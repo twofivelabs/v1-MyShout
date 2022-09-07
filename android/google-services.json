@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "137661141174",
+    "project_id": "my-shout-app",
+    "storage_bucket": "my-shout-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137661141174:android:09b9b75dd8f528e2449617",
+        "android_client_info": {
+          "package_name": "org.myshout.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "137661141174-t2rt1sg67impmca9dv3q7k1unvcacd4i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.myshout.app",
+            "certificate_hash": "764ea5075d11a6fa2497b3f7bb83a7d3c8df2d39"
+          }
+        },
+        {
+          "client_id": "137661141174-2c7m997h6d876781djaon8rffj3fu3uo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBddUQ4o0NMomYKUVaUUlJvpyizDje3Ud4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "137661141174-2c7m997h6d876781djaon8rffj3fu3uo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "137661141174-239vfjlneuf8u8nemqkph0jbrmkp04v0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.myshout.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

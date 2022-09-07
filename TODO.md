@@ -1,0 +1,20 @@
+# TODO's
+- [ ] Onboarding > Username is requesting Location access
+- [ ] Onboarding > Zooming in on phone number input [ios only]
+- [x] Implement SMS with twillio
+- [x] Setup LIVE twillio with Felix
+- [x] More notifications
+- [ ] Need to talk about Recover your account
+- [x] Logout Screen
+- [x] Unread messages notification bubble
+- [x] Add listener on chat messages, if user has not SEEN, add notification
+- [x] Add Friends
+- [x] Onboarding Process
+- [x] Request Safe Check-in
+- [x] Account Settings / Help options etc
+- [x] Invite Friends
+- [x] Security Pin
+- [x] Add member to chat
+- [x] Photo/Profile upload
+- [x] Interactive Map Feature
+- [x] Record Audio for Shout and Chat

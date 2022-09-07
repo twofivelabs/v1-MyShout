@@ -1,0 +1,184 @@
+<template>
+  <v-form ref="formEl" @submit.prevent="validate">
+    <div v-if="!form.showOtpInput">
+      <VuePhoneNumberInput class="my-6 phoneNumberInput"
+                           v-model="form.phoneNumberFormatted"
+                           @update="updatePhoneNumber($event)"
+                           required
+                           :translations="{ countrySelectorLabel: '' }"
+      />
+      <div class="text-center mt-10">
+        <v-btn
+            :disabled="!valid"
+            :loading="loading"
+            color="success"
+            elevation="0"
+            id="recaptcha-container"
+            class="text-center"
+            type="submit"
+        >
+          Send Code
+        </v-btn>
+      </div>
+    </div>
+    <div v-if="form.showOtpInput">
+      <!-- MAKE COMPONENT -->
+      <ElementH3 text="We sent you a SMS code" align="left" />
+      <v-text-field
+          label="Code"
+          placeholder="Code"
+          class="mt-5"
+          outlined
+          max=6
+          type="number"
+          v-model="form.otpProvided"
+          oninput="if(Number(this.value.length) > Number(this.max)) this.value = this.value.substring(0, Number(this.max));"
+      ></v-text-field>
+      <div class="text-center">
+        <v-btn
+            :loading="loading"
+            color="success"
+            elevation="0"
+            class="text-center"
+            type="submit"
+            @click="registerWithOTPCode"
+        >
+          Login
+        </v-btn>
+      </div>
+    </div>
+  </v-form>
+</template>
+<script>
+
+import {
+  defineComponent,
+  useContext,
+  useRouter,
+  onMounted,
+  ref,
+} from '@nuxtjs/composition-api'
+
+import formRules from '~/classes/formRules'
+import VuePhoneNumberInput from 'vue-phone-number-input';
+import 'vue-phone-number-input/dist/vue-phone-number-input.css';
+
+export default defineComponent({
+  name: 'FormsLoginbyphone',
+  components: {
+    VuePhoneNumberInput
+  },
+  props: {
+    goTo: {
+      type: String,
+      default: '/register'
+    },
+  },
+  setup (props) {
+    const { $fire, $fireModule, $notify, $system } = useContext()
+    const router = useRouter()
+    const loading = ref(false)
+
+    // DEFINE CONTENT
+    const valid = ref(true)
+    const appVerifier = ref(null)
+    const rules = formRules
+    const formEl = ref(null)
+    const form = ref({
+      phone: '',
+      phoneNumber: null,
+      phoneNumberFormatted: null,
+      showOtpInput: false,
+      otpProvided: null
+    })
+
+    // METHODS
+    const updatePhoneNumber = (e) => {
+      form.value.phoneNumberFormatted = e.formattedNumber
+      form.value.phone = e.formattedNumber
+    }
+    const validate = async () => {
+      loading.value = true
+      valid.value = await formEl.value.validate()
+      if (valid.value) {
+        await register()
+      }
+      loading.value = false
+    }
+    const register = async () => {
+      if (form.value.phone) {
+        try {
+          window.confirmationResult = await $fire.auth.signInWithPhoneNumber(form.value.phone.trim().toLowerCase(), appVerifier.value)
+          form.value.showOtpInput = true
+        } catch (e) {
+          initRecaptcha()
+
+          $system.log({
+            comp: 'FormsLoginbyphone',
+            msg: 'Error trying to register phone number',
+            val: e
+          })
+          $notify.show({ text: 'Error registering phone number', color: 'error' })
+          if (props.goTo) {
+            await router.push(props.goTo)
+          }
+        }
+      } else {
+        initRecaptcha()
+        $notify.show({ text: 'Error, try again', color: 'error' })
+      }
+    }
+    const registerWithOTPCode = async () => {
+      // Now enter in OTP code
+      loading.value = true
+      window.confirmationResult.confirm(form.value.otpProvided).then(result => {
+        if (!result.additionalUserInfo.isNewUser) {
+          $notify.show({ text: 'Successfully logged in', color: 'green' })
+          router.push('/')
+          return
+        }
+        $notify.show({ text: 'Successfully registered', color: 'green' })
+        if (props.goTo) {
+          router.push(props.goTo)
+          // router.push('/profile')
+        }
+      }).catch((e) => {
+        initRecaptcha()
+
+        $system.log({
+          comp: 'FormsLoginbyphone',
+          msg: 'Error with phone code',
+          val: e
+        })
+        $notify.show({ text: 'Error with phone code', color: 'error' })
+      })
+      loading.value = false
+    }
+    const initRecaptcha = () => {
+      appVerifier.value = new $fireModule.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+        callback: () => {
+          console.log('WORKS')
+        }
+      })
+    }
+
+    // MOUNT
+    onMounted(() => {
+      initRecaptcha()
+    })
+
+    return {
+      loading,
+      valid,
+      form,
+      formEl,
+      rules,
+      updatePhoneNumber,
+      validate,
+      register,
+      registerWithOTPCode
+    }
+  }
+})
+</script>

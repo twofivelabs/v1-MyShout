@@ -1,0 +1,371 @@
+/****************
+  GLOBALS
+  https://google-webfonts-helper.herokuapp.com/fonts/dm-serif-text?subsets=latin
+  Install locally
+ */
+/*@font-face {
+  font-family: 'DM Serif Text';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/dm-serif-text-v5-latin-regular.eot'); !* IE9 Compat Modes *!
+  src: local(''),
+  url('/fonts/dm-serif-text-v5-latin-regular.eot?#iefix') format('embedded-opentype'), !* IE6-IE8 *!
+  url('/fonts/dm-serif-text-v5-latin-regular.woff2') format('woff2'), !* Super Modern Browsers *!
+  url('/fonts/dm-serif-text-v5-latin-regular.woff') format('woff'), !* Modern Browsers *!
+  url('/fonts/dm-serif-text-v5-latin-regular.ttf') format('truetype'), !* Safari, Android, iOS *!
+  url('/fonts/dm-serif-text-v5-latin-regular.svg#DMSerifText') format('svg'); !* Legacy iOS *!
+}*/
+/* IMPORT HERE OR IN NUXT CONFIG FILE
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700&display=swap');
+*/
+
+/****************
+  VUETIFY OVERRIDES
+ */
+$heading-font-family: 'Sen', sans-serif;
+$body-font-family: 'Sen', sans-serif;
+$light-background-color: #eef3ff;
+$dark-background-color: #242A33;
+$tabs-bar-background-color: 'transparent';
+$slide-group-prev-basis: 25px;
+$global-primary-color: #6fa7e0;
+
+$shadow-key-umbra-opacity: rgba(0, 0, 0, 0.1);
+$shadow-key-penumbra-opacity: rgba(0, 0, 0, 0.07);
+$shadow-key-ambient-opacity: rgba(0, 0, 0, 0.06);
+
+$headings: (
+  'h1': (
+    'size': 1.7em,
+     'font-size': 1.7em,
+    'line-height': 0.9em,
+    'font-weight': 600,
+    'letter-spacing': 0
+  ),
+  'h2': (
+    'size': 1.9em,
+    'font-size': 1.9em,
+    'line-height': 1.25em !important,
+    'font-weight': 600,
+    'letter-spacing': 0
+  ),
+  'h3': (
+    'size': 1.55em,
+    'line-height': 1.2em,
+    'letter-spacing': 0
+  ),
+  'h4': (
+    'size': 1.5em,
+    'line-height': 1.2em,
+    'letter-spacing': 0
+  ),
+  'h5': (
+    'size': 1.25em,
+    'line-height': 1.2em,
+    'letter-spacing': 0
+  ),
+  'h6': (
+    'size': 1.0em,
+    'line-height': 1.2em,
+    'letter-spacing': 0
+  ),
+  'body-1': (
+    'line-height': 1.77rem
+  )
+);
+
+$border-radius-root: 0.25rem;
+$rounded: (
+  'xl': $border-radius-root * 12,
+  'lg': $border-radius-root * 4
+);
+$btn-round-border-radius: 100px;
+$btn-rounded-border-radius: 100px;
+$btn-border-radius: 100px;
+
+/****************
+  LIGHT THEME
+ */
+/* Form inputs */
+.input-tel__input {
+  background: #f6f6f6 !important;
+  border: none !important;
+  padding: 1.75rem !important;
+}
+input.country-selector__input {
+  border: none !important;
+  background: #f6f6f6 !important;
+  height:56px !important;
+}
+.country-selector__country-flag {
+  top:25px;
+}
+.country-selector__toggle {
+  top:calc(50% - 4px) !important;
+}
+
+/* Main body & header background color */
+.theme--light.v-application,
+.theme--light.v-app-bar.v-toolbar.v-sheet {
+  background-color: $light-background-color;
+}
+.theme--light.v-tabs-items {
+  background-color: $light-background-color;
+}
+
+/** CART **/
+.theme--light .cart-popup-contents {
+  background-color: #fff;
+}
+
+/** CHECKOUT **/
+.theme--light.v-stepper {
+  background: transparent;
+}
+
+/** CARD **/
+.theme--light.v-sheet.product-card,
+.theme--light.v-sheet.company-card,
+.theme--light.v-sheet.post-card,
+.theme--light.v-sheet.recent-news-card,
+.theme--light.v-sheet.company-list-card {
+  background-color: #fff;
+  border: 7px solid rgba(222, 222, 222, 0.20);
+}
+.theme--light.v-skeleton-loader .v-skeleton-loader__actions, .theme--light.v-skeleton-loader .v-skeleton-loader__article, .theme--light.v-skeleton-loader .v-skeleton-loader__card-heading, .theme--light.v-skeleton-loader .v-skeleton-loader__card-text, .theme--light.v-skeleton-loader .v-skeleton-loader__date-picker, .theme--light.v-skeleton-loader .v-skeleton-loader__list-item, .theme--light.v-skeleton-loader .v-skeleton-loader__list-item-avatar, .theme--light.v-skeleton-loader .v-skeleton-loader__list-item-text, .theme--light.v-skeleton-loader .v-skeleton-loader__list-item-two-line, .theme--light.v-skeleton-loader .v-skeleton-loader__list-item-avatar-two-line, .theme--light.v-skeleton-loader .v-skeleton-loader__list-item-three-line, .theme--light.v-skeleton-loader .v-skeleton-loader__list-item-avatar-three-line, .theme--light.v-skeleton-loader .v-skeleton-loader__table-heading, .theme--light.v-skeleton-loader .v-skeleton-loader__table-thead, .theme--light.v-skeleton-loader .v-skeleton-loader__table-tbody, .theme--light.v-skeleton-loader .v-skeleton-loader__table-tfoot {
+  background: transparent !important;
+}
+.theme--light.slide-up {
+  background-color: $light-background-color;
+}
+
+/****************
+  DARK THEME
+ */
+/* Main body & header background color */
+.theme--dark.v-application,
+.theme--dark.v-app-bar.v-toolbar.v-sheet {
+  background-color: $dark-background-color;
+}
+.theme--dark.v-navigation-drawer {
+  background-color: transparent;
+}
+.theme--dark.v-navigation-drawer:not(.v-navigation-drawer--floating) .v-navigation-drawer__border {
+  background-color: transparent;
+}
+.theme--dark.v-bottom-navigation {
+  background-color: $dark-background-color;
+}
+.theme--dark.v-tabs-items {
+  background-color: transparent;
+}
+.theme--dark.v-sheet {
+  background-color: $dark-background-color;
+}
+.v-dialog .theme--dark.v-sheet {
+  background-color: $dark-background-color;
+}
+.theme--dark.shipping-options {
+  background-color: $dark-background-color;
+}
+.theme--dark.v-tabs-items {
+  background-color: $dark-background-color;
+}
+
+/** CART **/
+.theme--dark .cart-popup-contents {
+  background-color: $dark-background-color;
+}
+
+/** CARD **/
+.theme--dark.v-sheet.product-card,
+.theme--dark.v-sheet.company-card,
+.theme--dark.v-sheet.post-card,
+.theme--dark.v-sheet.recent-news-card,
+.theme--dark.v-sheet.company-list-card {
+  background-color: #fff;
+  border: 7px solid #15191e;
+}
+.theme--dark.v-card > .v-card__title {
+  color: #000;
+}
+.theme--dark.v-card > .v-card__text {
+  color: #000;
+}
+.theme--dark.slide-up {
+  background-color: $dark-background-color;
+}
+
+/****************
+  BOTH THEMES
+ */
+.appBarHeight {
+  height: calc(60px + env(safe-area-inset-top));
+}
+.mobileNotch {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important;
+  height: inherit !important;
+}
+header.mobileNotch {
+  max-height:100px;
+}
+.v-card__subtitle, .v-card__text {
+  line-height: 1.975rem;
+  letter-spacing: 0 !important;
+}
+.v-application .body-1 {
+  letter-spacing: 0 !important;
+}
+.v-application .primary {
+  background-color:$global-primary-color;
+  border-color:$global-primary-color;
+}
+.v-bottom-sheet.v-dialog.v-bottom-sheet--inset {
+  max-width: 90%;
+}
+.v-dialog--scrollable > .v-sheet {
+  overflow-y:scroll !important;
+}
+@media screen and (max-width: 600px) {
+  .v-bottom-sheet.v-dialog.v-bottom-sheet--inset {
+    max-width: 100%;
+  }
+}
+
+/****************
+  CUSTOM
+ */
+.avatar-elevation {
+  border: 4px solid white;
+}
+
+.no-break {
+  word-break: break-word;
+}
+
+.v-application a {
+  text-decoration: none;
+  color: $global-primary-color !important;
+}
+
+.missing-image {
+  opacity: .25;
+}
+
+.post-card .name,
+.product-card .name,
+.company-card .title {
+  word-break: break-word;
+  line-height: 1.33em;
+  letter-spacing: -0.3px !important;
+}
+
+/****************
+  ANIMATIONS
+ */
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition-duration: 0.5s;
+  transition-property: height, opacity, transform;
+  transition-timing-function: cubic-bezier(0.55, 0, 0.1, 1);
+  overflow: hidden;
+}
+
+.slide-left-enter,
+.slide-right-leave-active {
+  opacity: 0;
+  transform: translate(2em, 0);
+}
+
+.slide-left-leave-active,
+.slide-right-enter {
+  opacity: 0;
+  transform: translate(-2em, 0);
+}
+
+/****************
+  PROJECT SPECIFIC
+ */
+$text-field-outlined-fieldset-border-width:3px;
+$text-field-outlined-fieldset-border:3px solid #f1f0ef !default;
+
+.phoneNumberInput .input-tel__input {
+  font-size:16px !important;
+  border-top: 3px solid rgb(118, 118, 118, 0.05) !important;
+  border-right: 3px solid rgb(118, 118, 118, 0.05) !important;
+  border-bottom: 3px solid rgb(118, 118, 118, 0.05) !important;
+}
+.phoneNumberInput .country-selector__input {
+  font-size: 16px !important;
+  border-top: 3px solid rgb(118, 118, 118, 0.05) !important;
+  border-left: 3px solid rgb(118, 118, 118, 0.05) !important;
+  border-bottom: 3px solid rgb(118, 118, 118, 0.05) !important;
+  height:62px !important;
+}
+.phoneNumberInput .country-selector__toggle {
+  top:20px !important;
+}
+.phoneNumberInput .country-selector__country-flag {
+  top:27px !important;
+}
+
+.v-text-field--outlined fieldset {
+  border-color: #f1f0ef !important;
+}
+.country-selector.has-hint .country-selector__input, .country-selector.has-value .country-selector__input {
+  padding-top:0 !important;
+}
+.alertBtn {
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: capitalize;
+  color: #fff;
+}
+.borderButton {
+  border:3px solid #f1f0ef;
+  background-color: #f8f9fa;
+}
+.borderInput {
+  border:3px solid #f1f0ef;
+  background-color: #f8f9fa;
+}
+details > summary {
+  font-size: 17px;
+  margin: 10px 0px 10px;
+  border-bottom: 1px solid #fefefe;
+  padding: 15px 0 30px;
+}
+.v-list--rounded.v-list--three-line .v-list-item, .v-list--rounded.v-list--three-line .v-list-item::before, .v-list--rounded.v-list--three-line .v-list-item > .v-ripple__container {
+  border-radius:32px !important;
+}
+.v-list--rounded .v-list-item, .v-list--rounded .v-list-item::before, .v-list--rounded .v-list-item > .v-ripple__container {
+  border-radius:15px !important;
+}
+.myshout .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
+  border: 2px solid #f0f0ef;
+  background: #f9f9f9;
+  margin-bottom: 15px;
+}
+.myshout .v-list-item__title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.myshout .v-list-item__subtitle {
+  font-size:0.9rem;
+}
+.myshout .v-list-item__icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  text-align: center;
+}
+.myshout .v-list-item__icon .v-icon {
+  font-size:33px;
+  width:100%;
+}
+.v-application--is-ltr .myshout .v-list-item__action:first-child, .v-application--is-ltr .myshout .v-list-item__icon:first-child {
+  margin-right:10px;
+}

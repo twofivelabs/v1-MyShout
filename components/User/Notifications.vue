@@ -1,0 +1,272 @@
+<template>
+  <div>
+    <div v-if="loading">
+      <v-skeleton-loader
+          type="list-item-avatar-three-line"
+      />
+      <v-skeleton-loader
+          type="list-item-avatar-three-line"
+      />
+      <v-skeleton-loader
+          type="list-item-avatar-three-line"
+      />
+    </div>
+    <div v-else>
+      <div v-if="notifications && Object.keys(notifications).length > 0">
+        <div
+            v-for="(notification, id) in notifications"
+            :key="id"
+        >
+          <v-row
+              v-if="notification.title || notification.body"
+              :id="notification.id"
+              v-intersect="onIntersect"
+              class="align-center mt-3"
+              style="border-bottom:1px solid #dedede;"
+          >
+            <v-col>
+              <div v-if="notification.title" class="body-1">
+                <span v-if="notification.type === 'friendRequest'">
+                  <v-icon color="myshoutOrange">mdi-account-check</v-icon>
+                </span>
+                <span v-else-if="notification.type === 'checkIn'">
+                  <v-icon color="myshoutOrange">mdi-checkbox-marked-circle-outline</v-icon>
+                </span>
+                <span v-else-if="notification.type === 'chat'">
+                  <v-icon color="myshoutOrange">mdi-message</v-icon>
+                </span>
+                {{ notification.title }}
+              </div>
+              <div class="body-2">
+                {{ notification.body }}
+              </div>
+              <div class="caption grey--text mt-2">
+                {{ notification.created_at }}
+              </div>
+            </v-col>
+            <v-col class="text-right" cols="3">
+              <v-badge
+                  v-if="!notification.seen"
+                  bottom
+                  dot
+                  left
+                  overlap
+              />
+              <v-btn text color="green" v-if="notification.type === 'friendRequest'" @click="approveFriendRequest(notification)">
+                <span v-if="!notification.completed"><v-icon>mdi-check</v-icon></span>
+              </v-btn>
+              <v-btn text color="red" v-if="notification.type === 'friendRequest'" @click="declineFriendRequest(notification)">
+                <span v-if="!notification.completed"><v-icon>mdi-delete</v-icon></span>
+              </v-btn>
+              <v-btn text color="green" v-else-if="notification.type === 'checkIn'" @click="checkInResponse(notification)">
+                <span v-if="!notification.completed"><v-icon>mdi-check</v-icon></span>
+              </v-btn>
+              <v-btn text v-else-if="notification.goTo" @click="goTo(notification.goTo)">
+                <v-icon>mdi-arrow-right</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </div>
+      </div>
+      <div v-else>
+        <div style="text-align:center;">
+          <ElementH4 align="center" text="You're all caught up!"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+
+import {
+  computed,
+  defineComponent,
+  ref,
+  useFetch,
+  useContext,
+  useRouter,
+  useStore,
+} from '@nuxtjs/composition-api'
+import { Intersect } from 'vuetify/lib/directives'
+
+export default defineComponent({
+  name: 'UserNotifications',
+  middleware: 'authenticated',
+  directives: { Intersect },
+  emits: [
+    'action'
+  ],
+  setup (_, { emit }) {
+    const {
+      state,
+      dispatch,
+      commit
+    } = useStore()
+    const { $system, $notify } = useContext()
+    const router = useRouter()
+    const user = computed(() => state.user.data)
+    const profile = computed(() => state.user.profile)
+
+    // DEFINE CONTENT
+    const loading = ref(false)
+    const notifications = computed(() => state.user.notifications.loaded)
+
+    // GET CONTENT
+    useFetch(async () => {
+      try {
+        loading.value = true
+        await dispatch('user/notifications/listen')
+      } catch(e) {
+        $system.log({
+          comp: 'UserNotifications',
+          msg: 'Not able to get notifications',
+          val: e
+        })
+      } finally {
+        loading.value = false
+      }
+    })
+
+    // METHODS
+    const approveFriendRequest = async (notification) => {
+      // Approve friendship for requested user
+      if (notification.completed) {
+        return
+      }
+      try {
+        console.log('NOTIFICATION', notification)
+        // When YOU approve a friendship, ADD friend to me
+        await dispatch('user/friends/add', {
+          id: notification.meta.requestedBy,
+          status: 'approved'
+        }).then(async () => {
+          // Update the requested BY user to be approved
+          await dispatch('user/friends/update', {
+            uid: notification.meta.requestedBy,
+            id: notification.uid,
+            status: 'approved'
+          })
+          // Add notification to 'requested user'
+          await dispatch('user/notifications/add', {
+            uid: notification.meta.requestedBy,
+            title: 'Friend Request Approved',
+            body: `@${profile.value.username} accepted your friendship.`,
+          })
+        })
+      } catch(e) {
+        $notify.show({ text: 'Error adding friendship', color: 'red' })
+        $system.log({
+          comp: 'UserNotifications',
+          msg: 'approveFriendRequest',
+          val: e
+        })
+      } finally {
+        $notify.show({ text: 'Successfully approved', color: 'green' })
+        // TODO: hide approve button
+        await dispatch('user/notifications/update', {
+          id: notification.id,
+          completed: true
+        })
+        loading.value = false
+      }
+    }
+    const declineFriendRequest = async (notification) => {
+      // decline friendship for requested user
+      if (notification.completed) {
+        return
+      }
+      try {
+        await dispatch('user/notifications/remove', notification.id)
+      } catch(e) {
+        $notify.show({ text: 'Error removing friendship', color: 'red' })
+        $system.log({
+          comp: 'UserNotifications',
+          msg: 'declineFriendRequest',
+          val: e
+        })
+      } finally {
+        loading.value = false
+      }
+    }
+    const checkInResponse = async (notification) => {
+      // Say YES I have checkedIn
+      if (notification.completed) {
+        return
+      }
+      try {
+        loading.value = true
+        await dispatch('user/checkins/update', {
+          uid: notification.uid,
+          id: notification.meta.checkInId.id,
+          responded: true,
+        }).then((res) => {
+          if (res !== false) {
+            $notify.show({ text: 'Success', color: 'green' })
+          }
+        })
+      } catch(e) {
+        $notify.show({ text: 'Error checking-in', color: 'red' })
+        $system.log({
+          comp: 'UserNotifications',
+          msg: 'checkIn',
+          val: e
+        })
+      } finally {
+        $notify.show({ text: 'Success', color: 'green' })
+        // TODO: hide approve button
+        await dispatch('user/notifications/update', {
+          uid: notification.uid,
+          id: notification.id,
+          completed: true
+        })
+        loading.value = false
+      }
+    }
+    const goTo = (to) => {
+      if (to === location.pathname) {
+        console.log('SAME, close')
+        emit('action', 'close')
+      } else {
+        router.push(to)
+      }
+    }
+    const onIntersect = (entries) => {
+      const notificationId = entries[0].target.id
+      const payload = { ...notifications.value[notificationId] }
+      if (payload.seen === false) {
+        payload.seen = true
+        dispatch('user/notifications/update', payload)
+      }
+      commit('user/notifications/SET_HAS_NOTIFICATIONS', false)
+    }
+
+    return {
+      loading,
+      user,
+      profile,
+      notifications,
+      goTo,
+      onIntersect,
+      checkInResponse,
+      approveFriendRequest,
+      declineFriendRequest
+    }
+  },
+  head: {}
+})
+</script>
+<style>
+.company-list-card {
+  overflow: hidden;
+}
+
+.company-product-0 {
+  z-index: 2;
+}
+
+.company-product-1 {
+  opacity: 0.25;
+  position: absolute;
+  padding-left: 5px;
+}
+</style>

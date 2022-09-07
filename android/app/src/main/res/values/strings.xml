@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MyShout</string>
+    <string name="title_activity_main">MyShout</string>
+    <string name="title_activity_link">MyShout</string>
+    <string name="package_name">org.myshout.app</string>
+    <string name="custom_url_scheme">myshout</string>
+    <string name="default_notification_channel_id">org.myshout.app.urgent</string>
+    <string name="publishable_key">
+        pk_test_51JPFp9KFsRJwypJ7KoZTeyDuJy1iHrNGTGXFjQb3OsLdfmeCWOc3zL9VZi63vr4zOVQML3mVY4HQDkbUbtIBJL5000rUypfGcy
+    </string>
+    <bool name="enable_google_pay">true</bool>
+    <bool name="google_pay_is_testing">true</bool>
+</resources>
