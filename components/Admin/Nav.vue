@@ -30,6 +30,9 @@
         </v-list-item>
       </v-list>
     </v-menu>
+    <v-btn @click="$nuxt.refresh()" class="elevation-0">
+      <v-icon>mdi-refresh</v-icon>
+    </v-btn>
   </div>
 </template>
 <script>

@@ -9,7 +9,7 @@ android {
         minSdk 21
         compileSdkVersion 31
         applicationId "org.myshout.app"
-        versionCode 11
+        versionCode 13
         versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug

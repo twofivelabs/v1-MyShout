@@ -5,6 +5,9 @@
     <!-- ALERTS -->
     <div v-if="!alerts">
       You have no alerts currently.
+      <v-btn @click="$nuxt.refresh()" class="elevation-0">
+        <v-icon>mdi-refresh</v-icon> Try Refresh Data
+      </v-btn>
     </div>
     <div v-if="alerts">
       <ElementH4 text="Last 100 Alerts" align="left" class="mb-4" />

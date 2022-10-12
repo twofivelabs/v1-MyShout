@@ -9,6 +9,14 @@
           Back To App
         </v-btn>
       </v-col>
+      <v-col class="ma-0 pa-0 text-right">
+        <v-btn text @click="logout" small class="px-1">
+          Logout
+          <v-icon>
+            mdi-exit-to-app
+          </v-icon>
+        </v-btn>
+      </v-col>
     </v-row>
     <v-row class="align-center mb-3">
       <v-col class="pa-0 ml-0" cols="5">
@@ -53,6 +61,9 @@ export default {
         items.splice(2, 2)
       }
       return items
+    },
+    logout () {
+      this.$store.dispatch('user/signOut')
     }
   }
 }

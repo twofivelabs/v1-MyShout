@@ -1,6 +1,16 @@
 <template>
   <v-container class="pa-8 mt-12">
-    <!-- SHOW NOTHING -->
+    <v-img alt="MyShout Logo" src="/logo/MyShout-Logo.svg"
+           class="mx-auto"
+           contain
+           max-width="200"
+           v-anime="{
+                        translateY: [100, 0],
+                        duration: 1200
+                     }"
+    />
+    <ElementH1 text="Uh oh!" class="mt-10" />
+    <ElementH2 text="Looks like you are not supposed to be here." />
   </v-container>
 </template>
 <script>
@@ -53,3 +63,6 @@ export default defineComponent({
   head: {}
 })
 </script>
+<style>
+.v-footer { display:none !important; }
+</style>

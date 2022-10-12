@@ -1,18 +1,28 @@
-export default function ({
-  store,
-  redirect
-}) {
-  // we can assume is user logged in with firebase, but we could throw some more error checks in here
-  console.log('store.state?.user?.profile?.role?.isAdmin', store.state?.user?.profile?.role?.isAdmin)
-  if (store.state.user.data) {
-    if (store.state.user.data.role.isAdmin || store.state.user.data.role.isDriver || store.state.user.data.role.isVendor) {
-      return true
+export default async function ({ app, store, redirect }) {
+    const user = app.$fire.auth.currentUser
+    const userToken = user ? await user.getIdTokenResult() : false
+
+    function checkUserStatus () {
+        if ((store.state.user.data.role && store.state.user.data.role.isActive) && !store.state.user.data.role.isActive) {
+            return redirect('/status')
+        }
     }
-  }
-  // This will use the firestore doc.
-  else if (store.state?.user?.profile?.role?.isAdmin) {
-    return true
-  } else {
-    return redirect('/onboarding/')
-  }
+
+    async function redirectToAdmin () {
+        if (await app.$system.isUserUsingWebsiteVersion()) {
+            if (userToken && userToken.claims && (userToken.claims.isAdmin || userToken.claims.isSuper)) {
+                return true
+            }
+            redirect('/onboarding/')
+            return false
+        }
+    }
+
+    if (user) {
+        checkUserStatus()
+        return await redirectToAdmin()
+    }
+    else {
+        return redirect('/onboarding/')
+    }
 }

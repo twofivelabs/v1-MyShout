@@ -78,6 +78,7 @@ const config = {
       name: 'MyShout',
       subject: 'Contact Form Filled'
     },
+    publicWebsiteDomains: ['admin.myshout.net', 'my-shout-app.web.app', 'my-shout-app.firebaseapp.com', 'admin.my-shout.us'],
     perVendorFee: 150, // In cents (100 = $1)
     deepLink: 'myshout',
     appAndroid: '',

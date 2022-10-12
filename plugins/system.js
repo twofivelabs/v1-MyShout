@@ -1,7 +1,5 @@
-export default ({
-  app,
-  store
-}, inject) => {
+export default ({ app, store }, inject) => {
+
   inject('system', {
     log (obj) {
         const timestamp = Date.now()
@@ -65,6 +63,16 @@ export default ({
                 app.$ttlStorage.set('darkMode', true)
             }
         }
+    },
+    async isUserUsingWebsiteVersion () {
+        const device = await app.$capacitor.device()
+        console.log('DEVICE', device.platform, window.location.hostname)
+        if ('web' !== device.platform) {
+            return false
+        }
+
+        return !!app.$config.publicWebsiteDomains.includes(window.location.hostname)
     }
   })
+
 }

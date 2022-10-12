@@ -44,7 +44,7 @@
 			"nativeAuth": false,
 			"properties": {
 				"google": {
-					"hostedDomain": "https://my-shout-app.firebaseapp.com/"
+					"hostedDomain": "https://admin.myshout.net/"
 				}
 			},
 			"permissions": {
