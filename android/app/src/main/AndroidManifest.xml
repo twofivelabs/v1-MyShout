@@ -91,6 +91,7 @@
 
     <!-- Navigator.getUserMedia -->
     <!-- Video -->
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Contacts -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
