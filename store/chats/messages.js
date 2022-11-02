@@ -11,6 +11,7 @@ class Messages extends FirestoreHelpers {
         this.fields = {
             owner: '',
             message: '',
+            image: null,
             audioUrl: '',
             seen: []
         }

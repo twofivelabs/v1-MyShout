@@ -147,6 +147,18 @@ export const actions = {
       return response
     }
   },
+  async paginate ({ commit }, { where={}, limit=10, direction='next' }) {
+        const response = await this.$db.group(`${dbRootPath}`, where, dataConverter, {
+            by: 'created_at',
+            direction: 'desc'
+        },
+        limit, true, direction)
+
+        if (response) {
+            await commit('SET_ALL', response)
+        }
+        return response
+  },
   async getOne ({ state, commit, rootState }, id) {
     try {
       if (state.loaded && state.loaded[id]) {
@@ -182,7 +194,6 @@ export const actions = {
           direction: 'desc'
       }
   }) {
-      console.log('WHERE', where)
       return await this.$db.group(`${dbRootPath}`, where, dataConverter, order, limit)
   },
 }

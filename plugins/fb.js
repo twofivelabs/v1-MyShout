@@ -1,5 +1,6 @@
 // import { defineNuxtPlugin } from '@nuxtjs/composition-api'
 const listeners = []
+export const paginationMarkers = {}
 
 export default ({ app }, inject) => {
   inject('db', {
@@ -83,7 +84,7 @@ export default ({ app }, inject) => {
         console.log('FINALLY', response)
       }
     },
-    async get_all (what, where = {}, dataConverter, order = {}, limit = null) {
+    async get_all (what, where = {}, dataConverter, order = {}, limit = null, paginate = false, direction = 'next') {
       let getAll = await app.$fire.firestore.collection(what).withConverter(dataConverter)
       if (Array.isArray(where)) {
         where.forEach((w) => {
@@ -99,9 +100,37 @@ export default ({ app }, inject) => {
         getAll = getAll.limit(limit)
       }
 
+        // If we are paginating, we require certain fields
+        if (paginate) {
+            if (!order || !order.by) {
+                getAll = getAll.orderBy('created_at', 'desc')
+            }
+            // PAGINATE NEXT
+            if (direction === 'next') {
+                if(paginationMarkers[`${what}-last`]) {
+                    getAll = getAll.startAfter(paginationMarkers[`${what}-last`])
+                    getAll = getAll.limit(limit)
+                }
+            }
+            // PREVIOUS
+            else {
+                if(paginationMarkers[`${what}-first`]) {
+                    getAll = getAll.endBefore(paginationMarkers[`${what}-first`])
+                    getAll = getAll.limitToLast(limit)
+                }
+            }
+        }
+
       return await getAll.get()
         .then((docs) => {
           const allData = []
+
+            // SET PAGINATION LEVEL
+            if (paginate) {
+                paginationMarkers[`${what}-last`] = docs.docs[docs.docs.length - 1]
+                paginationMarkers[`${what}-first`] = docs.docs[0]
+            }
+
           // This could be better by using OBJECT and not an array for working within the store
           // obj[ID]... vs/looping
           docs.forEach((doc) => {
@@ -205,7 +234,7 @@ export default ({ app }, inject) => {
         return false
       }
     },
-    async group (what, where = {}, dataConverter, order = {}, limit = null) {
+    async group (what, where = {}, dataConverter, order = {}, limit = null, paginate = false, direction = 'next') {
           let getAll = await app.$fire.firestore.collectionGroup(what).withConverter(dataConverter)
           console.log('WHERE', where)
           if (Array.isArray(where)) {
@@ -222,9 +251,37 @@ export default ({ app }, inject) => {
               getAll = getAll.limit(limit)
           }
 
+        // If we are paginating, we require certain fields
+        if (paginate) {
+            if (!order || !order.by) {
+                getAll = getAll.orderBy('created_at', 'desc')
+            }
+            // PAGINATE NEXT
+            if (direction === 'next') {
+                if(paginationMarkers[`${what}-last`]) {
+                    getAll = getAll.startAfter(paginationMarkers[`${what}-last`])
+                    getAll = getAll.limit(limit)
+                }
+            }
+            // PREVIOUS
+            else {
+                if(paginationMarkers[`${what}-first`]) {
+                    getAll = getAll.endBefore(paginationMarkers[`${what}-first`])
+                    getAll = getAll.limitToLast(limit)
+                }
+            }
+        }
+
           return await getAll.get()
               .then((docs) => {
                   const allData = []
+
+                  // SET PAGINATION LEVEL
+                  if (paginate) {
+                      paginationMarkers[`${what}-last`] = docs.docs[docs.docs.length - 1]
+                      paginationMarkers[`${what}-first`] = docs.docs[0]
+                  }
+
                   // This could be better by using OBJECT and not an array for working within the store
                   // obj[ID]... vs/looping
                   docs.forEach((doc) => {
@@ -236,7 +293,7 @@ export default ({ app }, inject) => {
               }).catch((e) => {
                   app.$system.log({
                       comp: 'Firebase',
-                      msg: 'group',
+                      msg: 'paginate',
                       val: e
                   })
                   return false

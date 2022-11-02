@@ -6,6 +6,7 @@
         @mouseup="stopRecording"
         @touchstart="startRecording"
         @touchend="stopRecording"
+        @touchcancel="stopRecording"
         color="primary rounded-lg white--text alertBtn"
         elevation="0"
         class="mb-6 py-7"

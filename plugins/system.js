@@ -14,6 +14,8 @@ export default ({ app, store }, inject) => {
             msg: obj.msg || null,
         }
 
+        console.log('LOGGER: ', obj.val)
+
         if(obj.val) {
             // o.val = obj.val.toString()
             try {

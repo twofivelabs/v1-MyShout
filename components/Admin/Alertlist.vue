@@ -2,7 +2,7 @@
   <v-container>
     <div v-if="alert">
       <v-row @click="rowClick(alert)" class="elevation-1 rounded-lg white align-center mb-1 mx-1">
-          <v-col cols="2">
+          <v-col cols="3">
             <div v-if="alert.type === 'accident'" class="">
               <IconsAccident width="45px" />
             </div>
@@ -17,27 +17,24 @@
             </div>
           </v-col>
           <v-col>
-            <div v-if="loadedUsers[alert.userId]" class="user">@{{ loadedUsers[alert.userId].username }}</div>
-            <div class="caption grey--text created_at">{{ alert.created_at.toDate().toDateString() }}</div>
-            <div v-if="alert.audioUrl" class="" >
-              <v-icon>
-                mdi-volume-high
-              </v-icon>
+            <div class="d-flex align-center justify-space-between">
+              <div v-if="loadedUsers[alert.userId]" class="user">@{{ loadedUsers[alert.userId].username }}</div>
+              <div class="caption grey--text created_at" v-if="alert.created_at">{{ formatDate(alert.created_at) }}</div>
+            </div>
+
+            <div class="d-flex align-center justify-space-between">
+              <div v-if="alert.location" style="font-size:12px;">
+                {{ alert.location.city }}
+                {{ alert.location.province }}
+                {{ alert.location.country }}
+              </div>
+              <a target="_blank" :href="`https://www.google.com/maps/search/?api=1&query=${alert.gps.lat},${alert.gps.lng}`">
+                <v-icon small>mdi-open-in-new</v-icon>
+              </a>
             </div>
           </v-col>
-          <v-col v-if="alert.location" style="font-size:12px;">
-            {{ alert.location.city }}
-            {{ alert.location.province }}
-            {{ alert.location.country }}
-          </v-col>
-          <v-col cols="2" class="text-right">
-            <a target="_blank" :href="`https://www.google.com/maps/search/?api=1&query=${alert.gps.lat},${alert.gps.lng}`">
-              <v-icon small>
-                mdi-open-in-new
-              </v-icon>
-            </a>
-          </v-col>
-        </v-row>
+
+      </v-row>
       <v-bottom-sheet v-if="alert" v-model="showBottomSheet" :scrollable="true" max-width="700">
         <v-sheet height="80vh" class="rounded-t-xl pb-14">
           <div class="ma-3">
@@ -55,22 +52,16 @@
 
             <div class="text-center my-3">
               <span class="caption" v-if="alert.created_at">
-                <v-icon>
-                  mdi-calendar
-                </v-icon>
-                {{ alert.created_at.toDate().toDateString() }}
+                <v-icon>mdi-calendar</v-icon>
+                {{ formatDate(alert.created_at) }}
               </span>
               <span class="caption">
-                <v-icon>
-                  mdi-map
-                </v-icon>
+                <v-icon>mdi-map</v-icon>
                 {{ alert.gps.lat }}, {{ alert.gps.lng }}
               </span>
               <span class="caption" v-if="loadedUsers[alert.userId]">
                 <nuxt-link :to="`/admin/users/view/${alert.userId}`">
-                  <v-icon>
-                    mdi-account
-                  </v-icon>
+                  <v-icon>mdi-account</v-icon>
                   <span v-if="loadedUsers[alert.userId]" class="user">@{{ loadedUsers[alert.userId].username }}</span>
                 </nuxt-link>
               </span>
@@ -156,6 +147,16 @@ export default defineComponent({
         showBottomSheet.value = false
       }
     }
+    const formatDate = (d) => {
+      try {
+        return d.created_at.toDate().toDateString()
+      } catch {
+        if (typeof d === 'string') {
+          return d
+        }
+        return new Date(d.seconds * 1000).toDateString()
+      }
+    }
 
     // GET CONTENT
 
@@ -165,6 +166,7 @@ export default defineComponent({
       isDriver,
       loading,
       showBottomSheet,
+      formatDate,
       rowClick,
       swipe
     }

@@ -6,7 +6,7 @@
           <v-icon>
             mdi-arrow-left
           </v-icon>
-          Back To App
+          To App
         </v-btn>
       </v-col>
       <v-col class="ma-0 pa-0 text-right">

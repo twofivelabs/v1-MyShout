@@ -39,29 +39,53 @@
       <v-app-bar color="transparent" flat bottom fixed style="top:calc(100% - 150px)">
         <v-text-field
             v-model="newMessage"
-            :append-outer-icon="'mdi-send'"
-            solo
-            clear-icon="mdi-close-circle"
-            clearable
-            label="Message"
-            type="text"
             @keydown.enter="sendMessage"
             @click:append-outer="sendMessage"
+            append-outer-icon="mdi-send"
+            clear-icon="mdi-close-circle"
+            label="Message"
+            type="text"
+            clearable
+            solo
         >
-<!--          <template v-slot:append>
+          <template v-slot:append>
+            <v-btn
+                :loading="imageButtonLoading"
+                @click="loadImageHandler"
+                color="transparent"
+                elevation="0"
+                class="pa-0"
+                small
+                fab
+            >
+              <v-badge
+                  :content="1"
+                  :value="imageAddedToMessage"
+                  color="green"
+                  overlap
+              >
+                <v-icon>
+                  mdi-image
+                </v-icon>
+              </v-badge>
+            </v-btn>
             <v-btn
                 :loading="loading"
                 @mousedown="startRecording"
                 @mouseup="stopRecording"
                 @touchstart="startRecording"
                 @touchend="stopRecording"
+                @touchcancel="stopRecording"
                 color="transparent"
                 elevation="0"
+                class="pa-0"
+                small
+                fab
             >
               <v-icon v-if="!buttonText">mdi-microphone</v-icon>
               {{ buttonText }}
             </v-btn>
-          </template>-->
+          </template>
         </v-text-field>
       </v-app-bar>
   </v-container>
@@ -122,6 +146,10 @@ export default defineComponent({
     const audioUrl = ref(null)
     const timerCount = ref(120)
     const timerInterval = ref()
+    // -- IMAGE MESSAGE --
+    const imageButtonLoading = ref(false)
+    const imageAddedToMessage = ref(false)
+    const imageMessageUrl = ref()
 
     // GET CONTENT
     useFetch(async () => {
@@ -186,7 +214,7 @@ export default defineComponent({
     }
     const sendMessage = async () => {
       try {
-        if(!newMessage.value || !user.value.data.uid) {
+        if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
           $notify.show({
             text: 'Please input text',
             color: 'error'
@@ -194,14 +222,30 @@ export default defineComponent({
           return
         }
 
+        let encryptedMessage = null
+
         // Encrypt message
-        const encryptedMessage = $encryption.encrypt(newMessage.value)
+        if (newMessage.value) {
+          encryptedMessage = $encryption.encrypt(newMessage.value)
+        }
 
         // Save message
+        /*console.log({
+          chatId: chatId.value,
+          message: {
+            message: encryptedMessage,
+            image: imageMessageUrl.value || null,
+            owner: user.value.data.uid,
+            seen: [
+              user.value.data.uid
+            ]
+          }
+        })*/
         await dispatch('chats/messages/add', {
           chatId: chatId.value,
           message: {
             message: encryptedMessage,
+            image: imageMessageUrl.value || null,
             owner: user.value.data.uid,
             seen: [
               user.value.data.uid
@@ -211,7 +255,7 @@ export default defineComponent({
         // Update chat last message
         await dispatch('chats/updateField', {
           id: chatId.value,
-          lastMessage: newMessage.value,
+          lastMessage: newMessage.value || null,
           seen: [
             user.value.data.uid
           ]
@@ -219,6 +263,8 @@ export default defineComponent({
 
         // Reset
         newMessage.value = null
+        imageAddedToMessage.value = false
+        imageMessageUrl.value = null
         await goToBottom(0)
       } catch (e) {
         $notify.show({
@@ -317,6 +363,25 @@ export default defineComponent({
         // ...
       }
     }
+    const loadImageHandler = async () => {
+      console.log('loadImageHandler')
+      imageButtonLoading.value = true
+      imageAddedToMessage.value = false
+
+      const photoBase64 = await $capacitor.cameraTakePicture()
+      const photoUrl = await $db.upload({
+        path: `/CHATS/${chatId.value}/${ new Date().getTime() }.jpg`,
+        data: photoBase64,
+        base64: true
+      })
+      console.log('photoUrl', photoUrl)
+
+      if (photoUrl) {
+        imageAddedToMessage.value = true
+        imageMessageUrl.value = photoUrl
+      }
+      imageButtonLoading.value = false
+    }
 
     // WATCH
     // Wait for chat to finish loading then messages
@@ -355,6 +420,9 @@ export default defineComponent({
       buttonText,
       timerCount,
       user,
+      imageButtonLoading,
+      imageAddedToMessage,
+      loadImageHandler,
       sendMessage,
       onIntersect,
       startRecording,

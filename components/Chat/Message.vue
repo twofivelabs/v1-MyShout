@@ -12,6 +12,9 @@
               <source :src="`${message.audioUrl}`">
             </audio>
           </div>
+          <div v-if="message.image">
+              <v-img :src="`${message.image}`" />
+          </div>
           <div class="caption">{{ message.created_at.toDate().toLocaleString('en-US', {
             year: 'numeric',
             month: 'short',
