@@ -10,8 +10,8 @@
             <v-icon color="white">mdi-store</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>Admin</v-list-item-title>
-            <v-list-item-subtitle>Manage Through Admin</v-list-item-subtitle>
+            <v-list-item-title>{{ $t('btn.admin') }}</v-list-item-title>
+            <v-list-item-subtitle>{{ $t('btn.admin_sub') }}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
         <v-list-item @click="showBottomSheet('profile')">
@@ -19,8 +19,8 @@
             <v-icon color="white">mdi-pencil</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>Edit Profile</v-list-item-title>
-            <v-list-item-subtitle>Update your contact information or photo.</v-list-item-subtitle>
+            <v-list-item-title>{{ $t('btn.edit_profile') }}</v-list-item-title>
+            <v-list-item-subtitle>{{ $t('btn.edit_profile_sub') }}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
 
@@ -29,8 +29,8 @@
             <v-icon color="white">mdi-cog</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>Settings & Privacy</v-list-item-title>
-            <v-list-item-subtitle>Permissions, settings, privacy</v-list-item-subtitle>
+            <v-list-item-title>{{ $t('btn.settings_privacy') }}</v-list-item-title>
+            <v-list-item-subtitle>{{ $t('btn.settings_privacy_sub') }}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
 
@@ -43,8 +43,8 @@
             <v-icon>mdi-exit-to-app</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>Log Out</v-list-item-title>
-            <v-list-item-subtitle>Log out or change accounts</v-list-item-subtitle>
+            <v-list-item-title>{{ $t('btn.log_out') }}</v-list-item-title>
+            <v-list-item-subtitle>{{ $t('btn.log_out_sub') }}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-list-item-group>

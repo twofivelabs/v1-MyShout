@@ -24,6 +24,15 @@ export default class FirestoreHelpers {
     return this.fields
   }
 
+  prepareMultiLingualProperties () {
+    window.$nuxt.context.i18n.locales.forEach((locale) => {
+        if (!this.fields.language[locale.code] && locale.code !== 'en') {
+            this.fields.language[locale.code] = Object.assign({}, this.multiLingualFields)
+        }
+    })
+    // console.log('locale',this.fields.language)
+  }
+
   objMap (obj, func) {
     return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, func(v)]))
   }

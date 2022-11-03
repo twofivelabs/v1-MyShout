@@ -1,5 +1,5 @@
 <template>
-  <v-container class="my-10">
+  <v-container class="admin-container">
     <AdminTitle/>
 
     <!-- ALERTS -->
@@ -9,14 +9,16 @@
         <v-icon>mdi-refresh</v-icon> {{ $t('you_have_no_alerts') }}
       </v-btn>
     </div>
-    <div v-if="alerts">
-      <v-select
-          :items="['ALL', 'accident', 'kidnapping', 'robbery', 'shout']"
-          @change="changeFilter"
-          :label="$t('form.filter_by')"
-          outlined
-      />
-      {{ filterText }}
+    <div v-if="alerts" class="mt-3">
+      <div class="px-3">
+        <v-select
+            :items="['ALL', 'accident', 'kidnapping', 'robbery', 'shout']"
+            @change="changeFilter"
+            :label="$t('form.filter_by')"
+            outlined
+        />
+        {{ filterText }}
+      </div>
 
       <template v-for="(alert, key) in alerts">
         <AdminAlertlist :alert="alert" :loadedUsers="loadedUsers" :key="key" />
@@ -54,6 +56,7 @@ import { paginationMarkers } from '@/plugins/fb'
 export default defineComponent({
   name: 'AdminDashboard',
   middleware: 'admin',
+  layout: 'admin',
   directives: { Touch },
   setup () {
     const { state, dispatch } = useStore()

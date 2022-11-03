@@ -5,8 +5,9 @@
         :to="getRoute()"
         class="mr-1 elevation-0"
         color="secondary"
+        small
     >
-      + {{ $t('btn.content') }}
+      + {{ $t('btn.add') }}
     </v-btn>
     <v-menu offset-y>
       <template #activator="{ on, attrs }">
@@ -16,11 +17,19 @@
             elevation="0"
             v-bind="attrs"
             v-on="on"
+            small
         >
-          {{ $t('btn.add') }}
+          {{ $t('btn.content') }}
         </v-btn>
       </template>
       <v-list>
+        <v-list-item to="/admin" nuxt color="primary">
+          <v-list-item-content>
+            <v-list-item-title >
+              Dashboard
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item v-for="(item, index) in navOptions" :key="index" :to="item.to" nuxt>
           <v-list-item-content>
             <v-list-item-title>
@@ -30,7 +39,7 @@
         </v-list-item>
       </v-list>
     </v-menu>
-    <v-btn @click="$nuxt.refresh()" class="elevation-0">
+    <v-btn @click="$nuxt.refresh()" small class="elevation-0">
       <v-icon>mdi-refresh</v-icon>
     </v-btn>
   </div>

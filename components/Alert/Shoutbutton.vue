@@ -84,7 +84,7 @@ export default defineComponent({
 
     // DEFINE CONTENT
     const dialog = ref(false)
-    const buttonText = ref('Shout Alert')
+    const buttonText = ref(i18n.t('shout_alert'))
     const audioUrl = ref(null)
     const timerCount = ref(5)
     const timerInterval = ref()

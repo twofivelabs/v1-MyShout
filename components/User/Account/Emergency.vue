@@ -14,7 +14,7 @@
       </template>
     </v-list>
     <div v-else>
-      <ElementH4 v-if="!loading" align="center" class="my-5" text="You have no emergency friends"/>
+      <ElementH4 v-if="!loading" align="center" class="my-5" :text="$t('no_emergency_friends')"/>
     </div>
   </div>
 </template>

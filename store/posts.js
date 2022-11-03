@@ -21,17 +21,26 @@ class Posts extends FirestoreHelpers {
       featured_image_url: null,
       published: null,
       learn_more: null,
+      learn_more_label: null,
+      language: {},
+    }
+    this.multiLingualFields = {
+      title: null,
+      content: null,
       learn_more_label: null
     }
     return this
   }
 
   write () {
-    this.fields.slug = this.slugify(this.fields.title)
+    if (!this.fields.slug) {
+        this.fields.slug = this.slugify(this.fields.title)
+    }
     return this
   }
 
   read () {
+    this.prepareMultiLingualProperties()
     return this
   }
 }

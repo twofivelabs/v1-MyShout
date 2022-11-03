@@ -288,5 +288,7 @@ export default {
     add_as_emergency_contact: 'Add as emergency contact',
     no_longer_receive_alerts: 'They will no longer receive alerts when you are in trouble.',
     yes_longer_receive_alerts: 'They will receive alerts when you are in trouble.',
-    view_on_list: 'View on list'
+    view_on_list: 'View on list',
+
+    no_emergency_friends: 'You have no emergency friends'
 }

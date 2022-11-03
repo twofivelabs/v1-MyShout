@@ -1,5 +1,5 @@
 <template>
-  <v-container class="py-10 mb-10">
+  <v-container class="admin-container">
     <AdminTitle/>
 
     <v-data-table
@@ -7,7 +7,7 @@
         :items="data"
         :items-per-page="20"
         :loading="loading"
-        class="elevation-0"
+        class="mt-3 elevation-0"
         :loading-text="$t('is_loading')"
         @click:row="rowClick"
     >
@@ -68,16 +68,8 @@ export default defineComponent({
         value: 'tags'
       },
       {
-        text: 'Content',
-        value: 'content'
-      },
-      {
         text: 'Pub',
         value: 'published'
-      },
-      {
-        text: 'Created',
-        value: 'created_at'
       }
     ]
 

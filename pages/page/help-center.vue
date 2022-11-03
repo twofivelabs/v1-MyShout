@@ -19,7 +19,7 @@
     <v-container class="mt-3 mb-12 mobileNotch px-3">
       <v-expansion-panels focusable>
         <v-expansion-panel v-for="(post,i) in posts" :key="i">
-          <v-expansion-panel-header>{{ post.title }}</v-expansion-panel-header>
+          <v-expansion-panel-header>{{ $lang.get(post, 'title') }}</v-expansion-panel-header>
           <v-expansion-panel-content>
             <div v-if="post.featured_image_url">
               <v-img :aspect-ratio="16/9" :src="post.featured_image_url" class="mb-4"/>

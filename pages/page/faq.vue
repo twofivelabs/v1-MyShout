@@ -19,14 +19,14 @@
     <v-container class="mt-3 mb-12 mobileNotch px-3">
       <v-expansion-panels focusable>
         <v-expansion-panel v-for="(post,i) in posts" :key="i">
-          <v-expansion-panel-header>{{ post.title }}</v-expansion-panel-header>
+          <v-expansion-panel-header>{{ $lang.get(post, 'title') }}</v-expansion-panel-header>
           <v-expansion-panel-content>
             <div v-if="post.featured_image_url">
               <v-img :aspect-ratio="16/9" :src="post.featured_image_url" class="mb-4"/>
             </div>
             <div v-if="post.content">
-              <div v-if="post.isMarkdown" v-dompurify-html="$md.render(post.content)" class="mdDoc"/>
-              <div v-else v-dompurify-html="post.content" class="mdDoc"/>
+              <div v-if="post.isMarkdown" v-dompurify-html="$md.render($lang.get(post, 'content'))" class="mdDoc"/>
+              <div v-else v-dompurify-html="$lang.get(post, 'content')" class="mdDoc"/>
             </div>
             <v-btn v-if="post.learn_more" :to="post.learn_more" class="elevation-0" primary>
               {{ post.learn_more_label ? post.learn_more_label : $t('btn.learn_more') }}

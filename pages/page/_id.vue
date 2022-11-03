@@ -10,7 +10,7 @@
       </v-app-bar-nav-icon>
       <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
-          <ElementH2 align="left" :text="page.title" />
+          <ElementH2 align="left" :text="$lang.get(page, 'title')" />
         </div>
       </v-toolbar-title>
       <v-spacer />
@@ -34,8 +34,8 @@
                 <v-img :aspect-ratio="16/9" :src="page.featured_image_url" class="mb-4"/>
               </div>
               <div v-if="page.content" class="ma-5 mb-15">
-                <div v-if="page.isMarkdown" v-dompurify-html="$md.render(page.content)" class="mdDoc"/>
-                <div v-else v-dompurify-html="page.content" class="mdDoc"/>
+                <div v-if="page.isMarkdown" v-dompurify-html="$lang.get(page, 'content')" class="mdDoc"/>
+                <div v-else v-dompurify-html="$lang.get(page, 'content')" class="mdDoc"/>
               </div>
             </v-col>
           </v-row>

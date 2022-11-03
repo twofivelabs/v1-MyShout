@@ -13,7 +13,12 @@ class Pages extends FirestoreHelpers {
       slug: null,
       content: null,
       isMarkdown: true,
-      featured_image_url: null
+      featured_image_url: null,
+      language: {},
+    }
+    this.multiLingualFields = {
+      title: null,
+      content: null
     }
     return this
   }
@@ -24,6 +29,7 @@ class Pages extends FirestoreHelpers {
   }
 
   read () {
+    this.prepareMultiLingualProperties()
     return this
   }
 }

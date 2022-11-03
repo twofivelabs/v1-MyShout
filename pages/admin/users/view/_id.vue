@@ -1,5 +1,5 @@
 <template>
-  <v-container class="my-10">
+  <v-container class="admin-container">
     <AdminTitle/>
     <div v-if="loading">
       <v-progress-linear
@@ -7,33 +7,25 @@
           indeterminate
       />
     </div>
-    <div v-if="form">
-      <v-row style="align-items: flex-end;">
-        <v-col cols="5" sm="4">
+
+    <div v-if="form" class="px-3 mt-3">
+      <v-row>
+        <v-col cols="12" sm="7">
           <v-avatar v-if="form.photoURL">
             <v-img :src="form.photoURL" />
           </v-avatar>
           <h3>{{ form.username }}</h3>
-        </v-col>
-        <v-col>
           <h5>{{ form.first_name }} {{ form.last_name }}</h5>
           <h5>{{ form.phone }}</h5>
           <h5>{{ form.email }}</h5>
         </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-btn small color="secondary" class="elevation-0 mb-2" :to="`/admin/users/edit/${form.id}`">
-            {{ $t('btn.edit') }}
-          </v-btn>
-        </v-col>
-        <v-col class="text-right">
-          <v-btn v-if="form.role.isActive" small @click="sendPasswordReset" color="secondary" class="elevation-0 mb-2">
-            {{ $t('btn.send_password_reset') }}
-          </v-btn>
-          <v-btn small @click="toggleActivation" :color="(form.role.isActive) ? 'secondary' : 'primary'" class="mb-2 elevation-0">{{ (form.role.isActive) ? $t('btn.deactivate') : $t('btn.reactivate') }}</v-btn>
+        <v-col class="pa-6 mt-3 rounded-lg grey lighten-5" cols="12" sm="5">
+          <v-btn block color="secondary" class="white--text elevation-0 mb-2" :to="`/admin/users/edit/${form.id}`">{{ $t('btn.edit') }}</v-btn>
+          <v-btn block color="secondary" v-if="form.role.isActive" @click="sendPasswordReset" class="elevation-0 mb-2">{{ $t('btn.send_password_reset') }}</v-btn>
+          <v-btn block color="secondary" @click="toggleActivation" class="mb-2 elevation-0">{{ (form.role.isActive) ? $t('btn.deactivate') : $t('btn.reactivate') }}</v-btn>
         </v-col>
       </v-row>
+
       <v-row class="mt-7 mx-1">
         <v-col class="elevation-6 white">
           <h3>{{ $t('gps.gps') }}</h3>

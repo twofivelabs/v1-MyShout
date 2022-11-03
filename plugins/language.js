@@ -12,11 +12,14 @@
 export default ({ app }, inject) => {
   inject('lang', {
     get (obj, key) {
-        if (!obj || !key) return
+        if (!obj || !key) return null
 
         try {
             const languageCode = app.i18n.localeProperties.code
             if (languageCode === 'en') {
+                return obj[key]
+            }
+            else if (obj.language[languageCode][key] === null || obj.language[languageCode][key] === undefined) {
                 return obj[key]
             }
             return obj.language[languageCode][key]

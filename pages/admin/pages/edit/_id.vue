@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="admin-container">
     <AdminTitle/>
     <div v-if="loading">
       <v-progress-linear
@@ -7,7 +7,7 @@
           indeterminate
       />
     </div>
-    <v-form v-else ref="formEl" @submit.prevent="validate">
+    <v-form v-else class="px-3 mt-3" ref="formEl" @submit.prevent="validate">
       <v-row>
         <v-col cols="12" sm="7">
           <v-text-field
@@ -22,6 +22,26 @@
               :label="$t('form.content')"
               required
           />
+
+          <!-- MULTI LINGUAL -->
+          <div v-if="Object.keys(form.language).length > 0">
+            <v-expansion-panels focusable>
+              <v-expansion-panel v-for="(language, langCode) in form.language" :key="langCode">
+                <v-expansion-panel-header style="text-transform: uppercase;">{{ langCode }}</v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <v-text-field
+                      v-model="form.language[langCode].title"
+                      :label="$t('form.title')"
+                  />
+                  <v-textarea
+                      v-model="form.language[langCode].content"
+                      :label="$t('form.content')"
+                  />
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </div>
+
         </v-col>
         <v-col class="pa-6 rounded-lg" cols="12" sm="5"
                style="background-color:rgba(0, 0, 0, 0.03)"
@@ -57,7 +77,7 @@
               class="text-center"
               color="success"
               elevation="0"
-              @click="validate"
+              type="submit"
           >
             {{ $t('btn.save') }}
           </v-btn>

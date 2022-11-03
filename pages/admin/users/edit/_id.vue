@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="admin-container">
     <AdminTitle/>
     <div v-if="loading">
       <v-progress-linear
@@ -7,7 +7,7 @@
           indeterminate
       />
     </div>
-    <v-form v-else ref="formEl" @submit.prevent="validate">
+    <v-form v-else class="px-3 mt-3" ref="formEl" @submit.prevent="validate">
       <v-row>
         <v-col cols="12" sm="7">
           <v-text-field

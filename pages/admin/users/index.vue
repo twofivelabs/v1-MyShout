@@ -1,9 +1,11 @@
 <template>
-  <v-container class="py-10 mb-10">
+  <v-container class="admin-container">
     <AdminTitle/>
 
-    <v-btn to="/admin/users/map" class="mb-2 elevation-0 primary white--text">View on map</v-btn>
-    Showing up to 500 users
+    <div class="mt-3 mb-2 px-3">
+      <v-btn to="/admin/users/map" small class="elevation-0 primary white--text">View on map</v-btn>
+      Showing up to 500 users
+    </div>
     <v-data-table
         :headers="headers"
         :items="data"
