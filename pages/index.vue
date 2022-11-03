@@ -13,9 +13,9 @@
         <div>
           <div class="d-flex d-inline-flex align-center">
             <IconsMinishout class="mr-2" />
-            <ElementH1 align="left" text="Emergency Alerts" />
+            <ElementH1 align="left" :text="$t('page.home_h1')" />
           </div>
-          <ElementP align="left" text="By pressing any of the following alerts, you'll be notifying all your emergency contacts your last known location." />
+          <ElementP align="left" :text="$t('page.home_p')" />
         </div>
 
         <div>

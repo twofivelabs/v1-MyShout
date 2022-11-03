@@ -8,7 +8,8 @@
       autocomplete="off"
       cache-items
       hide-details="true"
-      label="Search for your address"
+      :label="$t('form.search_for_address')"
+      :placeholder="$t('form.search_for_address')"
       outlined
       required
   />

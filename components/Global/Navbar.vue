@@ -16,9 +16,7 @@
         <img alt="MyShout Logo" src="/logo/MyShout-Logo.svg" style="width:100%; max-width:200px;">
       </nuxt-link>
       <v-spacer/>
-      <v-toolbar-items v-if="nav && nav.length > 0" justify="center"
-                       rounded
-      >
+      <v-toolbar-items v-if="nav && nav.length > 0" justify="center" rounded>
         <v-btn
             v-for="item in nav"
             :key="item.title"

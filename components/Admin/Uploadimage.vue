@@ -18,7 +18,7 @@
         append-outer-icon="mdi-cloud-upload"
         chips
         hide-details
-        label="Images"
+        :label="$t('form.images')"
         outlined
         prepend-icon="mdi-camera"
         show-size
@@ -27,7 +27,7 @@
         <v-btn :disabled="isUploadingImage" :loading="isUploadingImage"
                elevation="0" @click="uploadImages"
         >
-          Save
+          {{ $t('btn.save') }}
           <v-icon dark right>
             mdi-cloud-upload
           </v-icon>
@@ -98,8 +98,9 @@ export default {
 
     async validateAndUpload (file) {
       if (!file.type.match('image.*')) {
+
         this.$notify.show({
-          text: 'Error, not an appropriate file type',
+          text: this.i18n.t('notify.file_uploaded_error_type'),
           color: 'error'
         })
       } else {
@@ -120,7 +121,7 @@ export default {
         })
       }).catch(() => {
         this.$notify.show({
-          text: 'Error, try again',
+          text: this.i18n.t('notify.error_try_again'),
           color: 'error'
         })
       })
@@ -130,11 +131,11 @@ export default {
       this.urls = this.removeImageUrl(this.initial, url)
       this.$fire.storage.refFromURL(url).delete()
           .then(() => {
-            this.$notify.show({ text: 'Deleted' })
+            this.$notify.show({ text: this.i18n.t('notify.success') })
           })
           .catch(() => {
             this.$notify.show({
-              text: 'Error, deleting image',
+              text: this.i18n.t('notify.error_try_again'),
               color: 'error'
             })
           })

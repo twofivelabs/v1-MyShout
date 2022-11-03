@@ -132,12 +132,12 @@ export default function ({
             const permission = await Geolocation.checkPermissions()
             if (permission.location === 'denied') {
                 await Geolocation.requestPermissions()
-                app.$notify.show({ text: 'Permission Location Denied', color: 'error' })
+                app.$notify.show({ text: app.i18n.t('gps_permission_denied'), color: 'error' })
                 return false
             }
             else if (permission.location === 'prompt' || permission.location === 'prompt-with-rationale') {
                 await Geolocation.requestPermissions()
-                app.$notify.show({ text: 'Permission Location Prompt', color: 'error' })
+                app.$notify.show({ text: app.i18n.t('gps_permission_prompt'), color: 'error' })
                 return false
             }
             else if (permission.location === 'granted') {
@@ -258,7 +258,7 @@ export default function ({
             // Only request permissions if not granted
               console.log('STICKY: CHECK PERMISSIONS', permission.location)
               if (permission.location === 'denied') {
-                  app.$notify.show({ text: 'Permission denied: Geolocation', color: 'error' })
+                  app.$notify.show({ text: app.i18n.t('gps_permission_denied'), color: 'error' })
               }
               if (permission.location !== 'granted') {
               const device = await Device.getInfo()

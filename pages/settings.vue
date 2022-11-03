@@ -10,7 +10,7 @@
       </v-app-bar-nav-icon>
       <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
-          <ElementH2 align="left" text="Settings" />
+          <ElementH2 align="left" :text="$t('settings')" />
         </div>
       </v-toolbar-title>
       <v-spacer />
@@ -36,8 +36,8 @@
               <v-icon>mdi-google-maps</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
-              <v-list-item-title>Location Permissions</v-list-item-title>
-              <v-list-item-subtitle>Sharing your location is critical for emergency contacts to monitor your location.</v-list-item-subtitle>
+              <v-list-item-title>{{ $t('btn.location_permissions') }}</v-list-item-title>
+              <v-list-item-subtitle>{{ $t('btn.sharing_your_location_sub') }}</v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
               <MapLocationtoggle label="" class="mx-2" />
@@ -48,8 +48,8 @@
               <v-icon>mdi-message-outline</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
-              <v-list-item-title>Notification Permissions</v-list-item-title>
-              <v-list-item-subtitle>Receive notifications when a friend is in trouble, or a new chat message has been received.</v-list-item-subtitle>
+              <v-list-item-title>{{ $t('btn.notification_permissions') }}</v-list-item-title>
+              <v-list-item-subtitle>{{ $t('receive_notifications_sub') }}</v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
               <NotificationsToggle label="" class="mx-2" />
@@ -61,7 +61,7 @@
           <v-list-item-group>
             <v-list-item @click="$router.push('/page/account-settings')">
               <v-list-item-content>
-                <v-list-item-title>Account Settings</v-list-item-title>
+                <v-list-item-title>{{ $t('btn.account_settings') }}</v-list-item-title>
               </v-list-item-content>
               <v-list-item-action>
                 <v-btn icon>
@@ -71,7 +71,17 @@
             </v-list-item>
             <v-list-item @click="$router.push('/page/about-us')">
               <v-list-item-content>
-                <v-list-item-title>About Us</v-list-item-title>
+                <v-list-item-title>{{ $t('btn.about_us') }}</v-list-item-title>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-btn icon>
+                  <v-icon color="grey lighten-1">mdi-chevron-right</v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
+            <v-list-item @click="$router.push('/page/language')">
+              <v-list-item-content>
+                <v-list-item-title>{{ $t('btn.language') }}</v-list-item-title>
               </v-list-item-content>
               <v-list-item-action>
                 <v-btn icon>
@@ -81,7 +91,7 @@
             </v-list-item>
             <v-list-item @click="$router.push('/page/help-center')">
               <v-list-item-content>
-                <v-list-item-title>Help Center</v-list-item-title>
+                <v-list-item-title>{{ $t('btn.help_center') }}</v-list-item-title>
               </v-list-item-content>
               <v-list-item-action>
                 <v-btn icon>
@@ -91,7 +101,7 @@
             </v-list-item>
             <v-list-item @click="$router.push('/page/faq')">
               <v-list-item-content>
-                <v-list-item-title>Frequent Questions</v-list-item-title>
+                <v-list-item-title>{{ $t('btn.frequent_questions') }}</v-list-item-title>
               </v-list-item-content>
               <v-list-item-action>
                 <v-btn icon>
@@ -101,7 +111,7 @@
             </v-list-item>
             <v-list-item @click="$router.push('/page/contact')">
               <v-list-item-content>
-                <v-list-item-title>Feedback</v-list-item-title>
+                <v-list-item-title>{{ $t('btn.feedback') }}</v-list-item-title>
               </v-list-item-content>
               <v-list-item-action>
                 <v-btn icon>
@@ -111,7 +121,7 @@
             </v-list-item>
             <v-list-item @click="$router.push('/page/privacy')">
               <v-list-item-content>
-                <v-list-item-title>Privacy & Terms</v-list-item-title>
+                <v-list-item-title>{{ $t('btn.privacy_terms') }}</v-list-item-title>
               </v-list-item-content>
               <v-list-item-action>
                 <v-btn icon>

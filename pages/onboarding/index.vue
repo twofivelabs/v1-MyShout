@@ -10,7 +10,7 @@
                max-width="250"
                v-anime="{
                         translateY: [100, 0],
-                        duraotin: 1200
+                        duration: 1200
                      }"
         />
       </div>

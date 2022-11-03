@@ -9,7 +9,7 @@
           <v-icon >mdi-account-supervisor</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title>View Members</v-list-item-title>
+          <v-list-item-title>{{ $t('chats.view_members') }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </template>
@@ -37,7 +37,7 @@
             text
             @click="dialog = false"
         >
-          Close
+          {{ $t('btn.close') }}
         </v-btn>
       </v-card-actions>
     </v-card>

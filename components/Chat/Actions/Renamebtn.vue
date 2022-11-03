@@ -9,29 +9,29 @@
           <v-icon >mdi-pencil</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title>Rename Chat</v-list-item-title>
+          <v-list-item-title>{{ $t('chats.rename_chat') }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </template>
 
     <v-card class="rounded-xl pa-8">
-      <ElementH1 text="Rename Chat" />
+      <ElementH1 :text="$t('chats.rename_chat')" />
       <v-card-text class="mt-5">
-        <v-text-field v-model="form.title" label="Chat Name"/>
+        <v-text-field v-model="form.title" :label="$t('chats.chat_name')"/>
       </v-card-text>
       <v-card-actions class="justify-center">
         <v-btn
             text
             @click="dialog = false"
         >
-          Cancel
+          {{ $t('btn.cancel') }}
         </v-btn>
         <v-btn
             color="primary"
             class="elevation-0"
             @click="save"
         >
-          Save
+          {{ $t('btn.save') }}
         </v-btn>
       </v-card-actions>
     </v-card>

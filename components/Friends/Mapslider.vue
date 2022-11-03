@@ -52,7 +52,8 @@
                    class="elevation-0"
                    primary
             >
-              View More
+
+              {{ $t('view_more') }}
             </v-btn>
           </div>
         </v-sheet>

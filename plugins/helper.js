@@ -34,7 +34,7 @@ export default ({
         })
         if (result && result.length !== 0) {
           app.$notify.show({
-            text: 'Name already used',
+            text: app.i18n.t('notify.error_try_again'),
             color: 'red'
           })
           return false

@@ -70,7 +70,7 @@
       </div>
       <div v-else>
         <div style="text-align:center;">
-          <ElementH4 align="center" text="You're all caught up!"/>
+          <ElementH4 align="center" :text="$t('notifications.caught_up')"/>
         </div>
       </div>
     </div>
@@ -102,7 +102,7 @@ export default defineComponent({
       dispatch,
       commit
     } = useStore()
-    const { $system, $notify } = useContext()
+    const { $system, $notify, i18n } = useContext()
     const router = useRouter()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
@@ -154,14 +154,14 @@ export default defineComponent({
           })
         })
       } catch(e) {
-        $notify.show({ text: 'Error adding friendship', color: 'red' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
         $system.log({
           comp: 'UserNotifications',
           msg: 'approveFriendRequest',
           val: e
         })
       } finally {
-        $notify.show({ text: 'Successfully approved', color: 'green' })
+        $notify.show({ text: i18n.t('notify.success'), color: 'green' })
         // TODO: hide approve button
         await dispatch('user/notifications/update', {
           id: notification.id,
@@ -178,7 +178,7 @@ export default defineComponent({
       try {
         await dispatch('user/notifications/remove', notification.id)
       } catch(e) {
-        $notify.show({ text: 'Error removing friendship', color: 'red' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
         $system.log({
           comp: 'UserNotifications',
           msg: 'declineFriendRequest',
@@ -201,18 +201,18 @@ export default defineComponent({
           responded: true,
         }).then((res) => {
           if (res !== false) {
-            $notify.show({ text: 'Success', color: 'green' })
+            $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           }
         })
       } catch(e) {
-        $notify.show({ text: 'Error checking-in', color: 'red' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
         $system.log({
           comp: 'UserNotifications',
           msg: 'checkIn',
           val: e
         })
       } finally {
-        $notify.show({ text: 'Success', color: 'green' })
+        $notify.show({ text: i18n.t('notify.success'), color: 'green' })
         // TODO: hide approve button
         await dispatch('user/notifications/update', {
           uid: notification.uid,

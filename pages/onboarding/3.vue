@@ -4,7 +4,7 @@
 
       <!-- TOP PORTION -->
       <div class="d-flex flex-column justify-space-around align-center" style="width:100vw; height:23vh;">
-        <OnboardingCardheader class="gray--text mx-14" h1="Welcome!" />
+        <OnboardingCardheader class="gray--text mx-14" :h1="$t('onboarding.profile_setup_heading')" />
       </div>
 
       <!-- WHITE CARD -->
@@ -17,7 +17,7 @@
               }">
         <div class="d-flex flex-column align-center">
           <div>
-            <h5 class="text-h5 text-center">Looks like you're new here, let's setup your profile.</h5>
+            <h5 class="text-h5 text-center">{{ $t('onboarding.profile_setup_sub') }}</h5>
           </div>
           <v-spacer />
           <v-btn

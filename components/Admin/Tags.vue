@@ -8,7 +8,7 @@
         flat
         item-text="name"
         item-value="id"
-        label="Tags"
+        :label="$t('form.tags')"
         multiple
         outlined
         prepend-icon="mdi-tag"

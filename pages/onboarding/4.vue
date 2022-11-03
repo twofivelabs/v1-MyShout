@@ -4,7 +4,7 @@
 
       <!-- TOP PORTION -->
       <div class="d-flex flex-column justify-space-around align-center" style=" width:100vw; height:23vh;">
-        <OnboardingCardheader class="gray--text mx-14" h1="What should we call you?" />
+        <OnboardingCardheader class="gray--text mx-14" :h1="$t('onboarding.username_heading')" />
       </div>
 
       <!-- WHITE CARD -->
@@ -16,11 +16,11 @@
                 delay:900
               }">
         <div>
-          <h5 class="text-h5 text-center mb-6">Set a display name for others to know who they are talking to.</h5>
+          <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.username_sub') }}</h5>
           <v-form ref="formEl" @submit.prevent="validate">
             <v-text-field v-model="form.username"
                           :rules="rules.username"
-                          label="Username"
+                          :label="$t('form.username')"
                           prepend-inner-icon="mdi-at"
                           required
                           outlined
@@ -66,7 +66,8 @@ export default defineComponent({
     const {
       $config,
       $helper,
-      $notify
+      $notify,
+        i18n
     } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
@@ -87,7 +88,7 @@ export default defineComponent({
         // Does username exist?
         const username = $helper.slugify(form.value.username, '')
         if(await userExists(username)) {
-          $notify.show({ text: 'Username already exists', color: 'red' })
+          $notify.show({ text: i18n.t('notify.username_in_use'), color: 'red' })
         } else {
           // Save User
           await dispatch('user/updateField', {

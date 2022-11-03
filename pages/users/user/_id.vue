@@ -20,7 +20,9 @@
         </span>
         <div class="d-flex justify-center my-6">
           <UserActionsSendamessagebtn v-if="publicUser.status === 'approved'" :user="publicUser">
-            <v-btn color="myshoutGreen" class="elevation-0 rounded-lg white--text mr-2" large rounded>Send A Message</v-btn>
+            <v-btn color="myshoutGreen" class="elevation-0 rounded-lg white--text mr-2" large rounded>
+              {{ $t('chats.send_message') }}
+            </v-btn>
           </UserActionsSendamessagebtn>
           <UserActionsbtn :user="publicUser" />
         </div>
@@ -30,8 +32,9 @@
               v-if="publicUser.status"
               color="myshoutOrange"
               :title="publicUser.status"
-          ><v-icon class="">mdi-update</v-icon> friendship is {{ publicUser.status }}</v-chip>
-          <ElementH4 v-else align="center" text="You do not have permission to view their profile."/>
+          ><v-icon class="">mdi-update</v-icon>
+            {{ $t('friendship_is') }} {{ publicUser.status }}</v-chip>
+          <ElementH4 v-else align="center" :text="$t('permission.no_user_profile')"/>
         </div>
       </div>
 
@@ -43,18 +46,15 @@
               grow
           >
             <v-tab>
-              Location
+              {{ $t('location') }}
             </v-tab>
             <v-tab>
-              Alerts
+              {{ $t('alerts') }}
             </v-tab>
-            <v-tabs-items
-                v-model="activeTab"
-                class=""
-            >
+            <v-tabs-items v-model="activeTab" class="">
               <v-tab-item>
                 <MapGmbasic v-if="publicUser.permissions.shareLocationWithFriends" :lat="publicUser.gps.lat" :lng="publicUser.gps.lng" />
-                <ElementH4 v-else align="center" class="my-5" text="Your are not able to view their location."/>
+                <ElementH4 v-else align="center" class="my-5" :text="$t('permission.no_view_location')"/>
               </v-tab-item>
               <v-tab-item class="pt-3">
                 <UserAccountAlerts :user="publicUser" />

@@ -1,9 +1,9 @@
 <template>
   <div class="ma-6 text-center">
-    <ElementH1 text="404" />
-    <ElementH3 text="Nothing found" />
+    <ElementH1 :text="$t('page.not_found_heading')" />
+    <ElementH3 :text="$t('page.not_found_text')" />
     <v-btn class="mt-6" @click="$nuxt.refresh()">
-      Retry
+      {{ $t('btn.retry') }}
     </v-btn>
   </div>
 </template>

@@ -17,16 +17,16 @@
             class="text-center"
             type="submit"
         >
-          Send Code
+          {{ $t('btn.send_code') }}
         </v-btn>
       </div>
     </div>
     <div v-if="form.showOtpInput">
       <!-- MAKE COMPONENT -->
-      <ElementH3 text="We sent you a SMS code" align="left" />
+      <ElementH3 :text="$t('heading.we_sent_you_sms_code')" align="left" />
       <v-text-field
-          label="Code"
-          placeholder="Code"
+          :label="$t('form.code')"
+          :placeholder="$t('form.code')"
           class="mt-5"
           outlined
           max=6
@@ -43,7 +43,7 @@
             type="submit"
             @click="registerWithOTPCode"
         >
-          Login
+          {{ $t('btn.login') }}
         </v-btn>
       </div>
     </div>
@@ -75,7 +75,7 @@ export default defineComponent({
     },
   },
   setup (props) {
-    const { $fire, $fireModule, $notify, $system } = useContext()
+    const { $fire, $fireModule, $notify, $system, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
@@ -118,14 +118,14 @@ export default defineComponent({
             msg: 'Error trying to register phone number',
             val: e
           })
-          $notify.show({ text: 'Error registering phone number', color: 'error' })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
           if (props.goTo) {
             await router.push(props.goTo)
           }
         }
       } else {
         initRecaptcha()
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
     const registerWithOTPCode = async () => {
@@ -133,11 +133,11 @@ export default defineComponent({
       loading.value = true
       window.confirmationResult.confirm(form.value.otpProvided).then(result => {
         if (!result.additionalUserInfo.isNewUser) {
-          $notify.show({ text: 'Successfully logged in', color: 'green' })
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           router.push('/')
           return
         }
-        $notify.show({ text: 'Successfully registered', color: 'green' })
+        $notify.show({ text: i18n.t('notify.success'), color: 'green' })
         if (props.goTo) {
           router.push(props.goTo)
           // router.push('/profile')
@@ -150,7 +150,7 @@ export default defineComponent({
           msg: 'Error with phone code',
           val: e
         })
-        $notify.show({ text: 'Error with phone code', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       })
       loading.value = false
     }

@@ -3,7 +3,7 @@
     <a target="_blank" :href="`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`"><v-img width="600" class="mx-auto" :src="`https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=16&scale=1&size=600x500&maptype=hybrid&key=${$config.google.mapsApiKey}&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:1%7C${lat},${lng}`" :alt="`Google Map of ${lat},${lng}`" /></a>
   </div>
   <div v-else>
-    <ElementH4 align="center" class="my-5" text="User has not updated their location yet."/>
+    <ElementH4 align="center" class="my-5" :text="$t('gps.user_no_location')"/>
   </div>
 </template>
 <script>

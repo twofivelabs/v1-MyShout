@@ -13,7 +13,7 @@
                         duration: 1200
                      }"
         />
-        <OnboardingCardheader class="gray--text mb-10 mx-14" h1="Let family & friends know you're safe!" />
+        <OnboardingCardheader class="gray--text mb-10 mx-14" :h1="$t('know_your_safe')" />
       </div>
 
       <!-- WHITE CARD -->
@@ -25,7 +25,7 @@
                 delay:900
               }">
         <div v-if="!showNext">
-          <h5 class="text-h5 text-center">Provide your phone number to start chatting</h5>
+          <h5 class="text-h5 text-center">{{ $t('start_chatting') }}</h5>
           <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" @response="emittedResponseFunc" />
           <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" @response="emittedResponseFunc" />
         </div>
@@ -35,7 +35,7 @@
           <div class="d-inline-flex justify-center agreeToTerms">
             <v-checkbox
                 v-model="agreeToTerms"
-                label="Yes, I agree to terms"
+                :label="$t('onboarding.agree_to_terms')"
                 required
             ></v-checkbox>
           </div>
@@ -58,7 +58,7 @@ export default defineComponent({
   layout: 'onboarding',
   setup () {
     const {
-      $config, $capacitor, $ttlStorage, $notify
+      $config, $capacitor, $ttlStorage, $notify, i18n
     } = useContext()
     const router = useRouter()
     const loading = ref(false)
@@ -100,7 +100,7 @@ export default defineComponent({
         if (agreeToTerms.value) {
           router.push(goTo.value)
         } else {
-          $notify.show({ text: 'You must agree to terms before continuing', color: 'error' })
+          $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
         }
       }
     })
@@ -109,7 +109,7 @@ export default defineComponent({
         if (showNext.value) {
           router.push(goTo.value)
         } else {
-          $notify.show({ text: 'You must validate your phone number before continuing', color: 'error' })
+          $notify.show({ text: i18n.t('notify.validate_your_phone'), color: 'error' })
         }
       }
     })

@@ -15,7 +15,7 @@
       hide-details
       item-text="name"
       item-value="slug"
-      label="Search"
+      :label="$t('form.search')"
   />
 </template>
 <script>

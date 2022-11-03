@@ -10,7 +10,7 @@
       </v-app-bar-nav-icon>
       <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
-          <ElementH2 align="left" text="FAQ" />
+          <ElementH2 align="left" :text="$t('page.faq')" />
         </div>
       </v-toolbar-title>
       <v-spacer />
@@ -18,10 +18,7 @@
 
     <v-container class="mt-3 mb-12 mobileNotch px-3">
       <v-expansion-panels focusable>
-        <v-expansion-panel
-            v-for="(post,i) in posts"
-            :key="i"
-        >
+        <v-expansion-panel v-for="(post,i) in posts" :key="i">
           <v-expansion-panel-header>{{ post.title }}</v-expansion-panel-header>
           <v-expansion-panel-content>
             <div v-if="post.featured_image_url">
@@ -31,11 +28,8 @@
               <div v-if="post.isMarkdown" v-dompurify-html="$md.render(post.content)" class="mdDoc"/>
               <div v-else v-dompurify-html="post.content" class="mdDoc"/>
             </div>
-            <v-btn v-if="post.learn_more" :to="post.learn_more"
-                   class="elevation-0"
-                   primary
-            >
-              {{ post.learn_more_label ? post.learn_more_label : 'Learn More' }}
+            <v-btn v-if="post.learn_more" :to="post.learn_more" class="elevation-0" primary>
+              {{ post.learn_more_label ? post.learn_more_label : $t('btn.learn_more') }}
             </v-btn>
           </v-expansion-panel-content>
         </v-expansion-panel>

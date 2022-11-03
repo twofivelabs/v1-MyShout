@@ -12,25 +12,25 @@
         <v-col cols="12" sm="7">
           <v-text-field
               v-model="form.username"
-              label="Username"
+              :label="$t('form.username')"
               required
           />
           <v-text-field
               v-model="form.first_name"
-              label="First Name"
+              :label="$t('form.first_name')"
           />
           <v-text-field
               v-model="form.last_name"
-              label="Last Name"
+              :label="$t('form.last_name')"
           />
           <v-row>
             <v-col><v-text-field
                 v-model="form.location.city"
-                label="City"
+                :label="$t('form.city')"
             /></v-col>
             <v-col><v-text-field
                 v-model="form.location.country"
-                label="Country"
+                :label="$t('form.country')"
             /></v-col>
           </v-row>
         </v-col>
@@ -77,7 +77,7 @@
               elevation="0"
               @click="validate"
           >
-            Save
+            {{ $t('btn.save') }}
           </v-btn>
         </v-col>
       </v-row>
@@ -114,7 +114,7 @@ export default defineComponent({
     const {
       // $helper,
       $notify,
-      $system
+      $system, i18n
     } = useContext()
     const router = useRouter()
     const route = useRoute()
@@ -165,11 +165,11 @@ export default defineComponent({
         loading.value = true
         try {
           await dispatch('user/update', form.value)
-          $notify.show({ text: 'Success' })
+          $notify.show({ text: i18n.t('notify.success') })
           router.push('/admin/users')
         } catch {
           $notify.show({
-            text: 'Error, try again',
+            text: i18n.t('notify.error_try_again'),
             color: 'error'
           })
         } finally {
@@ -177,7 +177,7 @@ export default defineComponent({
         }
       } else {
         $notify.show({
-          text: 'Error, username was not found',
+          text: i18n.t('notify.error_try_again'),
           color: 'error'
         })
       }

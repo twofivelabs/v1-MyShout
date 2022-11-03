@@ -10,8 +10,8 @@
                           @click.native="swipe('Down')"
           />
 
-          <ElementH3 v-if="loading" align="center" text="Loading..." />
-          <ElementH3 align="center" text="Actions" />
+          <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
+          <ElementH3 align="center" :text="$t('actions')" />
 
           <v-list-item-group>
             <ChatActionsRenamebtn :chatId="chatId" />

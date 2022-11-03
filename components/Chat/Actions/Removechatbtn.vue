@@ -9,7 +9,7 @@
           <v-icon color="myshoutRed">mdi-delete</v-icon>
         </v-list-item-icon>
         <v-list-item-content style="color: var(--v-myshoutRed-base);">
-          <v-list-item-title>Remove Chat</v-list-item-title>
+          <v-list-item-title>{{ $t('chats.remove_chat') }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </template>
@@ -21,14 +21,14 @@
             text
             @click="dialog = false"
         >
-          Cancel
+          {{ $t('btn.cancel') }}
         </v-btn>
         <v-btn
             color="error"
             class="elevation-0"
             @click="removeChat"
         >
-          Yes, remove
+          {{ $t('btn.yes_remove') }}
         </v-btn>
       </v-card-actions>
     </v-card>

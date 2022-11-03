@@ -1,13 +1,13 @@
 <template>
   <div>
     <div v-if="!friends || friends.length === 0">
-      <ElementH4 v-if="!loading" align="center" class="my-5" text="You have no friends to chat with."/>
+      <ElementH4 v-if="!loading" align="center" class="my-5" :text="$t('contacts.no_contacts')"/>
     </div>
 
     <v-text-field
         v-else
-        label="Search Friends..."
-        placeholder="Search Friends..."
+        :label="$t('contacts.search_friends')"
+        :placeholder="$t('contacts.search_friends')"
         append-icon="mdi-magnify"
         filled
         rounded

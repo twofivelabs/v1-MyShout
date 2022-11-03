@@ -14,21 +14,21 @@
               v-model="form.title"
               :disabled="readonly"
               :readonly="readonly"
-              label="Title"
+              :label="$t('form.title')"
               required
           />
           <v-textarea
               v-model="form.content"
-              label="Content"
+              :label="$t('form.content')"
               required
           />
           <v-text-field
               v-model="form.learn_more"
-              label="Learn More Url"
+              :label="$t('form.learn_more_url')"
           />
           <v-text-field
               v-model="form.learn_more_label"
-              label="Learn More Label"
+              :label="$t('form.learn_more_label')"
           />
         </v-col>
         <v-col class="pa-6 rounded-lg" cols="12" sm="5"
@@ -47,15 +47,15 @@
           <div v-if="form.title" class="mt-6">
             <v-checkbox
                 v-model="form.published"
-                label="Published"
+                :label="$t('form.published')"
             />
             <v-checkbox
                 v-model="form.isMarkdown"
-                label="Is content using markdown?"
+                :label="$t('form.using_markdown')"
             />
-            <AdminTags :tags="form.tags" label="Tags" @data="emittedTags"/>
+            <AdminTags :tags="form.tags" :label="$t('form.tags')" @data="emittedTags"/>
 
-            Featured Image
+            {{ $t('form.featured_image') }}
             <AdminUploadimage :initial="[form.featured_image_url]" :multiple="false"
                               :storage="`Posts/${form.title}`"
                               @urls="emittedFeaturedImage"
@@ -73,7 +73,7 @@
               elevation="0"
               @click="validate"
           >
-            Save
+            {{ $t('btn.save') }}
           </v-btn>
           <span v-if="$route.params.id">
           <v-btn
@@ -83,7 +83,7 @@
               elevation="0"
               @click="remove"
           >
-            Delete
+            {{ $t('btn.delete') }}
           </v-btn>
         </span>
         </v-col>
@@ -121,7 +121,7 @@ export default defineComponent({
     const {
       $helper,
       $notify,
-      $system
+      $system, i18n
     } = useContext()
     const router = useRouter()
     const route = useRoute()
@@ -180,11 +180,11 @@ export default defineComponent({
         try {
           loading.value = true
           await dispatch('posts/add', form.value)
-          $notify.show({ text: 'Success' })
+          $notify.show({ text: i18n.t('notify.success') })
           router.push('/admin/posts')
         } catch (e) {
           $notify.show({
-            text: 'Error, try again 1',
+            text: i18n.t('notify.error_try_again'),
             color: 'error'
           })
         } finally {
@@ -192,7 +192,7 @@ export default defineComponent({
         }
       } else {
         $notify.show({
-          text: 'Error, try again 2',
+          text: i18n.t('notify.error_try_again'),
           color: 'error'
         })
       }
@@ -200,11 +200,11 @@ export default defineComponent({
     const remove = async () => {
       const response = await dispatch('posts/remove', form.value.slug)
       if (response) {
-        $notify.show({ text: 'Success' })
+        $notify.show({ text: i18n.t('notify.success') })
         router.push('/admin/posts')
       } else {
         $notify.show({
-          text: 'Error, try again 0',
+          text: i18n.t('notify.error_try_again'),
           color: 'error'
         })
       }

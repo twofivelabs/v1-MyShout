@@ -14,7 +14,7 @@
     <v-card class="pa-2 pt-6 rounded-xl elevation-13">
       <v-card-text>
         <div v-if="loading">
-          Loading...
+          :text="$t('is_loading')"
         </div>
         <div v-else-if="page">
           <h4 class="text-h4 text-center">{{ page.title }}</h4>

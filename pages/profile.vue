@@ -25,21 +25,18 @@
           style="max-width:800px; margin:0 auto;"
       >
         <v-tab>
-          Alerts
+          {{ $t('alerts') }}
         </v-tab>
         <v-tab>
-          Emergency
+          {{ $t('emergency') }}
         </v-tab>
         <v-tab>
-          Friends
+          {{ $t('friends') }}
         </v-tab>
         <v-tab>
-          Settings
+          {{ $t('settings') }}
         </v-tab>
-        <v-tabs-items
-            v-model="activeTab"
-            class=""
-        >
+        <v-tabs-items v-model="activeTab" class="">
           <v-tab-item>
             <UserAccountAlerts  v-if="activeTab === 0" :user="profile" />
           </v-tab-item>

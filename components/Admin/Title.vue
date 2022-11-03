@@ -6,12 +6,12 @@
           <v-icon>
             mdi-arrow-left
           </v-icon>
-          To App
+          {{ $t('btn.back_to_app') }}
         </v-btn>
       </v-col>
       <v-col class="ma-0 pa-0 text-right">
         <v-btn text @click="logout" small class="px-1">
-          Logout
+          {{ $t('btn.log_out') }}
           <v-icon>
             mdi-exit-to-app
           </v-icon>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="$nuxt.isOffline" class="text-center isOffline">
-      Uh Oh! It looks like you are offline.
+      {{ $t('you_are_currently_offline') }}
     </div>
   </div>
 </template>

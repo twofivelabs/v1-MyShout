@@ -15,22 +15,22 @@
     </template>
 
     <v-card class="rounded-xl pa-8">
-      <ElementH1 text="Remove as friend" />
-      <ElementP text="Please confirm you wish to remove as a friend." />
+      <ElementH1 :text="$t('btn.remove_friend')" />
+      <ElementP :text="$t('chats.confirm_remove_friend')" />
 
       <v-card-actions class="justify-center">
         <v-btn
             text
             @click="dialog = false"
         >
-          Cancel
+          {{ $t('btn.cancel') }}
         </v-btn>
         <v-btn
             color="primary"
             class="elevation-0"
             @click="removeFriendship"
         >
-          Remove As Friend
+          {{ $t('btn.remove_friend') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -61,7 +61,7 @@ export default defineComponent({
     'isFriend'
   ],
   setup(props, { emit }) {
-    const { $notify } = useContext()
+    const { $notify, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -73,10 +73,10 @@ export default defineComponent({
       if(res) {
         dialog.value = false
         await router.push('/profile')
-        $notify.show({ text: 'Success', color: 'success' })
+        $notify.show({ text: i18n.t('notify.success'), color: 'success' })
         emit('isFriend', false)
       } else {
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
 

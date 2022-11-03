@@ -6,7 +6,7 @@
         :items="data"
         :loading="loading"
         class="elevation-0"
-        loading-text="Loading... Please wait"
+        :loading-text="$t('is_loading')"
         @click:row="rowClick"
     >
       <template #[`item.like`]="{ item }">

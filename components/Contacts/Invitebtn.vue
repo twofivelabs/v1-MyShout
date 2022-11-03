@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12" align="center">
         <v-btn v-if="showButton" @click="showInviteSheet" color="primary"  class="elevation-0">
-          Invite Friends
+          {{ $t('contacts.invite_friends') }}
         </v-btn>
       </v-col>
     </v-row>
@@ -14,9 +14,9 @@
                           @click.native="swipe('Down')"
           />
 
-          <ElementH3 align="center" text="Invite Friends" />
-          <ElementH3 v-if="loading" align="center" text="Loading..." />
-          <ElementH4 v-if="!loading && (contacts && contacts.length === 0)" align="center" class="my-5" text="You have no contacts"/>
+          <ElementH3 align="center" :text="$t('contacts.invite_friends')" />
+          <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
+          <ElementH4 v-if="!loading && (contacts && contacts.length === 0)" align="center" class="my-5" :text="$t('contacts.no_contacts')"/>
 
           <template v-for="(contact, index) of contacts">
             <ContactsListitem class="mt-2" :contact="contact" :key="index" />

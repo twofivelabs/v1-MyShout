@@ -13,7 +13,7 @@
                         duration: 1200
                      }"
         />
-        <OnboardingCardheader class="gray--text mb-10 mx-14" h1="Let family & friends know you're safe!" />
+        <OnboardingCardheader class="gray--text mb-10 mx-14" :h1="$t('know_your_safe')" />
       </div>
 
       <!-- WHITE CARD -->
@@ -25,10 +25,12 @@
                 delay:900
               }">
         <div>
-          <h5 class="text-h5 text-center mb-6">Let's include your email for a backup</h5>
+          <h5 class="text-h5 text-center mb-6">{{ $t('include_email') }}</h5>
           <FormsRegisterbyemail goTo="/onboarding/3" :required="false" />
           <div class="text-center mt-4">
-            <v-btn class="elevation-0" primary text to="/onboarding/3">Skip for now</v-btn>
+            <v-btn class="elevation-0" primary text to="/onboarding/3">
+              {{ $t('skip_for_now') }}
+            </v-btn>
           </div>
         </div>
 

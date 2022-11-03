@@ -1,13 +1,12 @@
 <template>
   <v-container class="pa-8 mt-12">
-    <ElementH1 text="Forgot Password" align="left" />
+    <ElementH1 :text="$t('forgot_password')" align="left" />
     <v-row>
       <v-col cols="12" md="5" :order="`${$vuetify.breakpoint.mdAndUp ? '' : 'last' }`">
         <div class="mt-8">
           <p>
-            Back to
             <nuxt-link to="/login">
-              Login
+              {{ $t('btn.back_to_login') }}
             </nuxt-link>
           </p>
         </div>
@@ -17,7 +16,7 @@
           <v-text-field
             v-model="form.email"
             :rules="rules.email"
-            label="Email"
+            :label="$t('form.email')"
             required
           />
           <div class="text-center">
@@ -30,7 +29,7 @@
               type="submit"
               @click="validate"
             >
-              Email me a reset link
+              {{ $t('btn.send_password_reset') }}
             </v-btn>
           </div>
         </v-form>
@@ -55,7 +54,7 @@ export default defineComponent({
   middleware: 'guest',
   setup () {
     const router = useRouter()
-    const { $config, $notify, $fire, $system } = useContext()
+    const { $config, $notify, $fire, $system, i18n } = useContext()
     const loading = ref(false)
 
     // DEFINE CONTENT
@@ -80,7 +79,7 @@ export default defineComponent({
       if (form.value.email) {
         try {
           await $fire.auth.sendPasswordResetEmail(form.value.email)
-          $notify.show({ text: 'Please check your email' })
+          $notify.show({ text: i18n.t('notify.check_your_email') })
           await router.push('/login')
         } catch (e) {
           $system.log({
@@ -88,10 +87,10 @@ export default defineComponent({
             msg: 'Reset Password',
             val: e
           })
-          $notify.show({ text: 'Error, try again', color: 'error' })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } else {
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
 

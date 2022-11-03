@@ -55,7 +55,7 @@ export default defineComponent({
   setup () {
     const loading = ref(false)
     const { getters, state, dispatch } = useStore()
-    const { $capacitor, $db, $notify, $system } = useContext()
+    const { $capacitor, $db, $notify, $system, i18n } = useContext()
     const user = computed(() => state.user.data)
     const isLoggedIn = computed(() => getters['user/isLoggedIn'])
     let initial = computed(() => state.user.profile.initial)
@@ -80,9 +80,9 @@ export default defineComponent({
         })
         // Response
         if (updateResponse) {
-          $notify.show({ text: 'Success', color: 'success' })
+          $notify.show({ text: i18n.t('notify.success'), color: 'success' })
         } else {
-          $notify.show({ text: 'Error, please try again', color: 'error' })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } catch (e) {
         $system.log({

@@ -5,9 +5,8 @@
       <v-col cols="12" md="5" :order="`${$vuetify.breakpoint.mdAndUp ? '' : 'last' }`">
         <div class="mt-8">
           <p>
-            Already have an account?
             <nuxt-link to="/login">
-              Login
+              {{ $t('btn.already_have_account') }}
             </nuxt-link>
           </p>
         </div>

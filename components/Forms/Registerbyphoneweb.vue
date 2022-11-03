@@ -18,7 +18,7 @@
             class="text-center"
             type="submit"
         >
-          Send Code
+          {{ $t('btn.send_code') }}
         </v-btn>
       </div>
     </div>
@@ -27,10 +27,10 @@
       <v-card
           class="elevation-0 pa-12 rounded-xl"
       >
-        <ElementH3 text="We sent you a SMS code" align="center" />
+        <ElementH3 :text="$t('heading.we_sent_you_sms_code')" align="center" />
         <v-text-field
-            label="Code"
-            placeholder="Code"
+            :label="$t('form.code')"
+            :placeholder="$t('form.code')"
             class="mt-5 mx-8"
             outlined background-color="#f8f9fa"
             max=6
@@ -47,7 +47,7 @@
               type="submit"
               @click="registerWithOTPCode"
           >
-            Verify
+            {{ $t('btn.verify') }}
           </v-btn>
           <FormsRecoverbyemail />
         </div>
@@ -85,7 +85,7 @@ export default defineComponent({
     },
   },
   setup (props, { emit }) {
-    const { $fire, $fireModule, $notify, $system, $ttlStorage } = useContext()
+    const { $fire, $fireModule, $notify, $system, $ttlStorage, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -128,7 +128,7 @@ export default defineComponent({
             $notify.show({ text: e.message, color: 'error' })
             emit('response', { status: 'error', message: e.message })
           } else {
-            $notify.show({ text: 'Error registering phone number', color: 'error' })
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
             emit('response', { status: 'error', message: 'Error registering phone number 1' })
           }
 
@@ -140,7 +140,7 @@ export default defineComponent({
         }
       } else {
         initRecaptcha()
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         emit('response', { status: 'error', message: 'Error try again' })
         console.log('STICKY: No phone number')
       }
@@ -155,7 +155,7 @@ export default defineComponent({
 
         // If EXISTING user show logged in message
         if (!result.additionalUserInfo.isNewUser) {
-          $notify.show({text: 'Successfully logged in', color: 'green'})
+          $notify.show({text: i18n.t('notify.success'), color: 'green'})
           emit('response', {status: 'success', message: 'Successfully logged in'})
 
           // Update Profile
@@ -170,7 +170,7 @@ export default defineComponent({
         // If NEW user
         else {
           form.value.showOtpInput = false
-          $notify.show({ text: 'Successfully registered', color: 'green' })
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           emit('response', { status: 'success', message: 'Successfully registered' })
 
           await dispatch('user/updateField', {
@@ -180,7 +180,7 @@ export default defineComponent({
         }
       } catch (e) {
         initRecaptcha()
-        $notify.show({ text: 'Error with phone code', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         emit('response', { status: 'error', message: 'Error with phone code' })
         $system.log({
           comp: 'FormsRegisterbyphoneweb',

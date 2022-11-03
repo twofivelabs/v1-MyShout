@@ -10,7 +10,7 @@
       </v-app-bar-nav-icon>
       <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
-          <ElementH2 align="left" text="Contact Us" />
+          <ElementH2 align="left" :text="$t('btn.contact_us')" />
         </div>
       </v-toolbar-title>
       <v-spacer />
@@ -21,7 +21,7 @@
       <v-col cols="12" sm="5">
         <div class="mt-8 pr-8">
           <p>
-            Feel free to reach out to us with any questions you might have.
+            {{ $t('page.contact_intro') }}
           </p>
           <GlobalSocialmedia />
         </div>
@@ -31,7 +31,7 @@
           <v-text-field
             v-model="form.email"
             :rules="rules.email"
-            label="Email"
+            :label="$t('form.email')"
             required
           />
           <v-row>
@@ -39,14 +39,14 @@
               <v-text-field
                 v-model="form.phone"
                 :rules="rules.phone"
-                label="Phone"
+                :label="$t('form.phone')"
                 required
               />
             </v-col>
             <v-col>
               <v-text-field
                 v-model="form.name"
-                label="Name"
+                :label="$t('form.name')"
               />
             </v-col>
           </v-row>
@@ -54,7 +54,7 @@
           <v-textarea
             v-model="form.message"
             :rules="rules.message"
-            label="Message"
+            :label="$t('form.message')"
             required
           />
           <v-btn
@@ -66,7 +66,7 @@
             type="submit"
             :loading="loading"
           >
-            Send
+            {{ $t('btn.send') }}
           </v-btn>
         </v-form>
       </v-col>
@@ -93,7 +93,7 @@ export default defineComponent({
   middleware: 'authenticated',
   setup () {
     const { state, dispatch, getters } = useStore()
-    const { $config, $system, $notify } = useContext()
+    const { $config, $system, $notify, i18n } = useContext()
     const isLoggedIn = computed(() => getters['user/isLoggedIn'])
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
@@ -142,7 +142,7 @@ export default defineComponent({
         to_email: $config.contact.email,
         to_name: $config.contact.name
       }).then(() => {
-        $notify.show({ text: 'Successfully sent', color: 'success' })
+        $notify.show({ text: i18n.t('notify.success'), color: 'success' })
         form.value.message = null
       }).catch((e) => {
         $system.log({
@@ -150,7 +150,7 @@ export default defineComponent({
           msg: 'Form',
           val: e
         })
-        $notify.show({ text: 'Error sending', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       })
     }
 

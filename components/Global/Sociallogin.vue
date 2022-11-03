@@ -14,7 +14,7 @@ import {defineComponent, ref, useContext, useRouter} from '@nuxtjs/composition-a
 export default defineComponent({
   name: 'GlobalSocialLogin',
   setup() {
-    const { $notify, $fire, $fireModule, $system } = useContext()
+    const { $notify, $fire, $fireModule, $system, i18n } = useContext()
     const router = useRouter()
 
     // DEFINE CONTENT
@@ -31,7 +31,7 @@ export default defineComponent({
           msg: 'Login with Google',
           val: e
         })
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
     const appleSignIn = async () => {
@@ -43,7 +43,7 @@ export default defineComponent({
     const loginWithPopUp = async () => {
       await $fire.auth.signInWithPopup(provider.value).then(async () => {
         $fire.analytics.logEvent('login')
-        $notify.show({ text: 'Successfully logged in' })
+        $notify.show({ text: i18n.t('notify.success') })
         await router.push('/')
       }).catch((e) => {
         $system.log({
@@ -51,7 +51,7 @@ export default defineComponent({
           msg: 'Login with popup',
           val: e
         })
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       })
     }
 

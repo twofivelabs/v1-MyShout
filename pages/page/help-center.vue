@@ -10,7 +10,7 @@
       </v-app-bar-nav-icon>
       <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
-          <ElementH2 align="left" text="Help Center" />
+          <ElementH2 align="left" :text="$t('btn.help_center')" />
         </div>
       </v-toolbar-title>
       <v-spacer />
@@ -18,10 +18,7 @@
 
     <v-container class="mt-3 mb-12 mobileNotch px-3">
       <v-expansion-panels focusable>
-        <v-expansion-panel
-            v-for="(post,i) in posts"
-            :key="i"
-        >
+        <v-expansion-panel v-for="(post,i) in posts" :key="i">
           <v-expansion-panel-header>{{ post.title }}</v-expansion-panel-header>
           <v-expansion-panel-content>
             <div v-if="post.featured_image_url">
@@ -35,7 +32,7 @@
                    class="elevation-0"
                    primary
             >
-              {{ post.learn_more_label ? post.learn_more_label : 'Learn More' }}
+              {{ post.learn_more_label ? post.learn_more_label : $t('btn.learn_more') }}
             </v-btn>
           </v-expansion-panel-content>
         </v-expansion-panel>

@@ -4,7 +4,7 @@
     <v-text-field
         v-model="form.email"
         :rules="rules.email"
-        label="Email"
+        :label="$t('form.email')"
         prepend-inner-icon="mdi-email"
         :required="required"
         outlined background-color="#f8f9fa"
@@ -16,7 +16,7 @@
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         @click:append="showPassword = !showPassword"
         :type="showPassword ? 'text' : 'password'"
-        label="Password"
+        :label="$t('form.password')"
         prepend-inner-icon="mdi-lock"
         counter
         :required="required"
@@ -44,7 +44,7 @@
           <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
                           @click.native="swipe('Down')"
           />
-          <ElementH2 align="center" text="Please login again to verify your account" />
+          <ElementH2 align="center" :text="$t('verify_account')" />
 
           <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="" @response="emittedResponseFunc" />
           <FormsRegisterbyphonemobile v-else class="pt-6" goTo="" @response="emittedResponseFunc" />
@@ -83,7 +83,7 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const { $fire, $fireModule, $notify, $system, $capacitor } = useContext()
+    const { $fire, $fireModule, $notify, $system, $capacitor, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -136,7 +136,7 @@ export default defineComponent({
         const email = form.value.email.trim().toLowerCase()
         const credential = $fireModule.auth.EmailAuthProvider.credential(email, form.value.password)
         await $fire.auth.currentUser.linkWithCredential(credential).then(async () => {
-          $notify.show({ text: 'Success', color: 'green' })
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
 
           // Update Profile
           await dispatch('user/updateField', {
@@ -154,9 +154,9 @@ export default defineComponent({
         }).catch((e) => {
           console.log('STICKY: Error linking email with current user', e)
           if (e.code === 'auth/provider-already-linked') {
-            $notify.show({ text: 'Your account is already linked with an email', color: 'error' })
+            $notify.show({ text: i18n.t('already_verified'), color: 'error' })
           } else {
-            $notify.show({ text: 'Error, try again', color: 'error' })
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
           }
           $system.log({
             comp: 'FormsRegisterbyemail',
@@ -196,7 +196,7 @@ export default defineComponent({
       }
       // No input show error
       else {
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
 

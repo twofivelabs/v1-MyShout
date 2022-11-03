@@ -2,8 +2,8 @@
   <div>
     <v-text-field
         v-if="friends && friends.length > 0"
-        label="Search Friends..."
-        placeholder="Search Friends..."
+        :label="$t('form.search_friends')"
+        :placeholder="$t('form.search_friends')"
         append-icon="mdi-magnify"
         filled
         rounded
@@ -25,7 +25,7 @@
       </template>
     </v-list>
     <div v-else>
-      <ElementH4 v-if="!loading" align="center" class="my-5" text="You have no friends"/>
+      <ElementH4 v-if="!loading" align="center" class="my-5" :text="$t('chats.no_friends')"/>
     </div>
   </div>
 </template>

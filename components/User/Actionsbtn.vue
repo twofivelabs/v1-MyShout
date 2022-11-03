@@ -10,8 +10,8 @@
                           @click.native="swipe('Down')"
           />
 
-          <ElementH3 v-if="loading" align="center" text="Loading..." />
-          <ElementH3 align="center" text="Actions" />
+          <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
+          <ElementH3 align="center" :text="$t('actions')" />
 
           <v-list-item-group>
             <v-list-item v-if="!$route.fullPath.includes(user.id)" class="borderButton rounded-lg mb-2" :to="`/users/user/${user.id}`">
@@ -19,7 +19,7 @@
                 <v-icon>mdi-account</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title class="myshoutDarkGrey--text">View Profile</v-list-item-title>
+                <v-list-item-title class="myshoutDarkGrey--text">{{ $t('view_profile') }}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
             <UserActionsSendamessagebtn v-if="isFriend && (friendStatus === 'approved')" :user="user" />

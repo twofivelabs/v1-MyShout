@@ -2,7 +2,7 @@
   <div>
     <v-form ref="formEl" @submit.prevent="validate">
       <div class="d-flex align-center justify-space-between mb-12">
-        <ElementH3 align="left" text="Profile"/>
+        <ElementH3 align="left" :text="$t('profile')"/>
         <div>
           <v-btn
               :loading="loading"
@@ -10,9 +10,8 @@
               color="primary"
               elevation="0"
               type="submit"
-              @click="validate"
           >
-            Save
+            {{ $t('btn.save') }}
             <v-icon right>
               mdi-arrow-right
             </v-icon>
@@ -22,15 +21,15 @@
 
 <!--      <v-row>
         <v-col class="py-0 my-0" cols="12" sm="12">
-          <v-text-field v-model="form.username" :rules="rules.username" @keyup.native="validateUsername" outlined background-color="#f8f9fa" class="py-0 my-0" label="Username"/>
+          <v-text-field v-model="form.username" :rules="rules.username" @keyup.native="validateUsername" outlined background-color="#f8f9fa" class="py-0 my-0" :label="$t('form.username')"/>
         </v-col>
       </v-row>-->
       <v-row>
         <v-col class="py-0 my-0" cols="12" sm="6">
-          <v-text-field v-model="form.first_name" outlined background-color="#f8f9fa" class="py-0 my-0" label="First Name"/>
+          <v-text-field v-model="form.first_name" outlined background-color="#f8f9fa" class="py-0 my-0" :label="$t('form.first_name')"/>
         </v-col>
         <v-col class="py-0 my-0" cols="12" sm="6">
-          <v-text-field v-model="form.last_name" outlined background-color="#f8f9fa" class="py-0 my-0" label="Last Name"/>
+          <v-text-field v-model="form.last_name" outlined background-color="#f8f9fa" class="py-0 my-0" :label="$t('form.last_name')"/>
         </v-col>
       </v-row>
       <v-row v-if="form.location">
@@ -43,7 +42,7 @@
               class="py-0 my-0"
               background-color="#f8f9fa"
               outlined
-              label="Country"
+              :label="$t('form.country')"
               required
           />
         </v-col>
@@ -51,7 +50,7 @@
       <v-row v-if="form.location">
         <v-col class="py-0 my-0">
           <v-text-field v-model="form.location.city" class="py-0 my-0"
-                        label="Hometown"
+                        :label="$t('form.hometown')"
                         background-color="#f8f9fa"
                         outlined
           />
@@ -90,7 +89,7 @@ export default defineComponent({
     const {
       $system,
       $helper,
-      $notify,
+      $notify, i18n
       // $services,
     } = useContext()
     const user = computed(() => state.user.data)
@@ -369,7 +368,7 @@ export default defineComponent({
         limit: 3
       })
       if (hasUsers.length > 0) {
-        $notify.show({ text: 'Username invalid or is inuse by another user', color: 'error' })
+        $notify.show({ text: i18n.t('notify.username_in_use'), color: 'error' })
         return false
       }
       return hasUsers.length > 0;
@@ -406,7 +405,7 @@ export default defineComponent({
         limit: 3
       })
       if (hasUsers.length > 0) {
-        $notify.show({ text: 'Email invalid or is in use by another user', color: 'error' })
+        $notify.show({ text: i18n.t('notify.email_in_use'), color: 'error' })
         return false
       }
       return true
@@ -443,14 +442,14 @@ export default defineComponent({
         const response = await dispatch('user/update', form)
         if (response) {
           $notify.show({
-            text: 'Saved',
+            text: i18n.t('notify.success'),
             color: 'success'
           })
           // Reset original form upon save
           formOriginal = form
         } else {
           $notify.show({
-            text: 'Error',
+            text: i18n.t('notify.error_try_again'),
             color: 'red'
           })
         }
@@ -461,7 +460,7 @@ export default defineComponent({
           val: e
         })
         $notify.show({
-          text: 'Error, try again',
+          text: i18n.t('notify.error_try_again'),
           color: 'red'
         })
       } finally {

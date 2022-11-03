@@ -10,15 +10,15 @@
                           @click.native="swipe('Down')"
           />
 
-          <ElementH3 v-if="loading" align="center" text="Loading..." />
-          <ElementH1 align="center" text="New Chat" />
-          <ElementP text="Select friends you wish to chat with" />
+          <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
+          <ElementH1 align="center" :text="$t('chats.new_chat')" />
+          <ElementP :text="$t('chats.select_friends')" />
 
           <ChatViewsearchmembers @friendsSelected="friendsSelected"  />
 
           <v-app-bar color="rgba(0,0,0,0)" class="mb-16" flat bottom fixed style="top:90%; margin-bottom:20px">
             <div class="text-center" style="width: 100%">
-              <v-btn class="primary elevation-0" rounded large @click="startChat">Start Chat</v-btn>
+              <v-btn class="primary elevation-0" rounded large @click="startChat">{{ $t('chats.start_chat') }}</v-btn>
             </div>
           </v-app-bar>
         </div>
@@ -38,7 +38,7 @@ export default defineComponent({
   name: 'ChatNewchatbtn',
   directives: { Touch },
   setup() {
-    const { $system, $notify } = useContext()
+    const { $system, $notify, i18n } = useContext()
     const { dispatch, state } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -68,7 +68,7 @@ export default defineComponent({
     }
     const startChat = async () => {
       if (newChatFriends.value.length === 0) {
-        $notify.show({ text: 'Select a friend first', color: 'error' })
+        $notify.show({ text: i18n.t('chats.select_friend_first'), color: 'error' })
         return
       }
       try {

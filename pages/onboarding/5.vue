@@ -4,7 +4,7 @@
 
       <!-- TOP PORTION -->
       <div class="d-flex flex-column justify-space-around align-center" style=" width:100vw; height:23vh;">
-        <OnboardingCardheader class="gray--text mx-14" h1="Great! How about a profile photo?" />
+        <OnboardingCardheader class="gray--text mx-14" :h1="$t('onboarding.add_photo_heading')" />
       </div>
 
       <!-- WHITE CARD -->
@@ -16,7 +16,7 @@
                 delay:900
               }">
         <div class="text-center">
-          <h5 class="text-h5 text-center mb-6">Let others see who you are.</h5>
+          <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.add_photo_sub') }}</h5>
 
           <UserProfileavatar :user="profile" :size="120" class="mt-5 mx-auto" />
 

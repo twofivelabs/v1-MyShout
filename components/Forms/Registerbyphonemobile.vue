@@ -17,7 +17,7 @@
             class="text-center"
             type="submit"
         >
-          Send Code
+          {{ $t('btn.send_code') }}
         </v-btn>
       </div>
     </div>
@@ -28,8 +28,8 @@
       >
         <ElementH3 text="We sent you a SMS code" align="center" />
         <v-text-field
-            label="Code"
-            placeholder="Code"
+            :label="$t('form.code')"
+            :placeholder="$t('form.code')"
             class="mt-5 mx-8"
             outlined background-color="#f8f9fa"
             max=6
@@ -46,7 +46,7 @@
               type="submit"
               @click="registerWithOTPCode"
           >
-            Verify
+            {{ $t('btn.verify') }}
           </v-btn>
 
           <FormsRecoverbyemail />
@@ -89,7 +89,7 @@ export default defineComponent({
     },
   },
   setup (props, { emit }) {
-    const { $fireModule, $notify, $system, $ttlStorage } = useContext()
+    const { $fireModule, $notify, $system, $ttlStorage, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -130,7 +130,7 @@ export default defineComponent({
               form.value.showOtpInput = true
             },
             (e) => {
-              $notify.show({ text: 'Error registering phone number', color: 'error' })
+              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
               $system.log({
                 comp: 'FormsRegisterbyphonemobile',
                 msg: 'registerPhoneNumber > cfaSignInPhoneOnCodeSent',
@@ -153,7 +153,7 @@ export default defineComponent({
               })
             },)
       } catch (e) {
-        $notify.show({ text: 'Error registering phone number', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         if(e) {
           $system.log({
             comp: 'FormsRegisterbyphonemobile',
@@ -184,7 +184,7 @@ export default defineComponent({
 
           // If EXISTING user show logged in message
           if (!result.additionalUserInfo.isNewUser) {
-            $notify.show({ text: 'Successfully logged in', color: 'green' })
+            $notify.show({ text: i18n.t('notify.success'), color: 'green' })
             emit('response', { status: 'success', message: 'Successfully signed in', 'goTo': '/' })
 
             if (props.goTo) {
@@ -195,7 +195,7 @@ export default defineComponent({
 
           // If NEW user
           form.value.showOtpInput = false
-          $notify.show({ text: 'Successfully registered', color: 'green' })
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           emit('response', { status: 'success', message: 'Successfully registered', 'goTo': '/onboarding/2.1' })
           // Update Profile
           dispatch('user/updateField', {
@@ -208,7 +208,7 @@ export default defineComponent({
           msg: 'Error with phone code',
           val: e
         })
-        $notify.show({ text: 'Error with phone code', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         emit('response', { status: 'error', message: 'Error with phone code' })
       } finally {
         loading.value = false

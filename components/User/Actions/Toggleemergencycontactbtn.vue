@@ -9,31 +9,31 @@
           <v-icon :color="(friendship && friendship.isEmergency) ? 'myshoutRed' : 'myshoutGreen'">mdi-alert</v-icon>
         </v-list-item-icon>
         <v-list-item-content :style="`color: ${(friendship && friendship.isEmergency) ? 'var(--v-myshoutRed-base)' : 'var(--v-myshoutGreen-base)'};`">
-          <v-list-item-title v-if="friendship && friendship.isEmergency">Remove as emergency contact</v-list-item-title>
-          <v-list-item-title v-else>Add as emergency contact</v-list-item-title>
+          <v-list-item-title v-if="friendship && friendship.isEmergency">{{ $t('remove_as_emergency_contact') }}</v-list-item-title>
+          <v-list-item-title v-else>{{ $t('add_as_emergency_contact') }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </template>
 
     <v-card class="rounded-xl pa-8">
-      <ElementH1 v-if="friendship && friendship.isEmergency" text="Remove as an emergency contact" />
-      <ElementH1 v-else text="Add as an emergency contact" />
-      <ElementP v-if="friendship && friendship.isEmergency" text="They will no longer receive alerts when you are in trouble." />
-      <ElementP v-else text="They will receive alerts when you are in trouble." />
+      <ElementH1 v-if="friendship && friendship.isEmergency" :text="$t('remove_as_emergency_contact')" />
+      <ElementH1 v-else :text="$t('add_as_emergency_contact')" />
+      <ElementP v-if="friendship && friendship.isEmergency" :text="$t('no_longer_receive_alerts')" />
+      <ElementP v-else :text="$t('yes_longer_receive_alerts')" />
 
       <v-card-actions class="justify-center">
         <v-btn
             text
             @click="dialog = false"
         >
-          Cancel
+          {{ $t('btn.cancel') }}
         </v-btn>
         <v-btn
             color="primary"
             class="elevation-0"
             @click="toggleEmergencyContact"
         >
-          Confirm
+          {{ $t('btn.confirm') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -61,7 +61,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { $notify, $system } = useContext()
+    const { $notify, $system, i18n } = useContext()
     const { dispatch } = useStore()
     const loading = ref(false)
     const dialog = ref(false)
@@ -97,9 +97,9 @@ export default defineComponent({
       })
       if(res) {
         dialog.value = false
-        $notify.show({ text: 'Success', color: 'success' })
+        $notify.show({ text: i18n.t('notify.success'), color: 'success' })
       } else {
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         $system.log({
           comp: 'UserActionsToggleemergencycontactbtn',
           msg: 'toggleEmergencyContact',

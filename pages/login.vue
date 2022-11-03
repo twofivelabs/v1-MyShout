@@ -5,14 +5,13 @@
       <v-col cols="12" md="5" :order="`${$vuetify.breakpoint.mdAndUp ? '' : 'last' }`">
         <div class="mt-8">
           <p>
-            Don't have an account?
             <nuxt-link to="/onboarding/">
-              Register
+              {{ $t('btn.register_no_account') }}
             </nuxt-link>
           </p>
           <p>
             <nuxt-link to="/forgot-password">
-              Forgot Password?
+              {{ $t('btn.forgot_password') }}
             </nuxt-link>
           </p>
         </div>
@@ -42,7 +41,7 @@ import formRules from '~/classes/formRules'
 export default defineComponent({
   name: 'LoginPage',
   setup () {
-    const { $config, $notify, $fire, $system } = useContext()
+    const { $config, $notify, $fire, $system, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
@@ -69,7 +68,7 @@ export default defineComponent({
         try {
           await $fire.auth.signInWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
           $fire.analytics.logEvent('login')
-          $notify.show({ text: 'Successfully logged in', color: 'green' })
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           await router.push('/')
         } catch (e) {
           $system.log({
@@ -77,10 +76,10 @@ export default defineComponent({
             msg: 'Trying to login',
             val: e
           })
-          $notify.show({ text: 'Error, try again', color: 'error' })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } else {
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
 

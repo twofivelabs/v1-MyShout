@@ -14,12 +14,12 @@
               v-model="form.title"
               :disabled="readonly"
               :readonly="readonly"
-              label="Title"
+              :label="$t('form.title')"
               required
           />
           <v-textarea
               v-model="form.content"
-              label="Content"
+              :label="$t('form.content')"
               required
           />
         </v-col>
@@ -37,14 +37,14 @@
           </v-sheet>
 
           <div v-if="form.title">
-            Featured Image
+            {{ $t('form.featured_image') }}
             <AdminUploadimage :initial="[form.featured_image_url]" :multiple="false"
                               :storage="`Pages/${form.title}`"
                               @urls="emittedFeaturedImage"
             />
             <v-checkbox
                 v-model="form.isMarkdown"
-                label="Is content using markdown?"
+                :label="$t('form.using_markdown')"
             />
           </div>
         </v-col>
@@ -59,7 +59,7 @@
               elevation="0"
               @click="validate"
           >
-            Save
+            {{ $t('btn.save') }}
           </v-btn>
           <span v-if="$route.params.id">
           <v-btn
@@ -69,7 +69,7 @@
               elevation="0"
               @click="remove"
           >
-            Delete
+            {{ $t('btn.delete') }}
           </v-btn>
         </span>
         </v-col>
@@ -107,7 +107,7 @@ export default defineComponent({
     const {
       $helper,
       $notify,
-      $system
+      $system, i18n
     } = useContext()
     const router = useRouter()
     const route = useRoute()
@@ -166,11 +166,11 @@ export default defineComponent({
         try {
           loading.value = true
           await dispatch('pages/add', form.value)
-          $notify.show({ text: 'Success' })
+          $notify.show({ text: i18n.t('notify.success') })
           router.push('/admin/pages')
         } catch {
           $notify.show({
-            text: 'Error, try again',
+            text: i18n.t('notify.error_try_again'),
             color: 'error'
           })
         } finally {
@@ -178,7 +178,7 @@ export default defineComponent({
         }
       } else {
         $notify.show({
-          text: 'Error, title was not found',
+          text: i18n.t('notify.error_try_again'),
           color: 'error'
         })
       }
@@ -186,11 +186,11 @@ export default defineComponent({
     const remove = async () => {
       const response = await dispatch('pages/remove', form.value.slug)
       if (response) {
-        $notify.show({ text: 'Success' })
+        $notify.show({ text: i18n.t('notify.success') })
         router.push('/admin/pages')
       } else {
         $notify.show({
-          text: 'Error, try again 0',
+          text: i18n.t('notify.error_try_again'),
           color: 'error'
         })
       }

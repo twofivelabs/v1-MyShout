@@ -7,8 +7,8 @@
           <v-icon v-else color="white">mdi-bell</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title>Notifications</v-list-item-title>
-          <v-list-item-subtitle>Stay up-to-date</v-list-item-subtitle>
+          <v-list-item-title>{{ $t('notifications.heading') }}</v-list-item-title>
+          <v-list-item-subtitle>{{ $t('notifications.sub_heading') }}</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
     </slot>
@@ -19,8 +19,8 @@
                           @click.native="swipe('Down')"
           />
 
-          <ElementH3 v-if="loading" align="center" text="Loading..." />
-          <ElementH3 align="center" text="Notifications" />
+          <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
+          <ElementH3 align="center" :text="$t('notifications.heading')" />
 
           <UserNotifications @action="emittedNotificationAction" />
 

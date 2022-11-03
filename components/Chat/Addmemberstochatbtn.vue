@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-btn class="justify-center primary elevation-0" @click="newChat">
-      Add Member
+      {{ $t('chats.add_member') }}
     </v-btn>
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="80vh" class="rounded-t-xl pb-14">
@@ -10,15 +10,17 @@
                           @click.native="swipe('Down')"
           />
 
-          <ElementH3 v-if="loading" align="center" text="Loading..." />
-          <ElementH1 align="center" text="Add Member" />
-          <ElementP text="Select friends you wish to add" />
+          <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
+          <ElementH1 align="center" :text="$t('chats.add_member')" />
+          <ElementP :text="$t('chats.select_friends')" />
 
           <ChatViewsearchmembers @friendsSelected="friendsSelected"  />
 
           <v-app-bar color="rgba(0,0,0,0)" class="mb-16" flat bottom fixed style="top:90%; margin-bottom:20px">
             <div class="text-center" style="width: 100%">
-              <v-btn class="primary elevation-0" rounded large @click="startChat">Add</v-btn>
+              <v-btn class="primary elevation-0" rounded large @click="startChat">
+                {{ $t('btn.add') }}
+              </v-btn>
             </div>
           </v-app-bar>
         </div>
@@ -51,7 +53,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { $system, $notify } = useContext()
+    const { $system, $notify, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -81,7 +83,7 @@ export default defineComponent({
     }
     const startChat = async () => {
       if (newChatFriends.value.length === 0) {
-        $notify.show({ text: 'Select a friend first', color: 'error' })
+        $notify.show({ text: i18n.t('chats.select_friend_first'), color: 'error' })
         return
       }
       try {
@@ -92,7 +94,7 @@ export default defineComponent({
           if (room !== false) {
             // await router.push(`/chats/chat/${props.chat.id}`)
             await router.push(`/chats/chat/${props.chat.id}`)
-            $notify.show({ text: 'Successfully Added', color: 'success' })
+            $notify.show({ text: i18n.t('notify.success'), color: 'success' })
           }
         })
       } catch(e) {

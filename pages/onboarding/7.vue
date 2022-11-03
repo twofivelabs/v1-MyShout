@@ -4,7 +4,7 @@
 
       <!-- TOP PORTION -->
       <div class="d-flex flex-column justify-space-around align-center" style=" width:100vw; height:23vh;">
-        <OnboardingCardheader class="gray--text mx-14" prependIcon="mdi-bell-ring" h1="Notifications" />
+        <OnboardingCardheader class="gray--text mx-14" prependIcon="mdi-bell-ring" :h1="$t('onboarding.enable_notification_permissions_heading')" />
       </div>
 
       <!-- WHITE CARD -->
@@ -16,7 +16,9 @@
                 delay:900
               }">
         <div class="text-center">
-          <h5 class="text-h5 text-center mb-6">Notifications may include alerts, sounds and icon badges. These can be configured in settings.</h5>
+          <h5 class="text-h5 text-center mb-6">
+            {{ $t('onboarding.enable_notification_permissions') }}
+          </h5>
 
           <v-icon
               v-if="hasPermission"

@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-form ref="formEl" @submit.prevent="validate" class="rounded-lg pa-3" style="border:2px solid #ddd;">
-      <ElementH4 text="Change Email Address" align="left" class="mb-4" />
+      <ElementH4 :text="$t('heading.change_email_address')" align="left" class="mb-4" />
       <v-text-field
           v-model="form.email"
           :rules="rules.email"
@@ -9,10 +9,10 @@
           outlined
           background-color="#f8f9fa"
           class="py-0 my-0"
-          label="Email"
+          :label="$t('form.email')"
       />
       <div v-if="showSaveButton">
-        <span class="caption">To change your email, please provide your password.</span>
+        <span class="caption">{{ $t('heading.change_email_address_caption') }}</span>
         <v-text-field
             v-model="form.password"
             :rules="rules.password"
@@ -20,7 +20,7 @@
             :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="showPassword = !showPassword"
             :type="showPassword ? 'text' : 'password'"
-            label="Password"
+            :label="$t('form.password')"
             prepend-inner-icon="mdi-lock"
             counter
             required
@@ -34,7 +34,7 @@
             elevation="0"
             type="submit"
         >
-          Save
+          {{ $t('btn.save') }}
           <v-icon right>
             mdi-arrow-right
           </v-icon>
@@ -57,7 +57,7 @@ import lodash from 'lodash'
 export default defineComponent({
   name: 'UserChangeemail',
   setup () {
-    const { $notify, $system, $fire } = useContext()
+    const { $notify, $system, $fire, i18n } = useContext()
     const { state, dispatch } = useStore()
     const loading = ref(false)
     const user = computed(() => state.user.data)
@@ -86,7 +86,7 @@ export default defineComponent({
         limit: 3
       })
       if (hasUsers.length > 0) {
-        $notify.show({ text: 'Email invalid or is in use by another user', color: 'error' })
+        $notify.show({ text: i18n.t('notify.email_in_use'), color: 'error' })
         return false
       }
       return true
@@ -122,13 +122,13 @@ export default defineComponent({
               email: form.email
             })
             $notify.show({
-              text: 'Saved',
+              text: i18n.t('notify.success'),
               color: 'success'
             })
           }).catch((e) => {
             console.log('Error updating authentication', e)
             $notify.show({
-              text: 'Error updating authentication',
+              text: i18n.t('notify.error_try_again'),
               color: 'red'
             })
           })
@@ -136,7 +136,7 @@ export default defineComponent({
         }).catch((e) => {
           console.log('Error signing in', e)
           $notify.show({
-            text: 'Error, Not able to sign in',
+            text: i18n.t('notify.error_try_again'),
             color: 'red'
           })
         })
@@ -148,7 +148,7 @@ export default defineComponent({
           val: e
         })
         $notify.show({
-          text: 'Error, try again',
+          text: i18n.t('notify.error_try_again'),
           color: 'red'
         })
       } finally {

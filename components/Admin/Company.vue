@@ -9,7 +9,7 @@
         flat
         item-text="id"
         item-value="id"
-        label="Company"
+        :label="$t('form.company')"
         outlined
         prepend-icon="mdi-domain"
         solo

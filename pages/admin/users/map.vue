@@ -2,7 +2,7 @@
   <div class="pt-10">
     <AdminTitle class="mx-4"/>
 
-    <v-btn to="/admin/users" class="mb-2 mx-2 elevation-0 primary white--text">View on list</v-btn>
+    <v-btn to="/admin/users" class="mb-2 mx-2 elevation-0 primary white--text">{{ $t('view_on_list') }}</v-btn>
 
     <div id="map" ref="googleMapEl" style="width:calc(100vw); height:calc(100vh - 275px);"/>
   </div>

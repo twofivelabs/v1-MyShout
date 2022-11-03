@@ -6,7 +6,7 @@
         class="mr-1 elevation-0"
         color="secondary"
     >
-      + Add
+      + {{ $t('btn.content') }}
     </v-btn>
     <v-menu offset-y>
       <template #activator="{ on, attrs }">
@@ -17,7 +17,7 @@
             v-bind="attrs"
             v-on="on"
         >
-          Content
+          {{ $t('btn.add') }}
         </v-btn>
       </template>
       <v-list>

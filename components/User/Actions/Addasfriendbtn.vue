@@ -9,19 +9,19 @@
           <v-icon>mdi-account-multiple-plus</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title>Add friend</v-list-item-title>
+          <v-list-item-title>{{ $t('chats.add_friend') }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </template>
 
     <v-card class="rounded-xl pa-8">
-      <ElementH1 text="Add friend" />
-      <ElementP text="Enter in your friend's PIN" />
+      <ElementH1 :text="$t('chats.add_friend')" />
+      <ElementP :text="$t('chats.enter_pin')" />
 
       <v-text-field
           v-model="pin"
           type="text"
-          label="PIN"
+          :label="$t('form.pin')"
           autocomplete="off"
           required
       />
@@ -31,14 +31,14 @@
             text
             @click="dialog = false"
         >
-          Cancel
+          {{ $t('btn.cancel') }}
         </v-btn>
         <v-btn
             color="primary"
             class="elevation-0"
             @click="addFriendship"
         >
-          Add Friend
+          {{ $t('chats.add_friend') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -69,7 +69,7 @@ export default defineComponent({
     'isFriend'
   ],
   setup(props, { emit }) {
-    const { $notify } = useContext()
+    const { $notify, i18n } = useContext()
     const { dispatch, state } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -97,7 +97,7 @@ export default defineComponent({
 
       // Error handling
       if (!foundUser) {
-        $notify.show({ text: 'This PIN does not match', color: 'error' })
+        $notify.show({ text: i18n.t('notify.pin_no_match'), color: 'error' })
         return
       }
       // Does user be found match the props' user?
@@ -113,10 +113,11 @@ export default defineComponent({
       if(res) {
         // Create notification for friended user
         console.log('Add notification to: ', props.user.id)
+
         await dispatch('user/notifications/add', {
           uid: props.user.id,
-          title: 'New Friend Request',
-          body: `@${profile.value.username} requested to be your friend.`,
+          title: i18n.t('new_friend_request'),
+          body: `@${profile.value.username} ${i18n.t('requested_to_be_your_friend')}`,
           type: 'friendRequest',
           meta: {
             requestedBy: profile.value.id
@@ -126,11 +127,11 @@ export default defineComponent({
         // Finish up`
         dialog.value = false
         await router.push('/profile')
-        $notify.show({ text: 'Success', color: 'success' })
+        $notify.show({ text: i18n.t('notify.success'), color: 'success' })
         emit('isFriend', true)
 
       } else {
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
 

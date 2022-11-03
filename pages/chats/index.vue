@@ -3,7 +3,7 @@
     <v-app-bar color="transparent" class="mobileNotch elevation-0 appBarHeight" app fixed top>
       <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
-          <ElementH2 align="left" text="Your Chats" />
+          <ElementH2 align="left" :text="$t('chats.page_h1')" />
         </div>
       </v-toolbar-title>
       <v-spacer />
@@ -21,7 +21,7 @@
       </v-row>
       <template v-if="chatList && chatList.length === 0">
         <div class="text-center pa-10 grey--text">
-          No chats to display
+          {{ $t('chats.no_chats') }}
         </div>
       </template>
       <v-list two-line class="pb-9">

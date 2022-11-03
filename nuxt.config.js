@@ -145,6 +145,7 @@ const config = {
     '~/plugins/lodash',
     '~/plugins/services',
     '~/plugins/encryption',
+    '~/plugins/language',
      {
        src: '~/plugins/animation',
        mode: 'client'
@@ -183,7 +184,8 @@ const config = {
     '@nuxtjs/auth',
     '@nuxtjs/universal-storage',
     'vuejs-google-maps/nuxt',
-    '@nuxtjs/markdownit'
+    '@nuxtjs/markdownit',
+    '@nuxtjs/i18n'
     //'@nuxt/image',
     // 'nuxt-stripejs',
     // 'nuxt-leaflet'
@@ -196,6 +198,27 @@ const config = {
   stripe: {
     publishableKey: ''
   },
+
+    // http://www.lingoes.net/en/translator/langcode.htm
+    i18n: {
+        lazy: true,
+        langDir: 'langDir',
+        skipSettingLocaleOnNavigate: true,
+        locales: [
+            { code: 'en', iso: 'en-US', file: 'en.js', dir: 'ltr', name: 'English', local: 'English' },
+            { code: 'es', iso: 'es-ES', file: 'es.js', name: 'Spanish', local: 'Español' },
+            { code: 'fr', iso: 'fr', file: 'fr.js', name: 'French', local: 'Français' }
+        ],
+        defaultLocale: 'en',
+        detectBrowserLanguage: {
+            useCookie: true,
+            cookieKey: 'i18n_redirected',
+            redirectOn: 'root'
+        },
+        vueI18n: {
+            fallbackLocale: 'en'
+        }
+    },
 
   markdownit: {
     runtime: true

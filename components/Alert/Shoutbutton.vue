@@ -27,7 +27,7 @@
       {{  buttonText }}
     </v-btn>
     <div class="text-center gray--text caption mt-n4">
-      Hold To Send A 5 Second Audio Record
+      {{ $t('hold_for') }}
     </div>
     <v-dialog
         v-model="dialog"
@@ -35,7 +35,7 @@
     >
       <v-card class="rounded-xl pa-8">
         <IconsShout class="mb-7" />
-        <ElementH1 text="Your Shout alert has been sent" />
+        <ElementH1 :text="$t('your_shout_alert')" />
         <div v-if="loading">
           <v-skeleton-loader
               type="actions"
@@ -49,7 +49,7 @@
                 text
                 @click="dialog = false"
             >
-              Close
+              {{ $t('btn.close') }}
             </v-btn>
           </v-card-actions>
         </div>
@@ -77,7 +77,7 @@ export default defineComponent({
       $system,
       $notify,
       $db,
-      $capacitor } = useContext()
+      $capacitor, i18n } = useContext()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
@@ -116,22 +116,22 @@ export default defineComponent({
           msg: 'Trying to send alert',
           val: e
         })
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       } finally {
         loading.value = false
-        buttonText.value = 'Shout Alert'
+        buttonText.value = i18n.t('shout_alert')
       }
     }
     const startRecording = async () => {
       console.log('STICKY: START RECORDING')
-      buttonText.value = 'Recording... 5 sec.'
+      buttonText.value = `${i18n.t('recording')}... 5`
 
       await $capacitor.microphoneStart()
 
       // 5 second count down timer
       timerInterval.value = setInterval(function() {
         timerCount.value--;
-        buttonText.value = `Recording... ${timerCount.value} sec.`
+        buttonText.value = `${i18n.t('recording')}... ${timerCount.value}`
         if (timerCount.value === 0) {
           stopRecording()
         }
@@ -141,7 +141,7 @@ export default defineComponent({
       console.log('STICKY: STOP RECORDING', timerInterval.value)
       clearInterval(timerInterval.value)
       timerCount.value = 5
-      buttonText.value = 'Shout Alert'
+      buttonText.value = i18n.t('shout_alert')
 
       // Try and stop recorder
       try {
@@ -157,7 +157,7 @@ export default defineComponent({
           //  Open dialog
           await openDialog()
         } else {
-          $notify.show({ text: 'No audio', color: 'error' })
+          $notify.show({ text: i18n.t('notify.no_audio'), color: 'error' })
         }
       } catch (e) {
         // ...

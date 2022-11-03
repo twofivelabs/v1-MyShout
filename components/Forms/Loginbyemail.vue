@@ -3,7 +3,7 @@
     <v-text-field
         v-model="form.email"
         :rules="rules.email"
-        label="Email"
+        :label="$t('form.email')"
         required
         prepend-inner-icon="mdi-email"
         outlined
@@ -17,7 +17,7 @@
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         @click:append="showPassword = !showPassword"
         :type="showPassword ? 'text' : 'password'"
-        label="Password"
+        :label="$t('form.password')"
         required
         prepend-inner-icon="mdi-lock"
         counter
@@ -33,7 +33,7 @@
         class="text-center"
         type="submit"
     >
-      Login
+      {{ $t('btn.login') }}
     </v-btn>
   </div>
   </v-form>
@@ -102,10 +102,10 @@ export default defineComponent({
             msg: 'Error trying to register',
             val: e
           })
-          $notify.show({ text: 'Error, try again', color: 'error' })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } else {
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
 

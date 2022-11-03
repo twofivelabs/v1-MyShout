@@ -23,16 +23,20 @@
       </v-row>
       <v-row>
         <v-col>
-          <v-btn small color="secondary" class="elevation-0 mb-2" :to="`/admin/users/edit/${form.id}`">Edit</v-btn>
+          <v-btn small color="secondary" class="elevation-0 mb-2" :to="`/admin/users/edit/${form.id}`">
+            {{ $t('btn.edit') }}
+          </v-btn>
         </v-col>
         <v-col class="text-right">
-          <v-btn v-if="form.role.isActive" small @click="sendPasswordReset" color="secondary" class="elevation-0 mb-2">Send Password Reset</v-btn>
-          <v-btn small @click="toggleActivation" :color="(form.role.isActive) ? 'secondary' : 'primary'" class="mb-2 elevation-0">{{ (form.role.isActive) ? 'Deactivate' : 'Re-Activate' }}</v-btn>
+          <v-btn v-if="form.role.isActive" small @click="sendPasswordReset" color="secondary" class="elevation-0 mb-2">
+            {{ $t('btn.send_password_reset') }}
+          </v-btn>
+          <v-btn small @click="toggleActivation" :color="(form.role.isActive) ? 'secondary' : 'primary'" class="mb-2 elevation-0">{{ (form.role.isActive) ? $t('btn.deactivate') : $t('btn.reactivate') }}</v-btn>
         </v-col>
       </v-row>
       <v-row class="mt-7 mx-1">
         <v-col class="elevation-6 white">
-          <h3>GPS</h3>
+          <h3>{{ $t('gps.gps') }}</h3>
           <h5>{{ form.gps.city }}</h5>
           <div v-if="form.gps && form.gps.lat && form.gps.lng">
             {{ form.gps.lat }}, {{ form.gps.lng }}
@@ -45,7 +49,7 @@
         <v-col>
           <ElementH4 text="User Alerts" align="left" class="mb-4" />
           <div v-if="!alerts">
-            You have no alerts currently.
+            {{ $t('you_have_no_alerts') }}
           </div>
           <div v-if="alerts">
             <template v-for="(alert, key) in alerts">
@@ -85,7 +89,7 @@ export default defineComponent({
       dispatch
     } = useStore()
     const {
-      $system, $fire, $notify
+      $system, $fire, $notify, i18n
     } = useContext()
     const router = useRouter()
     const route = useRoute()
@@ -163,7 +167,7 @@ export default defineComponent({
       if(form.value.email) {
         await $fire.auth.sendPasswordResetEmail(form.value.email)
       } else {
-        $notify.show({ text: 'No user email to reset to', color: 'red' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
       }
     }
     const toggleActivation = async () => {

@@ -4,7 +4,7 @@
 
       <!-- TOP PORTION -->
       <div class="d-flex flex-column justify-space-around align-center" style=" width:100vw; height:23vh;">
-        <OnboardingCardheader class="gray--text mx-14" prependIcon="mdi-google-maps" h1="Your Location" />
+        <OnboardingCardheader class="gray--text mx-14" prependIcon="mdi-google-maps" :h1="$t('onboarding.enable_location_permissions_heading')" />
       </div>
 
       <!-- WHITE CARD -->
@@ -16,7 +16,9 @@
                 delay:900
               }">
         <div class="text-center">
-          <h5 class="text-h5 text-center mb-6">Please enable location access so we can share your location in case of emergencies.</h5>
+          <h5 class="text-h5 text-center mb-6">
+            {{ $t('onboarding.enable_location_permissions_sub') }}
+          </h5>
 
           <v-icon
               v-if="hasPermission"

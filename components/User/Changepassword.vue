@@ -1,9 +1,9 @@
 <template>
   <div>
     <v-form ref="formEl" @submit.prevent="validate" class="rounded-lg pa-3" style="border:2px solid #ddd;">
-      <ElementH4 text="Change Password" align="left" class="mb-4" />
-      <v-text-field v-model="form.email" :rules="rules.email" prepend-inner-icon="mdi-email" outlined background-color="#f8f9fa" class="py-0 my-0" label="Email"/>
-        <span class="caption">To change your password, please provide your current password.</span>
+      <ElementH4 :text="$t('heading.change_password')" align="left" class="mb-4" />
+      <v-text-field v-model="form.email" :rules="rules.email" prepend-inner-icon="mdi-email" outlined background-color="#f8f9fa" class="py-0 my-0" :label="$t('form.email')" />
+        <span class="caption">{{ $t('heading.change_password_caption') }}</span>
         <v-text-field
             v-model="form.password"
             :rules="rules.password"
@@ -11,7 +11,7 @@
             :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="showPassword = !showPassword"
             :type="showPassword ? 'text' : 'password'"
-            label="Current Password"
+            :label="$t('form.current_password')"
             prepend-inner-icon="mdi-lock"
             counter
             required
@@ -25,7 +25,7 @@
           :append-icon="showNewPassword ? 'mdi-eye' : 'mdi-eye-off'"
           @click:append="showNewPassword = !showNewPassword"
           :type="showNewPassword ? 'text' : 'password'"
-          label="New Password"
+          :label="$t('form.new_password')"
           prepend-inner-icon="mdi-lock"
           counter
           required
@@ -39,7 +39,7 @@
             elevation="0"
             type="submit"
         >
-          Save
+          {{ $t('btn.save') }}
           <v-icon right>
             mdi-arrow-right
           </v-icon>
@@ -61,7 +61,7 @@ import lodash from 'lodash'
 export default defineComponent({
   name: 'UserChangepassword',
   setup () {
-    const { $notify, $system, $fire } = useContext()
+    const { $notify, $system, $fire, i18n } = useContext()
     const { state, dispatch } = useStore()
     const loading = ref(false)
     const user = computed(() => state.user.data)
@@ -91,7 +91,7 @@ export default defineComponent({
         limit: 3
       })
       if (hasUsers.length > 0) {
-        $notify.show({ text: 'Email invalid or is in use by another user', color: 'error' })
+        $notify.show({ text: i18n.t('notify.email_in_use'), color: 'error' })
         return false
       }
       return true
@@ -123,13 +123,13 @@ export default defineComponent({
           // Update Firebase Auth
           $fire.auth.currentUser.updatePassword(form.newPassword).then(async () => {
             $notify.show({
-              text: 'Saved',
+              text: i18n.t('notify.success'),
               color: 'success'
             })
           }).catch((e) => {
             console.log('Error updating authentication', e)
             $notify.show({
-              text: 'Error updating authentication',
+              text: i18n.t('notify.error_try_again'),
               color: 'red'
             })
           })
@@ -137,7 +137,7 @@ export default defineComponent({
         }).catch((e) => {
           console.log('Error signing in', e)
           $notify.show({
-            text: 'Error, Not able to sign in',
+            text: i18n.t('notify.error_try_again'),
             color: 'red'
           })
         })
@@ -149,7 +149,7 @@ export default defineComponent({
           val: e
         })
         $notify.show({
-          text: 'Error, try again',
+          text: i18n.t('notify.error_try_again'),
           color: 'red'
         })
       } finally {

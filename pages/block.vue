@@ -9,8 +9,7 @@
                         duration: 1200
                      }"
     />
-    <ElementH1 text="Uh oh!" class="mt-10" />
-    <ElementH2 text="Looks like you are not supposed to be here." />
+    <ElementH2 :text="$t('not_supposed_to_be_here')" />
   </v-container>
 </template>
 <script>

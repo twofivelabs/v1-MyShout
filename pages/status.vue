@@ -1,12 +1,10 @@
 <template>
   <v-container class="pa-8 mt-12">
     <div v-if="user.role.isActive === true">
-      <ElementH1 text="Great!" align="left" />
-      <ElementH2 :text="`You have access, try again.`" align="left" />
+      <ElementH1 :text="$t('yes_status')" align="left" />
     </div>
     <div v-else>
-      <ElementH1 text="Uh-Oh" align="left" />
-      <ElementH2 :text="`You cannot access that, your status is not active.`" align="left" />
+      <ElementH2 :text="$t('permission.no_status')" align="left" />
     </div>
   </v-container>
 </template>
@@ -18,7 +16,6 @@ import {
   useContext,
   ref, computed, useStore
 } from '@nuxtjs/composition-api'
-
 
 export default defineComponent({
   name: 'StatusPage',

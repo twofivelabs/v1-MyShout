@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ElementH4 v-if="!loading && !canViewAlerts" align="center" class="my-5" text="You must be their emergency contact to view alerts"/>
+    <ElementH4 v-if="!loading && !canViewAlerts" align="center" class="my-5" :text="$t('must_be_emergency_contact')"/>
     <div v-else>
       <v-list v-if="alerts && alerts.length > 0" color="transparent" rounded>
         <v-list-item-group>
@@ -10,7 +10,7 @@
         </v-list-item-group>
       </v-list>
       <div v-else>
-        <ElementH4 v-if="!loading" align="center" class="my-5" text="You have no alerts"/>
+        <ElementH4 v-if="!loading" align="center" class="my-5" :text="$t('you_have_no_alerts')"/>
       </div>
     </div>
   </div>
@@ -76,7 +76,7 @@ export default defineComponent({
         } else if(!canViewAlerts.value) {
           return
         }
-        
+
         await dispatch('user/alerts/getAll', props.user.id).then((res) => {
           if (res !== false) {
             alerts.value = res

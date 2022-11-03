@@ -43,7 +43,7 @@
             @click:append-outer="sendMessage"
             append-outer-icon="mdi-send"
             clear-icon="mdi-close-circle"
-            label="Message"
+            :label="$t('form.message')"
             type="text"
             clearable
             solo
@@ -122,7 +122,7 @@ export default defineComponent({
       $db,
       $capacitor,
       $encryption,
-      $system,
+      $system, i18n,
       error
     } = useContext()
     const {
@@ -216,7 +216,7 @@ export default defineComponent({
       try {
         if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
           $notify.show({
-            text: 'Please input text',
+            text: i18n.t('notify.error_try_again'),
             color: 'error'
           })
           return
@@ -268,7 +268,7 @@ export default defineComponent({
         await goToBottom(0)
       } catch (e) {
         $notify.show({
-          text: 'Error, try again',
+          text: i18n.t('notify.error_try_again'),
           color: 'error'
         })
       }

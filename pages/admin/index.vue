@@ -4,16 +4,16 @@
 
     <!-- ALERTS -->
     <div v-if="!alerts">
-      You have no alerts currently.
+      {{ $t('you_have_no_alerts') }}
       <v-btn @click="$nuxt.refresh()" class="elevation-0">
-        <v-icon>mdi-refresh</v-icon> Try Refresh Data
+        <v-icon>mdi-refresh</v-icon> {{ $t('you_have_no_alerts') }}
       </v-btn>
     </div>
     <div v-if="alerts">
       <v-select
           :items="['ALL', 'accident', 'kidnapping', 'robbery', 'shout']"
           @change="changeFilter"
-          label="Filter By"
+          :label="$t('form.filter_by')"
           outlined
       />
       {{ filterText }}
@@ -25,10 +25,10 @@
       <div v-if="showPagination" class="d-flex align-center justify-space-between">
         <v-btn @click="goDirection('previous')" text>
           <v-icon>mdi-arrow-left</v-icon>
-          Previous
+          {{ $t('previous') }}
         </v-btn>
         <v-btn @click="goDirection('next')" text>
-          Next
+          {{ $t('next') }}
           <v-icon>mdi-arrow-right</v-icon>
         </v-btn>
       </div>

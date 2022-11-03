@@ -6,7 +6,7 @@
   >
     <template v-slot:activator="{ on, attrs }">
       <div v-bind="attrs" v-on="on" class="mt-9 text-center grey--text caption lighten-1">
-        Can't receive code?<br>Sign in through email.
+        {{ $t('heading.cant_receive_sms_code') }}
       </div>
     </template>
 
@@ -15,7 +15,7 @@
         <v-text-field
             v-model="form.email"
             :rules="rules.email"
-            label="Email"
+            :label="$t('form.email')"
             autocomplete="off"
             counter
             prepend-inner-icon="mdi-email"
@@ -25,7 +25,7 @@
         <v-text-field
             v-model="form.password"
             :rules="rules.password"
-            label="Password"
+            :label="$t('form.password')"
             autocomplete="off"
             :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="showPassword = !showPassword"
@@ -45,7 +45,7 @@
               class="text-center"
               type="submit"
           >
-            Login
+            {{ $t('btn.login') }}
           </v-btn>
         </div>
       </v-form>
@@ -116,10 +116,10 @@ export default defineComponent({
             msg: 'Error trying to register',
             val: e
           })
-          $notify.show({ text: 'Error, try again', color: 'error' })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } else {
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
 

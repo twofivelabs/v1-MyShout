@@ -9,27 +9,27 @@
           <v-icon >mdi-account-check</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title>Request safe check-in</v-list-item-title>
+          <v-list-item-title>{{ $t('request_safe_check_in') }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </template>
 
     <v-card class="rounded-xl pa-8">
-      <ElementH1 text="Request safe check-in" />
-      <ElementP text="We will send an alert to confirm they are safe." />
+      <ElementH1 :text="$t('request_safe_check_in')" />
+      <ElementP :text="$t('confirm_they_are_safe')" />
       <v-card-actions class="justify-center">
         <v-btn
             text
             @click="dialog = false"
         >
-          Cancel
+          {{ $t('btn.cancel') }}
         </v-btn>
         <v-btn
             color="primary"
             class="elevation-0"
             @click="save"
         >
-          Confirm Request
+          {{ $t('btn.confirm_request') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -53,7 +53,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { $system, $notify } = useContext()
+    const { $system, $notify, i18n } = useContext()
     const { dispatch, state } = useStore()
     const loggedInUser = computed(() => state.user.data)
     const loggedInProfile = computed(() => state.user.profile)
@@ -76,7 +76,7 @@ export default defineComponent({
           if (res !== false) {
             dialog.value = false
             checkAddId.value = res.id
-            $notify.show({ text: 'Successfully sent', color: 'green' })
+            $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           }
         })
         // Add A Notification
@@ -98,7 +98,7 @@ export default defineComponent({
           msg: 'save',
           val: e
         })
-        $notify.show({ text: 'Error sending request', color: 'red' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
       } finally {
         loading.value = false
       }

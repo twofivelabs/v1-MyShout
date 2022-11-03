@@ -12,14 +12,14 @@
                           @click.native="swipe('Down')"
           />
 
-          <ElementH3 v-if="loading" align="center" text="Loading..." />
-          <ElementH3 align="center" text="Find Friends" />
+          <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
+          <ElementH3 align="center" :text="$t('contacts.find_friends')" />
 
           <ContactsInvitebtn class="mt-3" />
 
           <v-text-field
-              label="Search Friends..."
-              placeholder="Search Friends..."
+              :label="$t('contacts.search_friends')"
+              :placeholder="$t('contacts.search_friends')"
               append-icon="mdi-magnify"
               filled
               rounded
@@ -41,8 +41,8 @@
             </template>
           </v-list>
           <div v-else>
-            <ElementH4 v-if="searchFriendInput" align="center" class="my-5" text="No results" />
-            <ElementH4 v-if="!searchFriendInput" align="center" class="my-5" text="Search for friend above" />
+            <ElementH4 v-if="searchFriendInput" align="center" class="my-5" :text="$t('no_results')" />
+            <ElementH4 v-if="!searchFriendInput" align="center" class="my-5" :text="$t('contacts.search_friends')" />
           </div>
 
         </div>

@@ -4,7 +4,7 @@
 
       <!-- TOP PORTION -->
       <div class="d-flex flex-column justify-space-around align-center" style=" width:100vw; height:23vh;">
-        <OnboardingCardheader class="gray--text mx-14" h1="What is your phone number?" />
+        <OnboardingCardheader class="gray--text mx-14" :h1="$t('onboarding.add_phone_number_heading')" />
       </div>
 
       <!-- WHITE CARD -->
@@ -16,7 +16,7 @@
                 delay:900
               }">
         <div>
-          <h5 class="text-h5 text-center mb-6">Your phone number is vital for alerting your friends and family in case of emergency.</h5>
+          <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.add_phone_number_sub') }}</h5>
           <v-form ref="formEl" @submit.prevent="validate">
             <VuePhoneNumberInput class="my-6"
                                  v-model="form.phoneNumberFormatted"
@@ -67,7 +67,7 @@ export default defineComponent({
   },
   setup () {
     const {
-      $config, $notify, $helper
+      $config, $notify, $helper, i18n
     } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
@@ -100,7 +100,7 @@ export default defineComponent({
         limit: 3
       })
       if (hasUsers.length > 0) {
-        $notify.show({ text: 'Phone invalid or is inuse by another user', color: 'error' })
+        $notify.show({ text: i18n.t('notify.phone_in_use'), color: 'error' })
         return false
       }
       return true;
@@ -123,7 +123,7 @@ export default defineComponent({
         })
 
         // Move on
-        $notify.show({ text: 'Success', color: 'green' })
+        $notify.show({ text: i18n.t('notify.success'), color: 'green' })
         await router.push('/onboarding/5')
       }
       loading.value = false

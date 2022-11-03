@@ -20,7 +20,7 @@
         duration: 400
       }"
       />
-      Kidnapping Alert
+      {{ $t('kidnapping_alert') }}
     </v-btn>
     <v-dialog
         v-model="dialog"
@@ -28,8 +28,8 @@
     >
       <v-card class="rounded-xl pa-8">
         <IconsKidnapping class="mb-7" />
-        <ElementH1 text="Alert sent" />
-        <ElementP text="We have notified your emergency contacts of your kidnapping. Please call them as soon as you have the opportunity." />
+        <ElementH1 :text="$t('alert_sent')" />
+        <ElementP :text="$t('notified_emergency_contacts_kidnapping')" />
         <div v-if="loading">
           <v-skeleton-loader
               type="actions"
@@ -43,7 +43,7 @@
                 text
                 @click="dialog = false"
             >
-              Close
+              {{ $t('btn.close') }}
             </v-btn>
           </v-card-actions>
         </div>
@@ -66,7 +66,7 @@ export default defineComponent({
     const {
       state, dispatch
     } = useStore()
-    const { $services, $system, $notify } = useContext()
+    const { $services, $system, $notify, i18n } = useContext()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
@@ -100,7 +100,7 @@ export default defineComponent({
           msg: 'Trying to send alert',
           val: e
         })
-        $notify.show({ text: 'Error, try again', color: 'error' })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       } finally {
         loading.value = false
       }
