@@ -10,6 +10,8 @@ import { VoiceRecorder } from 'capacitor-voice-recorder'
 import { Contacts } from '@capacitor-community/contacts'
 import { Badge } from '@robingenz/capacitor-badge'
 
+import admob from './cap.admob'
+
 // VARIABLES
 let watchCallbackId = null
 // const isMobile = ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/))
@@ -57,6 +59,8 @@ export default function ({
   }
 
   inject('capacitor', {
+      ...admob,
+
       async getContacts() {
           return await Contacts.getPermissions().then(async (permission) => {
               if (permission.granted) {
