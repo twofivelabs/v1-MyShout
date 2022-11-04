@@ -374,19 +374,24 @@ export default defineComponent({
       imageButtonLoading.value = true
       imageAddedToMessage.value = false
 
-      const photoBase64 = await $capacitor.cameraTakePicture()
-      const photoUrl = await $db.upload({
-        path: `/CHATS/${chatId.value}/${ new Date().getTime() }.jpg`,
-        data: photoBase64,
-        base64: true
-      })
-      console.log('photoUrl', photoUrl)
+      try {
+        const photoBase64 = await $capacitor.cameraTakePicture()
+        const photoUrl = await $db.upload({
+          path: `/CHATS/${chatId.value}/${ new Date().getTime() }.jpg`,
+          data: photoBase64,
+          base64: true
+        })
+        console.log('photoUrl', photoUrl)
 
-      if (photoUrl) {
-        imageAddedToMessage.value = true
-        imageMessageUrl.value = photoUrl
+        if (photoUrl) {
+          imageAddedToMessage.value = true
+          imageMessageUrl.value = photoUrl
+        }
+      } catch {
+        // ...
+      } finally {
+        imageButtonLoading.value = false
       }
-      imageButtonLoading.value = false
     }
 
     // WATCH
