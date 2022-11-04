@@ -17,6 +17,7 @@ public class MainActivity extends BridgeActivity {
            // registerPlugin(com.getcapacitor.community.stripe.StripePlugin.class);
 			registerPlugin(Contacts.class);
 			registerPlugin(CapacitorFirebaseAuth.class);
+			registerPlugin(com.getcapacitor.community.admob.AdMob.class);
 
            /* // Initializes the Bridge
            this.init(savedInstanceState, new ArrayList<Class<? extends Plugin>>() {{
