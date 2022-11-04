@@ -381,7 +381,7 @@ export default defineComponent({
           data: photoBase64,
           base64: true
         })
-        console.log('photoUrl', photoUrl)
+        // console.log('photoUrl', photoUrl)
 
         if (photoUrl) {
           imageAddedToMessage.value = true
