@@ -584,6 +584,7 @@ export default function ({
         })
     },
     async microphoneStart () {
+        await this.microphoneStop()
         return await VoiceRecorder.startRecording()
             .then((result) => {
                 console.log('STICKY: STARTED RECORDING')
@@ -599,19 +600,27 @@ export default function ({
             })
     },
     async microphoneStop () {
-          return await VoiceRecorder.stopRecording()
-              .then((result) => {
-                  console.log('STICKY: STOPPED RECORDING')
-                  return result.value
-              })
-              .catch(e => {
-                  app.$system.log({
-                      comp: 'Capacitor',
-                      msg: 'microphoneStop',
-                      val: e
-                  })
-                  return false
-              })
+        try {
+            const status = await VoiceRecorder.getCurrentStatus()
+            if (status.status !== 'RECORDING') {
+                return false
+            }
+            return await VoiceRecorder.stopRecording()
+                .then((result) => {
+                    return result.value
+                })
+                .catch(e => {
+                    console.log('STOP RECORDING ERROR: ', e)
+                    app.$system.log({
+                        comp: 'Capacitor',
+                        msg: 'microphoneStop',
+                        val: e
+                    })
+                    return false
+                })
+        } catch (e) {
+            console.log('Error stopping', e)
+        }
     }
   })
 }

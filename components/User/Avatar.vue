@@ -1,6 +1,6 @@
 <template>
   <div style="display:inline-block">
-    <v-badge 
+    <v-badge
       top
       dot
       overlap
@@ -22,17 +22,15 @@
         <span v-else-if="isLoggedIn" class="white--text headline">{{ initial }}</span>
       </v-avatar>
     </v-badge>
-    <v-bottom-sheet v-if="viewPhoto" v-model="viewPhoto" :scrollable="false" fullscreen>
-      <v-sheet height="100vh" class="rounded-t-xl pa-5">
-        <v-card>
-          <v-card-title class="justify-end">
-            <v-icon @click="viewPhoto=false">mdi-close-circle-outline</v-icon>
-          </v-card-title>
-          <v-card-text>
-            <v-img :src="photo" />
-          </v-card-text>
-        </v-card>
-      </v-sheet>
+    <v-bottom-sheet v-if="viewPhoto" v-model="viewPhoto" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
+      <div style="margin-bottom:45%;">
+        <v-img :src="photo" class="elevation-12 rounded-lg mx-1" />
+        <div class="text-center">
+          <v-btn @click="viewPhoto = !viewPhoto" color="primary" class="mt-n7" fab>
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
+      </div>
     </v-bottom-sheet>
   </div>
 </template>
@@ -97,7 +95,7 @@ export default defineComponent({
     }
 
     const tappedPhoto = () => {
-      if (route.value.name === 'users-user-id') {
+      if (route.value.name.includes('users-user-id')) {
         viewPhoto.value = true
       }
     }

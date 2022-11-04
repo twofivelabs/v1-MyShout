@@ -29,7 +29,7 @@
         </v-col>
       </v-row>
 
-      <v-card color="transparent" class="elevation-0 pt-14 pb-14 mt-5 mb-14">
+      <v-card color="transparent" class="chatBox elevation-0 pt-14 pb-14 mt-5 mb-14">
           <template v-for="(message, index) in messages">
             <ChatMessage :message="message" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" />
           </template>
@@ -76,6 +76,7 @@
                 @touchstart="startRecording"
                 @touchend="stopRecording"
                 @touchcancel="stopRecording"
+                @contextmenu.prevent="startRecording"
                 color="transparent"
                 elevation="0"
                 class="pa-0"
@@ -275,18 +276,22 @@ export default defineComponent({
     }
     const startRecording = async () => {
       console.log('STICKY: START RECORDING')
-      buttonText.value = '120'
 
-      await $capacitor.microphoneStart()
+      try {
+        buttonText.value = '120'
+        await $capacitor.microphoneStart()
 
-      // 5 second count down timer
-      timerInterval.value = setInterval(function () {
-        timerCount.value--;
-        buttonText.value = `${timerCount.value}`
-        if (timerCount.value === 0) {
-          stopRecording()
-        }
-      }, 1000)
+        // count down timer
+        timerInterval.value = setInterval(function () {
+          timerCount.value--;
+          buttonText.value = `${timerCount.value}`
+          if (timerCount.value <= 0) {
+            stopRecording()
+          }
+        }, 1000)
+      } catch (e) {
+        console.log('Error starting ', e)
+      }
     }
     const stopRecording = async () => {
       console.log('STICKY: STOP RECORDING', timerInterval.value)
@@ -322,6 +327,7 @@ export default defineComponent({
         }
       } catch (e) {
         // ...
+        console.log('ERROR STOPPING', e)
       }
     }
     const goToBottom = async (delay = 1000) => {
@@ -434,8 +440,12 @@ export default defineComponent({
 
 </script>
 <style>
-.chat-message {
-
+#chatBox * {
+  overflow-anchor: none;
+}
+#bottomOfChat {
+  overflow-anchor: auto;
+  height: 1px;
 }
 
 .v-text-field {
@@ -444,5 +454,9 @@ export default defineComponent({
 .mdi-send::before {
   font-size: 36px !important;
   margin-left:30px;
+  background-color:white;
+  border-radius:0.25rem;
+  padding:6px;
+  box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 10%), 0px 24px 38px 3px rgb(0 0 0 / 7%), 0px 9px 46px 8px rgb(0 0 0 / 6%);
 }
 </style>

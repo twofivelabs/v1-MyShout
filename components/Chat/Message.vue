@@ -13,7 +13,20 @@
             </audio>
           </div>
           <div v-if="message.image">
-              <v-img :src="`${message.image}`" />
+            <v-bottom-sheet v-model="showMedia" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
+              <template v-slot:activator="{ on, attrs }">
+                <v-img :src="`${message.image}`" v-bind="attrs" v-on="on" />
+              </template>
+
+              <div style="margin-bottom:45%;">
+                <v-img :src="`${message.image}`" class="elevation-12 rounded-lg mx-1" />
+                <div class="text-center">
+                  <v-btn @click="showMedia = !showMedia" color="primary" class="mt-n7" fab>
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </div>
+              </div>
+            </v-bottom-sheet>
           </div>
           <div class="caption">{{ message.created_at.toDate().toLocaleString('en-US', {
             year: 'numeric',
@@ -30,9 +43,10 @@
 <script>
 
 import {
-  computed,
   defineComponent,
+  computed,
   useStore,
+  ref
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -55,13 +69,20 @@ export default defineComponent({
     const { state } = useStore()
     const user = computed(() => state.user)
     const userId = computed(() => state.user.data.uid)
+    const showMedia = ref(false)
 
     // DEFINE CONTENT
 
     return {
       user,
-      userId
+      userId,
+      showMedia
     }
   }
 })
 </script>
+<style >
+.v-dialog {
+  box-shadow: none !important;
+}
+</style>

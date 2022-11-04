@@ -10,6 +10,7 @@ android {
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
     implementation project(':byteowls-capacitor-sms')
+    implementation project(':capacitor-community-admob')
     implementation project(':capacitor-community-contacts')
     implementation project(':capacitor-community-fcm')
     implementation project(':capacitor-app')

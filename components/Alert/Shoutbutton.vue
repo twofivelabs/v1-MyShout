@@ -124,18 +124,22 @@ export default defineComponent({
     }
     const startRecording = async () => {
       console.log('STICKY: START RECORDING')
-      buttonText.value = `${i18n.t('recording')}... 5`
 
-      await $capacitor.microphoneStart()
+      try {
+        buttonText.value = `${i18n.t('recording')}... 5`
+        await $capacitor.microphoneStart()
 
-      // 5 second count down timer
-      timerInterval.value = setInterval(function() {
-        timerCount.value--;
-        buttonText.value = `${i18n.t('recording')}... ${timerCount.value}`
-        if (timerCount.value === 0) {
-          stopRecording()
-        }
-      }, 1000)
+        // 5 second count down timer
+        timerInterval.value = setInterval(function () {
+          timerCount.value--;
+          buttonText.value = `${i18n.t('recording')}... ${timerCount.value}`
+          if (timerCount.value <= 0) {
+            stopRecording()
+          }
+        }, 1000)
+      } catch (e) {
+        console.log('Error starting ', e)
+      }
     }
     const stopRecording = async () => {
       console.log('STICKY: STOP RECORDING', timerInterval.value)
