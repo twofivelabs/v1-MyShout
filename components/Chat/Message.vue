@@ -8,7 +8,7 @@
             {{ message.message }}
           </div>
           <div v-if="message.audioUrl">
-            <audio controls preload="auto" style="min-width:220px">
+            <audio controls preload="metadata" style="min-width:220px">
               <source :src="`${message.audioUrl}`">
             </audio>
           </div>

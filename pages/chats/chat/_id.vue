@@ -19,7 +19,7 @@
 
       <ChatActionsbtn v-if="chat && chat.id" :chatId="chat.id" />
     </v-app-bar>
-    <v-container class="pa-0">
+    <v-container class="pa-0 fill-height align-end">
       <v-row class="pa-6 mt-5" v-if="loading">
         <v-col>
           <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
@@ -71,9 +71,10 @@
             </v-btn>
             <v-btn
                 :loading="loading"
-                @mousedown="startRecording"
-                @mouseup="stopRecording"
+                @mousedown.prevent="startRecording"
                 @touchstart="startRecording"
+                @mouseup.prevent="stopRecording"
+                @mouseout="stopRecording"
                 @touchend="stopRecording"
                 @touchcancel="stopRecording"
                 @contextmenu.prevent="startRecording"
@@ -144,9 +145,10 @@ export default defineComponent({
     const messageListener = ref()
     // -- AUDIO MESSAGE --
     const buttonText = ref()
+    const isRecording = ref(false)
     const audioUrl = ref(null)
     const timerCount = ref(120)
-    const timerInterval = ref()
+    const timerInterval = new Set()
     // -- IMAGE MESSAGE --
     const imageButtonLoading = ref(false)
     const imageAddedToMessage = ref(false)
@@ -275,34 +277,43 @@ export default defineComponent({
       }
     }
     const startRecording = async () => {
-      console.log('STICKY: START RECORDING')
+      if (isRecording.value) return
+      isRecording.value = true
 
       try {
         buttonText.value = '120'
-        await $capacitor.microphoneStart()
 
         // count down timer
-        timerInterval.value = setInterval(function () {
+        timerInterval.add(setInterval(() => {
           timerCount.value--;
           buttonText.value = `${timerCount.value}`
           if (timerCount.value <= 0) {
             stopRecording()
           }
-        }, 1000)
+        }, 1000))
+
+        await $capacitor.microphoneStart()
+
       } catch (e) {
         console.log('Error starting ', e)
       }
     }
     const stopRecording = async () => {
-      console.log('STICKY: STOP RECORDING', timerInterval.value)
-      clearInterval(timerInterval.value)
-      timerCount.value = 120
+      isRecording.value = false
       buttonText.value = null
+      timerCount.value = 120
+
+      // Clear timers
+      for (const id of timerInterval) {
+        timerInterval.delete(id)
+        clearInterval(id)
+      }
 
       // Try and stop recorder
       try {
         const audio = await $capacitor.microphoneStop()
-          // Upload Audio File
+
+        // Upload Audio File
         if (audio) {
           audioUrl.value = await $db.upload({
             path: `/CHATS/${chatId.value}/${user.value.data.uid}-${Date.now()}.wav`,
@@ -401,7 +412,7 @@ export default defineComponent({
         if (route.value.params.id) {
           chatId.value = route.value.params.id
           loadMessages()
-          goToBottom()
+          goToBottom(2500)
         }
       }
     })
@@ -420,6 +431,9 @@ export default defineComponent({
           // ...
         }
       }
+    })
+    watch(timerInterval, (t) => {
+      console.log('TIMER2', t)
     })
 
     return {
@@ -445,6 +459,12 @@ export default defineComponent({
 
 </script>
 <style>
+* {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  user-select: none;
+}
+
 #chatBox * {
   overflow-anchor: none;
 }

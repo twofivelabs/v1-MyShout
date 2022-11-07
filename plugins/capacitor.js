@@ -43,9 +43,8 @@ export default function ({
                 )) {
                     // It can be useful to direct the user to their device's
                     // settings when location permissions have been denied. The
-                    // plugin provides the 'openSettings' method to do exactly
-                    // this.
-                    BackgroundGeolocation.openSettings();
+                    // plugin provides the 'openSettings' method to do this
+                    BackgroundGeolocation.openSettings()
                 }
             }
             return console.error(error);
@@ -180,12 +179,12 @@ export default function ({
             const permission = await Geolocation.checkPermissions()
             if (permission.location === 'denied') {
                 await Geolocation.requestPermissions()
-                app.$notify.show({ text: app.i18n.t('gps_permission_denied'), color: 'error' })
+                app.$notify.show({ text: app.i18n.t('notify.gps_permission_denied'), color: 'error' })
                 return false
             }
             else if (permission.location === 'prompt' || permission.location === 'prompt-with-rationale') {
                 await Geolocation.requestPermissions()
-                app.$notify.show({ text: app.i18n.t('gps_permission_prompt'), color: 'error' })
+                app.$notify.show({ text: app.i18n.t('notify.gps_permission_prompt'), color: 'error' })
                 return false
             }
             else if (permission.location === 'granted') {
