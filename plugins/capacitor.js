@@ -10,6 +10,9 @@ import { VoiceRecorder } from 'capacitor-voice-recorder'
 import { Contacts } from '@capacitor-community/contacts'
 import { Badge } from '@robingenz/capacitor-badge'
 
+import {registerPlugin} from "@capacitor/core"
+const BackgroundGeolocation = registerPlugin("BackgroundGeolocation")
+
 import admob from './cap.admob'
 
 // VARIABLES
@@ -20,6 +23,47 @@ export default function ({
   app,
   store
 }, inject) {
+
+    BackgroundGeolocation.addWatcher({
+        // On Android, a notification must be shown to continue receiving
+        // location updates in the background. This option specifies the text of
+        // that notification.
+        backgroundMessage: "We are using your location to notify your family in case of emergency.",
+        backgroundTitle: "Using Your location",
+        requestPermissions: true,
+        stale: false,
+        distanceFilter: 10
+    }, (location, error) => {
+        if (error) {
+            if (error.code === "NOT_AUTHORIZED") {
+                if (window.confirm(
+                    "This app needs your location, " +
+                    "but does not have permission.\n\n" +
+                    "Open settings now?"
+                )) {
+                    // It can be useful to direct the user to their device's
+                    // settings when location permissions have been denied. The
+                    // plugin provides the 'openSettings' method to do exactly
+                    // this.
+                    BackgroundGeolocation.openSettings();
+                }
+            }
+            return console.error(error);
+        }
+
+        // WE GOT LOCATION
+        app.$capacitor.gpsSetPosition({
+            lat: location.latitude,
+            lng: location.longitude,
+            speed: location.speed || null,
+            data: null
+        })
+    }).then(() => {
+        // ... can remove watcher here
+    }).catch(() => {
+        console.log('STICKY: issue with background watcher')
+    })
+
   // INIT
   if(app) {
       app.store.dispatch('user/updateField', {

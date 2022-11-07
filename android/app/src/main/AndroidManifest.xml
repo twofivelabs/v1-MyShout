@@ -59,6 +59,10 @@
 
         <service
                 android:name="com.google.firebase.messaging.FirebaseMessagingService"/>
+
+        <meta-data
+                android:name="com.google.android.gms.ads.APPLICATION_ID"
+                android:value="@string/admob_app_id"/>
     </application>
 
     <meta-data
