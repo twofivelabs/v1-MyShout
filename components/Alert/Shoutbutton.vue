@@ -87,7 +87,8 @@ export default defineComponent({
     const buttonText = ref(i18n.t('shout_alert'))
     const audioUrl = ref(null)
     const timerCount = ref(5)
-    const timerInterval = ref()
+    const isRecording = ref(false)
+    const timerInterval = new Set()
 
     // METHODS
     const openDialog = async () => {
@@ -123,33 +124,45 @@ export default defineComponent({
       }
     }
     const startRecording = async () => {
+      if (isRecording.value) return
+      isRecording.value = true
+
       console.log('STICKY: START RECORDING')
 
       try {
         buttonText.value = `${i18n.t('recording')}... 5`
-        await $capacitor.microphoneStart()
 
         // 5 second count down timer
-        timerInterval.value = setInterval(function () {
+        timerInterval.add(setInterval(function () {
           timerCount.value--;
           buttonText.value = `${i18n.t('recording')}... ${timerCount.value}`
           if (timerCount.value <= 0) {
             stopRecording()
           }
-        }, 1000)
+        }, 1000))
+
+        await $capacitor.microphoneStart()
+
       } catch (e) {
         console.log('Error starting ', e)
       }
     }
     const stopRecording = async () => {
-      console.log('STICKY: STOP RECORDING', timerInterval.value)
-      clearInterval(timerInterval.value)
+      console.log('STICKY: STOP RECORDING')
+      isRecording.value = false
       timerCount.value = 5
       buttonText.value = i18n.t('shout_alert')
+
+      // Clear timers
+      for (const id of timerInterval) {
+        timerInterval.delete(id)
+        clearInterval(id)
+      }
 
       // Try and stop recorder
       try {
         const audio = await $capacitor.microphoneStop()
+
         // Upload audio file
         if (audio) {
           console.log('STICKY: ADD SHOUT TO', `/USERS/${user.value.uid}/shouts/${Date.now()}.wav`)
@@ -158,8 +171,10 @@ export default defineComponent({
             data: audio.recordDataBase64,
             base64: true
           })
+
           //  Open dialog
           await openDialog()
+
         } else {
           $notify.show({ text: i18n.t('notify.no_audio'), color: 'error' })
         }
@@ -173,11 +188,11 @@ export default defineComponent({
       user,
       profile,
       dialog,
+      buttonText,
+      timerCount,
       openDialog,
       startRecording,
       stopRecording,
-      buttonText,
-      timerCount
     }
   }
 })

@@ -163,7 +163,13 @@ export default {
     notifications: {
         heading: 'Avis',
         sub_heading: 'Tiens-toi à jour',
-        caught_up: 'Vous êtes tous rattrapés !'
+        caught_up: 'Vous êtes tous rattrapés !',
+
+        chat_notification: 'Notification de chat',
+        new_friend_request: 'Nouvelle demande d\'ami',
+        friend_request_approved: 'Demande d\'ami approuvée',
+        requested_to_be_your_friend: 'demandé à être ton ami.',
+        accepted_your_friendship: 'accepté votre amitié.'
     },
     gps: {
         gps: 'GPS',

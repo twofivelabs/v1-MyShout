@@ -13,10 +13,7 @@
     </div>
     <div v-else>
       <div v-if="notifications && Object.keys(notifications).length > 0">
-        <div
-            v-for="(notification, id) in notifications"
-            :key="id"
-        >
+        <div v-for="(notification, id) in notifications" :key="id">
           <v-row
               v-if="notification.title || notification.body"
               :id="notification.id"
@@ -35,10 +32,30 @@
                 <span v-else-if="notification.type === 'chat'">
                   <v-icon color="myshoutOrange">mdi-message</v-icon>
                 </span>
-                {{ notification.title }}
+
+                <span v-if="notification.title === 'Chat Notification'">
+                  {{ $t('notifications.chat_notification') }}
+                </span>
+                <span v-else-if="notification.title === 'New Friend Request'">
+                  {{ $t('notifications.new_friend_request') }}
+                </span>
+                <span v-else-if="notification.title === 'Friend Request Approved'">
+                  {{ $t('notifications.friend_request_approved') }}
+                </span>
+                <span v-else>
+                  {{ notification.title }}
+                </span>
               </div>
               <div class="body-2">
-                {{ notification.body }}
+                <span v-if="notification.body.includes('requested to be your friend.')">
+                  {{ notification.body.replace('requested to be your friend.', $t('notifications.requested_to_be_your_friend')) }}
+                </span>
+                <span v-else-if="notification.body.includes('accepted your friendship.')">
+                  {{ notification.body.replace('requested to be your friend.', $t('notifications.accepted_your_friendship')) }}
+                </span>
+                <span v-else>
+                  {{ notification.body }}
+                </span>
               </div>
               <div class="caption grey--text mt-2">
                 {{ notification.created_at }}
