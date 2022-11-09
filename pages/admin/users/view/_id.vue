@@ -26,20 +26,24 @@
         </v-col>
       </v-row>
 
-      <v-row class="mt-7 mx-1">
-        <v-col class="elevation-6 white">
-          <h3>{{ $t('gps.gps') }}</h3>
-          <h5>{{ form.gps.city }}</h5>
-          <div v-if="form.gps && form.gps.lat && form.gps.lng">
-            {{ form.gps.lat }}, {{ form.gps.lng }}
-            <a target="_blank" :href="`https://www.google.com/maps/@${form.gps.lat},${form.gps.lng},14z`"><v-img width="600" class="mx-auto" :src="`https://maps.googleapis.com/maps/api/staticmap?center=${form.gps.lat},${form.gps.lng}&zoom=16&scale=1&size=600x500&maptype=hybrid&key=${$config.google.mapsApiKey}&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:1%7C${form.gps.lat},${form.gps.lng}`" :alt="`Google Map of ${form.gps.lat},${form.gps.lng}`" /></a>
+      <v-row class="mt-7">
+        <v-col>
+          <ElementH4 :text="$t('gps.gps')" align="left" class="mb-4" />
+          <div class="elevation-6 white rounded-lg pa-4 mx-4">
+            <h5>{{ form.gps.city }}</h5>
+            <div v-if="form.gps && form.gps.lat && form.gps.lng">
+              {{ form.gps.lat }}, {{ form.gps.lng }}
+              <a target="_blank" :href="`https://www.google.com/maps/search/?api=1&query=${form.gps.lat},${form.gps.lng}`">
+                <v-img width="600" class="mx-auto" :src="`https://maps.googleapis.com/maps/api/staticmap?center=${form.gps.lat},${form.gps.lng}&zoom=16&scale=1&size=600x500&maptype=hybrid&key=${$config.google.mapsApiKey}&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:1%7C${form.gps.lat},${form.gps.lng}`" :alt="`Google Map of ${form.gps.lat},${form.gps.lng}`" />
+              </a>
+            </div>
           </div>
         </v-col>
       </v-row>
 
       <v-row>
         <v-col>
-          <ElementH4 text="User Alerts" align="left" class="mb-4" />
+          <ElementH4 :text="$t('alerts')" align="left" class="mb-4" />
           <div v-if="!alerts">
             {{ $t('you_have_no_alerts') }}
           </div>

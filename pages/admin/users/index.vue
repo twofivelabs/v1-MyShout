@@ -3,17 +3,18 @@
     <AdminTitle/>
 
     <div class="mt-3 mb-2 px-3">
+      <AdminSearchbox class="mb-6" />
       <v-btn to="/admin/users/map" small class="elevation-0 primary white--text">View on map</v-btn>
       Showing up to 500 users
     </div>
     <v-data-table
-        :headers="headers"
-        :items="data"
-        :items-per-page="20"
-        :loading="loading"
-        class="elevation-0"
-        :loading-text="$t('is_loading')"
         @click:row="rowClick"
+        :items="data"
+        :headers="headers"
+        :loading="loading"
+        :loading-text="$t('is_loading')"
+        :items-per-page="20"
+        class="elevation-0"
     >
     </v-data-table>
   </v-container>

@@ -36,18 +36,20 @@
           <div id="bottomOfChat"></div>
       </v-card>
 
-      <v-app-bar color="transparent" flat bottom fixed style="top:calc(100% - 150px)">
+      <v-app-bar color="transparent" class="align-center" flat bottom fixed style="top:calc(100% - 150px)">
         <v-text-field
             v-model="newMessage"
             @keydown.enter="sendMessage"
-            @click:append-outer="sendMessage"
-            append-outer-icon="mdi-send"
-            clear-icon="mdi-close-circle"
             :label="$t('form.message')"
             type="text"
-            clearable
+            hide-details
             solo
         >
+          <template v-slot:append-outer>
+            <v-btn @click="sendMessage" fab>
+              <v-icon>mdi-send</v-icon>
+            </v-btn>
+          </template>
           <template v-slot:append>
             <v-btn
                 :loading="imageButtonLoading"
@@ -381,12 +383,11 @@ export default defineComponent({
       }
     }
     const loadImageHandler = async () => {
-      console.log('loadImageHandler')
       imageButtonLoading.value = true
       imageAddedToMessage.value = false
 
       try {
-        const photoBase64 = await $capacitor.cameraTakePicture()
+        const photoBase64 = await $capacitor.cameraTakePicture(false)
         const photoUrl = await $db.upload({
           path: `/CHATS/${chatId.value}/${ new Date().getTime() }.jpg`,
           data: photoBase64,
@@ -472,16 +473,11 @@ export default defineComponent({
   overflow-anchor: auto;
   height: 1px;
 }
+.v-text-field .v-input__control {
+  margin-top:5px !important;
+}
+.v-text-field .v-input__append-outer {
+  margin-top:0 !important;
+}
 
-.v-text-field {
-  max-width:95%;
-}
-.mdi-send::before {
-  font-size: 36px !important;
-  margin-left:30px;
-  background-color:white;
-  border-radius:0.25rem;
-  padding:6px;
-  box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 10%), 0px 24px 38px 3px rgb(0 0 0 / 7%), 0px 9px 46px 8px rgb(0 0 0 / 6%);
-}
 </style>
