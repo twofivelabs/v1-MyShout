@@ -8,9 +8,10 @@
             {{ message.message }}
           </div>
           <div v-if="message.audioUrl">
-            <audio controls preload="metadata" style="min-width:220px">
+            <audio v-if="!message.audioExpired" controls preload="metadata" style="min-width:220px">
               <source :src="`${message.audioUrl}`">
             </audio>
+            <div v-else class="text-center" style="font-size:11px;font-style:italic;padding:2vh 0">Audio Clip Has Expired</div>
           </div>
           <div v-if="message.image">
             <v-bottom-sheet v-model="showMedia" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
