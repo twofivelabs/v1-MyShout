@@ -25,6 +25,7 @@ exports.UserSMSWrite = functions.firestore
         },
       } = context;
       const data = sms.data();
+      functions.logger.log("STICKY1", data);
 
       if (data) {
         let phone;
@@ -32,14 +33,30 @@ exports.UserSMSWrite = functions.firestore
         // Get User Data
         UsersCollection.doc(UserId).get().then((snapshot) => {
           phone = snapshot.data().phone;
+          functions.logger.log("STICKY2", snapshot.data());
 
           if (phone) {
             twilioClient.messages.create({
               body: data.body,
               from: twilioAccount.phoneNumber,
               to: phone,
-            }).then((response) => {
-              UsersCollection.doc(UserId).collection("SMS").doc(SMSId).collection("Responses").add(response);
+            }).then((r) => {
+              const path = `Users/${UserId}/SMS/${SMSId}`;
+              functions.logger.log("STICKY PATH: ", path);
+              functions.logger.log("STICKY Save SMS Response", r);
+
+              admin.firestore().doc(path).update({response: {
+                to: r.to,
+                from: r.from,
+                errorMessage: r.errorMessage,
+                errorCode: r.errorCode,
+                sid: r.sid,
+                accountSid: r.accountSid,
+              }}).catch((e) => {
+                functions.logger.log("STICKY ADD RESPONSE", e);
+              });
+            }).catch((e) => {
+              functions.logger.log("STICKY3", e);
             });
           } else {
             functions.logger.log("No phone to send sms alert");

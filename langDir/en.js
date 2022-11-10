@@ -75,7 +75,7 @@ export default {
         please_confirm_delete: 'Please confirm you wish to delete your account and all data. This is not reversible.'
     },
     heading: {
-        cant_receive_sms_code: 'Can\'t receive code?<br>Sign in through email.',
+        cant_receive_sms_code: 'Can\'t receive code? Sign in through email.',
         we_sent_you_sms_code: 'We sent you a SMS code',
         forgot_password: 'Forgot Password',
         edit_profile: 'Profile',
