@@ -158,7 +158,8 @@ export default {
         enter_pin: 'Enter in your friend\'s PIN',
         add_member: 'Ajouter membre',
         view_members: 'Voir les membres',
-        remove_chat: 'Supprimer le chat'
+        remove_chat: 'Supprimer le chat',
+        audio_expired: 'Le clip audio a expiré'
     },
     notifications: {
         heading: 'Avis',

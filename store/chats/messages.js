@@ -148,10 +148,10 @@ export const actions = {
         }
         return all
     },
-    async remove ({ commit }, doc) {
-        const response = await this.$db.delete_doc(`${dbRootPath}/${doc}`)
+    async remove ({ commit }, data) {
+        const response = await this.$db.delete_doc(`Chats/${data.chatId}/${dbRootPath}/${data.id}`)
         if (response) {
-            await commit('REMOVE_ONE', doc)
+            await commit('REMOVE_ONE', data)
         }
         return response
     },

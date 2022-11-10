@@ -31,7 +31,7 @@
 
       <v-card color="transparent" class="chatBox elevation-0 pt-14 pb-14 mt-5 mb-14">
           <template v-for="(message, index) in messages">
-            <ChatMessage :message="message" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" />
+            <ChatMessage :message="message" :chat="chat" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" />
           </template>
           <div id="bottomOfChat"></div>
       </v-card>
@@ -197,6 +197,7 @@ export default defineComponent({
             .onSnapshot((snapshot) => {
               snapshot.docChanges().forEach((change) => {
                 // TODO: Add 'modified' / 'removed' as options here too
+                // console.log('MESSAGE LISTENER', change, change.type, $encryption.decrypt(change.doc.data().message))
                 if (change.type === 'added') {
                   const data = change.doc.data()
                   data.id = change.doc.id
@@ -433,9 +434,6 @@ export default defineComponent({
         }
       }
     })
-    watch(timerInterval, (t) => {
-      console.log('TIMER2', t)
-    })
 
     return {
       loading,
@@ -466,7 +464,8 @@ export default defineComponent({
   user-select: none;
 }
 
-#chatBox * {
+.chatBox { width: 100%; }
+.chatBox * {
   overflow-anchor: none;
 }
 #bottomOfChat {

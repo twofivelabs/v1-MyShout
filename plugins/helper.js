@@ -6,7 +6,21 @@ export default ({
   $vuetify
 }, inject) => {
   inject('helper', {
+     downloadFile(path, filename) {
+         // Create a new link
+         const anchor = document.createElement('a');
+         anchor.href = path;
+         anchor.download = filename;
 
+         // Append to the DOM
+         document.body.appendChild(anchor);
+
+         // Trigger `click` event
+         anchor.click();
+
+         // Remove element from DOM
+         document.body.removeChild(anchor);
+    },
     sleep (ms) {
       console.log('SLEEP', ms)
       return new Promise(resolve => setTimeout(resolve, ms))

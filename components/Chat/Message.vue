@@ -11,7 +11,7 @@
             <audio v-if="!message.audioExpired" controls preload="metadata" style="min-width:220px">
               <source :src="`${message.audioUrl}`">
             </audio>
-            <div v-else class="text-center" style="font-size:11px;font-style:italic;padding:2vh 0">Audio Clip Has Expired</div>
+            <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
           </div>
           <div v-if="message.image">
             <v-bottom-sheet v-model="showMedia" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
@@ -29,13 +29,19 @@
               </div>
             </v-bottom-sheet>
           </div>
-          <div class="caption">{{ message.created_at.toDate().toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric'
-          }) }}</div>
+          <div class="caption">
+               {{ message.created_at.toDate().toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric'
+                }) }}
+            <span v-if="message.audioUrl" class="pl-3">
+              <v-btn @click="downloadFile(message.audioUrl)" plain text small class="pa-0 ma-0 white--text text-capitalize">Download</v-btn>
+              <v-btn @click="deleteFile(message.audioUrl)" :loading="loading" plain text small class="pa-0 ma-0 white--text text-capitalize">Delete</v-btn>
+            </span>
+          </div>
         </div>
       </div>
     </main>
@@ -47,6 +53,7 @@ import {
   defineComponent,
   computed,
   useStore,
+  useContext,
   ref
 } from '@nuxtjs/composition-api'
 
@@ -64,20 +71,55 @@ export default defineComponent({
       default: () => {
         return {}
       }
+    },
+    chat: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     }
   },
-  setup() {
-    const { state } = useStore()
+  setup(props) {
+    const { state, dispatch } = useStore()
+    const { $helper, $fire } = useContext()
     const user = computed(() => state.user)
     const userId = computed(() => state.user.data.uid)
     const showMedia = ref(false)
+    const loading = ref(false)
 
     // DEFINE CONTENT
+    const downloadFile = (file) => {
+      return $helper.downloadFile(file, 'recording.wav')
+    }
+    const deleteFile = async (file) => {
+      loading.value = true
+      try {
+        // Hide From UI
+        document.getElementById(`message-${props.message.id}`).style.display = 'none';
+
+        // Delete Message
+        await dispatch('chats/messages/remove', {
+          chatId: props.chat.id,
+          id: props.message.id
+        })
+
+        // Delete File
+        await $fire.storage.refFromURL(file).delete()
+
+      } catch (e) {
+        console.log('Error deleting file', e)
+      } finally {
+        loading.value = false
+      }
+    }
 
     return {
       user,
       userId,
-      showMedia
+      showMedia,
+      loading,
+      downloadFile,
+      deleteFile
     }
   }
 })
