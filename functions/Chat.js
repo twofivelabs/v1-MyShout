@@ -72,7 +72,7 @@ exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 
         snapshot.forEach((doc) => {
           const days = Math.round(moment.duration(moment().startOf("day") - doc.data().created_at.toDate()).asDays());
           if (days >= 30) {
-            admin.storage().refFromURL(doc.data().audioUrl).delete();
+            admin.storage.refFromURL(doc.data().audioUrl).delete();
             console.log("Expiring Audio Clip In Message " + doc.id);
             db.collectionGroup("Messages").doc(doc.id).update({"audioExpired": true});
           }

@@ -29,7 +29,7 @@
               <div v-else v-dompurify-html="$lang.get(post, 'content')" class="mdDoc"/>
             </div>
             <v-btn v-if="post.learn_more" :to="post.learn_more" class="elevation-0" primary>
-              {{ post.learn_more_label ? post.learn_more_label : $t('btn.learn_more') }}
+              {{ $lang.get(post, 'learn_more_label') ? $lang.get(post, 'learn_more_label') : $t('btn.learn_more') }}
             </v-btn>
           </v-expansion-panel-content>
         </v-expansion-panel>
