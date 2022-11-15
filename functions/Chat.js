@@ -1,5 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const {getStorage, ref} = require("firebase-admin/storage");
 const serviceAccount = require("./service-key.json");
 
 const moment = require("moment");
@@ -9,7 +10,9 @@ if (!admin.apps.length) {
     credential: admin.credential.cert(serviceAccount),
   });
 }
+
 const db = admin.firestore();
+const storage = getStorage();
 
 
 // firebase deploy --only functions:Chat
@@ -72,9 +75,11 @@ exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 
         snapshot.forEach((doc) => {
           const days = Math.round(moment.duration(moment().startOf("day") - doc.data().created_at.toDate()).asDays());
           if (days >= 30) {
-            admin.storage.refFromURL(doc.data().audioUrl).delete();
-            console.log("Expiring Audio Clip In Message " + doc.id);
-            db.collectionGroup("Messages").doc(doc.id).update({"audioExpired": true});
+            console.log("Message Doc: " + doc.id);
+            const storageRef = ref(storage, "gs://my-shout-app.appspot.com/CHATS/aR7oFfq1MxjIxTctwMtb/1667409268401.jpg");
+            console.log("storageRef", storageRef);
+            return db.collectionGroup("Messages").doc(doc.id).collection("Logs").add(storageRef);
+            // db.collectionGroup("Messages").doc(doc.id).update({"audioExpired": true});
           }
         });
       });
