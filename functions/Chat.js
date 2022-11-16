@@ -8,6 +8,7 @@ const moment = require("moment");
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
+    storageBucket: "my-shout-app.appspot.com",
   });
 }
 
@@ -76,7 +77,7 @@ exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 
           const days = Math.round(moment.duration(moment().startOf("day") - doc.data().created_at.toDate()).asDays());
           if (days >= 30) {
             console.log("Message Doc: " + doc.id);
-            const storageRef = ref(storage, "gs://my-shout-app.appspot.com/CHATS/aR7oFfq1MxjIxTctwMtb/1667409268401.jpg");
+            const storageRef = ref(storage, "CHATS/aR7oFfq1MxjIxTctwMtb/1667409268401.jpg");
             console.log("storageRef", storageRef);
             return db.collectionGroup("Messages").doc(doc.id).collection("Logs").add(storageRef);
             // db.collectionGroup("Messages").doc(doc.id).update({"audioExpired": true});
