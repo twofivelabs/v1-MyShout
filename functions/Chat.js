@@ -13,6 +13,7 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 const storage = admin.storage();
+const bucket = storage.bucket("my-shout-app.appspot.com");
 
 
 // firebase deploy --only functions:Chat
@@ -76,9 +77,10 @@ exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 
           const days = Math.round(moment.duration(moment().startOf("day") - doc.data().created_at.toDate()).asDays());
           if (days >= 30) {
             console.log("Message Doc: " + doc.id);
-            const storageRef = ref(storage, "CHATS/aR7oFfq1MxjIxTctwMtb/1667409268401.jpg");
-            console.log("storageRef", storageRef);
-            // db.collectionGroup("Messages").doc(doc.id).update({"audioExpired": true});
+            bucket.file(doc.data().audioUrl).delete().then((result)=>{
+              console.log("Delete File Result", result);
+              db.collectionGroup("Messages").doc(doc.id).update({"audioExpired": true});
+            });
           }
         });
       });
