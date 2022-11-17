@@ -12,8 +12,7 @@ if (!admin.apps.length) {
 }
 
 const db = admin.firestore();
-const storage = admin.storage();
-const bucket = storage.bucket("my-shout-app.appspot.com");
+const bucket = admin.storage().bucket("gs://my-shout-app.appspot.com");
 
 
 // firebase deploy --only functions:Chat
@@ -70,16 +69,14 @@ exports.ChatMessageCreated = functions.firestore
 exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 * * *")
     .timeZone("America/New_York")
     .onRun((context) => {
-      console.log("Checking For Active Audio Clips Due For Expiration");
-
       return db.collectionGroup("Messages").orderBy("audioUrl").where("audioUrl", "!=", "").orderBy("created_at").get().then((snapshot) => {
         snapshot.forEach((doc) => {
           const days = Math.round(moment.duration(moment().startOf("day") - doc.data().created_at.toDate()).asDays());
           if (days >= 30) {
-            console.log("Message Doc: " + doc.id);
-            bucket.file(doc.data().audioUrl).delete().then((result)=>{
-              console.log("Delete File Result", result);
-              db.collectionGroup("Messages").doc(doc.id).update({"audioExpired": true});
+            const url = decodeURIComponent(doc.data().audioUrl.split("/")[7].split("?")[0]);
+            bucket.file(url).delete().then((res)=>{
+              const chatId = doc.ref.parent.parent.id;
+              return db.collection("Chats").doc(chatId).collection("Messages").doc(doc.id).update({"audioUrl": "", "audioExpired": true});
             });
           }
         });

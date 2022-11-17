@@ -1,4 +1,4 @@
-const options = {"workboxURL":"https://cdn.jsdelivr.net/npm/workbox-cdn@5.1.4/workbox/workbox-sw.js","importScripts":["/firebase-auth-sw.js"],"config":{"debug":true},"cacheOptions":{"cacheId":"myshout-prod","directoryIndex":"/","revision":"C3HyhyGfnsnl"},"clientsClaim":true,"skipWaiting":true,"cleanupOutdatedCaches":true,"offlineAnalytics":false,"preCaching":[{"revision":"C3HyhyGfnsnl","url":"/?standalone=true"}],"runtimeCaching":[{"urlPattern":"/nuxt/","handler":"CacheFirst","method":"GET","strategyPlugins":[]},{"urlPattern":"/","handler":"NetworkFirst","method":"GET","strategyPlugins":[]}],"offlinePage":null,"pagesURLPattern":"/","offlineStrategy":"NetworkFirst"}
+const options = {"workboxURL":"https://cdn.jsdelivr.net/npm/workbox-cdn@5.1.4/workbox/workbox-sw.js","importScripts":["/firebase-auth-sw.js"],"config":{"debug":true},"cacheOptions":{"cacheId":"myshout-dev","directoryIndex":"/","revision":"F8OwyIHZjBZ0"},"clientsClaim":true,"skipWaiting":true,"cleanupOutdatedCaches":true,"offlineAnalytics":false,"preCaching":[{"revision":"F8OwyIHZjBZ0","url":"/?standalone=true"}],"runtimeCaching":[{"urlPattern":"/nuxt/","handler":"NetworkFirst","method":"GET","strategyPlugins":[]},{"urlPattern":"/","handler":"NetworkFirst","method":"GET","strategyPlugins":[]}],"offlinePage":null,"pagesURLPattern":"/","offlineStrategy":"NetworkFirst"}
 
 importScripts(...[options.workboxURL, ...options.importScripts])
 
@@ -102,13 +102,13 @@ function offlinePage(workbox, options) {
 }
 
 function workboxExtensions(workbox, options) {
-
+  
 }
 
 function cachingExtensions(workbox, options) {
-
+  
 }
 
 function routingExtensions(workbox, options) {
-
+  
 }
