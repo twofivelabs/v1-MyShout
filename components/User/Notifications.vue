@@ -47,10 +47,10 @@
                 </span>
               </div>
               <div class="body-2">
-                <span v-if="notification.body.includes('requested to be your friend.')">
+                <span v-if="notification.body && notification.body.includes('requested to be your friend.')">
                   {{ notification.body.replace('requested to be your friend.', $t('notifications.requested_to_be_your_friend')) }}
                 </span>
-                <span v-else-if="notification.body.includes('accepted your friendship.')">
+                <span v-else-if="notification.body && notification.body.includes('accepted your friendship.')">
                   {{ notification.body.replace('requested to be your friend.', $t('notifications.accepted_your_friendship')) }}
                 </span>
                 <span v-else>
