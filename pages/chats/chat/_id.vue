@@ -29,14 +29,14 @@
         </v-col>
       </v-row>
 
-      <v-card color="transparent" class="chatBox elevation-0 pt-14 pb-14 mt-5 mb-14">
+      <v-card color="transparent" class="chatBox elevation-0 pt-14 mt-5 mb-14">
           <template v-for="(message, index) in messages">
             <ChatMessage :message="message" :chat="chat" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" />
           </template>
           <div id="bottomOfChat"></div>
       </v-card>
 
-      <v-app-bar color="transparent" class="align-center" flat bottom fixed style="top:calc(100% - 150px)">
+      <v-app-bar color="transparent" class="align-center" flat bottom fixed style="top:calc(100% - 180px)">
         <v-text-field
             v-model="newMessage"
             @keydown.enter="sendMessage"
@@ -466,7 +466,7 @@ export default defineComponent({
   user-select: none;
 }
 
-.chatBox { width: 100%; }
+.chatBox { width: 100%; padding-bottom:120px !important; }
 .chatBox * {
   overflow-anchor: none;
 }

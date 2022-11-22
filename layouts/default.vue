@@ -44,7 +44,8 @@ export default defineComponent({
       $vuetify,
       $fire,
       $system,
-      $capacitor
+      $capacitor,
+      i18n
     } = useContext()
     const route = useRoute()
     const loading = ref(false)
@@ -117,6 +118,9 @@ export default defineComponent({
       }
     })
     onMounted(() => {
+      const code = $ttlStorage.get('locale')
+      i18n.setLocale(code)
+
       $system.initDarkMode()
 
       $capacitor.AdMob_init()

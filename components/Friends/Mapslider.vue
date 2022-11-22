@@ -37,7 +37,7 @@
         <v-sheet
             class="pa-5 overflow-y-auto rounded-t-xl slide-up"
             height="35vh"
-            style="padding-bottom:150px;"
+            style="padding-bottom:180px;"
         >
           <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
                           @click.native="swipe('Down')"

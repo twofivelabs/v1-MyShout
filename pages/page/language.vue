@@ -73,7 +73,7 @@ export default defineComponent({
   middleware: 'authenticated',
   setup () {
     const { state } = useStore()
-    const { $config, $notify, i18n } = useContext()
+    const { $config, $notify, i18n, $ttlStorage } = useContext()
     const router = useRouter()
     const user = computed(() => state.users.data)
     const profile = computed(() => state.users.profile)
@@ -82,7 +82,9 @@ export default defineComponent({
 
     // METHODS
     const changeLang = async (code) => {
+      $ttlStorage.set('locale', code)
       await i18n.setLocale(code)
+
       await i18n.setLocaleCookie(code)
       $notify.show({ text: i18n.t('notify.success'), color: 'green' })
       router.push('/')

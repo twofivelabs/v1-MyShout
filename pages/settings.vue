@@ -37,7 +37,7 @@
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>{{ $t('btn.location_permissions') }}</v-list-item-title>
-              <v-list-item-subtitle>{{ $t('btn.sharing_your_location_sub') }}</v-list-item-subtitle>
+              <v-list-item-subtitle>{{ $t('sharing_your_location_sub') }}</v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
               <MapLocationtoggle label="" class="mx-2" />
