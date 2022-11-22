@@ -267,6 +267,12 @@ export default {
     friends: 'Amies',
     settings: 'Paramètres',
 
+    alert: 'Alerte',
+    accident: 'Accident',
+    kidnapping: 'Enlèvement',
+    robbery: 'Vol',
+    shout: 'Cri',
+
     alert_details: 'Détails de l\'alerte',
     accident_alert: 'Alerte accident',
     kidnapping_alert: 'Alerte enlèvement',

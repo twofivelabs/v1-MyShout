@@ -5,7 +5,7 @@
     </v-icon>
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="50vh" class="rounded-t-xl">
-        <div class="ma-3">
+        <div class="ma-3" style="padding-bottom:150px;">
           <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
                           @click.native="swipe('Down')"
           />

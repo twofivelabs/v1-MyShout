@@ -28,7 +28,7 @@ export default defineComponent({
   name: 'AdminLayout',
   setup () {
     const { state, dispatch } = useStore()
-    const { $config, $remoteConfig, $fire, $system, } = useContext()
+    const { $config, $remoteConfig, $fire, $system, $capacitor } = useContext()
 
     // MOUNT
     onBeforeMount(async () => {
@@ -61,6 +61,8 @@ export default defineComponent({
     })
     onMounted(() => {
       $system.initDarkMode()
+
+      $capacitor.AdMob_hideBanner()
 
       // Load remote config from firebase
       try {

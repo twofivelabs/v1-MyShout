@@ -14,18 +14,23 @@
 <script>
 
 import {
-  defineComponent,
-  ref
+  defineComponent, onMounted,
+  ref, useContext,
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
   name: 'OnboardingLayout',
   setup () {
     const loading = ref(false)
-
+    const {
+      $capacitor
+    } = useContext()
     // DEFINE CONTENT
 
     // MOUNT
+    onMounted(() => {
+      $capacitor.AdMob_hideBanner()
+    })
 
     return {
       loading

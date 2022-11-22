@@ -34,7 +34,7 @@
                 <v-img :aspect-ratio="16/9" :src="page.featured_image_url" class="mb-4"/>
               </div>
               <div v-if="page.content" class="ma-5 mb-15">
-                <div v-if="page.isMarkdown" v-dompurify-html="$lang.get(page, 'content')" class="mdDoc"/>
+                <div v-if="page.isMarkdown" v-dompurify-html="$md.render($lang.get(page, 'content'))" class="mdDoc"/>
                 <div v-else v-dompurify-html="$lang.get(page, 'content')" class="mdDoc"/>
               </div>
             </v-col>

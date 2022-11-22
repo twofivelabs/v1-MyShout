@@ -9,7 +9,7 @@
           <v-icon color="myshoutRed">mdi-account-multiple-minus</v-icon>
         </v-list-item-icon>
         <v-list-item-content style="color: var(--v-myshoutRed-base);">
-          <v-list-item-title>Remove as friend</v-list-item-title>
+          <v-list-item-title>{{ $t('remove_friend') }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </template>

@@ -421,6 +421,8 @@ export default defineComponent({
     // This will load with moving back and forth
     watch(route, (r) => {
       if (r.name === 'chats-chat-id') {
+        $capacitor.AdMob_hideBanner()
+
         chatId.value = route.value.params.id
         loadMessages()
         goToBottom()

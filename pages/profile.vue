@@ -9,7 +9,7 @@
         </NotificationsButton>-->
       </v-col>
     </v-row>
-    <div v-if="profile">
+    <div v-if="profile" style="padding-bottom:150px;">
       <div class="text-center">
         <UserProfileavatar :user="profile" :size="120" />
         <ElementH1 v-if="profile.username" :text="`@${profile.username}`" />

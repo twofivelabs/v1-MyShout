@@ -44,6 +44,7 @@ export default defineComponent({
       $vuetify,
       $fire,
       $system,
+      $capacitor
     } = useContext()
     const route = useRoute()
     const loading = ref(false)
@@ -117,6 +118,9 @@ export default defineComponent({
     })
     onMounted(() => {
       $system.initDarkMode()
+
+      $capacitor.AdMob_init()
+      $capacitor.AdMob_banner()
 
       // Load remote config from firebase
       try {

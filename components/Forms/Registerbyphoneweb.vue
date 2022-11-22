@@ -5,8 +5,10 @@
                            v-model="form.phoneNumberFormatted"
                            @update="updatePhoneNumber($event)"
                            required
-                           :translations="{ countrySelectorLabel: '' }"
-
+                           :translations="{
+                              countrySelectorLabel: '',
+                              phoneNumberLabel: $t('form.phone')
+                           }"
       />
       <div class="text-center mt-10">
         <v-btn

@@ -267,6 +267,12 @@ export default {
     friends: 'Amigas',
     settings: 'Ajustes',
 
+    alert: 'Alerta',
+    accident: 'Accidente',
+    kidnapping: 'Secuestro',
+    robbery: 'Robo',
+    shout: 'Grito',
+
     alert_details: 'Detalles de la alerta',
     accident_alert: 'Alerta de accidente',
     kidnapping_alert: 'Alerta de secuestro',

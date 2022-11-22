@@ -6,7 +6,7 @@
           <v-icon >mdi-message-text</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title>Send a message</v-list-item-title>
+          <v-list-item-title>{{ $t('chats.send_message') }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </slot>

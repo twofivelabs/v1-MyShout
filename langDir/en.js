@@ -268,6 +268,12 @@ export default {
     friends: 'Friends',
     settings: 'Settings',
 
+    alert: 'Alert',
+    accident: 'Accident',
+    kidnapping: 'Kidnapping',
+    robbery: 'Robbery',
+    shout: 'Shout',
+
     alert_details: 'Alert Details',
     accident_alert: 'Accident Alert',
     kidnapping_alert: 'Kidnapping Alert',

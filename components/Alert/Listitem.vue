@@ -8,17 +8,21 @@
         <IconsShout v-if="alert.type === 'shout'" width="50" />
       </div>
       <v-list-item-content>
-        <ElementH3 :text="alert.type" align="left" style="text-transform: capitalize;" />
+        <ElementH3 v-if="alert.type === 'accident'" :text="$t('accident')" align="left" style="text-transform: capitalize;" />
+        <ElementH3 v-if="alert.type === 'kidnapping'" :text="$t('kidnapping')" align="left" style="text-transform: capitalize;" />
+        <ElementH3 v-if="alert.type === 'robbery'" :text="$t('robbery')" align="left" style="text-transform: capitalize;" />
+        <ElementH3 v-if="alert.type === 'shout'" :text="$t('shout')" align="left" style="text-transform: capitalize;" />
+
         <span class="caption" v-if="alert.location">{{ alert.location.city }}, {{ alert.location.province }}</span>
         <span class="caption" v-else-if="alert.gps.lat">{{ alert.gps.lat }}, {{ alert.gps.lng }}</span>
       </v-list-item-content>
       <v-list-item-action class="mr-3">
-        <span class="caption">{{ alert.timeAgo }}</span>
+        <span class="caption">{{ alert.created_at }}</span>
       </v-list-item-action>
     </v-list-item>
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="80vh" class="rounded-t-xl pb-14">
-        <div class="ma-3">
+        <div class="ma-3" style="padding-bottom:150px;">
           <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
                           @click.native="swipe('Down')"
           />

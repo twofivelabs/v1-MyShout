@@ -65,7 +65,7 @@ export default defineComponent({
   middleware: 'authenticated',
   setup() {
     const { state, commit } = useStore()
-    const { $system, $fire } = useContext()
+    const { $system, $fire, $capacitor } = useContext()
     const user = computed(() => state.user.data)
     const chatList2 = computed(() => state.chats.all)
     const loading = ref(false)
@@ -110,6 +110,9 @@ export default defineComponent({
     onMounted(() => {
       if (user.value.uid) {
         getChats()
+
+        $capacitor.AdMob_init()
+        $capacitor.AdMob_banner()
       }
     })
 

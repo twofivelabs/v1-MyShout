@@ -5,7 +5,10 @@
                            v-model="form.phoneNumberFormatted"
                            @update="updatePhoneNumber($event)"
                            required
-                           :translations="{ countrySelectorLabel: '' }"
+                           :translations="{
+                              countrySelectorLabel: '',
+                              phoneNumberLabel: $t('form.phone')
+                           }"
       />
       <div class="text-center mt-10">
         <v-btn
@@ -26,7 +29,7 @@
       <v-card
           class="elevation-0 pa-12 rounded-xl"
       >
-        <ElementH3 text="We sent you a SMS code" align="center" />
+        <ElementH3 :text="$t('heading.we_sent_you_sms_code')" align="center" />
         <v-text-field
             :label="$t('form.code')"
             :placeholder="$t('form.code')"

@@ -6,21 +6,21 @@
   >
     <template v-slot:activator="{ on, attrs }" >
       <div class="text-center grey--text caption lighten-1">
-        <div>By signing up you agree to our</div>
-        <div v-on="on" v-bind="attrs" @click="loadPage">Privacy Policy and Terms</div>.
+        <div>{{ $t('onboarding.terms_text') }}</div>
+        <div v-on="on" v-bind="attrs" @click="loadPage">{{ $t('onboarding.terms_btn') }}</div>.
       </div>
     </template>
 
     <v-card class="pa-2 pt-6 rounded-xl elevation-13">
       <v-card-text>
         <div v-if="loading">
-          :text="$t('is_loading')"
+          {{ $t('is_loading') }}
         </div>
         <div v-else-if="page">
-          <h4 class="text-h4 text-center">{{ page.title }}</h4>
+          <h4 class="text-h4 text-center">{{ $lang.get(page, 'title') }}</h4>
           <div v-if="page.content">
-            <div v-if="page.isMarkdown" v-dompurify-html="$md.render(page.content)" class="mdDoc mt-5"/>
-            <div v-else v-dompurify-html="page.content" class="mdDoc mt-5"/>
+            <div v-if="page.isMarkdown" v-dompurify-html="$md.render($lang.get(page, 'content'))" class="mdDoc mt-5"/>
+            <div v-else v-dompurify-html="$lang.get(page, 'content')" class="mdDoc mt-5"/>
           </div>
         </div>
       </v-card-text>
@@ -29,7 +29,7 @@
             text
             @click="dialog = false"
         >
-          Close
+          {{ $t('btn.close') }}
         </v-btn>
       </v-card-actions>
     </v-card>
