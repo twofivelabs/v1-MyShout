@@ -51,26 +51,7 @@
             </v-btn>
           </template>
           <template v-slot:append>
-            <v-btn
-                :loading="imageButtonLoading"
-                @click="loadImageHandler"
-                color="transparent"
-                elevation="0"
-                class="pa-0"
-                small
-                fab
-            >
-              <v-badge
-                  :content="1"
-                  :value="imageAddedToMessage"
-                  color="green"
-                  overlap
-              >
-                <v-icon>
-                  mdi-image
-                </v-icon>
-              </v-badge>
-            </v-btn>
+            <ChatUploadimage :chat="chat" :currentUrl="imageMessageUrl" @url="imageMessageUrlCallback" />
             <v-btn
                 :loading="loading"
                 @mousedown.prevent="startRecording"
@@ -151,9 +132,6 @@ export default defineComponent({
     const audioUrl = ref(null)
     const timerCount = ref(120)
     const timerInterval = new Set()
-    // -- IMAGE MESSAGE --
-    const imageButtonLoading = ref(false)
-    const imageAddedToMessage = ref(false)
     const imageMessageUrl = ref()
 
     // GET CONTENT
@@ -269,7 +247,6 @@ export default defineComponent({
 
         // Reset
         newMessage.value = null
-        imageAddedToMessage.value = false
         imageMessageUrl.value = null
         await goToBottom(0)
       } catch (e) {
@@ -383,29 +360,10 @@ export default defineComponent({
         // ...
       }
     }
-    const loadImageHandler = async () => {
-      imageButtonLoading.value = true
-      imageAddedToMessage.value = false
-
-      try {
-        const photoBase64 = await $capacitor.cameraTakePicture(false)
-        const photoUrl = await $db.upload({
-          path: `/CHATS/${chatId.value}/${ new Date().getTime() }.jpg`,
-          data: photoBase64,
-          base64: true
-        })
-        // console.log('photoUrl', photoUrl)
-
-        if (photoUrl) {
-          imageAddedToMessage.value = true
-          imageMessageUrl.value = photoUrl
-        }
-      } catch {
-        // ...
-      } finally {
-        imageButtonLoading.value = false
-      }
+    const imageMessageUrlCallback = (url) => {
+      imageMessageUrl.value = url
     }
+
 
     // WATCH
     // Wait for chat to finish loading then messages
@@ -446,14 +404,13 @@ export default defineComponent({
       buttonText,
       timerCount,
       user,
-      imageButtonLoading,
-      imageAddedToMessage,
-      loadImageHandler,
+      imageMessageUrl,
       sendMessage,
       onIntersect,
       startRecording,
       stopRecording,
-      goTo
+      goTo,
+      imageMessageUrlCallback
     }
   }
 })
