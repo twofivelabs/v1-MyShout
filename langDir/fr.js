@@ -4,6 +4,7 @@ export default {
         back_to_login: 'Retour connexion',
         save: 'Enregistrer',
         delete: 'Effacer',
+        download: 'Télécharger',
         send: 'Envoyer',
         retry: 'Recommencez',
         add: 'Ajouter',

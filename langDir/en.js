@@ -4,6 +4,7 @@ export default {
         back_to_login: 'Back to login',
         save: 'Save',
         delete: 'Delete',
+        download: 'Download',
         send: 'Send',
         retry: 'Retry',
         add: 'Add',

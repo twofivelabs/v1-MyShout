@@ -8,9 +8,10 @@
             {{ message.message }}
           </div>
           <div v-if="message.audioUrl">
-            <audio v-if="!message.audioExpired" controls preload="metadata" style="min-width:220px">
+            <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />
+<!--            <audio v-if="!message.audioExpired" controls preload="metadata" style="min-width:220px">
               <source :src="`${message.audioUrl}`">
-            </audio>
+            </audio>-->
             <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
           </div>
           <div v-if="message.image">
@@ -38,8 +39,8 @@
                   minute: 'numeric'
                 }) }}
             <span v-if="message.audioUrl" class="pl-3">
-              <v-btn @click="downloadFile(message.audioUrl)" plain text small class="pa-0 ma-0 white--text text-capitalize">Download</v-btn>
-              <v-btn @click="deleteFile(message.audioUrl)" :loading="loading" plain text small class="pa-0 ma-0 white--text text-capitalize">Delete</v-btn>
+              <v-btn @click="downloadFile(message.audioUrl)" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.download')}}</v-btn>
+              <v-btn @click="deleteFile(message.audioUrl)" :loading="loading" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.delete')}}</v-btn>
             </span>
           </div>
         </div>

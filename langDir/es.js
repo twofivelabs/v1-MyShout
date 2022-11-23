@@ -4,6 +4,7 @@ export default {
         back_to_login: 'Atrás para iniciar sesión',
         save: 'Guardar',
         delete: 'Borrar',
+        download: 'Descargar',
         send: 'Enviar',
         retry: 'Rever',
         add: 'Agregar',
