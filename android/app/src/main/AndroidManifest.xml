@@ -63,6 +63,12 @@
         <meta-data
                 android:name="com.google.android.gms.ads.APPLICATION_ID"
                 android:value="@string/admob_app_id"/>
+
+        <service
+                android:name="com.equimaps.capacitor_background_geolocation.BackgroundGeolocationService"
+                android:enabled="true"
+                android:exported="true"
+                android:foregroundServiceType="location" />
     </application>
 
     <meta-data

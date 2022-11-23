@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import ch.byrds.capacitor.contacts.Contacts;
 import com.baumblatt.capacitor.firebase.auth.CapacitorFirebaseAuth;
+import com.equimaps.capacitor_background_geolocation.BackgroundGeolocation;
 
 public class MainActivity extends BridgeActivity {
   @Override
@@ -18,6 +19,7 @@ public class MainActivity extends BridgeActivity {
            // registerPlugin(com.getcapacitor.community.stripe.StripePlugin.class);
 			registerPlugin(Contacts.class);
 			registerPlugin(CapacitorFirebaseAuth.class);
+			registerPlugin(BackgroundGeolocation.class);
 
 
            /* // Initializes the Bridge

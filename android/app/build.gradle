@@ -6,7 +6,7 @@ android {
     compileSdk compileSdkVersion
     defaultConfig {
         targetSdk 31
-        minSdk 21
+        minSdk 23
         compileSdkVersion 31
         applicationId "org.myshout.app"
         versionCode 15

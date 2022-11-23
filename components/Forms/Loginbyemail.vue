@@ -52,7 +52,7 @@ import formRules from '~/classes/formRules'
 export default defineComponent({
   name: 'FormsLoginbyemail',
   setup () {
-    const { $fire, $fireModule, $notify, $system } = useContext()
+    const { $fire, $fireModule, $notify, $system, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
