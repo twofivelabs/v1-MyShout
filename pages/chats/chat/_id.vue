@@ -52,24 +52,8 @@
           </template>
           <template v-slot:append>
             <ChatUploadimage :chat="chat" :currentUrl="imageMessageUrl" @url="imageMessageUrlCallback" />
-            <v-btn
-                :loading="loading"
-                @mousedown.prevent="startRecording"
-                @touchstart="startRecording"
-                @mouseup.prevent="stopRecording"
-                @mouseout="stopRecording"
-                @touchend="stopRecording"
-                @touchcancel="stopRecording"
-                @contextmenu.prevent="startRecording"
-                color="transparent"
-                elevation="0"
-                class="pa-0"
-                small
-                fab
-            >
-              <v-icon v-if="!buttonText">mdi-microphone</v-icon>
-              {{ buttonText }}
-            </v-btn>
+            <ChatRecordaudio :chat="chat" />
+
           </template>
         </v-text-field>
       </v-app-bar>
@@ -91,8 +75,9 @@ import {
   useContext,
   useRoute,
   useFetch,
-  useStore, computed,
-    watch
+  useStore,
+  computed,
+  watch
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -104,7 +89,6 @@ export default defineComponent({
       $notify,
       $fire,
       $vuetify,
-      $db,
       $capacitor,
       $encryption,
       $system, i18n,
@@ -126,12 +110,7 @@ export default defineComponent({
     const chatId = ref()
     const users = ref({})
     const messageListener = ref()
-    // -- AUDIO MESSAGE --
-    const buttonText = ref()
-    const isRecording = ref(false)
-    const audioUrl = ref(null)
-    const timerCount = ref(120)
-    const timerInterval = new Set()
+
     const imageMessageUrl = ref()
 
     // GET CONTENT
@@ -256,71 +235,6 @@ export default defineComponent({
         })
       }
     }
-    const startRecording = async () => {
-      if (isRecording.value) return
-      isRecording.value = true
-
-      try {
-        buttonText.value = '120'
-
-        // count down timer
-        timerInterval.add(setInterval(() => {
-          timerCount.value--;
-          buttonText.value = `${timerCount.value}`
-          if (timerCount.value <= 0) {
-            stopRecording()
-          }
-        }, 1000))
-
-        await $capacitor.microphoneStart()
-
-      } catch (e) {
-        console.log('Error starting ', e)
-      }
-    }
-    const stopRecording = async () => {
-      isRecording.value = false
-      buttonText.value = null
-      timerCount.value = 120
-
-      // Clear timers
-      for (const id of timerInterval) {
-        timerInterval.delete(id)
-        clearInterval(id)
-      }
-
-      // Try and stop recorder
-      try {
-        const audio = await $capacitor.microphoneStop()
-
-        // Upload Audio File
-        if (audio) {
-          audioUrl.value = await $db.upload({
-            path: `/CHATS/${chatId.value}/${user.value.data.uid}-${Date.now()}.wav`,
-            data: audio.recordDataBase64,
-            base64: true
-          })
-
-          // Send Message
-          await dispatch('chats/messages/add', {
-            chatId: chatId.value,
-            message: {
-              message: '',
-              owner: user.value.data.uid,
-              audioUrl: audioUrl.value
-            }
-          })
-          try {
-            await $vuetify.goTo('#bottomOfChat')
-          } catch {
-            // ...
-          }
-        }
-      } catch (e) {
-        // ...
-        console.log('ERROR STOPPING', e)
-      }
-    }
     const goToBottom = async (delay = 1000) => {
       setTimeout(() => {
         $vuetify.goTo('#bottomOfChat').then(() => {
@@ -364,7 +278,6 @@ export default defineComponent({
       imageMessageUrl.value = url
     }
 
-
     // WATCH
     // Wait for chat to finish loading then messages
     watch(chatLoading, () => {
@@ -401,14 +314,10 @@ export default defineComponent({
       newMessage,
       messages,
       users,
-      buttonText,
-      timerCount,
       user,
       imageMessageUrl,
       sendMessage,
       onIntersect,
-      startRecording,
-      stopRecording,
       goTo,
       imageMessageUrlCallback
     }
