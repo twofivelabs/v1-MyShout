@@ -663,6 +663,7 @@ export default function ({
                 })
         } catch (e) {
             console.log('Error stopping', e)
+            return false
         }
     }
   })
