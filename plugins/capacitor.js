@@ -123,7 +123,7 @@ export default function ({
      speed: null
      */
     async gpsSetPosition (gps) {
-        console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
+        // console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
         await store.dispatch('user/updateGPS', gps)
     },
     async gpsGetCurrentPosition () {
@@ -160,7 +160,7 @@ export default function ({
         // GET BY IP
         // TODO: Need to tweak, because this might always run
         if (app.$config.getVisitorIP) {
-            console.log('$capacitor > getSetCurrentPosition > getVisitorLocationByIP')
+            // ('$capacitor > getSetCurrentPosition > getVisitorLocationByIP')
             await app.$services.getVisitorLocationByIP().then(async (coordinates) => {
                 app.$capacitor.gpsSetPosition({
                     lat: coordinates.latitude,
@@ -220,7 +220,7 @@ export default function ({
           return false
         })
         if (coordinates) {
-          console.log('$capacitor > getSetCurrentPosition > coordinates', coordinates)
+          // console.log('$capacitor > getSetCurrentPosition > coordinates', coordinates)
           retCoordinates = {
             lat: coordinates.coords.latitude,
             lng: coordinates.coords.longitude,
@@ -230,7 +230,7 @@ export default function ({
           // Most likely using this 1 time, don't want to burn through our API requests
           if (!store.state.user.gps.lat) {
               if(app.$config.getVisitorIP) {
-                  console.log('$capacitor > getSetCurrentPosition > getVisitorLocationByIP')
+                  // console.log('$capacitor > getSetCurrentPosition > getVisitorLocationByIP')
                   await app.$services.getVisitorLocationByIP().then(async (data) => {
                       retCoordinates = {
                           lat: data.latitude,

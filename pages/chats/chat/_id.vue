@@ -178,6 +178,7 @@ export default defineComponent({
     const sendMessage = async () => {
       try {
         if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
+          console.log("STICKY: No Message To Send....")
           $notify.show({
             text: i18n.t('notify.error_try_again'),
             color: 'error'
@@ -233,6 +234,8 @@ export default defineComponent({
           text: i18n.t('notify.error_try_again'),
           color: 'error'
         })
+        console.log("STICKY: Cannot Send Message", e)
+
       }
     }
     const goToBottom = async (delay = 1000) => {
