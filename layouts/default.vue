@@ -111,7 +111,7 @@ export default defineComponent({
 
       /**
        * Deep Linking for mobile
-       * This should open the app if someone clicks a link and they have the app installed
+       * This should open the app if someone clicks a link, and they have the app installed
        */
       if ((isIphone === 'iPhone' || isAndroid === 'Android') && isIpad === 'null') {
         window.location = `${$config.deepLink}://${location}`
@@ -123,8 +123,10 @@ export default defineComponent({
 
       $system.initDarkMode()
 
-      $capacitor.AdMob_init()
-      $capacitor.AdMob_banner()
+      setTimeout(() => {
+        $capacitor.AdMob_init()
+        $capacitor.AdMob_banner()
+      }, 1500)
 
       // Load remote config from firebase
       try {

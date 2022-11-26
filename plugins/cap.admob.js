@@ -28,8 +28,8 @@ export default {
 
         AdMob.initialize({
             requestTrackingAuthorization: true,
-            testingDevices: ['2077ef9a63d2b398840261c8221a0c9b'],
-            initializeForTesting: true,
+            //testingDevices: ['2077ef9a63d2b398840261c8221a0c9b'],
+            //initializeForTesting: true,
         }).then().catch()
 
         // LISTENERS

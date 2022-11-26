@@ -36,7 +36,7 @@
           <div id="bottomOfChat"></div>
       </v-card>
 
-      <v-app-bar color="transparent" class="align-center" flat bottom fixed style="top:calc(100% - 180px)">
+      <v-app-bar color="transparent" class="align-center formMessageInput" flat bottom fixed style="top:calc(100% - 180px)">
         <v-text-field
             v-model="newMessage"
             @keydown.enter="sendMessage"
@@ -110,13 +110,14 @@ export default defineComponent({
     const chatId = ref()
     const users = ref({})
     const messageListener = ref()
-
     const imageMessageUrl = ref()
+
+    $capacitor.AdMob_hideBanner()
 
     // GET CONTENT
     useFetch(async () => {
+      chatLoading.value = true
       try {
-        chatLoading.value = true
         await dispatch('chats/getOne', route.value.params.id).then(async (res) => {
           if (res !== false) {
             chat.value = res
@@ -286,6 +287,8 @@ export default defineComponent({
     watch(chatLoading, () => {
       if (chatLoading.value === false) {
         if (route.value.params.id) {
+          $capacitor.AdMob_hideBanner()
+
           chatId.value = route.value.params.id
           loadMessages()
           goToBottom(2500)
@@ -329,19 +332,15 @@ export default defineComponent({
 
 </script>
 <style>
-* {
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  user-select: none;
-}
 
-.chatBox { width: 100%; padding-bottom:120px !important; }
-.chatBox * {
-  overflow-anchor: none;
-}
+.chatBox { z-index:0; width: 100%; padding-bottom:120px !important; }
+
 #bottomOfChat {
   overflow-anchor: auto;
   height: 1px;
+}
+.formMessageInput {
+  z-index: 999999999;
 }
 .v-text-field .v-input__control {
   margin-top:5px !important;
