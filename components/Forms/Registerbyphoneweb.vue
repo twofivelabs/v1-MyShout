@@ -51,6 +51,7 @@
           >
             {{ $t('btn.verify') }}
           </v-btn>
+
           <FormsRecoverbyemail />
         </div>
       </v-card>
