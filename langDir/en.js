@@ -170,7 +170,9 @@ export default {
         new_friend_request: 'New Friend Request',
         friend_request_approved: 'Friend Request Approved',
         requested_to_be_your_friend: 'requested to be your friend.',
-        accepted_your_friendship: 'accepted your friendship.'
+        accepted_your_friendship: 'accepted your friendship.',
+
+        this_is_emergency_alarm_from: 'This is an emergency alarm from'
     },
     gps: {
         gps: 'GPS',
@@ -286,6 +288,7 @@ export default {
     notified_emergency_contacts_accident: 'We have notified your emergency contacts of your accident. Please call them as soon as you have the opportunity.',
     notified_emergency_contacts_kidnapping: 'We have notified your emergency contacts of your kidnapping. Please call them as soon as you have the opportunity.',
     notified_emergency_contacts_robbery: 'We have notified your emergency contacts of your robbery. Please call them as soon as you have the opportunity.',
+
 
     recording: 'Recording',
 

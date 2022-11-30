@@ -171,7 +171,9 @@ export default {
         new_friend_request: 'Nueva solicitud de amistad',
         friend_request_approved: 'Solicitud de amistad aprobada',
         requested_to_be_your_friend: 'pidió ser su amigo.',
-        accepted_your_friendship: 'acepto tu amistad.'
+        accepted_your_friendship: 'acepto tu amistad.',
+
+        this_is_emergency_alarm_from: 'Esta es una alarma de emergencia de'
     },
     gps: {
         gps: 'GPS',
