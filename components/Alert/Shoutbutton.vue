@@ -25,7 +25,7 @@
         duration: 400
       }"
       />
-      {{  buttonText }}
+      {{  buttonText }} {{ timerCountText }}
     </v-btn>
     <div class="text-center gray--text caption mt-n4">
       {{ $t('hold_for') }}
@@ -86,6 +86,7 @@ export default defineComponent({
     // DEFINE CONTENT
     const dialog = ref(false)
     const buttonText = computed(() => i18n.t('shout_alert'))
+    const timerCountText = ref(null)
     const audioUrl = ref(null)
     const timerCount = ref(5)
     const isRecording = ref(false)
@@ -121,7 +122,6 @@ export default defineComponent({
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       } finally {
         loading.value = false
-        buttonText.value = i18n.t('shout_alert')
       }
     }
     const startRecording = async () => {
@@ -131,12 +131,12 @@ export default defineComponent({
       console.log('STICKY: START RECORDING')
 
       try {
-        buttonText.value = `${i18n.t('recording')}... 5`
+        timerCountText.value = `${i18n.t('recording')}... 5`
 
         // 5 second count down timer
         timerInterval.add(setInterval(function () {
           timerCount.value--;
-          buttonText.value = `${i18n.t('recording')}... ${timerCount.value}`
+          timerCountText.value = `${i18n.t('recording')}... ${timerCount.value}`
           if (timerCount.value <= 0) {
             stopRecording()
           }
@@ -152,7 +152,7 @@ export default defineComponent({
       console.log('STICKY: STOP RECORDING')
       isRecording.value = false
       timerCount.value = 5
-      buttonText.value = i18n.t('shout_alert')
+      timerCountText.value = null
 
       // Clear timers
       for (const id of timerInterval) {
@@ -191,6 +191,7 @@ export default defineComponent({
       dialog,
       buttonText,
       timerCount,
+      timerCountText,
       openDialog,
       startRecording,
       stopRecording,
