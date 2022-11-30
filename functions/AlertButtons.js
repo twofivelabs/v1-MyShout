@@ -45,19 +45,8 @@ exports.sendAlert = functions.https.onCall((data) => {
               u.id = doc.id;
               functions.logger.log("USER LOG 2", u);
 
-              // ADD SMS DOC TO USER
+              // ADD SMS TO USER DOC
               /* admin.firestore()
-                  .collection(`Users/${u.id}/SMS`)
-                  .add({
-                    body: `This is an emergency alarm from ${data.data.user.username} **${data.type} alert**.`,
-                    created_at: new Date(),
-                  })
-                  .then(() => {
-                    functions.logger.log("Added SMS to user");
-                  }); */
-
-              // ADD NOTIFICATION TO USER DOC
-              admin.firestore()
                   .collection(`Users/${u.id}/SMS`)
                   .add({
                     uid: u.id,
@@ -70,6 +59,22 @@ exports.sendAlert = functions.https.onCall((data) => {
                   })
                   .then(() => {
                     functions.logger.log("Added Notification to user");
+                  }); */
+
+              // ADD NOTIFICATION TO USER DOC
+              admin.firestore()
+                  .collection(`Users/${u.id}/Notifications`)
+                  .add({
+                    uid: u.id,
+                    title: `${data.type} alert`,
+                    body: `This is an emergency alarm from ${data.data.user.username} **${data.type} alert**.`,
+                    goTo: `/users/user/${data.data.user.id}`,
+                    type: "alert",
+                  }).then(() => {
+                    return Promise.resolve(true);
+                  }).catch(() => {
+                    functions.logger.error("ALERT > Add Notification Error", u);
+                    return Promise.resolve(false);
                   });
             });
           });

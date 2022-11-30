@@ -32,6 +32,19 @@
                 <span v-else-if="notification.type === 'chat'">
                   <v-icon color="myshoutOrange">mdi-message</v-icon>
                 </span>
+                <span v-else-if="notification.title === 'kidnapping alert'">
+                  <v-icon color="myshoutRed">mdi-alert</v-icon>
+                </span>
+                <span v-else-if="notification.title === 'accident alert'">
+                  <v-icon color="myshoutRed">mdi-alert</v-icon>
+                </span>
+                <span v-else-if="notification.title === 'robbery alert'">
+                  <v-icon color="myshoutRed">mdi-alert</v-icon>
+                </span>
+                <span v-else-if="notification.title === 'shout alert'">
+                  <v-icon color="myshoutRed">mdi-alert</v-icon>
+                </span>
+
 
                 <span v-if="notification.title === 'Chat Notification'">
                   {{ $t('notifications.chat_notification') }}
@@ -42,6 +55,19 @@
                 <span v-else-if="notification.title === 'Friend Request Approved'">
                   {{ $t('notifications.friend_request_approved') }}
                 </span>
+                <span v-else-if="notification.title === 'kidnapping alert'">
+                  {{ $t('kidnapping_alert') }}
+                </span>
+                <span v-else-if="notification.title === 'accident alert'">
+                  {{ $t('accident_alert') }}
+                </span>
+                <span v-else-if="notification.title === 'robbery alert'">
+                  {{ $t('robbery_alert') }}
+                </span>
+                <span v-else-if="notification.title === 'shout alert'">
+                  {{ $t('shout_alert') }}
+                </span>
+
                 <span v-else>
                   {{ notification.title }}
                 </span>
@@ -53,6 +79,10 @@
                 <span v-else-if="notification.body && notification.body.includes('accepted your friendship.')">
                   {{ notification.body.replace('requested to be your friend.', $t('notifications.accepted_your_friendship')) }}
                 </span>
+                <span v-else-if="notification.body && notification.body.includes('This is an emergency alarm from')">
+                  {{ emergencyBodyNotification(notification.body) }}
+                </span>
+
                 <span v-else>
                   {{ notification.body }}
                 </span>
@@ -256,6 +286,24 @@ export default defineComponent({
       }
       commit('user/notifications/SET_HAS_NOTIFICATIONS', false)
     }
+    const emergencyBodyNotification = (body) => {
+      let newBody = body.replace('This is an emergency alarm from', i18n.t('notifications.this_is_emergency_alarm_from'))
+
+      if (newBody.includes('**accident alert**')) {
+        newBody = newBody.replace('**accident alert**', '**'+ i18n.t('accident_alert') +'**')
+      }
+      if (body.includes('**kidnapping alert**')) {
+        newBody = newBody.replace('**kidnapping alert**', '**'+ i18n.t('kidnapping_alert') +'**')
+      }
+      if (newBody.includes('**robbery alert**')) {
+        newBody = newBody.replace('**robbery alert**', '**'+ i18n.t('robbery_alert') +'**')
+      }
+      if (newBody.includes('**shout alert**')) {
+        newBody = newBody.replace('**shout alert**', '**'+ i18n.t('shout_alert') +'**')
+      }
+
+      return newBody
+    }
 
     return {
       loading,
@@ -263,6 +311,7 @@ export default defineComponent({
       profile,
       notifications,
       goTo,
+      emergencyBodyNotification,
       onIntersect,
       checkInResponse,
       approveFriendRequest,

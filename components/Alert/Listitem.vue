@@ -28,7 +28,7 @@
           />
 
           <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
-          <ElementH1 align="center" text="Alert Details" />
+          <ElementH1 align="center" :text="$t('alert_details')" />
 
           <IconsAccident v-if="alert.type === 'accident'" width="60" />
           <IconsKidnapping v-if="alert.type === 'kidnapping'" width="60" />
