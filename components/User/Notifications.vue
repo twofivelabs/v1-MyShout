@@ -156,13 +156,13 @@ export default defineComponent({
 
     // DEFINE CONTENT
     const loading = ref(false)
-    const notifications = computed(() => state.user.notifications.loaded)
+    const notifications = computed(() => state.user.notifications.all)
 
     // GET CONTENT
     useFetch(async () => {
       try {
         loading.value = true
-        await dispatch('user/notifications/listen')
+        // await dispatch('user/notifications/listen')
       } catch(e) {
         $system.log({
           comp: 'UserNotifications',

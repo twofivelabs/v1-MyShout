@@ -27,7 +27,7 @@
         </v-row>
       </div>
       <div v-else>
-        <div v-if="page">
+        <div v-if="page" style="padding-bottom:125px !important;">
           <v-row>
             <v-col cols="12">
               <div v-if="page.featured_image_url">

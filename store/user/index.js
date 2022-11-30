@@ -404,10 +404,13 @@ export const actions = {
     }
     return response
   },
-  async listen({ commit }, id) {
+  async listen({ commit, dispatch }, id) {
       try {
         if(id) {
           console.log('listening to user', id)
+
+          dispatch('user/notifications/listen', null, {root:true})
+
           return this.$fire.firestore
               .doc(`Users/${id}`)
               .onSnapshot(async (doc) => {

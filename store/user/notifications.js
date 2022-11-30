@@ -72,6 +72,24 @@ export const mutations = {
     state.all = data
     // Vue.set(state, 'all', data)
   },
+  PUSH_TO_ALL: (state, { data, position }) => {
+    if (!data) return
+
+    let indexOfMatchingSlug = -1
+    if (data && data.id) {
+        indexOfMatchingSlug = state.all.findIndex(one => one.id === data.id)
+    }
+    if (indexOfMatchingSlug > -1) {
+        Vue.set(state.all, indexOfMatchingSlug, data)
+        Vue.set(state, 'allCount', state.all.length)
+    } else {
+        if (!position || position === 'push') {
+            state.all.push(data)
+        } else {
+            state.all.unshift(data)
+        }
+    }
+  },
   PUSH_TO_LOADED: (state, data) => {
     Vue.set(state.loaded, data.id, data)
     // state.loaded[data.id] = data
@@ -151,6 +169,8 @@ export const actions = {
   },
   async listen ({ rootState, commit }) {
     const uid = rootState.user.data.uid
+    let hasInitNotifications = false
+    console.log('...LISTENING TO NOTIFICATIONS...')
     await this.$fire.firestore.collection(`Users/${uid}/${dbRootPath}`)
         .orderBy('created_at', 'desc')
         .limitToLast(100)
@@ -160,15 +180,19 @@ export const actions = {
             const data = change.doc.data()
             data.id = change.doc.id
             data.created_at = data.created_at.toDate().toDateString()
+
             if (change.type === 'added') {
               if (data && data.seen === false) {
                 commit('SET_HAS_NOTIFICATIONS', true)
               }
+              const position = (hasInitNotifications ? 'unshift' : 'push')
+              commit('PUSH_TO_ALL', {data, position})
               commit('PUSH_TO_LOADED', data)
             } else if (change.type === 'removed') {
               commit('REMOVE', data)
             }
           })
+          hasInitNotifications = true
         })
   },
   async remove ({ rootState }, doc) {
