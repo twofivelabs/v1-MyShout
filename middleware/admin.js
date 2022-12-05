@@ -13,6 +13,7 @@ export default async function ({ app, store, redirect }) {
             if (userToken && userToken.claims && (userToken.claims.isAdmin || userToken.claims.isSuper)) {
                 return true
             }
+            console.log('go to onboarding, admin')
             redirect('/onboarding/')
             return false
         }
@@ -23,6 +24,7 @@ export default async function ({ app, store, redirect }) {
         return await redirectToAdmin()
     }
     else {
+        console.log('go to onboarding, admin')
         return redirect('/onboarding/')
     }
 }

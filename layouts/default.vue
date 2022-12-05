@@ -66,6 +66,7 @@ export default defineComponent({
        */
       if (!$ttlStorage.get('onboardingComplete') && $vuetify.breakpoint.mdAndDown) {
         if (window.location.pathname !== '/onboarding') {
+          console.log('go to onboarding, default')
           router.push('/onboarding')
         }
       }

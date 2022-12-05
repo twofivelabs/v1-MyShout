@@ -7,7 +7,7 @@
     <template v-slot:activator="{ on, attrs }" >
       <div class="text-center grey--text caption lighten-1">
         <div>{{ $t('onboarding.terms_text') }}</div>
-        <div v-on="on" v-bind="attrs" @click="loadPage">{{ $t('onboarding.terms_btn') }}</div>.
+        <div v-on="on" v-bind="attrs" @click="loadPage">{{ $t('onboarding.terms_btn') }}.</div>
       </div>
     </template>
 

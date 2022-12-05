@@ -66,7 +66,7 @@ import formRules from '~/classes/formRules'
 export default defineComponent({
   name: 'FormsRecoverbyemail',
   setup () {
-    const { $fire, $fireModule, $notify, $system, i18n } = useContext()
+    const { $fire, $helper, $fireModule, $ttlStorage, $notify, $system, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
     const dialog = ref(false)
@@ -92,25 +92,51 @@ export default defineComponent({
     }
     const register = async () => {
       if (form.value.email && form.value.password) {
+
         try {
+          // SIGNOUT FIRST
+          await $fire.auth.signOut()
+
           if ($fire.auth.currentUser === null) {
-            $notify.show({ text: 'Error creating your account', color: 'red' })
             await $fire.auth.createUserWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
+            $fire.analytics.logEvent('sign_up')
+            $notify.show({ text: i18n.t('notify.success'), color: 'green' })
+
+            $ttlStorage.set('onboardingComplete', true)
+
+            await $helper.sleep(500)
+            loading.value = false
+
+            await router.push('/')
+
           } else {
             const credential = await $fireModule.auth.EmailAuthProvider.credential(form.value.email.trim().toLowerCase(), form.value.password)
-            await $fire.auth.currentUser.linkWithCredential(credential).then(() => {
+            await $fire.auth.currentUser.linkWithCredential(credential).then(async () => {
               $fire.analytics.logEvent('sign_up')
+              $notify.show({ text: i18n.t('notify.success'), color: 'green' })
+
+              $ttlStorage.set('onboardingComplete', true)
+
+              await $helper.sleep(500)
+              loading.value = false
+
+              await router.push('/')
+
             }).catch((e) => {
+              loading.value = false
+              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+
               $system.log({
                 comp: 'FormsRecoverbyemail',
                 msg: 'Error trying to link account',
                 val: e
               })
             })
+            loading.value = false
           }
-          $notify.show({ text: 'Successfully registered', color: 'green' })
-          await router.push('/')
+
         } catch (e) {
+          loading.value = false
           $system.log({
             comp: 'FormsRecoverbyemail',
             msg: 'Error trying to register',
@@ -119,6 +145,7 @@ export default defineComponent({
           $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } else {
+        loading.value = false
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }

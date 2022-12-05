@@ -204,8 +204,12 @@ export const mutations = {
   SET_PROFILE_FIELD: (state, value) => {
     state.profile = Object.assign(state.profile, value)
     const key = Object.keys(value)[0]
+    const v = value[key]
     // console.log('VALUE', key)
-    Vue.set(state, `profile.${key}`, value)
+    console.log('SET PROFILE FIELD', key, v, JSON.stringify(value) )
+    // Vue.set(state, `profile.${key}`, value)
+    Vue.set(state, `profile.${key}`, v)
+    console.log('PROFILE', state.profile)
     // state.profile = Object.assign(state.profile, value)
   },
   SET_AUTH_USER: (state, {
@@ -426,10 +430,12 @@ export const actions = {
       }
   },
   async checkUserData ({ state }) {
+      console.log('checking user data')
     if (state.profile && state.profile.role.isActive) {
         // CHECK IS USERNAME IS AVAILABLE
         if (!state.profile.username || state.profile.username.length === 0) {
             // Make sure were not on the page we are redirecting to [could cause loop]
+            console.log('... Redirecting to onboarding 4')
             return this.$router.push('/onboarding/4')
         }
     }

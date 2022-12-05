@@ -79,9 +79,9 @@ export default defineComponent({
       if (form.value.email && form.value.password) {
         try {
           if ($fire.auth.currentUser === null) {
-            $notify.show({ text: 'Error creating your account', color: 'red' })
-            $fire.analytics.logEvent('login')
             await $fire.auth.createUserWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
+            $fire.analytics.logEvent('sign_up')
+
           } else {
             const credential = await $fireModule.auth.EmailAuthProvider.credential(form.value.email.trim().toLowerCase(), form.value.password)
             await $fire.auth.currentUser.linkWithCredential(credential).then(() => {

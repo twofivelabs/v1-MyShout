@@ -149,6 +149,8 @@ export default defineComponent({
               console.log('Sent to number ' + form.value.phone.trim().toLowerCase() + ' successfully!');
             },
             (e) => {
+              form.value.showOtpInput = true
+
               $system.log({
                 comp: 'FormsRegisterbyphonemobile',
                 msg: 'registerPhoneNumber > cfaSignIn',

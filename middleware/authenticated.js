@@ -3,9 +3,9 @@ export default async function ({ app, store, redirect }) {
     const userToken = user ? await user.getIdTokenResult() : false
 
     function checkUserStatus () {
-    if ((store.state.user.data.role && store.state.user.data.role.isActive) && !store.state.user.data.role.isActive) {
-      return redirect('/status')
-    }
+        if ((store.state.user.data.role && store.state.user.data.role.isActive) && !store.state.user.data.role.isActive) {
+          return redirect('/status')
+        }
     }
 
     async function redirectToAdmin () {
@@ -18,6 +18,7 @@ export default async function ({ app, store, redirect }) {
               redirect('/block/')
               return false
           }
+          return true
       }
 
     // Is user logged in with firebase, but we could throw some more error checks in here
@@ -33,9 +34,11 @@ export default async function ({ app, store, redirect }) {
 
     if (user) {
         checkUserStatus()
-        return await redirectToAdmin()
+        await redirectToAdmin()
+        return true
     }
     else {
+        console.log('Redirect to onboarding authenticated.js')
         return redirect('/onboarding/')
     }
 }
