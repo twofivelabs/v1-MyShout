@@ -26,9 +26,7 @@
     </div>
     <v-dialog v-model="form.showOtpInput" max-width="500">
       <!-- MAKE COMPONENT -->
-      <v-card
-          class="elevation-0 pa-12 rounded-xl"
-      >
+      <v-card class="elevation-0 pa-12 rounded-xl">
         <ElementH3 :text="$t('heading.we_sent_you_sms_code')" align="center" />
         <v-text-field
             :label="$t('form.code')"
@@ -125,12 +123,12 @@ export default defineComponent({
     }
     const registerPhoneNumber = async () => {
       loading.value = true
+      form.value.showOtpInput = true
       try {
         // Should be before sign in
         cfaSignInPhoneOnCodeSent().subscribe(
             (verificationId) => {
               appVerifier.value = verificationId
-              form.value.showOtpInput = true
             },
             (e) => {
               $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
@@ -202,10 +200,12 @@ export default defineComponent({
           form.value.showOtpInput = false
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           emit('response', { status: 'success', message: 'Successfully registered', 'goTo': '/onboarding/2.1' })
+
           // Update Profile
           dispatch('user/updateField', {
             created_at: new Date()
           })
+
         })
       } catch (e) {
         $system.log({

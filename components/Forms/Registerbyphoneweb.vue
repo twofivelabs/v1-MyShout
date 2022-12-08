@@ -26,9 +26,7 @@
     </div>
     <v-dialog v-model="form.showOtpInput" max-width="500">
       <!-- MAKE COMPONENT -->
-      <v-card
-          class="elevation-0 pa-12 rounded-xl"
-      >
+      <v-card class="elevation-0 pa-12 rounded-xl">
         <ElementH3 :text="$t('heading.we_sent_you_sms_code')" align="center" />
         <v-text-field
             :label="$t('form.code')"
@@ -88,7 +86,7 @@ export default defineComponent({
     },
   },
   setup (props, { emit }) {
-    const { $fire, $fireModule, $notify, $system, $ttlStorage, i18n } = useContext()
+    const { $fire, $fireModule, $helper, $notify, $system, $ttlStorage, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -104,6 +102,7 @@ export default defineComponent({
       showOtpInput: false,
       otpProvided: null
     })
+
     // METHODS
     const updatePhoneNumber = (e) => {
       form.value.phoneNumberFormatted = e.formattedNumber
@@ -120,19 +119,26 @@ export default defineComponent({
     const register = async () => {
       if (form.value.phone) {
         loading.value = true
+        form.value.showOtpInput = true
+
         try {
           // Create firebase credentials
           window.confirmationResult = await $fire.auth.signInWithPhoneNumber(form.value.phone.trim().toLowerCase(), appVerifier.value)
-          form.value.showOtpInput = true
 
         } catch (e) {
-          initRecaptcha()
+          // await initRecaptcha()
+
           if(e && e.message) {
-            $notify.show({ text: e.message, color: 'error' })
-            emit('response', { status: 'error', message: e.message })
+            if (e.message === 'reCAPTCHA placeholder element must be an element or id') {
+              // ...
+            } else {
+              $notify.show({ text: e.message, color: 'error' })
+
+            }
+            // emit('response', { status: 'error', message: e.message })
           } else {
             $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-            emit('response', { status: 'error', message: 'Error registering phone number 1' })
+            // emit('response', { status: 'error', message: 'Error registering phone number 1' })
           }
 
           $system.log({
@@ -142,14 +148,17 @@ export default defineComponent({
           })
         }
       } else {
-        initRecaptcha()
+        // await initRecaptcha()
+
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        emit('response', { status: 'error', message: 'Error try again' })
+        // emit('response', { status: 'error', message: 'Error try again' })
         console.log('STICKY: No phone number')
+
       }
     }
     const registerWithOTPCode = async () => {
       loading.value = true
+
       try {
         const result = await window.confirmationResult.confirm(form.value.otpProvided)
 
@@ -182,30 +191,39 @@ export default defineComponent({
           })
         }
       } catch (e) {
-        initRecaptcha()
+        // await initRecaptcha()
+
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         emit('response', { status: 'error', message: 'Error with phone code' })
+
         $system.log({
           comp: 'FormsRegisterbyphoneweb',
           msg: 'Registering phone code',
           val: e
         })
+
       } finally {
         loading.value = false
         form.value.showOtpInput = false
       }
     }
-    const initRecaptcha = () => {
-      appVerifier.value = new $fireModule.auth.RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          console.log('WORKS')
-        }
-      })
+    const initRecaptcha = async () => {
+      try {
+        await $helper.sleep(2000)
+        appVerifier.value = new $fireModule.auth.RecaptchaVerifier('recaptcha-container', {
+          size: 'invisible',
+          callback: () => {
+            console.log('WORKS')
+          }
+        })
+      } catch (e) {
+        console.log('initRecaptcha', e)
+      }
     }
+
     // MOUNT
-    onMounted(() => {
-      initRecaptcha()
+    onMounted(async() => {
+      await initRecaptcha()
     })
     return {
       loading,

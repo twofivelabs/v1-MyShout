@@ -26,6 +26,7 @@
               }">
         <div v-if="!showNext">
           <h5 class="text-h5 text-center">{{ $t('start_chatting') }}</h5>
+
           <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" @response="emittedResponseFunc" />
           <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" @response="emittedResponseFunc" />
         </div>
@@ -79,9 +80,9 @@ export default defineComponent({
     }
     const emittedResponseFunc = (res) => {
       if (res.status === 'success') {
-        goTo.value = res.goTo
-        onboardingState.showOtpInput = false
-        showNext.value = true
+        //goTo.value = res.goTo
+        //onboardingState.showOtpInput = false
+        //showNext.value = true
         $ttlStorage.set('onboardingComplete', true)
       }
     }
@@ -96,6 +97,7 @@ export default defineComponent({
 
     // WATCH
     watch(showNext, (val) => {
+      console.log('SHOW NEXT', val)
       if (val) {
         if (agreeToTerms.value) {
           router.push(goTo.value)

@@ -107,9 +107,10 @@ export default defineComponent({
     }
     const register = async () => {
       if (form.value.phone) {
+        form.value.showOtpInput = true
+
         try {
           window.confirmationResult = await $fire.auth.signInWithPhoneNumber(form.value.phone.trim().toLowerCase(), appVerifier.value)
-          form.value.showOtpInput = true
         } catch (e) {
           initRecaptcha()
 
@@ -155,12 +156,16 @@ export default defineComponent({
       loading.value = false
     }
     const initRecaptcha = () => {
-      appVerifier.value = new $fireModule.auth.RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          console.log('WORKS')
-        }
-      })
+      try {
+        appVerifier.value = new $fireModule.auth.RecaptchaVerifier('recaptcha-container', {
+          size: 'invisible',
+          callback: () => {
+            console.log('WORKS')
+          }
+        })
+      } catch (e) {
+        console.log('Loginbyphone > initRecaptcha', e)
+      }
     }
 
     // MOUNT
