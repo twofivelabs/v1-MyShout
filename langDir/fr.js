@@ -40,6 +40,7 @@ export default {
         log_out_sub: 'Se déconnecter ou changer de compte',
         login: 'Connexion',
         verify: 'Vérifier',
+        sign_up: `S'inscrire`,
         dark_mode: 'Mode sombre',
         learn_more: 'Apprendre encore plus',
         content: 'Contenu',
@@ -76,6 +77,10 @@ export default {
         please_confirm_delete: 'Veuillez confirmer que vous souhaitez supprimer votre compte et toutes les données. Ce n\'est pas réversible.'
     },
     heading: {
+        login_phone: `Veuillez fournir votre numéro de téléphone pour vous connecter`,
+        login_email: `Fournissez votre adresse email pour vous connecter`,
+        signup_phone: `Fournissez votre numéro de téléphone pour créer un compte`,
+        signup_email: `Veuillez fournir votre adresse email pour créer un compte`,        
         cant_receive_sms_code: 'Vous ne pouvez pas recevoir de code ? Se connecter par e-mail',
         we_sent_you_sms_code: 'Nous vous avons envoyé un code SMS',
         forgot_password: 'Mot de passe oublié',

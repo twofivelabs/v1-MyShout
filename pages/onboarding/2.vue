@@ -24,23 +24,81 @@
                 duration: 900,
                 delay:900
               }">
-        <div v-if="!showNext">
-          <h5 class="text-h5 text-center">{{ $t('start_chatting') }}</h5>
+        <v-tabs
+          v-if="!showNext"
+          v-model="activeTab"
+          background-color="transparent"
+          fixed-tabs
+        >
+          <v-tab>
+            {{ $t('btn.login') }}
+          </v-tab>
+          <v-tab>
+            {{ $t('btn.sign_up') }}
+          </v-tab>
+          <v-tabs-items v-model="activeTab" class="">
+            <v-tab-item>
+              <div v-if="phoneAuth">
+                <h5 class="text-h5 text-center">{{ $t('heading.login_phone') }}</h5>
+                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" @response="emittedResponseFunc" />
+                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" @response="emittedResponseFunc" /> 
+                <v-btn
+                  text block
+                  class="mx-auto mt-5"
+                  @click="phoneAuth = false"
+                >
+                  Use Email Address
+                </v-btn>
+              </div>
+              <div v-else>
+                <h5 class="text-h5 text-center">{{ $t('heading.login_email') }}</h5>
+                <v-btn
+                  text block
+                  class="mx-auto mt-5"
+                  @click="phoneAuth = true"
+                >
+                  Use Phone Number
+                </v-btn>
+              </div>
+            </v-tab-item>
+            <v-tab-item class="pt-3">
+              <div v-if="phoneAuth">
+                <h5 class="text-h5 text-center">{{ $t('heading.signup_phone') }}</h5>
+                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" @response="emittedResponseFunc" />
+                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" @response="emittedResponseFunc" /> 
+                <v-btn
+                  text block
+                  class="mx-auto mt-5"
+                  @click="phoneAuth = false"
+                >
+                  Use Email Address
+                </v-btn>
+              </div>
+              <div v-else>
+                <h5 class="text-h5 text-center">{{ $t('heading.signup_email') }}</h5>
+                <v-btn
+                  text block
+                  class="mx-auto mt-5"
+                  @click="phoneAuth = true"
+                >
+                  Use Phone Number
+                </v-btn>
+              </div>
 
-          <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" @response="emittedResponseFunc" />
-          <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" @response="emittedResponseFunc" />
-        </div>
-
-        <div class="text-center mt-5">
-          <OnboardingPrivacypolicy class="mt-15" />
-          <div class="d-inline-flex justify-center agreeToTerms">
-            <v-checkbox
-                v-model="agreeToTerms"
-                :label="$t('onboarding.agree_to_terms')"
-                required
-            ></v-checkbox>
-          </div>
-        </div>
+              <div class="text-center mt-5">
+                <OnboardingPrivacypolicy class="mt-15" />
+                <div class="d-inline-flex justify-center agreeToTerms">
+                  <v-checkbox
+                      v-model="agreeToTerms"
+                      :label="$t('onboarding.agree_to_terms')"
+                      required
+                  ></v-checkbox>
+                </div>
+              </div>
+            </v-tab-item>
+          </v-tabs-items>
+        </v-tabs>
+          
       </div>
     </div>
   </v-container>
@@ -63,6 +121,8 @@ export default defineComponent({
     } = useContext()
     const router = useRouter()
     const loading = ref(false)
+    const activeTab = ref('Login')
+    const phoneAuth = ref(true)
     const showNext = ref(false)
     const device = ref('mobile')
     const agreeToTerms = ref(false)
@@ -128,6 +188,8 @@ export default defineComponent({
 
     return {
       loading,
+      activeTab,
+      phoneAuth,
       onboardingState,
       showNext,
       device,
@@ -143,4 +205,9 @@ export default defineComponent({
 .agreeToTerms label {
   font-size:13px;
 }
+.v-tabs-items {
+  padding-top:2vh;
+  background-color: transparent !important;
+}
+
 </style>

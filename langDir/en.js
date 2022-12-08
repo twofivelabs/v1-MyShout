@@ -40,6 +40,7 @@ export default {
         log_out_sub: 'Log out or change accounts',
         login: 'Login',
         verify: 'Verify',
+        sign_up: 'Sign Up',
         dark_mode: 'Dark Mode',
         learn_more: 'Learn More',
         content: 'Content',
@@ -76,6 +77,10 @@ export default {
         please_confirm_delete: 'Please confirm you wish to delete your account and all data. This is not reversible.'
     },
     heading: {
+        login_phone: `Provide your phone number to login`,
+        login_email: `Provide your email address to login`,
+        signup_phone: `Provide your phone number to create an account`,
+        signup_email: `Provide your email address to create an account`,
         cant_receive_sms_code: 'Can\'t receive code? Sign in through email.',
         we_sent_you_sms_code: 'We sent you a SMS code',
         forgot_password: 'Forgot Password',

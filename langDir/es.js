@@ -40,6 +40,7 @@ export default {
         log_out_sub: 'Cerrar sesión o cambiar cuentas',
         login: 'Acceso',
         verify: 'Verificar',
+        sign_up: 'Regístrate',
         dark_mode: 'Modo oscuro',
         learn_more: 'Aprende más',
         content: 'Contenido',
@@ -76,6 +77,10 @@ export default {
         please_confirm_delete: 'Confirme que desea eliminar su cuenta y todos los datos. Esto no es reversible.'
     },
     heading: {
+        login_phone: `Proporciona tu número de teléfono para iniciar sesión`,
+        login_email: `Proporciona tu dirección de correo electrónico para iniciar sesión`,
+        signup_phone: `Proporcione su número de teléfono para crear una cuenta`,
+        signup_email: `Proporciona tu dirección de correo electrónico para crear una cuenta`,        
         cant_receive_sms_code: '¿No puedes recibir el código? Iniciar sesión por correo electrónico',
         we_sent_you_sms_code: 'Te enviamos un código SMS',
         forgot_password: 'Has olvidado tu contraseña',
