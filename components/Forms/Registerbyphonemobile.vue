@@ -59,7 +59,7 @@
             {{ $t('btn.verify') }}
           </v-btn>
 
-          <FormsRecoverbyemail />
+<!--          <FormsRecoverbyemail />-->
         </div>
       </v-card>
     </v-dialog>
@@ -221,6 +221,10 @@ export default defineComponent({
           dispatch('user/updateField', {
             created_at: new Date()
           })
+
+          if (props.goTo) {
+            router.push(props.goTo)
+          }
 
         })
       } catch (e) {

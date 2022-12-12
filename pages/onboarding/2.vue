@@ -31,6 +31,7 @@
         <v-tabs
           v-model="activeTab"
           background-color="transparent"
+          class="loginTabs"
           fixed-tabs
         >
           <v-tab>
@@ -73,8 +74,8 @@
               <div v-if="phoneAuth">
                 <h5 class="text-h5 text-center">{{ $t('heading.signup_phone') }}</h5>
 
-                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" />
-                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" />
+                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/onboarding/3" />
+                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/onboarding/3" />
 
                 <v-btn
                   text block
@@ -162,7 +163,7 @@ export default defineComponent({
   padding-top:2vh;
   background-color: transparent !important;
 }
-.v-tab {
+.loginTabs .v-tab {
   font-weight:600;
 }
 

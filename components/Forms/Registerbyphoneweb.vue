@@ -59,7 +59,7 @@
             {{ $t('btn.verify') }}
           </v-btn>
 
-          <FormsRecoverbyemail />
+<!--          <FormsRecoverbyemail />-->
         </div>
       </v-card>
     </v-dialog>
@@ -192,8 +192,10 @@ export default defineComponent({
           })
 
           if (props.goTo) {
+            console.log('PUSH USER TO ', props.goTo)
             router.push(props.goTo)
           }
+          console.log('We are not taking the user anywhere')
         }
         // If NEW user
         else {
@@ -241,6 +243,7 @@ export default defineComponent({
     onMounted(async() => {
       await initRecaptcha()
     })
+
     return {
       loading,
       valid, agreeToTerms,
