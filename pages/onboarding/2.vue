@@ -43,10 +43,8 @@
           <v-tabs-items v-model="activeTab" class="">
             <v-tab-item>
               <div v-if="phoneAuth">
-                <h5 class="text-h5 text-center">{{ $t('heading.login_phone') }}</h5>
-
-                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" />
-                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" />
+                <FormsRegisterbyphoneweb v-if="device === 'web'" goTo="/" />
+                <FormsRegisterbyphonemobile v-else goTo="/" />
 
                 <v-btn
                   text block
@@ -57,9 +55,7 @@
                 </v-btn>
               </div>
               <div v-else>
-                <h5 class="text-h5 text-center">{{ $t('heading.login_email') }}</h5>
-
-                <FormsAuthemaillogin class="pt-6" />
+                <FormsAuthemaillogin />
 
                 <v-btn
                   text block
@@ -72,10 +68,8 @@
             </v-tab-item>
             <v-tab-item class="pt-3">
               <div v-if="phoneAuth">
-                <h5 class="text-h5 text-center">{{ $t('heading.signup_phone') }}</h5>
-
-                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/onboarding/3" />
-                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/onboarding/3" />
+                <FormsRegisterbyphoneweb v-if="device === 'web'" goTo="/onboarding/3" />
+                <FormsRegisterbyphonemobile v-else goTo="/onboarding/3" />
 
                 <v-btn
                   text block
@@ -86,9 +80,7 @@
                 </v-btn>
               </div>
               <div v-else>
-                <h5 class="text-h5 text-center">{{ $t('heading.signup_email') }}</h5>
-
-                <FormsAuthemailregister class="pt-6" />
+                <FormsAuthemailregister />
 
                 <v-btn
                   text block
