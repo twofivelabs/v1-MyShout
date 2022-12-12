@@ -408,12 +408,10 @@ export const actions = {
     }
     return response
   },
-  async listen({ commit, dispatch }, id) {
+  async listen({ commit }, id) {
       try {
         if(id) {
           console.log('listening to user', id)
-
-          dispatch('user/notifications/listen', null, {root:true})
 
           return this.$fire.firestore
               .doc(`Users/${id}`)
@@ -547,7 +545,8 @@ export const actions = {
         //await dispatch('cart/getCurrent', authUserUid, { root: true })
         //await dispatch('user/favourites/getAll', authUserUid, { root: true })
         //await dispatch('user/tagging/getAll', authUserUid, { root: true })
-        await dispatch('user/notifications/getAll', {}, { root: true })
+        //await dispatch('user/notifications/getAll', {}, { root: true })
+        await dispatch('user/notifications/listen', null, { root:true })
       }
     }
   },

@@ -17,9 +17,9 @@
       </div>
 
       <!-- WHITE CARD -->
-      <div 
-        class="white pa-10 rounded-t-xl rounded-b-0 elevation-13" 
-        style="width:100vw; max-width:700px;" 
+      <div
+        class="white pa-10 rounded-t-xl rounded-b-0 elevation-13"
+        style="width:100vw; max-width:700px;"
         v-anime="{
           translateY: [200, 0],
           opacity: [0, 1],
@@ -45,14 +45,14 @@
                 <h5 class="text-h5 text-center">{{ $t('heading.login_phone') }}</h5>
 
                 <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" />
-                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" /> 
+                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" />
 
                 <v-btn
                   text block
                   class="mx-auto mt-5"
                   @click="phoneAuth = false"
                 >
-                  Use Email Address
+                  {{ $t('use_email_address') }}
                 </v-btn>
               </div>
               <div v-else>
@@ -65,7 +65,7 @@
                   class="mx-auto mt-5"
                   @click="phoneAuth = true"
                 >
-                  Use Phone Number
+                  {{ $t('use_phone_number') }}
                 </v-btn>
               </div>
             </v-tab-item>
@@ -74,14 +74,14 @@
                 <h5 class="text-h5 text-center">{{ $t('heading.signup_phone') }}</h5>
 
                 <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" />
-                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" /> 
+                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" />
 
                 <v-btn
                   text block
                   class="mx-auto mt-5"
                   @click="phoneAuth = false"
                 >
-                  Use Email Address
+                  {{ $t('use_email_address') }}
                 </v-btn>
               </div>
               <div v-else>
@@ -94,13 +94,13 @@
                   class="mx-auto mt-5 mb-5"
                   @click="phoneAuth = true"
                 >
-                  Use Phone Number
+                  {{ $t('use_phone_number') }}
                 </v-btn>
               </div>
             </v-tab-item>
           </v-tabs-items>
         </v-tabs>
-          
+
       </div>
     </div>
   </v-container>
@@ -125,7 +125,7 @@ export default defineComponent({
     const activeTab = ref('Login')
     const phoneAuth = ref(true)
     const device = ref('mobile')
-    
+
     // MOUNTED
     onMounted(async() => {
       const d = await $capacitor.device()
@@ -161,6 +161,9 @@ export default defineComponent({
 .v-tabs-items {
   padding-top:2vh;
   background-color: transparent !important;
+}
+.v-tab {
+  font-weight:600;
 }
 
 </style>

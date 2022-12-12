@@ -80,7 +80,7 @@ export default {
         login_phone: `Proporciona tu número de teléfono para iniciar sesión`,
         login_email: `Proporciona tu dirección de correo electrónico para iniciar sesión`,
         signup_phone: `Proporcione su número de teléfono para crear una cuenta`,
-        signup_email: `Proporciona tu dirección de correo electrónico para crear una cuenta`,        
+        signup_email: `Proporciona tu dirección de correo electrónico para crear una cuenta`,
         cant_receive_sms_code: '¿No puedes recibir el código? Iniciar sesión por correo electrónico',
         we_sent_you_sms_code: 'Te enviamos un código SMS',
         forgot_password: 'Has olvidado tu contraseña',
@@ -313,6 +313,9 @@ export default {
     yes_longer_receive_alerts: 'Recibirán alertas cuando tengas problemas.',
     view_on_list: 'Ver en la lista',
 
-    no_emergency_friends: 'You have no emergency friends'
+    no_emergency_friends: 'You have no emergency friends',
+
+    use_email_address: 'Usar dirección de correo electrónico',
+    use_phone_number: 'Usar número de teléfono'
 }
 

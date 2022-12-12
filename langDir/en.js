@@ -315,5 +315,8 @@ export default {
     yes_longer_receive_alerts: 'They will receive alerts when you are in trouble.',
     view_on_list: 'View on list',
 
-    no_emergency_friends: 'You have no emergency friends'
+    no_emergency_friends: 'You have no emergency friends',
+
+    use_email_address: 'Use Email Address',
+    use_phone_number: 'Use Phone Number'
 }

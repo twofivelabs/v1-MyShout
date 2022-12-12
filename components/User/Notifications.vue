@@ -279,7 +279,8 @@ export default defineComponent({
     }
     const onIntersect = (entries) => {
       const notificationId = entries[0].target.id
-      const payload = { ...notifications.value[notificationId] }
+      const payload = { ...state.user.notifications.loaded[notificationId] }
+
       if (payload.seen === false) {
         payload.seen = true
         dispatch('user/notifications/update', payload)

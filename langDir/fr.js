@@ -80,7 +80,7 @@ export default {
         login_phone: `Veuillez fournir votre numéro de téléphone pour vous connecter`,
         login_email: `Fournissez votre adresse email pour vous connecter`,
         signup_phone: `Fournissez votre numéro de téléphone pour créer un compte`,
-        signup_email: `Veuillez fournir votre adresse email pour créer un compte`,        
+        signup_email: `Veuillez fournir votre adresse email pour créer un compte`,
         cant_receive_sms_code: 'Vous ne pouvez pas recevoir de code ? Se connecter par e-mail',
         we_sent_you_sms_code: 'Nous vous avons envoyé un code SMS',
         forgot_password: 'Mot de passe oublié',
@@ -313,6 +313,9 @@ export default {
     yes_longer_receive_alerts: 'Ils recevront des alertes lorsque vous êtes en difficulté.',
     view_on_list: 'Voir sur liste',
 
-    no_emergency_friends: 'Vous n\'avez pas d\'amis d\'urgence'
+    no_emergency_friends: 'Vous n\'avez pas d\'amis d\'urgence',
+
+    use_email_address: 'Utiliser l\'adresse e-mail',
+    use_phone_number: 'Utiliser le numéro de téléphone'
 }
 
