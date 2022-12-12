@@ -17,15 +17,18 @@
       </div>
 
       <!-- WHITE CARD -->
-      <div class="white pa-10 rounded-t-xl rounded-b-0 elevation-13" style="width:100vw; max-width:700px; min-height:55vh;" v-anime="{
-                translateY: [200, 0],
-                opacity: [0, 1],
-                easing: 'easeOutExpo',
-                duration: 900,
-                delay:900
-              }">
+      <div 
+        class="white pa-10 rounded-t-xl rounded-b-0 elevation-13" 
+        style="width:100vw; max-width:700px;" 
+        v-anime="{
+          translateY: [200, 0],
+          opacity: [0, 1],
+          easing: 'easeOutExpo',
+          duration: 900,
+          delay:900
+        }"
+      >
         <v-tabs
-          v-if="!showNext"
           v-model="activeTab"
           background-color="transparent"
           fixed-tabs
@@ -41,8 +44,8 @@
               <div v-if="phoneAuth">
                 <h5 class="text-h5 text-center">{{ $t('heading.login_phone') }}</h5>
 
-                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" @response="emittedResponseFunc" />
-                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" @response="emittedResponseFunc" /> 
+                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" />
+                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" /> 
 
                 <v-btn
                   text block
@@ -70,8 +73,8 @@
               <div v-if="phoneAuth">
                 <h5 class="text-h5 text-center">{{ $t('heading.signup_phone') }}</h5>
 
-                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" @response="emittedResponseFunc" />
-                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" @response="emittedResponseFunc" /> 
+                <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" />
+                <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" /> 
 
                 <v-btn
                   text block
@@ -80,17 +83,6 @@
                 >
                   Use Email Address
                 </v-btn>
-
-                <div class="text-center mt-5">
-                  <OnboardingPrivacypolicy class="mt-15" />
-                  <div class="d-inline-flex justify-center agreeToTerms">
-                    <v-checkbox
-                        v-model="agreeToTerms"
-                        :label="$t('onboarding.agree_to_terms')"
-                        required
-                    ></v-checkbox>
-                  </div>
-                </div>
               </div>
               <div v-else>
                 <h5 class="text-h5 text-center">{{ $t('heading.signup_email') }}</h5>
@@ -116,10 +108,10 @@
 <script>
 
 import {
-  defineComponent, reactive,
+  defineComponent,
   ref,
   useContext,
-  useMeta, onMounted, watch, useRouter
+  useMeta, onMounted
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -127,62 +119,18 @@ export default defineComponent({
   layout: 'onboarding',
   setup () {
     const {
-      $config, $capacitor, $ttlStorage, $notify, i18n
+      $config, $capacitor
     } = useContext()
-    const router = useRouter()
     const loading = ref(false)
     const activeTab = ref('Login')
     const phoneAuth = ref(true)
-    const showNext = ref(false)
     const device = ref('mobile')
-    const agreeToTerms = ref(false)
-    const onboardingState = reactive({
-      phoneNumber: null,
-      phoneNumberFormatted: null,
-      otpProvided: null,
-      showOtpInput: false,
-    })
-    const goTo = ref('/onboarding/2.1')
-
-    // METHODS
-    const updatePhoneNumber = (e) => {
-      onboardingState.phoneNumberFormatted = e.formattedNumber
-    }
-    const emittedResponseFunc = (res) => {
-      if (res.status === 'success') {
-        //goTo.value = res.goTo
-        //onboardingState.showOtpInput = false
-        //showNext.value = true
-        $ttlStorage.set('onboardingComplete', true)
-      }
-    }
-
+    
     // MOUNTED
     onMounted(async() => {
       const d = await $capacitor.device()
       if(d.platform === 'web') {
         device.value = 'web'
-      }
-    })
-
-    // WATCH
-    watch(showNext, (val) => {
-      console.log('SHOW NEXT', val)
-      if (val) {
-        if (agreeToTerms.value) {
-          router.push(goTo.value)
-        } else {
-          $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
-        }
-      }
-    })
-    watch(agreeToTerms, (val) => {
-      if (val) {
-        if (showNext.value) {
-          router.push(goTo.value)
-        } else {
-          $notify.show({ text: i18n.t('notify.validate_your_phone'), color: 'error' })
-        }
       }
     })
 
@@ -200,12 +148,7 @@ export default defineComponent({
       loading,
       activeTab,
       phoneAuth,
-      onboardingState,
-      showNext,
-      device,
-      agreeToTerms,
-      updatePhoneNumber,
-      emittedResponseFunc
+      device
     }
   },
   head: {}
