@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="formEl" @submit.prevent="validate">
+  <v-form ref="formEl" @submit.prevent="validate" class="text-center">
     <v-text-field
         v-model="form.email"
         :rules="rules.email"
@@ -41,18 +41,27 @@
         background-color="#f8f9fa"
     />
 
-    <div class="text-center">
-      <v-btn
-        :disabled="!valid"  
-        :loading="loading"
-        color="primary"
-        elevation="0"
-        class="text-center"
-        type="submit"
-      >
-        {{ $t('btn.sign_up') }}
-      </v-btn>
-  </div>
+    <v-btn
+      :disabled="!valid"  
+      :loading="loading"
+      color="primary"
+      elevation="0"
+      class="text-center"
+      type="submit"
+    >
+      {{ $t('btn.sign_up') }}
+    </v-btn>
+    
+    <div class="text-center mt-5">
+      <OnboardingPrivacypolicy class="mt-15" />
+      <div class="d-inline-flex justify-center agreeToTerms">
+        <v-checkbox
+          v-model="agreeToTerms"
+          :label="$t('onboarding.agree_to_terms')"
+          required
+        ></v-checkbox>
+      </div>
+    </div>
   </v-form>
 </template>
 <script>
@@ -77,6 +86,7 @@ export default defineComponent({
     const valid = ref(true)
     const rules = formRules
     const showPassword = ref(false)
+    const agreeToTerms = ref(false)
     const formEl = ref(null)
     const form = ref({
       email: '',
@@ -86,13 +96,19 @@ export default defineComponent({
     // METHODS
     const validate = async () => {
       loading.value = true
-      valid.value = await formEl.value.validate()
-      if (valid.value) {
-        await submitLogin()
+
+      if (agreeToTerms.value) {
+        valid.value = await formEl.value.validate()
+        if (valid.value) {
+          await register()
+        }
+      } else {
+        $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
       }
+      
       loading.value = false
     }
-    const submitLogin = async () => {
+    const register = async () => {
       if (form.value.email && form.value.password) {
         try {
           if ($fire.auth.currentUser === null) {
@@ -129,7 +145,7 @@ export default defineComponent({
       formEl,
       rules,
       validate,
-      showPassword
+      showPassword, agreeToTerms
     }
   }
 })

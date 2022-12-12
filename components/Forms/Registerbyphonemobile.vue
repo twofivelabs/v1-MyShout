@@ -1,27 +1,36 @@
 <template>
   <v-form ref="formEl" @submit.prevent="validate">
-    <div v-if="!form.showOtpInput">
-      <VuePhoneNumberInput class="my-6 phoneNumberInput"
-                           v-model="form.phoneNumberFormatted"
-                           @update="updatePhoneNumber($event)"
-                           required
-                           :translations="{
-                              countrySelectorLabel: '',
-                              phoneNumberLabel: $t('form.phone')
-                           }"
+    <div v-if="!form.showOtpInput" class="text-center">
+      <VuePhoneNumberInput class="mt-5 mb-10 phoneNumberInput"
+        v-model="form.phoneNumberFormatted"
+        @update="updatePhoneNumber($event)"
+        required
+        :translations="{
+          countrySelectorLabel: '',
+          phoneNumberLabel: $t('form.phone')
+        }"
       />
-      <div class="text-center mt-10">
-        <v-btn
-            :disabled="!valid"
-            :loading="loading"
-            color="primary"
-            elevation="0"
-            id="recaptcha-container"
-            class="text-center"
-            type="submit"
-        >
-          {{ $t('btn.send_code') }}
-        </v-btn>
+
+      <v-btn
+        :disabled="!valid"
+        :loading="loading"
+        color="primary"
+        elevation="0"
+        id="recaptcha-container"
+        type="submit"
+      >
+        {{ $t('btn.send_code') }}
+      </v-btn>
+
+      <div class="text-center mt-5">
+        <OnboardingPrivacypolicy class="mt-15" />
+        <div class="d-inline-flex justify-center agreeToTerms">
+          <v-checkbox
+            v-model="agreeToTerms"
+            :label="$t('onboarding.agree_to_terms')"
+            required
+          ></v-checkbox>
+        </div>
       </div>
     </div>
     <v-dialog v-model="form.showOtpInput" max-width="500">
@@ -98,6 +107,7 @@ export default defineComponent({
     // DEFINE CONTENT
     const valid = ref(true)
     const appVerifier = ref(null)
+    const agreeToTerms = ref(false)
     const rules = formRules
     const formEl = ref(null)
     const form = ref({
@@ -115,10 +125,16 @@ export default defineComponent({
     }
     const validate = async () => {
       loading.value = true
-      valid.value = await formEl.value.validate()
-      if (valid.value) {
-        await registerPhoneNumber()
+
+      if (agreeToTerms.value) {
+        valid.value = await formEl.value.validate()
+        if (valid.value) {
+          await registerPhoneNumber()
+        }
+      } else {
+        $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
       }
+
       loading.value = false
     }
     const registerPhoneNumber = async () => {
@@ -223,7 +239,7 @@ export default defineComponent({
 
     return {
       loading,
-      valid,
+      valid, agreeToTerms,
       form,
       formEl,
       rules,
