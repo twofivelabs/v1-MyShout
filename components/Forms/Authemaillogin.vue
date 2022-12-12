@@ -97,10 +97,10 @@ export default defineComponent({
           console.log("Error", e)
 
           switch (e.code) {
-            case "wrong-password":
+            case "auth/wrong-password":
               $notify.show({ text: i18n.t('onboarding.error_wrong_password'), color: 'error' })
               break;
-            case "user-not-found":
+            case "auth/user-not-found":
               $notify.show({ text: i18n.t('onboarding.error_user_not_found'), color: 'error' })
               break;
           }          
