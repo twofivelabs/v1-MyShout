@@ -109,6 +109,7 @@ export default {
         country: 'Pays',
         email: 'E-mail',
         phone: 'Téléphone',
+        confirm_password: 'Confirmez le mot de passe',
         message: 'Message',
         password: 'Mot de passe',
         current_password: 'Mot de passe actuel',
@@ -212,6 +213,9 @@ export default {
         thank_you_sub: 'Merci d\'avoir créé votre profil.',
         username_heading: 'Comment doit-on vous appelez?',
         username_sub: 'Définissez un nom d\'affichage pour que les autres sachent à qui ils parlent.',
+        error_wrong_password: `Le mot de passe saisi est incorrect.`,
+        error_user_not_found: `Aucun utilisateur n'existe. Veuillez créer un nouveau compte.`,
+        error_email_in_use: `L'adresse email est déjà utilisée.`,
     },
     page: {
         not_found_heading: '404',

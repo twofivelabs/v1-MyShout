@@ -52,9 +52,9 @@ import {
 import formRules from '~/classes/formRules'
 
 export default defineComponent({
-  name: 'FormsLoginbyemail',
+  name: 'FormsAuthemaillogin',
   setup () {
-    const { $fire, $fireModule, $notify, $system, i18n } = useContext()
+    const { $fire, $notify, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
@@ -73,38 +73,37 @@ export default defineComponent({
       loading.value = true
       valid.value = await formEl.value.validate()
       if (valid.value) {
-        await register()
+        await submitLogin()
       }
       loading.value = false
     }
-    const register = async () => {
+    const submitLogin = async () => {
       if (form.value.email && form.value.password) {
         try {
           if ($fire.auth.currentUser === null) {
-            await $fire.auth.createUserWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
-            $fire.analytics.logEvent('sign_up')
-
+            const authentication = await $fire.auth.signInWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
+            console.log("Authentication results", authentication)
+            if (authentication.user) {
+              $fire.analytics.logEvent('login')
+              $notify.show({ text: 'Successfully logged in', color: 'green' })
+              await router.push('/')
+            } else {
+              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+            }
           } else {
-            const credential = await $fireModule.auth.EmailAuthProvider.credential(form.value.email.trim().toLowerCase(), form.value.password)
-            await $fire.auth.currentUser.linkWithCredential(credential).then(() => {
-              $fire.analytics.logEvent('sign_up')
-            }).catch((e) => {
-              $system.log({
-                comp: 'FormsLoginbyemail',
-                msg: 'Error trying to link account',
-                val: e
-              })
-            })
+            await router.push('/')
           }
-          $notify.show({ text: 'Successfully registered', color: 'green' })
-          await router.push('/')
         } catch (e) {
-          $system.log({
-            comp: 'FormsLoginbyemail',
-            msg: 'Error trying to register',
-            val: e
-          })
-          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+          console.log("Error", e)
+
+          switch (e.code) {
+            case "wrong-password":
+              $notify.show({ text: i18n.t('onboarding.error_wrong_password'), color: 'error' })
+              break;
+            case "user-not-found":
+              $notify.show({ text: i18n.t('onboarding.error_user_not_found'), color: 'error' })
+              break;
+          }          
         }
       } else {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
@@ -118,7 +117,6 @@ export default defineComponent({
       formEl,
       rules,
       validate,
-      register,
       showPassword
     }
   }

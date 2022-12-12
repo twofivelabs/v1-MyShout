@@ -25,7 +25,7 @@ import {
   ref,
   useContext,
   useRoute,
-  useRouter,
+  //useRouter,
   useStore
 } from '@nuxtjs/composition-api'
 
@@ -36,7 +36,7 @@ export default defineComponent({
       state,
       dispatch
     } = useStore()
-    const router = useRouter()
+    //const router = useRouter()
     const {
       $config,
       $remoteConfig,
@@ -67,7 +67,7 @@ export default defineComponent({
       if (!$ttlStorage.get('onboardingComplete') && $vuetify.breakpoint.mdAndDown) {
         if (window.location.pathname !== '/onboarding') {
           console.log('go to onboarding, default')
-          router.push('/onboarding')
+          //router.push('/onboarding')
         }
       }
 

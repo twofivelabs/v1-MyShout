@@ -15,7 +15,7 @@
 
 import {
   defineComponent, onMounted,
-  ref, useContext,
+  ref, useContext
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({

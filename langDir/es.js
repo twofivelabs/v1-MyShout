@@ -111,6 +111,7 @@ export default {
         phone: 'Teléfono',
         message: 'Mensaje',
         password: 'Clave',
+        confirm_password: 'Confirmar contraseña',
         current_password: 'Contraseña actual',
         new_password: 'Nueva contraseña',
         search_for_address: 'Busca tu dirección',
@@ -212,6 +213,9 @@ export default {
         thank_you_sub: 'Gracias por configurar tu perfil.',
         username_heading: '¿Como deberíamos llamarte?',
         username_sub: 'Establezca un nombre para mostrar para que otros sepan con quién están hablando.',
+        error_wrong_password: `La contraseña ingresada es incorrecta.`,
+        error_user_not_found: `No existe ningún usuario. Por favor crea una nueva cuenta`,
+        error_email_in_use: `La dirección de correo electrónico ya está en uso.`,
     },
     page: {
         not_found_heading: '404',

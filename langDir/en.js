@@ -111,6 +111,7 @@ export default {
         phone: 'Phone',
         message: 'Message',
         password: 'Password',
+        confirm_password: 'Confirm Password',
         current_password: 'Current Password',
         new_password: 'New Password',
         search_for_address: 'Search for your address',
@@ -211,6 +212,9 @@ export default {
         thank_you_sub: 'Thanks for setting up your profile.',
         username_heading: 'What should we call you?',
         username_sub: 'Set a display name for others to know who they are talking to.',
+        error_wrong_password: `The password inputed in incorrect.`,
+        error_user_not_found: `No user exists. Please create a new account.`,
+        error_email_in_use: `The email address is already in use.`,
     },
     page: {
         not_found_heading: '404',

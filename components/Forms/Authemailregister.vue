@@ -26,6 +26,21 @@
         background-color="#f8f9fa"
     />
 
+    <v-text-field
+        v-model="form.confirmPassword"
+        :rules="rules.confirmPassword"
+        autocomplete="off"
+        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        @click:append="showPassword = !showPassword"
+        :type="showPassword ? 'text' : 'password'"
+        :label="$t('form.confirm_password')"
+        required
+        prepend-inner-icon="mdi-lock"
+        counter
+        outlined
+        background-color="#f8f9fa"
+    />
+
     <div class="text-center">
       <v-btn
         :disabled="!valid"  
@@ -35,7 +50,7 @@
         class="text-center"
         type="submit"
       >
-        {{ $t('btn.login') }}
+        {{ $t('btn.sign_up') }}
       </v-btn>
   </div>
   </v-form>
@@ -52,9 +67,9 @@ import {
 import formRules from '~/classes/formRules'
 
 export default defineComponent({
-  name: 'FormsLoginbyemail',
+  name: 'FormsAuthemailregister',
   setup () {
-    const { $fire, $fireModule, $notify, $system, i18n } = useContext()
+    const { $fire, $notify, $ttlStorage, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
@@ -73,38 +88,34 @@ export default defineComponent({
       loading.value = true
       valid.value = await formEl.value.validate()
       if (valid.value) {
-        await register()
+        await submitLogin()
       }
       loading.value = false
     }
-    const register = async () => {
+    const submitLogin = async () => {
       if (form.value.email && form.value.password) {
         try {
           if ($fire.auth.currentUser === null) {
-            await $fire.auth.createUserWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
-            $fire.analytics.logEvent('sign_up')
-
+            const authentication = await $fire.auth.createUserWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
+            console.log("Authentication results", authentication)
+            if (authentication.user) {
+              $fire.analytics.logEvent('signup')
+              $ttlStorage.set('onboardingComplete', true)
+              await router.push('/')
+            } else {
+              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+            }
           } else {
-            const credential = await $fireModule.auth.EmailAuthProvider.credential(form.value.email.trim().toLowerCase(), form.value.password)
-            await $fire.auth.currentUser.linkWithCredential(credential).then(() => {
-              $fire.analytics.logEvent('sign_up')
-            }).catch((e) => {
-              $system.log({
-                comp: 'FormsLoginbyemail',
-                msg: 'Error trying to link account',
-                val: e
-              })
-            })
+            await router.push('/')
           }
-          $notify.show({ text: 'Successfully registered', color: 'green' })
-          await router.push('/')
         } catch (e) {
-          $system.log({
-            comp: 'FormsLoginbyemail',
-            msg: 'Error trying to register',
-            val: e
-          })
-          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+          console.log("Error", e)
+
+          switch (e.code) {
+            case "auth/email-already-in-use":
+              $notify.show({ text: i18n.t('onboarding.error_email_in_use'), color: 'error' })
+              break;
+          }          
         }
       } else {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
@@ -118,7 +129,6 @@ export default defineComponent({
       formEl,
       rules,
       validate,
-      register,
       showPassword
     }
   }

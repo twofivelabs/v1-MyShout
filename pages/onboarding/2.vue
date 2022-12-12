@@ -17,7 +17,7 @@
       </div>
 
       <!-- WHITE CARD -->
-      <div class="white pa-10 rounded-t-xl rounded-b-0 elevation-13" style="width:100vw; max-width:700px; height:57vh;" v-anime="{
+      <div class="white pa-10 rounded-t-xl rounded-b-0 elevation-13" style="width:100vw; max-width:700px; min-height:55vh;" v-anime="{
                 translateY: [200, 0],
                 opacity: [0, 1],
                 easing: 'easeOutExpo',
@@ -40,8 +40,10 @@
             <v-tab-item>
               <div v-if="phoneAuth">
                 <h5 class="text-h5 text-center">{{ $t('heading.login_phone') }}</h5>
+
                 <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" @response="emittedResponseFunc" />
                 <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" @response="emittedResponseFunc" /> 
+
                 <v-btn
                   text block
                   class="mx-auto mt-5"
@@ -52,6 +54,9 @@
               </div>
               <div v-else>
                 <h5 class="text-h5 text-center">{{ $t('heading.login_email') }}</h5>
+
+                <FormsAuthemaillogin class="pt-6" />
+
                 <v-btn
                   text block
                   class="mx-auto mt-5"
@@ -64,8 +69,10 @@
             <v-tab-item class="pt-3">
               <div v-if="phoneAuth">
                 <h5 class="text-h5 text-center">{{ $t('heading.signup_phone') }}</h5>
+
                 <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="/" @response="emittedResponseFunc" />
                 <FormsRegisterbyphonemobile v-else class="pt-6" goTo="/" @response="emittedResponseFunc" /> 
+
                 <v-btn
                   text block
                   class="mx-auto mt-5"
@@ -73,27 +80,30 @@
                 >
                   Use Email Address
                 </v-btn>
+
+                <div class="text-center mt-5">
+                  <OnboardingPrivacypolicy class="mt-15" />
+                  <div class="d-inline-flex justify-center agreeToTerms">
+                    <v-checkbox
+                        v-model="agreeToTerms"
+                        :label="$t('onboarding.agree_to_terms')"
+                        required
+                    ></v-checkbox>
+                  </div>
+                </div>
               </div>
               <div v-else>
                 <h5 class="text-h5 text-center">{{ $t('heading.signup_email') }}</h5>
+
+                <FormsAuthemailregister class="pt-6" />
+
                 <v-btn
                   text block
-                  class="mx-auto mt-5"
+                  class="mx-auto mt-5 mb-5"
                   @click="phoneAuth = true"
                 >
                   Use Phone Number
                 </v-btn>
-              </div>
-
-              <div class="text-center mt-5">
-                <OnboardingPrivacypolicy class="mt-15" />
-                <div class="d-inline-flex justify-center agreeToTerms">
-                  <v-checkbox
-                      v-model="agreeToTerms"
-                      :label="$t('onboarding.agree_to_terms')"
-                      required
-                  ></v-checkbox>
-                </div>
               </div>
             </v-tab-item>
           </v-tabs-items>
