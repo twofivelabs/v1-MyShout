@@ -181,7 +181,12 @@ export const actions = {
             data.id = change.doc.id
             data.created_at = data.created_at.toDate().toDateString()
 
-            if (change.type === 'added') {
+            if (change.type === 'modified') {
+                if (data && data.seen === false) {
+                    commit('SET_HAS_NOTIFICATIONS', true)
+                }
+            }
+            else if (change.type === 'added') {
               if (data && data.seen === false) {
                 commit('SET_HAS_NOTIFICATIONS', true)
               }

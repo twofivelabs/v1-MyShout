@@ -12,8 +12,8 @@
       />
     </div>
     <div v-else>
-      <div v-if="notifications && Object.keys(notifications).length > 0">
-        <div v-for="(notification, id) in notifications" :key="id">
+      <div v-if="notificationsLoaded && Object.keys(notificationsLoaded).length > 0">
+        <div v-for="(notification, id) in notificationsLoaded" :key="id">
           <v-row
               v-if="notification.title || notification.body"
               :id="notification.id"
@@ -157,6 +157,7 @@ export default defineComponent({
     // DEFINE CONTENT
     const loading = ref(false)
     const notifications = computed(() => state.user.notifications.all)
+    const notificationsLoaded = computed(() => state.user.notifications.loaded)
 
     // GET CONTENT
     useFetch(async () => {
@@ -311,6 +312,7 @@ export default defineComponent({
       user,
       profile,
       notifications,
+      notificationsLoaded,
       goTo,
       emergencyBodyNotification,
       onIntersect,
