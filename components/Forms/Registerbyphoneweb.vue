@@ -1,6 +1,6 @@
 <template>
   <v-form ref="formEl" @submit.prevent="validate">
-    <div v-if="!form.showOtpInput" class="text-center">
+    <div class="text-center">
       <VuePhoneNumberInput class="mt-5 mb-10 phoneNumberInput"
         v-model="form.phoneNumberFormatted"
         @update="updatePhoneNumber($event)"
@@ -16,7 +16,7 @@
         :loading="loading"
         color="primary"
         elevation="0"
-        id="recaptcha-container"
+        id="recaptchaContainer"
         type="submit"
       >
         {{ $t('btn.send_code') }}
@@ -73,7 +73,7 @@ import {
   useRouter,
   onMounted,
   ref,
-  useStore
+  useStore, nextTick
 } from '@nuxtjs/composition-api'
 
 import formRules from '~/classes/formRules'
@@ -101,7 +101,7 @@ export default defineComponent({
     const loading = ref(false)
     // DEFINE CONTENT
     const valid = ref(true)
-    const appVerifier = ref(null)
+    const recaptchaContainer = ref(null)
     const agreeToTerms = ref(false)
     const rules = formRules
     const formEl = ref(null)
@@ -139,7 +139,7 @@ export default defineComponent({
 
         try {
           // Create firebase credentials
-          window.confirmationResult = await $fire.auth.signInWithPhoneNumber(form.value.phone.trim().toLowerCase(), appVerifier.value)
+          window.confirmationResult = await $fire.auth.signInWithPhoneNumber(form.value.phone.trim().toLowerCase(), recaptchaContainer.value)
 
         } catch (e) {
           // await initRecaptcha()
@@ -228,7 +228,7 @@ export default defineComponent({
     const initRecaptcha = async () => {
       try {
         await $helper.sleep(2000)
-        appVerifier.value = new $fireModule.auth.RecaptchaVerifier('recaptcha-container', {
+        recaptchaContainer.value = new $fireModule.auth.RecaptchaVerifier('recaptchaContainer', {
           size: 'invisible',
           callback: () => {
             console.log('WORKS')
@@ -241,7 +241,9 @@ export default defineComponent({
 
     // MOUNT
     onMounted(async() => {
-      await initRecaptcha()
+      nextTick(async () => {
+        await initRecaptcha()
+      })
     })
 
     return {
@@ -250,6 +252,7 @@ export default defineComponent({
       form,
       formEl,
       rules,
+      recaptchaContainer,
       updatePhoneNumber,
       validate,
       register,
