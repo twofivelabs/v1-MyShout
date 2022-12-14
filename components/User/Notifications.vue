@@ -45,8 +45,10 @@
                   <v-icon color="myshoutRed">mdi-alert</v-icon>
                 </span>
 
-
-                <span v-if="notification.title === 'Chat Notification'">
+                <span v-if="notification.title === 'Check-In'">
+                  {{ $t('check_in') }}
+                </span>
+                <span v-else-if="notification.title === 'Chat Notification'">
                   {{ $t('notifications.chat_notification') }}
                 </span>
                 <span v-else-if="notification.title === 'New Friend Request'">
@@ -81,6 +83,9 @@
                 </span>
                 <span v-else-if="notification.body && notification.body.includes('This is an emergency alarm from')">
                   {{ emergencyBodyNotification(notification.body) }}
+                </span>
+                <span v-else-if="notification.body && notification.body.includes('You have been requested to check-in by')">
+                  {{ notification.body.replace('You have been requested to check-in by', $t('notifications.requested_to_check_in')) }}
                 </span>
 
                 <span v-else>

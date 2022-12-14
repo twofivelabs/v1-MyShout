@@ -178,7 +178,7 @@ export default {
         friend_request_approved: 'Solicitud de amistad aprobada',
         requested_to_be_your_friend: 'pidió ser su amigo.',
         accepted_your_friendship: 'acepto tu amistad.',
-
+        requested_to_check_in: 'Se le ha solicitado que se registre por',
         this_is_emergency_alarm_from: 'Esta es una alarma de emergencia de'
     },
     gps: {
@@ -305,6 +305,7 @@ export default {
     sharing_your_location_sub: 'Compartir su ubicación es fundamental para que los contactos de emergencia controlen su ubicación.',
     receive_notifications_sub: 'Reciba notificaciones cuando un amigo tenga problemas o cuando se reciba un nuevo mensaje de chat.',
 
+    check_in: 'Registrarse',
     request_safe_check_in: 'Solicitar ingreso seguro',
     confirm_they_are_safe: 'Enviaremos una alerta para confirmar que son seguros.',
     remove_as_emergency_contact: 'Eliminar como contacto de emergencia',

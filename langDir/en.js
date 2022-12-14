@@ -177,7 +177,7 @@ export default {
         friend_request_approved: 'Friend Request Approved',
         requested_to_be_your_friend: 'requested to be your friend.',
         accepted_your_friendship: 'accepted your friendship.',
-
+        requested_to_check_in: 'You have been requested to check-in by',
         this_is_emergency_alarm_from: 'This is an emergency alarm from'
     },
     gps: {
@@ -307,6 +307,7 @@ export default {
     sharing_your_location_sub: 'Sharing your location is critical for emergency contacts to monitor your location.',
     receive_notifications_sub: 'Receive notifications when a friend is in trouble, or a new chat message has been received.',
 
+    check_in: 'Check-In',
     request_safe_check_in: 'Request safe check-in',
     confirm_they_are_safe: 'We will send an alert to confirm they are safe.',
     remove_as_emergency_contact: 'Remove as emergency contact',
@@ -319,4 +320,5 @@ export default {
 
     use_email_address: 'Use Email Address',
     use_phone_number: 'Use Phone Number'
+
 }

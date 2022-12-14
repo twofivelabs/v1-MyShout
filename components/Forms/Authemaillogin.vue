@@ -10,7 +10,7 @@
         background-color="#f8f9fa"
         class="py-0 my-0"
     />
-    
+
     <v-text-field
         v-model="form.password"
         :rules="rules.password"
@@ -28,7 +28,7 @@
 
     <div class="text-center">
       <v-btn
-        :disabled="!valid"  
+        :disabled="!valid"
         :loading="loading"
         color="primary"
         elevation="0"
@@ -37,7 +37,12 @@
       >
         {{ $t('btn.login') }}
       </v-btn>
-  </div>
+    </div>
+
+    <div class="text-center py-5">
+      <FormsForgotpasswordbtn class="mx-auto" />
+    </div>
+
   </v-form>
 </template>
 <script>
@@ -103,7 +108,7 @@ export default defineComponent({
             case "auth/user-not-found":
               $notify.show({ text: i18n.t('onboarding.error_user_not_found'), color: 'error' })
               break;
-          }          
+          }
         }
       } else {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
