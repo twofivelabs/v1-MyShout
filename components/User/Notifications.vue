@@ -79,7 +79,7 @@
                   {{ notification.body.replace('requested to be your friend.', $t('notifications.requested_to_be_your_friend')) }}
                 </span>
                 <span v-else-if="notification.body && notification.body.includes('accepted your friendship.')">
-                  {{ notification.body.replace('requested to be your friend.', $t('notifications.accepted_your_friendship')) }}
+                  {{ notification.body.replace('accepted your friendship.', $t('notifications.accepted_your_friendship')) }}
                 </span>
                 <span v-else-if="notification.body && notification.body.includes('This is an emergency alarm from')">
                   {{ emergencyBodyNotification(notification.body) }}

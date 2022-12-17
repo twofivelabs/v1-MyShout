@@ -25,7 +25,6 @@
                   elevation="0"
                   class="text-center"
                   type="submit"
-                  @click="validate"
               >
                 {{ $t('btn.send_password_reset') }}
               </v-btn>
@@ -98,6 +97,7 @@ export default defineComponent({
       swipe,
       rules,
       form,
+      formEl,
       validate,
       forgotPassword
     }
