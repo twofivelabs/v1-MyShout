@@ -34,6 +34,8 @@
           </v-icon>
 
           <div class="text-center mt-15">
+            <OnboardingPrivacypolicy :showTermsText="false" class="" />
+
             <v-btn
                 :loading="loading"
                 color="primary"
@@ -41,7 +43,7 @@
                 dark
                 x-large
                 type="submit"
-                class="white--text"
+                class="white--text mt-10"
                 to="/onboarding/7"
             >
               <v-icon>mdi-arrow-right</v-icon>

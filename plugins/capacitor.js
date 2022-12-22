@@ -28,7 +28,7 @@ export default function ({
         // On Android, a notification must be shown to continue receiving
         // location updates in the background. This option specifies the text of
         // that notification.
-        backgroundMessage: "We are using your location to notify your family in case of emergency.",
+        backgroundMessage: "MyShout collects location data to enable notify emergency contacts, even when the app is closed or not in use.",
         backgroundTitle: "Using Your location",
         requestPermissions: true,
         stale: false,
