@@ -19,6 +19,15 @@
           <h5 class="text-h5 text-center mb-6">
             {{ $t('onboarding.enable_location_permissions_sub') }}
           </h5>
+          <h6 class="primary--text text-h6 text-center mb-6">
+            {{ $t('onboarding.location_requirements_1') }}
+          </h6>
+          <h6 class="primary--text text-h6 text-center mb-6">
+            {{ $t('onboarding.location_requirements_3') }}
+          </h6>
+          <h6 class="primary--text text-h6 text-center mb-6">
+            {{ $t('onboarding.location_requirements_4') }}
+          </h6>
 
           <v-icon
               v-if="hasPermission"
@@ -38,15 +47,15 @@
 
             <v-btn
                 :loading="loading"
+                @click="goNext"
                 color="primary"
-                fab
                 dark
                 x-large
                 type="submit"
                 class="white--text mt-10"
-                to="/onboarding/7"
             >
-              <v-icon>mdi-arrow-right</v-icon>
+              <v-icon>mdi-check</v-icon>
+              {{ $t('btn.yes_i_agree') }}
             </v-btn>
           </div>
         </div>
@@ -63,7 +72,7 @@ import {
   useContext,
   useMeta,
   useStore,
-  onMounted
+  useRouter
 } from '@nuxtjs/composition-api'
 import {Geolocation} from '@capacitor/geolocation'
 
@@ -73,29 +82,35 @@ export default defineComponent({
   middleware: 'authenticated',
   setup () {
     const {
-      $config, $capacitor
+      $config, $capacitor, $services
     } = useContext()
     const {
       state
     } = useStore()
+    const router = useRouter()
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
     const hasPermission = ref(false)
 
     // METHODS
+    const goNext = async () => {
+      loading.value = true
 
-    // MOUNT
-    onMounted(() => {
-      Geolocation.checkPermissions().then(async (permission) => {
-        if (permission.location === 'granted') {
-          hasPermission.value = true
-        }
-      })
+      setTimeout(async () => {
+        Geolocation.checkPermissions().then(async (permission) => {
+          if (permission.location === 'granted') {
+            hasPermission.value = true
+          }
+        })
 
-      setTimeout(() => {
-        $capacitor.positionPermissions()
+        await $capacitor.positionPermissions()
+        await $services.getSetUserGeneralLocation()
+
+        loading.value = false
+        router.push('/onboarding/7')
+
       },1500)
-    })
+    }
 
     // PAGE META
     useMeta({
@@ -110,7 +125,8 @@ export default defineComponent({
     return {
       loading,
       profile,
-      hasPermission
+      hasPermission,
+      goNext
     }
   },
   head: {}

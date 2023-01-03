@@ -12,7 +12,7 @@
     <bool name="enable_google_pay">true</bool>
     <bool name="google_pay_is_testing">true</bool>
     <string name="capacitor_background_geolocation_notification_channel_name">
-        Background Tracking
+        Background GPS Tracking For Emergency Contacts
     </string>
     <string name="capacitor_background_geolocation_notification_icon">
         drawable/ic_tracking

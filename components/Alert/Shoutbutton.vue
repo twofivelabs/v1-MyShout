@@ -130,6 +130,9 @@ export default defineComponent({
 
       console.log('STICKY: START RECORDING')
 
+      // MICROPHONE PERMISSIONS
+      $capacitor.microphonePermissions()
+
       try {
         timerCountText.value = `${i18n.t('recording')}... 5`
 

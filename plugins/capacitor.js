@@ -10,59 +10,20 @@ import { VoiceRecorder } from 'capacitor-voice-recorder'
 import { Contacts } from '@capacitor-community/contacts'
 import { Badge } from '@robingenz/capacitor-badge'
 
-import {registerPlugin} from "@capacitor/core"
+import { registerPlugin } from "@capacitor/core"
 const BackgroundGeolocation = registerPlugin("BackgroundGeolocation")
 
 import admob from './cap.admob'
 
 // VARIABLES
 let watchCallbackId = null
+let backgroundGeoLocationWatcherId = null
 // const isMobile = ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/))
 
 export default function ({
   app,
   store
 }, inject) {
-
-    BackgroundGeolocation.addWatcher({
-        // On Android, a notification must be shown to continue receiving
-        // location updates in the background. This option specifies the text of
-        // that notification.
-        backgroundMessage: "MyShout collects location data to enable notify emergency contacts, even when the app is closed or not in use.",
-        backgroundTitle: "Using Your location",
-        requestPermissions: true,
-        stale: false,
-        distanceFilter: 10
-    }, (location, error) => {
-        if (error) {
-            if (error.code === "NOT_AUTHORIZED") {
-                if (window.confirm(
-                    "This app needs your location, " +
-                    "but does not have permission.\n\n" +
-                    "Open settings now?"
-                )) {
-                    // It can be useful to direct the user to their device's
-                    // settings when location permissions have been denied. The
-                    // plugin provides the 'openSettings' method to do this
-                    BackgroundGeolocation.openSettings()
-                }
-            }
-            return console.error(error);
-        }
-
-        // WE GOT LOCATION
-        app.$capacitor.gpsSetPosition({
-            lat: location.latitude,
-            lng: location.longitude,
-            speed: location.speed || null,
-            data: null
-        })
-    }).then(() => {
-        // ... can remove watcher here
-    }).catch(() => {
-        console.log('STICKY: issue with background watcher')
-    })
-
   // INIT
   if(app) {
       app.store.dispatch('user/updateField', {
@@ -124,7 +85,62 @@ export default function ({
      */
     async gpsSetPosition (gps) {
         // console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
+        gps.updated_at = new Date()
         await store.dispatch('user/updateGPS', gps)
+    },
+    async gpsBackgroundPosition () {
+        console.log('STICKY: gpsBackgroundPosition')
+
+        if (backgroundGeoLocationWatcherId) {
+            console.log('STICKY: We already have a watcher ID', backgroundGeoLocationWatcherId)
+            return
+        }
+
+        try {
+            backgroundGeoLocationWatcherId = await BackgroundGeolocation.addWatcher({
+                // On Android, a notification must be shown to continue receiving
+                // location updates in the background. This option specifies the text of
+                // that notification.
+                // TODO: Language detection here
+                backgroundMessage: "MyShout collects location data to enable notify emergency contacts, even when the app is closed or not in use.",
+                backgroundTitle: "MyShout is using your location",
+                requestPermissions: true,
+                stale: false,
+                distanceFilter: 10
+            }, (location, error) => {
+                console.log('STICKY: Background Location: ', location, JSON.stringify(location))
+                if (error) {
+                    if (error.code === "NOT_AUTHORIZED") {
+                        if (window.confirm(
+                            "This app needs your location, " +
+                            "but does not have permission.\n\n" +
+                            "Open settings now?"
+                        )) {
+                            // It can be useful to direct the user to their device's
+                            // settings when location permissions have been denied. The
+                            // plugin provides the 'openSettings' method to do this
+                            BackgroundGeolocation.openSettings().then(() => {
+                                console.log('STICKY: openSettings')
+                            }).catch(() => {
+                                // ..
+                            })
+                        }
+                    }
+                    console.log('STICKY: BackgroundGeolocation', error.code, error)
+                    return console.error(error);
+                }
+
+                // WE GOT LOCATION
+                app.$capacitor.gpsSetPosition({
+                    lat: location.latitude,
+                    lng: location.longitude,
+                    speed: location.speed || null,
+                    data: null
+                })
+            })
+        } catch (e) {
+            console.log('STICKY: Background Location ERROR: ', e, JSON.stringify(e))
+        }
     },
     async gpsGetCurrentPosition () {
         const device = await Device.getInfo()
@@ -302,7 +318,7 @@ export default function ({
         // 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'
         await Geolocation.checkPermissions()
           .then(async (permission) => {
-            // Only request permissions if not granted
+              // Only request permissions if not granted
               console.log('STICKY: CHECK PERMISSIONS', permission.location)
               if (permission.location === 'denied') {
                   app.$notify.show({ text: app.i18n.t('gps_permission_denied'), color: 'error' })
@@ -406,7 +422,6 @@ export default function ({
                 const permission = await PushNotifications.requestPermissions()
 
                 if (permission.receive === 'granted') {
-                  console.log("STICKY: I AM IN!")
                     await this.pushNotificationsListeners()
                     console.log('STICKY: NOTIFICATIONS > Mobile > True')
 

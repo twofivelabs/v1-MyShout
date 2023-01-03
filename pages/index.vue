@@ -68,30 +68,33 @@ export default defineComponent({
 
     // GET CONTENT
 
-    // GPS PERMISSIONS
-    $capacitor.gpsCheckPermissions().then(async (has) => {
-      if (has) {
-        console.log('STICKY: GPS > HAS PERMISSIONS')
-        await $capacitor.gpsGetCurrentPosition(l => {
-          console.log('STICKY: GPS > ', l)
-        })
-      }
-    })
-
     // MOUNTED
-    onMounted(() => {
+    onMounted(async () => {
+      // GPS PERMISSIONS
+      await $capacitor.gpsBackgroundPosition()
+      /*$capacitor.gpsCheckPermissions().then(async (has) => {
+        if (has) {
+          console.log('STICKY: GPS > HAS PERMISSIONS')
+          await $capacitor.gpsGetCurrentPosition(l => {
+            console.log('STICKY: GPS > ', l)
+          })
+        }
+      })*/
+
+      // MICROPHONE PERMISSIONS
+      $capacitor.microphonePermissions()
+
+      // NOTIFICATION PERMISSIONS
+      if ($capacitor.pushNotificationsRequestAndRegisterPermissions()) {
+        console.log('STICKY: Notifications > Granted')
+      }
+
+
       // Check user if they have profile pieces
       setTimeout(() => {
         dispatch('user/checkUserData')
       }, 2500)
     })
-
-    // MICROPHONE PERMISSIONS
-    $capacitor.microphonePermissions()
-    // NOTIFICATION PERMISSIONS
-    if ($capacitor.pushNotificationsRequestAndRegisterPermissions()) {
-      console.log('STICKY: Notifications > Granted')
-    }
 
     // PAGE META
     useMeta({

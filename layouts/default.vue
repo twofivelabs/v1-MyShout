@@ -24,7 +24,7 @@ import {
   onMounted,
   ref,
   useContext,
-  useRoute,
+  //useRoute,
   //useRouter,
   useStore
 } from '@nuxtjs/composition-api'
@@ -47,14 +47,14 @@ export default defineComponent({
       $capacitor,
       i18n
     } = useContext()
-    const route = useRoute()
+    //const route = useRoute()
     const loading = ref(false)
 
     // DEFINE CONTENT
-    const isIphone = route.value.query.isIphone
+    /*const isIphone = route.value.query.isIphone
     const isAndroid = route.value.query.isAndroid
     const isIpad = route.value.query.isIpad
-    const location = route.value.query.location
+    const location = route.value.query.location*/
 
     // METHODS
 
@@ -114,9 +114,9 @@ export default defineComponent({
        * Deep Linking for mobile
        * This should open the app if someone clicks a link, and they have the app installed
        */
-      if ((isIphone === 'iPhone' || isAndroid === 'Android') && isIpad === 'null') {
+      /*if ((isIphone === 'iPhone' || isAndroid === 'Android') && isIpad === 'null') {
         window.location = `${$config.deepLink}://${location}`
-      }
+      }*/
     })
     onMounted(() => {
       const code = $ttlStorage.get('locale')

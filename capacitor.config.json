@@ -57,10 +57,10 @@
   },
   "cordova": {},
   "server": {
-    "iosScheme": "myshout",
-    "androidScheme": "myshout"
+    "iosScheme": "",
+    "androidScheme": ""
   },
   "ios": {
-    "scheme": "myshout"
+    "scheme": ""
   }
 }

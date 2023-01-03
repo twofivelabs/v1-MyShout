@@ -9,17 +9,17 @@ import java.util.ArrayList;
 
 import ch.byrds.capacitor.contacts.Contacts;
 import com.baumblatt.capacitor.firebase.auth.CapacitorFirebaseAuth;
-import com.equimaps.capacitor_background_geolocation.BackgroundGeolocation;
+//import com.equimaps.capacitor_background_geolocation.BackgroundGeolocation;
 
 public class MainActivity extends BridgeActivity {
   @Override
        public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
 			registerPlugin(com.getcapacitor.community.admob.AdMob.class);
-           super.onCreate(savedInstanceState);
-           // registerPlugin(com.getcapacitor.community.stripe.StripePlugin.class);
+			// registerPlugin(com.getcapacitor.community.stripe.StripePlugin.class);
 			registerPlugin(Contacts.class);
 			registerPlugin(CapacitorFirebaseAuth.class);
-			registerPlugin(BackgroundGeolocation.class);
+			// registerPlugin(BackgroundGeolocation.class);
 
 
            /* // Initializes the Bridge

@@ -9,7 +9,7 @@ let admobHasInit = false
 
 export default {
     async AdMob_init() {
-        console.log('ADMOB: admobHasInit')
+        console.log('STICKY:ADMOB admobHasInit')
         if (admobHasInit) return
 
         const { status } = await AdMob.trackingAuthorizationStatus()
@@ -38,7 +38,7 @@ export default {
         })
         AdMob.addListener(BannerAdPluginEvents.SizeChanged, (AdMobBannerSize) => {
             // Subscribe Change Banner Size
-            console.log('STICKY: AdMobBannerSize', AdMobBannerSize)
+            console.log('STICKY:ADMOB AdMobBannerSize', AdMobBannerSize, JSON.stringify(AdMobBannerSize))
         })
 
         admobHasInit = true
@@ -57,11 +57,15 @@ export default {
             // isTesting: true
             // npa: true
         }
-        console.log('ADMOB: showBanner')
-        await AdMob.showBanner(BannerAdOptions)
+        console.log('STICKY:ADMOB showBanner')
+        try {
+            await AdMob.showBanner(BannerAdOptions)
+        } catch (e) {
+            console.log('STICKY:ADMOB showBanner error', e, JSON.stringify(e))
+        }
     },
     async AdMob_hideBanner() {
-        console.log('ADMOB: hideBanner')
+        console.log('STICKY:ADMOB hideBanner')
         try {
             await AdMob.hideBanner()
         } catch {
