@@ -6,8 +6,8 @@
 	"webDir": "dist",
 	"plugins": {
 		"Badge": {
-			"persist": true,
-			"autoClear": false
+			"persist": false,
+			"autoClear": true
 		},
 		"SplashScreen": {
 			"launchShowDuration": 3000,
@@ -55,12 +55,5 @@
 			}
 		}
 	},
-	"cordova": {},
-	"server": {
-		"iosScheme": "",
-		"androidScheme": ""
-	},
-	"ios": {
-		"scheme": ""
-	}
+	"cordova": {}
 }

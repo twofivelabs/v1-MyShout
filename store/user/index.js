@@ -377,19 +377,22 @@ export const actions = {
         }
         // eslint-disable-next-line no-unused-vars
         const hash = geohashForLocation([data.lat, data.lng])
+        const current_date = new Date()
 
         commit('SET_GPS', {
           lat: data.lat,
           lng: data.lng,
           geoHash: hash,
-          city: city
+          city: city,
+          updated_at: current_date
         })
         dispatch('updateField', {
           gps: {
             lat: data.lat,
             lng: data.lng,
             geoHash: hash,
-            city: city
+            city: city,
+            updated_at: current_date
           }
         })
       }

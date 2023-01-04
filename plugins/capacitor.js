@@ -85,7 +85,6 @@ export default function ({
      */
     async gpsSetPosition (gps) {
         // console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
-        gps.updated_at = new Date()
         await store.dispatch('user/updateGPS', gps)
     },
     async gpsBackgroundPosition () {

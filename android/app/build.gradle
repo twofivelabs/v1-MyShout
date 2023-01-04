@@ -3,12 +3,11 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.firebase.firebase-perf'
 
 android {
-    compileSdk compileSdkVersion
+    compileSdk 31
     defaultConfig {
-        targetSdk 31
-        minSdk 23
-        compileSdkVersion 31
         applicationId "org.myshout.app"
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk defaultTargetSdkVersion
         versionCode 26
         versionName '1.4'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

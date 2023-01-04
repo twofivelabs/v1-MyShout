@@ -1,10 +1,10 @@
 # TODO's
-- [ ] Onboarding > Username is requesting Location access
-- [ ] Onboarding > Zooming in on phone number input [ios only]
+- [x] Onboarding > Username is requesting Location access
+- [x] Onboarding > Zooming in on phone number input [ios only]
 - [x] Implement SMS with twillio
 - [x] Setup LIVE twillio with Felix
 - [x] More notifications
-- [ ] Need to talk about Recover your account
+- [x] Need to talk about Recover your account
 - [x] Logout Screen
 - [x] Unread messages notification bubble
 - [x] Add listener on chat messages, if user has not SEEN, add notification

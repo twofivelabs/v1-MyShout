@@ -11,13 +11,18 @@
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
 
+        <!-- AD-MOB -->
+        <meta-data
+                android:name="com.google.android.gms.ads.APPLICATION_ID"
+                android:value="@string/admob_app_id"/>
+
         <activity
                 android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
                 android:name="org.myshout.app.MainActivity"
                 android:label="@string/title_activity_main"
                 android:theme="@style/AppTheme.NoActionBarLaunch"
                 android:launchMode="singleTask"
-            android:exported="true">
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -26,24 +31,6 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="@string/custom_url_scheme"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="org.myshout.app.deeplinks.LinkActivity"
-                  android:label="@string/title_activity_link"
-                  android:theme="@style/AppTheme.NoActionBar"
-            android:exported="true">
-            <intent-filter>
-                <!-- Sets the intent action to view the activity -->
-                <action android:name="android.intent.action.VIEW"/>
-                <!-- Allows the link to be opened from a web browser -->
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- Allows the deep link to be used without specifying the app name -->
-                <category android:name="android.intent.category.DEFAULT"/>
-                <!-- URI tutsplus://deeplink -->
-                <!--<data android:scheme="myshout" android:host="deeplink"/>-->
-                <!-- URI https://www.mydeeplink.com -->
-                <!-- <data android:scheme="http" android:host="store.piiint.com"/>-->
             </intent-filter>
         </activity>
 
@@ -59,10 +46,6 @@
 
         <service
                 android:name="com.google.firebase.messaging.FirebaseMessagingService"/>
-
-        <meta-data
-                android:name="com.google.android.gms.ads.APPLICATION_ID"
-                android:value="@string/admob_app_id"/>
 
         <service
                 android:name="com.equimaps.capacitor_background_geolocation.BackgroundGeolocationService"
@@ -83,14 +66,6 @@
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />-->
 
-    <meta-data
-            android:name="com.getcapacitor.community.stripe.enable_google_pay"
-            android:value="@bool/enable_google_pay"/>
-
-    <meta-data
-            android:name="com.getcapacitor.community.stripe.google_pay_is_testing"
-            android:value="@bool/google_pay_is_testing"/>
-
     <!-- Internet & Network Permissions -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -102,6 +77,9 @@
     <!-- Navigator.getUserMedia -->
     <!-- Video -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- AD MOB -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <!-- Contacts -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />

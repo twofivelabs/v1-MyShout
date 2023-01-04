@@ -67,9 +67,9 @@ export default {
     async AdMob_hideBanner() {
         console.log('STICKY:ADMOB hideBanner')
         try {
-            await AdMob.hideBanner()
+            await AdMob.removeBanner()
         } catch {
             // ...
         }
-    },
+    }
 }
