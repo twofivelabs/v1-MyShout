@@ -5,8 +5,8 @@ export default function ({ $axios, app }) {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Expose-Headers': 'Access-Control-*',
       'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
-      Allow: 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
+      'Access-Control-Allow-Methods': 'GET, PATCH, POST, PUT, DELETE, OPTIONS, HEAD',
+      Allow: 'GET, PATCH, POST, PUT, DELETE, OPTIONS, HEAD',
       'Content-Type': 'application/json'
     }
   })

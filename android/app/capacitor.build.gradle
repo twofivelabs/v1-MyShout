@@ -21,6 +21,7 @@ dependencies {
     implementation project(':capacitor-push-notifications')
     implementation project(':capacitor-share')
     implementation project(':robingenz-capacitor-badge')
+    implementation project(':transistorsoft-capacitor-background-fetch')
     implementation project(':capacitor-firebase-auth')
     implementation project(':capacitor-voice-recorder')
 

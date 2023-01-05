@@ -253,6 +253,10 @@ const config = {
       target: 'https://www.myshout.com',
       pathRewrite: { '^/wp/': '' }
     }*/
+     /* '/firestore/': {
+          target: 'https://firestore.googleapis.com/v1/projects/my-shout-app/databases/(default)/documents/',
+          pathRewrite: { '^/firestore/': '' }
+      }*/
   },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa

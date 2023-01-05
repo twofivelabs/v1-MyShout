@@ -16,7 +16,7 @@
     <div id="map" ref="googleMapEl" style="width:calc(100vw); height:calc(100vh - 75px);"/>
 
     <div class="map-slider">
-      <FriendsMapslider :friends="friends"/>
+      <FriendsMapslider :friends="friends" class="mb-10" />
     </div>
   </div>
 </template>

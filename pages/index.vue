@@ -70,16 +70,17 @@ export default defineComponent({
 
     // MOUNTED
     onMounted(async () => {
+
       // GPS PERMISSIONS
       await $capacitor.gpsBackgroundPosition()
-      /*$capacitor.gpsCheckPermissions().then(async (has) => {
+      $capacitor.gpsCheckPermissions().then(async (has) => {
         if (has) {
           console.log('STICKY: GPS > HAS PERMISSIONS')
           await $capacitor.gpsGetCurrentPosition(l => {
             console.log('STICKY: GPS > ', l)
           })
         }
-      })*/
+      })
 
       // MICROPHONE PERMISSIONS
       $capacitor.microphonePermissions()
@@ -89,10 +90,17 @@ export default defineComponent({
         console.log('STICKY: Notifications > Granted')
       }
 
+      // BACKGROUND TASKS
+      await $capacitor.background_init()
 
       // Check user if they have profile pieces
       setTimeout(() => {
         dispatch('user/checkUserData')
+
+        $capacitor.updateLoggedInUsersGPS({
+          lat: 55.555555,
+          lng: -111.111111
+        })
       }, 2500)
     })
 

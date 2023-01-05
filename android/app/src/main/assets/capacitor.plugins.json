@@ -48,6 +48,10 @@
 		"classpath": "dev.robingenz.capacitor.badge.BadgePlugin"
 	},
 	{
+		"pkg": "@transistorsoft/capacitor-background-fetch",
+		"classpath": "com.transistorsoft.bgfetch.capacitor.BackgroundFetchPlugin"
+	},
+	{
 		"pkg": "capacitor-firebase-auth",
 		"classpath": "com.baumblatt.capacitor.firebase.auth.CapacitorFirebaseAuth"
 	},

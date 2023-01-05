@@ -38,6 +38,9 @@ project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/sh
 include ':robingenz-capacitor-badge'
 project(':robingenz-capacitor-badge').projectDir = new File('../node_modules/@robingenz/capacitor-badge/android')
 
+include ':transistorsoft-capacitor-background-fetch'
+project(':transistorsoft-capacitor-background-fetch').projectDir = new File('../node_modules/@transistorsoft/capacitor-background-fetch/android')
+
 include ':capacitor-firebase-auth'
 project(':capacitor-firebase-auth').projectDir = new File('../node_modules/capacitor-firebase-auth/android')
 

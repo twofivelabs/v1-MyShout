@@ -10,10 +10,14 @@ import { VoiceRecorder } from 'capacitor-voice-recorder'
 import { Contacts } from '@capacitor-community/contacts'
 import { Badge } from '@robingenz/capacitor-badge'
 
-import { registerPlugin } from "@capacitor/core"
+import { registerPlugin, CapacitorHttp } from "@capacitor/core"
 const BackgroundGeolocation = registerPlugin("BackgroundGeolocation")
 
+import { geohashForLocation } from 'geofire-common'
+
+
 import admob from './cap.admob'
+import background from './cap.background'
 
 // VARIABLES
 let watchCallbackId = null
@@ -64,6 +68,7 @@ export default function ({
 
   inject('capacitor', {
       ...admob,
+      ...background,
 
       async getContacts() {
           return await Contacts.getPermissions().then(async (permission) => {
@@ -83,6 +88,55 @@ export default function ({
      longitude: -119.396922
      speed: null
      */
+    async updateLoggedInUsersGPS(gps) {
+        if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: no gps data')
+
+        const user = app.$fire.auth.currentUser
+        const userToken = user ? await user.getIdTokenResult() : false
+
+        if (!userToken.token) return console.log('STICKY: no user token available')
+
+        const url = `https://firestore.googleapis.com/v1/projects/my-shout-app/databases/(default)/documents/Users/${userToken.claims.user_id}?updateMask.fieldPaths=gps.lat&updateMask.fieldPaths=gps.lng&updateMask.fieldPaths=gps.geoHash`
+        const data = {
+            "fields": {
+                "gps": {
+                    "mapValue": {
+                        "fields": {
+                            "geoHash": {
+                                stringValue: geohashForLocation([gps.lat, gps.lng])
+                            },
+                            "lat": {
+                                "doubleValue": parseFloat(gps.lat)
+                            },
+                            "lng": {
+                                "doubleValue": parseFloat(gps.lng)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /*const options = {
+            url,
+            headers,
+            data
+        }*/
+        console.log('STICKY: CapacitorHttp', url, data, JSON.stringify(data))
+        await CapacitorHttp.patch({
+            url: url,
+            headers: {
+                'Authorization': `Bearer ${userToken.token}`
+            },
+            data: data
+        }).then(e => {
+            console.log('STICKY: CapacitorHttp > DONE', e, JSON.stringify(e))
+
+        }).catch (e => {
+            console.log('STICKY: CapacitorHttp > ERROR', e, JSON.stringify(e))
+
+        })
+
+    },
     async gpsSetPosition (gps) {
         // console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
         await store.dispatch('user/updateGPS', gps)
@@ -92,7 +146,7 @@ export default function ({
 
         if (backgroundGeoLocationWatcherId) {
             console.log('STICKY: We already have a watcher ID', backgroundGeoLocationWatcherId)
-            return
+            // return
         }
 
         try {
@@ -108,6 +162,10 @@ export default function ({
                 distanceFilter: 10
             }, (location, error) => {
                 console.log('STICKY: Background Location: ', location, JSON.stringify(location))
+                app.$capacitor.updateLoggedInUsersGPS({
+                    lat: 66.555555,
+                    lng: -222.111111
+                })
                 if (error) {
                     if (error.code === "NOT_AUTHORIZED") {
                         if (window.confirm(
@@ -143,11 +201,13 @@ export default function ({
     },
     async gpsGetCurrentPosition () {
         const device = await Device.getInfo()
+        let gps = null
 
         // DESKTOP / WEBSITES
         if (device.platform === 'web') {
             await navigator.geolocation.getCurrentPosition((coordinates) => {
                 if (coordinates && coordinates.coords) {
+                    gps = coordinates.coords
                     console.log('LOGGER: WEB COORDS', coordinates)
                     app.$capacitor.gpsSetPosition({
                         lat: coordinates.coords.latitude,
@@ -162,6 +222,7 @@ export default function ({
         else {
             await Geolocation.getCurrentPosition({enableHighAccuracy: true}).then((coordinates) => {
                 if (coordinates && coordinates.coords) {
+                    gps = coordinates.coords
                     console.log('LOGGER: PHONE COORDS', coordinates)
                     app.$capacitor.gpsSetPosition({
                         lat: coordinates.coords.latitude,
@@ -185,6 +246,8 @@ export default function ({
                 })
             })
         }
+
+        return gps
     },
     async gpsCheckPermissions () {
         // DESKTOP / WEB, When requesting location will auto pop-up with location

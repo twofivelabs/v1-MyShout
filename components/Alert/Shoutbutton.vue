@@ -78,7 +78,9 @@ export default defineComponent({
       $system,
       $notify,
       $db,
-      $capacitor, i18n } = useContext()
+      $capacitor,
+      $helper,
+      i18n } = useContext()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
@@ -96,6 +98,9 @@ export default defineComponent({
     const openDialog = async () => {
       dialog.value = true
       loading.value = true
+
+      await $capacitor.gpsGetCurrentPosition()
+      await $helper.sleep(500)
 
       // Place alert info here
       await $services.alertButton('shout', {

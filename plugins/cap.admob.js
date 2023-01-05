@@ -2,8 +2,9 @@
 import { AdMob, BannerAdSize, BannerAdPosition, BannerAdPluginEvents } from '@capacitor-community/admob'
 import { Device } from '@capacitor/device'
 
-const androidAdId = 'ca-app-pub-8080343904271029~4328877889'
-const iosAdId = 'ca-app-pub-8080343904271029~8235537145'
+// CREATE AN AD-UNIT
+const androidAdId = 'ca-app-pub-8080343904271029/7742243748'
+const iosAdId = 'ca-app-pub-8080343904271029/2489917065'
 let bannerAdId = androidAdId
 let admobHasInit = false
 
@@ -33,8 +34,13 @@ export default {
         }).then().catch()
 
         // LISTENERS
-        AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
+        AdMob.addListener(BannerAdPluginEvents.Loaded, (e) => {
             // Subscribe Banner Event Listener
+            console.log('STICKY:ADMOB Event, Loaded', e, JSON.stringify(e))
+        })
+        AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (e) => {
+            // Subscribe Banner Event Listener
+            console.log('STICKY:ADMOB Event, FailedToLoad', e, JSON.stringify(e))
         })
         AdMob.addListener(BannerAdPluginEvents.SizeChanged, (AdMobBannerSize) => {
             // Subscribe Change Banner Size

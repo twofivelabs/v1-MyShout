@@ -342,7 +342,9 @@ export const actions = {
     } else if (data.id) {
         userId = data.id
     }
+
     if (userId && this.$db) {
+        console.log(`STICKY: updateUserField, ${dbRootPath}/${userId}`, data, JSON.stringify(data))
       const response = await this.$db.update(`${dbRootPath}/${userId}`, null, data)
       if (response) {
         await commit('SET_PROFILE_FIELD', data)
@@ -359,7 +361,7 @@ export const actions = {
   }, data) {
     if (data && (data.lat && data.lng)) {
       if ((state.gps.lat === data.lat) && (state.gps.lng === data.lng)) {
-        // console.log('STICKY: User has not moved')
+        console.log('STICKY: User has not moved', data.lat, data.lng)
       } else {
         // GET CITY FOR LOCATION
         let city = null

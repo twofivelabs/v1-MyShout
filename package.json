@@ -40,6 +40,7 @@
     "@nuxtjs/pwa": "^3.3.5",
     "@nuxtjs/universal-storage": "^0.5.9",
     "@robingenz/capacitor-badge": "^1.2.1",
+    "@transistorsoft/capacitor-background-fetch": "^1.0.2",
     "animejs": "^3.2.1",
     "capacitor-firebase-auth": "^3.0.0",
     "capacitor-voice-recorder": "^2.2.0",
