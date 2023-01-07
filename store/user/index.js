@@ -344,7 +344,7 @@ export const actions = {
     }
 
     if (userId && this.$db) {
-        console.log(`STICKY: updateUserField, ${dbRootPath}/${userId}`, data, JSON.stringify(data))
+      // console.log(`STICKY: updateUserField, ${dbRootPath}/${userId}`, data, JSON.stringify(data))
       const response = await this.$db.update(`${dbRootPath}/${userId}`, null, data)
       if (response) {
         await commit('SET_PROFILE_FIELD', data)

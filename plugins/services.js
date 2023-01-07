@@ -89,6 +89,7 @@ export default ({
             lng
         })
         let res = {}
+// console.log('STICKY: reverseGeocode', reverse)
 
         if (reverse && reverse.data) {
             const comp = lodash.chain(reverse.data.results[0].address_components)
@@ -103,6 +104,9 @@ export default ({
             }
         }
 
+        if (!res.city || !res.country) {
+            return null
+        }
         return res
     },
 
@@ -120,6 +124,28 @@ export default ({
       console.log('ALERT BUTTON RESPONSE FROM FB', res)
       return res
     },
+
+      /**
+       * MyShout Update GPS VIA HTTP method
+       * User: object
+       */
+      async restUpdateGPS (gps={}) {
+          if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: no gps data')
+
+          const user = app.$fire.auth.currentUser
+          const userToken = user ? await user.getIdTokenResult() : false
+
+          if (!userToken.token) return console.log('STICKY: no user token available')
+          console.log('STICKY: UserTokenClaims:', userToken.claims.user_id)
+          // const responseFunc = app.$fire.functions.httpsCallable('Rest-updateGPS')
+          const responseFunc = app.$fire.functions.httpsCallable('Location-getLocationByIP')
+          const res = await responseFunc({
+              userId: userToken.claims.user_id,
+              gps
+          })
+          console.log('STICKY: RES BUTTON RESPONSE FROM FB', res)
+          return res
+      },
     /**
     * Twilio Send SMS
     * body: data.body,

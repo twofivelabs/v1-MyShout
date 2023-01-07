@@ -18,6 +18,7 @@ exports.TwilioSMS = require("./Twilio");
 exports.Users = require("./Users");
 exports.AlertButtons = require("./AlertButtons");
 exports.Chat = require("./Chat");
+exports.Rest = require("./Rest");
 
 // trigger function on new user creation.
 // firebase deploy --only functions:AddUserRole

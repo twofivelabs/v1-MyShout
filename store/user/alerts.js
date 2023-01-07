@@ -116,6 +116,7 @@ export const actions = {
   },
   async add ({ commit, rootState }, data) {
     const uid = rootState.user.data.uid
+
     if (uid) {
       const response = await this.$db.add(`Users/${uid}/${dbRootPath}`, dataConverter, data)
       if (response) {

@@ -15,8 +15,8 @@ iOS Pod File Debug
 
 Vue Packages version Mismatch
 Try to match it with the VUE version
-- IE: npm i vue-server-renderer@[version]
-- IE: npm i vue-template-compiler@[version]
+- IE: npm i vue-server-renderer@2.6.14[version]
+- IE: npm i vue-template-compiler@2.6.14[version]
 
 Gradle File Missing
 - `npx cap update`

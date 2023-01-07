@@ -10,7 +10,7 @@ let admobHasInit = false
 
 export default {
     async AdMob_init() {
-        console.log('STICKY:ADMOB admobHasInit')
+        console.log('STICKY: ADMOB admobHasInit')
         if (admobHasInit) return
 
         const { status } = await AdMob.trackingAuthorizationStatus()
@@ -36,15 +36,15 @@ export default {
         // LISTENERS
         AdMob.addListener(BannerAdPluginEvents.Loaded, (e) => {
             // Subscribe Banner Event Listener
-            console.log('STICKY:ADMOB Event, Loaded', e, JSON.stringify(e))
+            console.log('STICKY: ADMOB Event, Loaded', e, JSON.stringify(e))
         })
         AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (e) => {
             // Subscribe Banner Event Listener
-            console.log('STICKY:ADMOB Event, FailedToLoad', e, JSON.stringify(e))
+            console.log('STICKY: ADMOB Event, FailedToLoad', e, JSON.stringify(e))
         })
         AdMob.addListener(BannerAdPluginEvents.SizeChanged, (AdMobBannerSize) => {
             // Subscribe Change Banner Size
-            console.log('STICKY:ADMOB AdMobBannerSize', AdMobBannerSize, JSON.stringify(AdMobBannerSize))
+            console.log('STICKY: ADMOB AdMobBannerSize', AdMobBannerSize, JSON.stringify(AdMobBannerSize))
         })
 
         admobHasInit = true
@@ -63,15 +63,14 @@ export default {
             // isTesting: true
             // npa: true
         }
-        console.log('STICKY:ADMOB showBanner')
         try {
             await AdMob.showBanner(BannerAdOptions)
         } catch (e) {
-            console.log('STICKY:ADMOB showBanner error', e, JSON.stringify(e))
+            console.log('STICKY: ADMOB showBanner error', e, JSON.stringify(e))
         }
     },
     async AdMob_hideBanner() {
-        console.log('STICKY:ADMOB hideBanner')
+        console.log('STICKY: ADMOB hideBanner')
         try {
             await AdMob.removeBanner()
         } catch {

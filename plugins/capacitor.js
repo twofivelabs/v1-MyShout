@@ -9,19 +9,13 @@ import { VoiceRecorder } from 'capacitor-voice-recorder'
 
 import { Contacts } from '@capacitor-community/contacts'
 import { Badge } from '@robingenz/capacitor-badge'
-
-import { registerPlugin, CapacitorHttp } from "@capacitor/core"
-const BackgroundGeolocation = registerPlugin("BackgroundGeolocation")
-
-import { geohashForLocation } from 'geofire-common'
-
+import { Http } from '@capacitor-community/http'
 
 import admob from './cap.admob'
 import background from './cap.background'
 
 // VARIABLES
 let watchCallbackId = null
-let backgroundGeoLocationWatcherId = null
 // const isMobile = ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/))
 
 export default function ({
@@ -96,15 +90,12 @@ export default function ({
 
         if (!userToken.token) return console.log('STICKY: no user token available')
 
-        const url = `https://firestore.googleapis.com/v1/projects/my-shout-app/databases/(default)/documents/Users/${userToken.claims.user_id}?updateMask.fieldPaths=gps.lat&updateMask.fieldPaths=gps.lng&updateMask.fieldPaths=gps.geoHash`
+        const url = `https://firestore.googleapis.com/v1/projects/my-shout-app/databases/(default)/documents/Users/${userToken.claims.user_id}?updateMask.fieldPaths=gps&currentDocument.exists=true`
         const data = {
             "fields": {
                 "gps": {
                     "mapValue": {
                         "fields": {
-                            "geoHash": {
-                                stringValue: geohashForLocation([gps.lat, gps.lng])
-                            },
                             "lat": {
                                 "doubleValue": parseFloat(gps.lat)
                             },
@@ -116,89 +107,27 @@ export default function ({
                 }
             }
         }
-        /*const options = {
-            url,
-            headers,
-            data
-        }*/
-        console.log('STICKY: CapacitorHttp', url, data, JSON.stringify(data))
-        await CapacitorHttp.patch({
-            url: url,
-            headers: {
-                'Authorization': `Bearer ${userToken.token}`
-            },
-            data: data
-        }).then(e => {
-            console.log('STICKY: CapacitorHttp > DONE', e, JSON.stringify(e))
 
-        }).catch (e => {
+        try {
+            const response = await Http.patch({
+                headers: {
+                    'Authorization': `Bearer ${userToken.token}`
+                },
+                url,
+                data
+            })
+            console.log('STICKY: CapacitorHttp > USER:', userToken.claims.user_id)
+            console.log('STICKY: CapacitorHttp > DATA:', data, JSON.stringify(data))
+            console.log('STICKY: CapacitorHttp > SUCCESS:', response.status)
+        } catch (e) {
             console.log('STICKY: CapacitorHttp > ERROR', e, JSON.stringify(e))
-
-        })
-
+        }
     },
     async gpsSetPosition (gps) {
         // console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
         await store.dispatch('user/updateGPS', gps)
     },
-    async gpsBackgroundPosition () {
-        console.log('STICKY: gpsBackgroundPosition')
 
-        if (backgroundGeoLocationWatcherId) {
-            console.log('STICKY: We already have a watcher ID', backgroundGeoLocationWatcherId)
-            // return
-        }
-
-        try {
-            backgroundGeoLocationWatcherId = await BackgroundGeolocation.addWatcher({
-                // On Android, a notification must be shown to continue receiving
-                // location updates in the background. This option specifies the text of
-                // that notification.
-                // TODO: Language detection here
-                backgroundMessage: "MyShout collects location data to enable notify emergency contacts, even when the app is closed or not in use.",
-                backgroundTitle: "MyShout is using your location",
-                requestPermissions: true,
-                stale: false,
-                distanceFilter: 10
-            }, (location, error) => {
-                console.log('STICKY: Background Location: ', location, JSON.stringify(location))
-                app.$capacitor.updateLoggedInUsersGPS({
-                    lat: 66.555555,
-                    lng: -222.111111
-                })
-                if (error) {
-                    if (error.code === "NOT_AUTHORIZED") {
-                        if (window.confirm(
-                            "This app needs your location, " +
-                            "but does not have permission.\n\n" +
-                            "Open settings now?"
-                        )) {
-                            // It can be useful to direct the user to their device's
-                            // settings when location permissions have been denied. The
-                            // plugin provides the 'openSettings' method to do this
-                            BackgroundGeolocation.openSettings().then(() => {
-                                console.log('STICKY: openSettings')
-                            }).catch(() => {
-                                // ..
-                            })
-                        }
-                    }
-                    console.log('STICKY: BackgroundGeolocation', error.code, error)
-                    return console.error(error);
-                }
-
-                // WE GOT LOCATION
-                app.$capacitor.gpsSetPosition({
-                    lat: location.latitude,
-                    lng: location.longitude,
-                    speed: location.speed || null,
-                    data: null
-                })
-            })
-        } catch (e) {
-            console.log('STICKY: Background Location ERROR: ', e, JSON.stringify(e))
-        }
-    },
     async gpsGetCurrentPosition () {
         const device = await Device.getInfo()
         let gps = null

@@ -5,9 +5,6 @@
 	"npmClient": "npm",
 	"webDir": "dist",
 	"plugins": {
-		"CapacitorHttp": {
-			"enabled": true
-		},
 		"Badge": {
 			"persist": false,
 			"autoClear": true

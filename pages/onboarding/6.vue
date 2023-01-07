@@ -85,7 +85,7 @@ export default defineComponent({
       $config, $capacitor, $services
     } = useContext()
     const {
-      state
+      state, dispatch
     } = useStore()
     const router = useRouter()
     const profile = computed(() => state.user.profile)
@@ -105,6 +105,12 @@ export default defineComponent({
 
         await $capacitor.positionPermissions()
         await $services.getSetUserGeneralLocation()
+
+        await dispatch('user/updateField', {
+          permissions: {
+            location: true
+          }
+        })
 
         loading.value = false
         router.push('/onboarding/7')

@@ -92,6 +92,7 @@ export default defineComponent({
       // Add document to user
       try {
         const location = await $services.reverseGeocode(profile.value.gps.lat, profile.value.gps.lng)
+        //console.log('LOCATION:', location)
         await dispatch('user/alerts/add', {
           type: 'accident',
           userId: user.value.uid,

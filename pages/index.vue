@@ -25,6 +25,9 @@
         </div>
 
         <AlertShoutbutton />
+
+        <v-btn @click="sendGPSChanges">Update GPS</v-btn>
+        <v-btn @click="sendGPSChangesRest">Update GPS REST</v-btn>
       </div>
     </div>
   </v-container>
@@ -57,7 +60,7 @@ export default defineComponent({
     } = useStore()
     const {
       $config,
-      $capacitor,
+      $capacitor, $services
     } = useContext()
     const loading = ref(false)
     const user = computed(() => state.user)
@@ -70,9 +73,7 @@ export default defineComponent({
 
     // MOUNTED
     onMounted(async () => {
-
       // GPS PERMISSIONS
-      await $capacitor.gpsBackgroundPosition()
       $capacitor.gpsCheckPermissions().then(async (has) => {
         if (has) {
           console.log('STICKY: GPS > HAS PERMISSIONS')
@@ -90,19 +91,32 @@ export default defineComponent({
         console.log('STICKY: Notifications > Granted')
       }
 
-      // BACKGROUND TASKS
+      // BACKGROUND TASKS (Maybe move to layout)
       await $capacitor.background_init()
 
       // Check user if they have profile pieces
       setTimeout(() => {
         dispatch('user/checkUserData')
+      }, 2500)
+    })
 
+    const sendGPSChanges = () => {
+      console.log('STICKY: sendGPS Changes START')
         $capacitor.updateLoggedInUsersGPS({
           lat: 55.555555,
           lng: -111.111111
         })
-      }, 2500)
-    })
+      console.log('STICKY: sendGPS Changes FINISH')
+    }
+
+    const sendGPSChangesRest = async () => {
+      console.log('STICKY: sendGPS Changes REST START')
+      await $services.restUpdateGPS({
+        lat: 55.555555,
+        lng: -111.111111
+      })
+      console.log('STICKY: sendGPS Changes REST FINISH')
+    }
 
     // PAGE META
     useMeta({
@@ -115,6 +129,8 @@ export default defineComponent({
     })
 
     return {
+      sendGPSChanges,
+      sendGPSChangesRest,
       loading,
       user,
       location,

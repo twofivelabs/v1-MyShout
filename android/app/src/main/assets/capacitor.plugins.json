@@ -20,6 +20,10 @@
 		"classpath": "com.getcapacitor.community.fcm.FCMPlugin"
 	},
 	{
+		"pkg": "@capacitor-community/http",
+		"classpath": "com.getcapacitor.plugin.http.Http"
+	},
+	{
 		"pkg": "@capacitor/app",
 		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
 	},
