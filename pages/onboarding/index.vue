@@ -9,9 +9,11 @@
                contain
                max-width="250"
                v-anime="{
-                        translateY: [100, 0],
-                        duration: 1200
-                     }"
+                  translateY: [100, 0],
+                  duration: 1200,
+                  opacity: [0, 100],
+                  easing: 'easeInOutQuad',
+               }"
         />
       </div>
       <v-btn

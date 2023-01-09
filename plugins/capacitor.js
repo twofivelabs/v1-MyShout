@@ -9,7 +9,6 @@ import { VoiceRecorder } from 'capacitor-voice-recorder'
 
 import { Contacts } from '@capacitor-community/contacts'
 import { Badge } from '@robingenz/capacitor-badge'
-import { Http } from '@capacitor-community/http'
 
 import admob from './cap.admob'
 import background from './cap.background'
@@ -82,47 +81,6 @@ export default function ({
      longitude: -119.396922
      speed: null
      */
-    async updateLoggedInUsersGPS(gps) {
-        if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: no gps data')
-
-        const user = app.$fire.auth.currentUser
-        const userToken = user ? await user.getIdTokenResult() : false
-
-        if (!userToken.token) return console.log('STICKY: no user token available')
-
-        const url = `https://firestore.googleapis.com/v1/projects/my-shout-app/databases/(default)/documents/Users/${userToken.claims.user_id}?updateMask.fieldPaths=gps&currentDocument.exists=true`
-        const data = {
-            "fields": {
-                "gps": {
-                    "mapValue": {
-                        "fields": {
-                            "lat": {
-                                "doubleValue": parseFloat(gps.lat)
-                            },
-                            "lng": {
-                                "doubleValue": parseFloat(gps.lng)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        try {
-            const response = await Http.patch({
-                headers: {
-                    'Authorization': `Bearer ${userToken.token}`
-                },
-                url,
-                data
-            })
-            console.log('STICKY: CapacitorHttp > USER:', userToken.claims.user_id)
-            console.log('STICKY: CapacitorHttp > DATA:', data, JSON.stringify(data))
-            console.log('STICKY: CapacitorHttp > SUCCESS:', response.status)
-        } catch (e) {
-            console.log('STICKY: CapacitorHttp > ERROR', e, JSON.stringify(e))
-        }
-    },
     async gpsSetPosition (gps) {
         // console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
         await store.dispatch('user/updateGPS', gps)

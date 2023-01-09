@@ -10,10 +10,10 @@
       <!-- WHITE CARD -->
       <div class="white pa-10 rounded-t-xl rounded-b-0 elevation-13" style="width:100vw; max-width:700px; height:77vh;" v-anime="{
                 translateY: [200, 0],
-                opacity: [0, 1],
-                easing: 'easeOutExpo',
                 duration: 900,
-                delay:900
+                delay:900,
+                opacity: [0, 100],
+                easing: 'easeInOutQuad'
               }">
         <div class="d-flex flex-column align-center">
           <div>

@@ -9,9 +9,11 @@
              contain
              max-width="200"
              v-anime="{
-                        translateY: [100, 0],
-                        duration: 1200
-                     }"
+                translateY: [100, 0],
+                duration: 1200,
+                opacity: [0, 100],
+                easing: 'easeInOutQuad'
+             }"
         />
         <OnboardingCardheader class="gray--text mb-10 mx-14" :h1="$t('know_your_safe')" />
       </div>

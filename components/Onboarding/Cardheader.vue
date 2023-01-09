@@ -6,7 +6,9 @@
       style="box-shadow: none !important;"
       v-anime="{
         translateY: [100, 0],
-        duration: 1200
+        duration: 1200,
+        opacity: [0, 100],
+        easing: 'easeInOutQuad'
       }"
   >
     <v-row

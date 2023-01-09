@@ -92,7 +92,7 @@ export default defineComponent({
       }
 
       // BACKGROUND TASKS (Maybe move to layout)
-      await $capacitor.background_init()
+      await $capacitor.background_tasksInit()
 
       // Check user if they have profile pieces
       setTimeout(() => {
