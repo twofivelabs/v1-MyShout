@@ -11,11 +11,11 @@
     </string>
     <bool name="enable_google_pay">true</bool>
     <bool name="google_pay_is_testing">true</bool>
-    <string name="capacitor_background_geolocation_notification_channel_name">
+    <!--<string name="capacitor_background_geolocation_notification_channel_name">
         Background GPS Tracking For Emergency Contacts
-    </string>
-    <string name="capacitor_background_geolocation_notification_icon">
+    </string>-->
+    <!--<string name="capacitor_background_geolocation_notification_icon">
         drawable/ic_tracking
-    </string>
+    </string>-->
     <string name="admob_app_id">ca-app-pub-8080343904271029~4328877889</string>
 </resources>

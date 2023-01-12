@@ -15,7 +15,7 @@
       </v-toolbar-title>
       <v-spacer />
     </v-app-bar>
-    <v-container class="px-0 pt-4 mt-8 pb-12 mobileNotch">
+    <v-container class="px-0 pt-4 mt-8 mb-12 pb-12 mobileNotch">
       <v-row v-if="loading">
         <v-col>
           <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />

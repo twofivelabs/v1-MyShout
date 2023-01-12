@@ -16,7 +16,7 @@
       <v-spacer />
     </v-app-bar>
 
-    <v-container class="mt-3 mobileNotch px-3">
+    <v-container class="mt-3 mobileNotch px-3 ">
       <v-row>
         <v-col cols="12" sm="5">
 

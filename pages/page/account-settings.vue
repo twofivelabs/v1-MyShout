@@ -16,7 +16,7 @@
       <v-spacer />
     </v-app-bar>
 
-    <v-container class="mt-3 mb-12 mobileNotch px-3">
+    <v-container class="mt-3 mb-12 pb-12 mobileNotch px-3">
       <v-row>
         <v-col cols="12" class="">
           <ElementH3 :text="$t('security_pin_heading')" align="left" />

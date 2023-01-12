@@ -195,7 +195,7 @@ export default {
         terms_text: 'By signing up you agree to our',
         terms_btn: 'Privacy Policy and Terms',
         enable_location_permissions_heading: 'Your Location',
-        enable_location_permissions_sub: 'MyShout collects location data to enable emergency buttons, in-app mapping, even when the app is closed or not in use.',
+        enable_location_permissions_sub: 'MyShout collects location data to enable emergency buttons, in-app mapping.',
         enable_notification_permissions_heading: 'Notifications',
         enable_notification_permissions: 'Notifications may include alerts, sounds and icon badges. These can be configured in settings.',
         add_phone_number_heading: 'What is your phone number?',

@@ -136,7 +136,7 @@ export default defineComponent({
         $capacitor.AdMob_banner()
 
         // BACKGROUND TASKS
-        $capacitor.background_tasksInit()
+        // $capacitor.background_tasksInit()
 
       }, 2500)
     })

@@ -25,9 +25,9 @@
           <h6 class="primary--text text-h6 text-center mb-6">
             {{ $t('onboarding.location_requirements_3') }}
           </h6>
-          <h6 class="primary--text text-h6 text-center mb-6">
+<!--          <h6 class="primary&#45;&#45;text text-h6 text-center mb-6">
             {{ $t('onboarding.location_requirements_4') }}
-          </h6>
+          </h6>-->
 
           <v-icon
               v-if="hasPermission"

@@ -8,10 +8,6 @@
 		"classpath": "com.getcapacitor.community.admob.AdMob"
 	},
 	{
-		"pkg": "@capacitor-community/background-geolocation",
-		"classpath": "com.equimaps.capacitor_background_geolocation.BackgroundGeolocation"
-	},
-	{
 		"pkg": "@capacitor-community/contacts",
 		"classpath": "ch.byrds.capacitor.contacts.Contacts"
 	},
@@ -54,10 +50,6 @@
 	{
 		"pkg": "@robingenz/capacitor-badge",
 		"classpath": "dev.robingenz.capacitor.badge.BadgePlugin"
-	},
-	{
-		"pkg": "@transistorsoft/capacitor-background-fetch",
-		"classpath": "com.transistorsoft.bgfetch.capacitor.BackgroundFetchPlugin"
 	},
 	{
 		"pkg": "capacitor-firebase-auth",

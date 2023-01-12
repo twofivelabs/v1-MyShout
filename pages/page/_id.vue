@@ -16,7 +16,7 @@
       <v-spacer />
     </v-app-bar>
 
-    <v-container :class="`mobileNotch ${page.slug}`">
+    <v-container :class="`mobileNotch ${page.slug} mb-12 pb-12`">
       <div v-if="loading">
         <v-row>
           <v-col cols="12">

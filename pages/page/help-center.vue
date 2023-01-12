@@ -16,7 +16,7 @@
       <v-spacer />
     </v-app-bar>
 
-    <v-container class="mt-3 mb-12 mobileNotch px-3" style="padding-bottom:125px !important;">
+    <v-container class="mt-3 mb-12 pb-12 mobileNotch px-3" style="padding-bottom:125px !important;">
       <v-expansion-panels focusable>
         <v-expansion-panel v-for="(post,i) in posts" :key="i">
           <v-expansion-panel-header>{{ $lang.get(post, 'title') }}</v-expansion-panel-header>

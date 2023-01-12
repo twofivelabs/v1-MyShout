@@ -196,7 +196,7 @@ export default {
         terms_text: 'En vous inscrivant, vous acceptez nos',
         terms_btn: 'Politique de confidentialité et conditions',
         enable_location_permissions_heading: 'Votre emplacement',
-        enable_location_permissions_sub: 'MyShout collecte des données de localisation pour activer les boutons d\'urgence, la cartographie intégrée à l\'application, même lorsque l\'application est fermée ou non utilisée.',
+        enable_location_permissions_sub: 'MyShout collecte des données de localisation pour activer les boutons d\'urgence, la cartographie in-app.',
         enable_notification_permissions_heading: 'Avis',
         enable_notification_permissions: 'Les notifications peuvent inclure des alertes, des sons et des badges d\'icônes. Ceux-ci peuvent être configurés dans les paramètres.',
         add_phone_number_heading: 'Quel est votre numéro de téléphone?',

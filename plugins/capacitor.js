@@ -11,7 +11,7 @@ import { Contacts } from '@capacitor-community/contacts'
 import { Badge } from '@robingenz/capacitor-badge'
 
 import admob from './cap.admob'
-import background from './cap.background'
+// import background from './cap.background'
 
 // VARIABLES
 let watchCallbackId = null
@@ -61,7 +61,7 @@ export default function ({
 
   inject('capacitor', {
       ...admob,
-      ...background,
+      //...background,
 
       async getContacts() {
           return await Contacts.getPermissions().then(async (permission) => {
@@ -148,8 +148,14 @@ export default function ({
                 return false
             }
             else if (permission.location === 'prompt' || permission.location === 'prompt-with-rationale') {
-                await Geolocation.requestPermissions()
-                app.$notify.show({ text: app.i18n.t('notify.gps_permission_prompt'), color: 'error' })
+                await Geolocation.requestPermissions().catch((e) => {
+                    app.$notify.show({ text: app.i18n.t('notify.gps_permission_prompt'), color: 'error' })
+                    app.$system.log({
+                        comp: 'Capacitor',
+                        msg: 'requestPermissions',
+                        val: e
+                    })
+                })
                 return false
             }
             else if (permission.location === 'granted') {

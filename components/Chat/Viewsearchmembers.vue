@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mb-12 pb-12">
     <div v-if="!friends || friends.length === 0">
       <ElementH4 v-if="!loading" align="center" class="my-5" :text="$t('contacts.no_contacts')"/>
     </div>
