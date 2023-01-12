@@ -26,8 +26,6 @@
 
         <AlertShoutbutton />
 
-        <v-btn @click="sendGPSChanges">Update GPS</v-btn>
-        <v-btn @click="sendGPSChangesRest">Update GPS REST</v-btn>
       </div>
     </div>
   </v-container>
@@ -43,6 +41,7 @@ import {
   useStore,
   onMounted,
 } from '@nuxtjs/composition-api'
+import {Preferences} from '@capacitor/preferences'
 
 export default defineComponent({
   name: 'HomePage',
@@ -60,7 +59,7 @@ export default defineComponent({
     } = useStore()
     const {
       $config,
-      $capacitor, $services
+      $capacitor
     } = useContext()
     const loading = ref(false)
     const user = computed(() => state.user)
@@ -91,32 +90,20 @@ export default defineComponent({
         console.log('STICKY: Notifications > Granted')
       }
 
-      // BACKGROUND TASKS (Maybe move to layout)
-      await $capacitor.background_tasksInit()
-
       // Check user if they have profile pieces
       setTimeout(() => {
         dispatch('user/checkUserData')
+
+        try {
+          Preferences.set({
+            key: 'currentUserId',
+            value: user.value.data.uid,
+          })
+        } catch {
+          // ...
+        }
       }, 2500)
     })
-
-    const sendGPSChanges = () => {
-      console.log('STICKY: sendGPS Changes START')
-        $capacitor.updateLoggedInUsersGPS({
-          lat: 55.555555,
-          lng: -111.111111
-        })
-      console.log('STICKY: sendGPS Changes FINISH')
-    }
-
-    const sendGPSChangesRest = async () => {
-      console.log('STICKY: sendGPS Changes REST START')
-      await $services.restUpdateGPS({
-        lat: 55.555555,
-        lng: -111.111111
-      })
-      console.log('STICKY: sendGPS Changes REST FINISH')
-    }
 
     // PAGE META
     useMeta({
@@ -129,8 +116,6 @@ export default defineComponent({
     })
 
     return {
-      sendGPSChanges,
-      sendGPSChangesRest,
       loading,
       user,
       location,

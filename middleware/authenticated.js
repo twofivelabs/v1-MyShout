@@ -2,6 +2,10 @@ export default async function ({ app, store, redirect }) {
     const user = app.$fire.auth.currentUser
     const userToken = user ? await user.getIdTokenResult() : false
 
+    /*if (userToken.token) {
+        console.log('TOKEN:', userToken.token)
+    }*/
+
     function checkUserStatus () {
         if ((store.state.user.data.role && store.state.user.data.role.isActive) && !store.state.user.data.role.isActive) {
           return redirect('/status')

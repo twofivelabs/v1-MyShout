@@ -128,8 +128,9 @@ export default ({
       /**
        * MyShout Update GPS VIA HTTP method
        * User: object
+       * GPS: object
        */
-      async restUpdateGPS (gps={}) {
+    async restUpdateGPS (gps={}) {
           if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: no gps data')
 
           const user = app.$fire.auth.currentUser
@@ -137,15 +138,17 @@ export default ({
 
           if (!userToken.token) return console.log('STICKY: no user token available')
           console.log('STICKY: UserTokenClaims:', userToken.claims.user_id)
-          // const responseFunc = app.$fire.functions.httpsCallable('Rest-updateGPS')
-          const responseFunc = app.$fire.functions.httpsCallable('Location-getLocationByIP')
-          const res = await responseFunc({
+          const responseFunc = app.$fire.functions.httpsCallable('Rest-updateGPS')
+          //const responseFunc = app.$fire.functions.httpsCallable('REST-getLocationByIP')
+          const payload = {
               userId: userToken.claims.user_id,
               gps
-          })
+          }
+          console.log('STICKY: restUpdateGPS PAYLOAD', payload)
+          const res = await responseFunc(payload)
           console.log('STICKY: RES BUTTON RESPONSE FROM FB', res)
           return res
-      },
+    },
     /**
     * Twilio Send SMS
     * body: data.body,

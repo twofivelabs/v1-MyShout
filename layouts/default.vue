@@ -134,6 +134,10 @@ export default defineComponent({
       setTimeout(() => {
         $capacitor.AdMob_init()
         $capacitor.AdMob_banner()
+
+        // BACKGROUND TASKS
+        $capacitor.background_tasksInit()
+
       }, 2500)
     })
 

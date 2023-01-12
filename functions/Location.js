@@ -21,6 +21,8 @@ exports.getLocationByIP = functions.https.onCall((data) => {
       const gps = data.gps;
       const hash = geohashForLocation([gps.lat, gps.lng]);
 
+      if (!userId || !gps) return;
+
       functions.logger.log("USER LOG", userId);
       functions.logger.log("GPS LOG", gps);
       // data.data.gps.lat  data.data.gps.lng
@@ -35,6 +37,7 @@ exports.getLocationByIP = functions.https.onCall((data) => {
               updated_at: new Date(),
             },
           }, {merge: true}).then(() => {
+            functions.logger.log(`Firebase Updated User ${userId}, with GPS ${gps.lng} and ${gps.lat}`);
             return Promise.resolve(true);
           }).catch((e) => {
             functions.logger.log("Error updating GPS data", e);

@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const serviceAccount = require("./service-key.json");
+const {geohashForLocation} = require("geofire-common");
 // const got = require("got");
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -25,16 +26,20 @@ exports.updateGPS = functions.https.onCall((data) => {
       const userId = data.userId;
       const gps = data.gps;
 
-      functions.logger.log("USER LOG", userId);
-      functions.logger.log("GPS LOG", gps);
+      if (!userId || !gps) return;
+
+      const hash = geohashForLocation([gps.lat, gps.lng]);
+
+      functions.logger.log("USER LOG2", userId);
+      functions.logger.log("GPS LOG2", gps);
       // data.data.gps.lat  data.data.gps.lng
       return admin.firestore()
           .doc(`Users/${userId}`)
           .set({
             gps: {
-              lng: 50,
-              lat: -100,
-              geoHash: "aa",
+              lng: gps.lng,
+              lat: gps.lat,
+              geoHash: hash,
               updated_at: new Date(),
             },
           }, {merge: true}).then(() => {
