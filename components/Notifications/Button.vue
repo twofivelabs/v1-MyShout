@@ -41,9 +41,7 @@ export default defineComponent({
   name: 'NotificationsButton',
   directives: { Touch },
   setup() {
-    const {
-      state, dispatch
-    } = useStore()
+    const { state, dispatch } = useStore()
     const { $system, $capacitor } = useContext()
     const loading = ref(false)
     const showBottomSheet = ref(false)
@@ -53,7 +51,8 @@ export default defineComponent({
     const getNotifications = async () => {
       try {
         loading.value = true
-        await dispatch('user/notifications/getAll')
+        await dispatch('user/notifications/listen')
+        // await dispatch('user/notifications/getAll')
       } catch(e) {
         $system.log({
           comp: 'NotificationsButton',

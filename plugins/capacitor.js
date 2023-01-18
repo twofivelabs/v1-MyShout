@@ -149,7 +149,7 @@ export default function ({
             }
             else if (permission.location === 'prompt' || permission.location === 'prompt-with-rationale') {
                 await Geolocation.requestPermissions().catch((e) => {
-                    app.$notify.show({ text: app.i18n.t('notify.gps_permission_prompt'), color: 'error' })
+                    // app.$notify.show({ text: app.i18n.t('notify.gps_permission_prompt'), color: 'error' })
                     app.$system.log({
                         comp: 'Capacitor',
                         msg: 'requestPermissions',

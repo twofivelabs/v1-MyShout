@@ -30,8 +30,9 @@
         <div v-if="publicUser.status !== 'approved'" class="mt-6">
           <v-chip
               v-if="publicUser.status"
-              color="myshoutOrange"
               :title="publicUser.status"
+              @click="$fetch()"
+              color="myshoutOrange"
           ><v-icon class="">mdi-update</v-icon>
             {{ $t('friendship_is') }} {{ publicUser.status }}</v-chip>
           <ElementH4 v-else align="center" :text="$t('permission.no_user_profile')"/>
@@ -114,6 +115,7 @@ export default defineComponent({
 
     // GET CONTENT
     useFetch(async () => {
+      console.log('FETCHING')
       await getPageData()
     })
 

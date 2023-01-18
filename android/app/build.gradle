@@ -8,7 +8,7 @@ android {
         applicationId "org.myshout.app"
         minSdk rootProject.ext.minSdkVersion
         targetSdk defaultTargetSdkVersion
-        versionCode 26
+        versionCode 27
         versionName '1.4'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug

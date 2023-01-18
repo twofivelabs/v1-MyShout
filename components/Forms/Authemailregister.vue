@@ -10,7 +10,7 @@
         background-color="#f8f9fa"
         class="py-0 my-0"
     />
-    
+
     <v-text-field
         v-model="form.password"
         :rules="rules.password"
@@ -26,23 +26,8 @@
         background-color="#f8f9fa"
     />
 
-    <v-text-field
-        v-model="form.confirmPassword"
-        :rules="rules.confirmPassword"
-        autocomplete="off"
-        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-        @click:append="showPassword = !showPassword"
-        :type="showPassword ? 'text' : 'password'"
-        :label="$t('form.confirm_password')"
-        required
-        prepend-inner-icon="mdi-lock"
-        counter
-        outlined
-        background-color="#f8f9fa"
-    />
-
     <v-btn
-      :disabled="!valid"  
+      :disabled="!valid"
       :loading="loading"
       color="primary"
       elevation="0"
@@ -51,7 +36,7 @@
     >
       {{ $t('btn.sign_up') }}
     </v-btn>
-    
+
     <div class="text-center mt-5">
       <OnboardingPrivacypolicy class="mt-15" />
       <div class="d-inline-flex justify-center agreeToTerms">
@@ -105,7 +90,7 @@ export default defineComponent({
       } else {
         $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
       }
-      
+
       loading.value = false
     }
     const register = async () => {
@@ -131,7 +116,7 @@ export default defineComponent({
             case "auth/email-already-in-use":
               $notify.show({ text: i18n.t('onboarding.error_email_in_use'), color: 'error' })
               break;
-          }          
+          }
         }
       } else {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })

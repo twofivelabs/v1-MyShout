@@ -297,17 +297,22 @@ export default defineComponent({
     })
     // This will load with moving back and forth
     watch(route, (r) => {
-      if (r.name === 'chats-chat-id') {
+      // console.log('r/route', r)
+      if (r.name.includes('chats-chat-id')) {
         $capacitor.AdMob_hideBanner()
 
         chatId.value = route.value.params.id
         loadMessages()
         goToBottom()
+
       } else {
         // Need to stop listening to the changes made to the chat
         try {
           console.log('STICKY: REMOVE CHAT MESSAGE LISTENER')
           messageListener.value()
+
+          $capacitor.AdMob_init()
+          $capacitor.AdMob_banner()
         } catch {
           // ...
         }

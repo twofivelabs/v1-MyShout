@@ -170,6 +170,11 @@ export const actions = {
   async listen ({ rootState, commit }) {
     const uid = rootState.user.data.uid
     let hasInitNotifications = false
+
+    if (hasInitNotifications) {
+        console.log('...ALREADY LISTENING TO NOTIFICATIONS...')
+        return
+    }
     console.log('...LISTENING TO NOTIFICATIONS...')
     await this.$fire.firestore.collection(`Users/${uid}/${dbRootPath}`)
         .orderBy('created_at', 'desc')
