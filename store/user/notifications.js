@@ -24,8 +24,8 @@ class Notification extends FirestoreHelpers {
   write () {
     return this
   }
-
   read () {
+    this.fields.created_at_formatted = this.fields.created_at.toDate().toDateString() +" "+ this.fields.created_at.toDate().toTimeString()
     return this
   }
 }
@@ -180,16 +180,24 @@ export const actions = {
         .orderBy('created_at', 'desc')
         .limitToLast(100)
         .onSnapshot((snapshot) => {
-          commit('SET_ALL', [])
+          // commit('SET_ALL', [])
           snapshot.docChanges().forEach((change) => {
             const data = change.doc.data()
             data.id = change.doc.id
-            data.created_at = data.created_at.toDate().toDateString()
-
+              console.log('DATA DATE > ', data?.created_at?.seconds)
+            try {
+                data.seconds = data?.created_at?.seconds
+                data.created_at = data.created_at.toDate().toDateString()
+            } catch {
+                // ...
+            }
             if (change.type === 'modified') {
                 if (data && data.seen === false) {
                     commit('SET_HAS_NOTIFICATIONS', true)
                 }
+                const position = (hasInitNotifications ? 'unshift' : 'push')
+                commit('PUSH_TO_ALL', {data, position})
+                commit('PUSH_TO_LOADED', data)
             }
             else if (change.type === 'added') {
               if (data && data.seen === false) {

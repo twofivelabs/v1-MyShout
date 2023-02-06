@@ -12,8 +12,8 @@
       />
     </div>
     <div v-else>
-      <div v-if="notificationsLoaded && Object.keys(notificationsLoaded).length > 0">
-        <div v-for="(notification, id) in notificationsLoaded" :key="id">
+      <div v-if="notifications && notifications.length > 0">
+        <div v-for="(notification, id) in notifications" :key="id">
           <v-row
               v-if="notification.title || notification.body"
               :id="notification.id"
@@ -134,12 +134,13 @@ import {
   computed,
   defineComponent,
   ref,
-  useFetch,
   useContext,
+  useFetch,
   useRouter,
   useStore,
 } from '@nuxtjs/composition-api'
-import { Intersect } from 'vuetify/lib/directives'
+import {Intersect} from 'vuetify/lib/directives'
+import {orderBy} from 'lodash'
 
 export default defineComponent({
   name: 'UserNotifications',
@@ -161,8 +162,14 @@ export default defineComponent({
 
     // DEFINE CONTENT
     const loading = ref(false)
-    const notifications = computed(() => state.user.notifications.all)
-    const notificationsLoaded = computed(() => state.user.notifications.loaded)
+    const notifications = computed(() => {
+      const loaded = state.user.notifications.all
+      return orderBy(loaded, ['seconds'], ['desc'])
+    })
+    const notificationsLoaded = computed(() => {
+      const loaded = state.user.notifications.loaded
+      return orderBy(loaded, ['seconds'], ['desc'])
+    })
 
     // GET CONTENT
     useFetch(async () => {
