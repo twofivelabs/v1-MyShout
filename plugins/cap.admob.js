@@ -13,8 +13,8 @@ export default {
         console.log('STICKY: ADMOB admobHasInit')
         if (admobHasInit) return
 
-        const { status } = await AdMob.trackingAuthorizationStatus()
-        if (status === 'notDetermined') {
+        //const { status } = await AdMob.trackingAuthorizationStatus()
+        //if (status === 'notDetermined') {
             /**
              * If you want to explain TrackingAuthorization before showing the iOS dialog,
              * you can show the modal here.
@@ -25,10 +25,10 @@ export default {
              * await modal.present();
              * await modal.onDidDismiss();  // Wait for close modal
              **/
-        }
+        //}
 
         AdMob.initialize({
-            requestTrackingAuthorization: true,
+            requestTrackingAuthorization: false,
             //testingDevices: ['2077ef9a63d2b398840261c8221a0c9b'],
             //initializeForTesting: true,
         }).then().catch()

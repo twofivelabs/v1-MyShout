@@ -3,6 +3,7 @@ import Vue from 'vue'
 import { reactive } from '@nuxtjs/composition-api'
 import { geohashForLocation } from 'geofire-common'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
+import {Badge} from '@robingenz/capacitor-badge'
 
 const dbRootPath = 'Users'
 
@@ -41,8 +42,9 @@ class User extends FirestoreHelpers {
         location: false,
         shareLocationWithFriends: true
       },
-      notifications: {
-        hasMessages: false
+      has: {
+        notifications: false,
+        messages: false
       },
       gps: {
         lat: null,
@@ -180,6 +182,9 @@ export const getters = {
       return {}
     }
   },
+  hasNotificatoins: () => {
+    //..
+  },
 }
 
 export const mutations = {
@@ -206,16 +211,34 @@ export const mutations = {
     const key = Object.keys(value)[0]
     const v = value[key]
     // console.log('VALUE', key)
-    console.log('SET PROFILE FIELD', key, v, JSON.stringify(value) )
+    // console.log('SET PROFILE FIELD', key, v, JSON.stringify(value) )
     // Vue.set(state, `profile.${key}`, value)
     Vue.set(state, `profile.${key}`, v)
-    console.log('PROFILE', state.profile)
+    // console.log('PROFILE', state.profile)
     // state.profile = Object.assign(state.profile, value)
   },
-  SET_AUTH_USER: (state, {
-    authUser,
-    claims
-  }) => {
+  SET_HAS_NOTIFICATIONS: (state, value) => {
+    if( typeof value === 'undefined' ) return false
+
+    if( typeof value === 'object' ) {
+        // ...
+    }
+
+    if( typeof value === 'boolean' ) {
+        // state.has.notifications = value
+        lodash.set(state.profile.has, 'notifications', value)
+        Vue.set(state.profile.has, 'notifications', value)
+        console.log('USER STATE', state)
+
+        if (value === true) {
+            const count = 1
+            Badge.set({ count })
+        } else {
+            Badge.clear()
+        }
+    }
+  },
+  SET_AUTH_USER: (state, { authUser, claims }) => {
     state.data = {
       uid: authUser.uid,
       email: authUser.email,
@@ -234,27 +257,26 @@ export const mutations = {
       state.profile.initial = 'A'
     }
   },
-  SET_USER_PROFILE: (state, userProfile) => {
-    if (userProfile && userProfile.first_name) {
-      state.data.initial = userProfile.first_name.charAt(0).toUpperCase()
-      state.profile.initial = userProfile.first_name.charAt(0).toUpperCase()
-    }
-    state.profile.email = userProfile.email
-    state.profile.emailVerified = userProfile.emailVerified
-    state.profile.photoURL = userProfile.photoURL
-  },
   SET_USER_PROFILE_INIT: (state, userProfile) => {
-    // state.profile = userProfile
     const combineUserProfile = Object.assign(state.profile, userProfile)
+
+    if (!lodash.has(state.profile, 'has.messages')) {
+        console.log('STICKY: USER > no hasMessages')
+        lodash.set(state.profile, 'has.messages', false)
+        Vue.set(state.profile, 'has.messages', false)
+    }
+    if (!lodash.has(state.profile, 'has.notifications')) {
+        console.log('STICKY: USER > no hasNotifications')
+        lodash.set(state.profile, 'has.notifications', false)
+        Vue.set(state.profile, 'has.notifications', false)
+    }
+
     Vue.set(state, 'profile', combineUserProfile)
-    if (userProfile && userProfile.first_name) {
+    if (userProfile?.first_name) {
       Vue.set(state.profile, 'initial', userProfile.first_name.charAt(0).toUpperCase())
     }
   },
-  ON_AUTH_STATE_CHANGED_MUTATION: (state, {
-    authUser,
-    claims
-  }) => {
+  ON_AUTH_STATE_CHANGED_MUTATION: (state, { authUser, claims }) => {
     if (!authUser) {
       // NO USER
     } else {
@@ -314,10 +336,7 @@ export const actions = {
       return await this.$db.update(`${dbRootPath}/${id}`, dataConverter, data)
     }
   },
-  async update ({
-    getters,
-    commit
-  }, data) {
+  async update ({ getters, commit }, data) {
       let userId = getters.userId
       if (data.uid) {
           userId = data.uid
@@ -332,19 +351,16 @@ export const actions = {
         return response
       }
   },
-  async updateField ({
-    getters,
-    commit
-  }, data) {
+  async updateField ({ getters, commit }, data) {
     let userId = getters.userId
     if (data.uid) {
         userId = data.uid
     } else if (data.id) {
         userId = data.id
     }
-
+      console.log(`STICKY: updateUserField,`)
     if (userId && this.$db) {
-      // console.log(`STICKY: updateUserField, ${dbRootPath}/${userId}`, data, JSON.stringify(data))
+      console.log(`STICKY: updateUserField, ${dbRootPath}/${userId}`, data, JSON.stringify(data))
       const response = await this.$db.update(`${dbRootPath}/${userId}`, null, data)
       if (response) {
         await commit('SET_PROFILE_FIELD', data)
@@ -352,13 +368,7 @@ export const actions = {
       return response
     }
   },
-  async updateGPS ({
-    state,
-                     // eslint-disable-next-line no-unused-vars
-    commit,
-                     // eslint-disable-next-line no-unused-vars
-    dispatch
-  }, data) {
+  async updateGPS ({ state, commit, dispatch }, data) {
     if (data && (data.lat && data.lng)) {
       if ((state.gps.lat === data.lat) && (state.gps.lng === data.lng)) {
         console.log('STICKY: User has not moved', data.lat, data.lng)
@@ -400,15 +410,13 @@ export const actions = {
       }
     }
   },
-  async get ({
-    getters,
-    commit
-  }, id = null) {
+  async get ({ getters, commit }, id = null) {
     if (!id) {
       id = getters.userId
     }
     const response = await this.$db.get_one(`${dbRootPath}/${id}`)
     if (response) {
+      await commit('SET_HAS_NOTIFICATIONS', { ...response })
       await commit('SET_USER_PROFILE_INIT', { ...response })
     }
     return response
@@ -416,7 +424,7 @@ export const actions = {
   async listen({ commit }, id) {
       try {
         if(id) {
-          console.log('listening to user', id)
+          console.log(' listening to user', id)
 
           return this.$fire.firestore
               .doc(`Users/${id}`)
@@ -443,20 +451,15 @@ export const actions = {
         }
     }
   },
-  async getAll ({ commit, rootState }, {
-        where = {},
-        limit = 20,
-        order = {},
-        uid = null
-    }) {
-        uid = uid || rootState.user.data.uid
-        if (uid) {
-            let response = await this.$db.get_all(`${dbRootPath}`, where, dataConverter, order, limit)
-            if (response) {
-                commit('SET_ALL', response)
-            }
-            return response
+  async getAll ({ commit, rootState }, { where = {}, limit = 20, order = {}, uid = null }) {
+    uid = uid || rootState.user.data.uid
+    if (uid) {
+        let response = await this.$db.get_all(`${dbRootPath}`, where, dataConverter, order, limit)
+        if (response) {
+            commit('SET_ALL', response)
         }
+        return response
+    }
   },
   async getOne ({ state, commit, rootState }, id) {
     try {
@@ -512,13 +515,7 @@ export const actions = {
    * @param claims
    * @returns {Promise<void>}
    */
-  async onAuthStateChanged ({
-    commit,
-    dispatch
-  }, {
-    authUser,
-    claims
-  }) {
+  async onAuthStateChanged ({ commit, dispatch }, { authUser, claims }) {
     if (!authUser) {
       await dispatch('noUserCleanUp')
       return
@@ -540,9 +537,7 @@ export const actions = {
     })
     await dispatch('setUserProfile', authUser.uid)
   },
-  async setUserProfile ({
-    dispatch
-  }, authUserUid) {
+  async setUserProfile ({ dispatch }, authUserUid) {
     if (authUserUid) {
       if (this.$db) {
         // await dispatch('get', authUserUid)
@@ -580,6 +575,4 @@ export const actions = {
       })
     }
   }
-
-
 }

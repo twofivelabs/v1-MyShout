@@ -30,15 +30,16 @@ exports.ChatMessageCreated = functions.firestore
       if (message) {
         return db.doc(`Chats/${ChatId}`).get().then((doc) => {
           const chat = doc.data();
-          functions.logger.log(chat.participants, chat.seen);
+          // functions.logger.log(chat.participants, chat.seen);
           const unseenParticipants = chat.participants.filter((x) => !chat.seen.includes(x));
-          functions.logger.log("unseenParticipants", unseenParticipants);
+          // functions.logger.log("unseenParticipants", unseenParticipants);
 
           // Update user docs that they have un-seen messages
           unseenParticipants.forEach((userId) => {
             // Update notification bubble
             db.doc(`Users/${userId}`).update({
               "notifications.hasMessages": true,
+              "has.messages": true,
             }).then(() => {
               return Promise.resolve(true);
             }).catch(() => {
@@ -49,17 +50,49 @@ exports.ChatMessageCreated = functions.firestore
             if (!chat.title) {
               notificationTitle = "Chat Notification";
             }
-            db.collection(`Users/${userId}/Notifications`).add({
-              uid: userId,
-              title: notificationTitle,
-              body: chat.lastMessage,
-              goTo: `/chats/chat/${chat.id}`,
-              type: "chat",
-            }).then(() => {
-              return Promise.resolve(true);
-            }).catch(() => {
-              return Promise.resolve(false);
-            });
+            // GET ANY PREVIOUS NOTIFICATIONS AND UPDATED IT
+            const goTo = `/chats/chat/${chat.id}`;
+            // console.log(`CHAT > Users/${userId}/Notifications`);
+            // console.log(`CHAT > goTo > ${goTo}`);
+            db.collection(`Users/${userId}/Notifications`)
+                .where("goTo", "==", goTo)
+                .orderBy("created_at", "desc")
+                .limit(1)
+                .get()
+                .then((snapshot) => {
+                  // console.log("CHAT > snapshot", snapshot);
+                  functions.logger.log("CHAT > snapshot", snapshot);
+                  if (snapshot.empty) {
+                    // ADD DOCUMENT
+                    // console.log("CHAT > ADD NEW");
+                    functions.logger.log("CHAT > ADD NEW");
+                    db.collection(`Users/${userId}/Notifications`).add({
+                      uid: userId,
+                      title: notificationTitle,
+                      body: chat.lastMessage,
+                      goTo: goTo,
+                      created_at: new Date(),
+                      seen: false,
+                      type: "chat",
+                    }).then(() => {
+                      return Promise.resolve(true);
+                    }).catch(() => {
+                      return Promise.resolve(false);
+                    });
+                  } else {
+                    // UPDATE DOCUMENT
+                    // console.log("CHAT > UPDATE EXISTING");
+                    // functions.logger.log("CHAT > UPDATE EXISTING");
+                    db.doc(`Users/${userId}/Notifications/${snapshot.docs[0].id}`).update({
+                      body: chat.lastMessage,
+                      created_at: new Date(),
+                    });
+                  }
+                }).catch((e) => {
+                  // CATCH
+                  console.log("CHAT > CATCH > ", e);
+                  functions.logger.log("CHAT > CATCH > ", e);
+                });
           });
         });
       }

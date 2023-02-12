@@ -84,8 +84,8 @@ export default defineComponent({
 
     // GET CONTENT
     useFetch(async () => {
+      loading.value = true
       try {
-        loading.value = true
         await dispatch('pages/getOne', route.value.params.id).then((res) => {
           if (res !== false) {
             page.value = res

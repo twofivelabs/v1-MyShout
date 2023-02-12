@@ -85,7 +85,7 @@ export default defineComponent({
     const isLoggedIn = computed(() => getters['user/isLoggedIn'])
     const profile = computed(() => state.user.profile)
     const user = computed(() => state.user.data)
-    const hasNotifications = computed(() => state.user.notifications.hasNotifications)
+    const hasNotifications = computed(() => state.user.profile.has.notifications)
 
     // DEFINE CONTENT
     const activeTab = ref()

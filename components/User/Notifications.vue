@@ -13,6 +13,9 @@
     </div>
     <div v-else>
       <div v-if="notificationsLoaded && Object.keys(notificationsLoaded).length > 0">
+        <div class="text-center mb-3">
+          <v-btn @click="deleteAllNotifications" x-small text>{{ $t('btn.delete_all') }}</v-btn>
+        </div>
         <div v-for="(notification, id) in notificationsLoaded" :key="id">
           <v-row
               v-if="notification.title || notification.body"
@@ -69,6 +72,9 @@
                 <span v-else-if="notification.title === 'shout alert'">
                   {{ $t('shout_alert') }}
                 </span>
+                <span v-else-if="notification.title === 'Checked-In'">
+                  {{ $t('notifications.checked_in_title') }}
+                </span>
 
                 <span v-else>
                   {{ notification.title }}
@@ -86,6 +92,9 @@
                 </span>
                 <span v-else-if="notification.body && notification.body.includes('You have been requested to check-in by')">
                   {{ notification.body.replace('You have been requested to check-in by', $t('notifications.requested_to_check_in')) }}
+                </span>
+                <span v-else-if="notification.body && notification.body.includes(' has checked-in.')">
+                  {{ notification.body.replace(' has checked-in.', $t('notifications.has_checked_in')) }}
                 </span>
 
                 <span v-else>
@@ -134,12 +143,13 @@ import {
   computed,
   defineComponent,
   ref,
-  useFetch,
   useContext,
+  useFetch,
   useRouter,
   useStore,
 } from '@nuxtjs/composition-api'
-import { Intersect } from 'vuetify/lib/directives'
+import {Intersect} from 'vuetify/lib/directives'
+import {orderBy, filter} from 'lodash'
 
 export default defineComponent({
   name: 'UserNotifications',
@@ -154,20 +164,33 @@ export default defineComponent({
       dispatch,
       commit
     } = useStore()
-    const { $system, $notify, i18n } = useContext()
+    const { $system, $fire, $capacitor, $notify, i18n } = useContext()
     const router = useRouter()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
 
     // DEFINE CONTENT
     const loading = ref(false)
-    const notifications = computed(() => state.user.notifications.all)
-    const notificationsLoaded = computed(() => state.user.notifications.loaded)
+    const notifications = computed(() => {
+      const loaded = state.user.notifications.all
+      return orderBy(loaded, ['seconds'], ['desc'])
+    })
+    const notificationsLoaded = computed(() => {
+      const loaded = state.user.notifications.loaded
+      const filtered = filter(loaded, ['seen', false])
+      if (filtered?.length === 0) {
+        commit('user/SET_HAS_NOTIFICATIONS', false)
+        $capacitor.pushNotificationsRemoveAllNotifications()
+      } else {
+        commit('user/SET_HAS_NOTIFICATIONS', true)
+      }
+      return orderBy(loaded, ['seconds'], ['desc'])
+    })
 
     // GET CONTENT
     useFetch(async () => {
+      loading.value = true
       try {
-        loading.value = true
         // await dispatch('user/notifications/listen')
       } catch(e) {
         $system.log({
@@ -187,7 +210,6 @@ export default defineComponent({
         return
       }
       try {
-        console.log('NOTIFICATION', notification)
         // When YOU approve a friendship, ADD friend to me
         await dispatch('user/friends/add', {
           id: notification.meta.requestedBy,
@@ -203,6 +225,7 @@ export default defineComponent({
           await dispatch('user/notifications/add', {
             uid: notification.meta.requestedBy,
             title: 'Friend Request Approved',
+            seen: false,
             body: `@${profile.value.username} accepted your friendship.`,
           })
         })
@@ -243,17 +266,33 @@ export default defineComponent({
     }
     const checkInResponse = async (notification) => {
       // Say YES I have checkedIn
-      if (notification.completed) {
-        return
-      }
+      if (notification?.completed) return
+      loading.value = true
+
       try {
-        loading.value = true
         await dispatch('user/checkins/update', {
           uid: notification.uid,
-          id: notification.meta.checkInId.id,
+          id: notification.meta.checkInId,
           responded: true,
         }).then((res) => {
           if (res !== false) {
+            // Respond to user with notification
+            // Get username from BODY
+            let username = ''
+            try {
+              username = '@'+notification.body.split('@')[1]
+            } catch {
+              // ..
+            }
+            // Send response to requester
+            dispatch('user/notifications/add', {
+              uid: notification.meta.requestedBy,
+              title: 'Checked-In',
+              created_at: new Date(),
+              seen: false,
+              body: `${username} has checked-in.`,
+            })
+
             $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           }
         })
@@ -287,11 +326,15 @@ export default defineComponent({
       const notificationId = entries[0].target.id
       const payload = { ...state.user.notifications.loaded[notificationId] }
 
+      // Bub fix in case the object doesn't have 'seen' in it.
+      if (payload['seen'] === undefined) payload.seen = false
+
       if (payload.seen === false) {
         payload.seen = true
         dispatch('user/notifications/update', payload)
       }
-      commit('user/notifications/SET_HAS_NOTIFICATIONS', false)
+
+      // commit('user/notifications/SET_HAS_NOTIFICATIONS', false)
     }
     const emergencyBodyNotification = (body) => {
       let newBody = body.replace('This is an emergency alarm from', i18n.t('notifications.this_is_emergency_alarm_from'))
@@ -311,6 +354,19 @@ export default defineComponent({
 
       return newBody
     }
+    const deleteAllNotifications = () => {
+      const loaded = state.user.notifications.loaded
+      for (const i in loaded) {
+        dispatch('user/notifications/remove', loaded[i])
+      }
+      // update notification bubble
+      $fire.firestore.doc(`Users/${user.value.uid}`).update({
+        "notifications.hasMessages": false,
+        "has.messages": false
+      })
+      // Clear the app bubble
+      $capacitor.pushNotificationsClearBadge()
+    }
 
     return {
       loading,
@@ -318,6 +374,7 @@ export default defineComponent({
       profile,
       notifications,
       notificationsLoaded,
+      deleteAllNotifications,
       goTo,
       emergencyBodyNotification,
       onIntersect,

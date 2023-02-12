@@ -118,6 +118,8 @@ export default defineComponent({
           uid: props.user.id,
           title: i18n.t('new_friend_request'),
           body: `@${profile.value.username} ${i18n.t('requested_to_be_your_friend')}`,
+          seen: false,
+          created_at: new Date(),
           type: 'friendRequest',
           meta: {
             requestedBy: profile.value.id

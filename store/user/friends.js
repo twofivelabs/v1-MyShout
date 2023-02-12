@@ -125,7 +125,6 @@ export const actions = {
   async update ({ commit, rootState }, data) {
     const uid = (data.uid) ? data.uid : rootState.user.data.uid
     if (uid && data.id) {
-      console.log('UPDATE', `Users/${uid}/${dbRootPath}/${data.id}`)
       const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter, data)
       if (response) {
         await commit('PUSH_TO_LOADED', data)
@@ -135,7 +134,6 @@ export const actions = {
   },
   async updateField ({ rootState }, data) {
       const uid = rootState.user.data.uid
-      console.log('updatefield', `Users/${uid}/${dbRootPath}/${data.id}`)
       if (uid && data.id) {
         // const response = await this.$db.update(`Users/${uid}/${dbRootPath}`, null, data)
         const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, null, data)
@@ -185,6 +183,21 @@ export const actions = {
         val: e
       })
       return false
+    }
+  },
+  async getAccess ({ rootState }, data) {
+    try {
+        const uid = data.userId || rootState.user.data.uid
+        if (!uid) { return }
+        return await this.$db.get_one(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter)
+        // return await this.$db.get_one(`Users/${data.id}/${dbRootPath}/${uid}`, dataConverter)
+    } catch (e) {
+        this.$system.log({
+            comp: 'store/friends',
+            msg: 'getAccess',
+            val: e
+        })
+        return false
     }
   },
   async remove ({ rootState }, doc) {

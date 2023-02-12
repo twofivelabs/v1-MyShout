@@ -51,7 +51,7 @@ import {
 } from '@nuxtjs/composition-api'
 // import Vue from 'vue'
 import { Touch } from 'vuetify/lib/directives'
-import { paginationMarkers } from '@/plugins/fb'
+// import { paginationMarkers } from '@/plugins/fb'
 
 export default defineComponent({
   name: 'AdminDashboard',
@@ -79,7 +79,7 @@ export default defineComponent({
     const { fetch } = useFetch(async () => {
       loading.value = true
       const loopUsers = {}
-      console.log('paginationMarkers, ', paginationMarkers)
+
       try {
         showPagination.value = true
         filterText.value = null

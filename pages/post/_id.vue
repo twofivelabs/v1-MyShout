@@ -79,8 +79,8 @@ export default defineComponent({
 
     // GET CONTENT
     useFetch(async () => {
+      loading.value = true
       try {
-        loading.value = true
         await dispatch('posts/getOne', route.value.params.id).then((res) => {
           if (res !== false) {
             post.value = res

@@ -122,6 +122,10 @@ export default defineComponent({
       const code = $ttlStorage.get('locale')
       i18n.setLocale(code)
 
+      setTimeout(() => {
+        dispatch('user/notifications/listen')
+      }, 1500)
+
       $system.initDarkMode()
 
       // Load remote config from firebase

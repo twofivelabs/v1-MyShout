@@ -103,6 +103,7 @@ export default defineComponent({
     // GET CONTENT
     useFetch(async () => {
       // LOAD USER DATA
+      loading.value = true
       try {
         if (isVendor.value) {
           router.push('/admin')
@@ -112,7 +113,6 @@ export default defineComponent({
           form.value = lodash.cloneDeep(state.user.default)
         }
         if (route.value.params.id) {
-          loading.value = true
           await dispatch('user/getOne', route.value.params.id).then((res) => {
             if (res !== false) {
               form.value = lodash.cloneDeep(res)

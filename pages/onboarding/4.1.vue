@@ -10,10 +10,10 @@
       <!-- WHITE CARD -->
       <div class="white pa-10 rounded-t-xl rounded-b-0 elevation-13" style="width:100vw; max-width:700px; height:77vh;" v-anime="{
                 translateY: [200, 0],
-                opacity: [0, 100],
+                opacity: [0, 1],
                 easing: 'easeInOutQuad',
-                duration: 900,
-                delay:900
+                duration: 600,
+                delay:600
               }">
         <div>
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.add_phone_number_sub') }}</h5>

@@ -1,20 +1,8 @@
 # TODO's
-- [x] Onboarding > Username is requesting Location access
-- [x] Onboarding > Zooming in on phone number input [ios only]
-- [x] Implement SMS with twillio
-- [x] Setup LIVE twillio with Felix
-- [x] More notifications
-- [x] Need to talk about Recover your account
-- [x] Logout Screen
-- [x] Unread messages notification bubble
-- [x] Add listener on chat messages, if user has not SEEN, add notification
-- [x] Add Friends
-- [x] Onboarding Process
-- [x] Request Safe Check-in
-- [x] Account Settings / Help options etc
-- [x] Invite Friends
-- [x] Security Pin
-- [x] Add member to chat
-- [x] Photo/Profile upload
-- [x] Interactive Map Feature
-- [x] Record Audio for Shout and Chat
+- [ ] Friend request puts a red dot on the APP icon
+- --- Open the app, red dot on the chat page
+- --- no red dot on the notification icon to approve friend request
+- --- when you close the app, red dot stays
+- [ ] Emergency does not send an alert message
+- --- no red dot on the app icon
+- --- There WAS red dot on chat icon, but no message in the chat screen

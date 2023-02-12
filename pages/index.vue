@@ -26,6 +26,8 @@
 
         <AlertShoutbutton />
 
+        hasNotifications {{ $store.state.user.profile.has.notifications }}
+
       </div>
     </div>
   </v-container>
@@ -40,18 +42,13 @@ import {
   useMeta,
   useStore,
   onMounted,
+  watchEffect,
 } from '@nuxtjs/composition-api'
 import {Preferences} from '@capacitor/preferences'
 
 export default defineComponent({
   name: 'HomePage',
   middleware: 'authenticated',
-  transition (to, from) {
-    if (!from) {
-      return 'slide-left'
-    }
-    return +to.query.page < +from.query.page ? 'slide-right' : 'slide-left'
-  },
   setup () {
     const {
       state,
@@ -66,29 +63,40 @@ export default defineComponent({
 
     // DEFINE CONTENT
     const location = computed(() => state.user.location)
-    const posts = ref([])
+    const hasRequestedNotificationPermissions = ref(false)
+    const hasRequestedMicrophonePermissions = ref(false)
 
-    // GET CONTENT
+    // WATCH
+    watchEffect(async () => {
+      // NOTIFICATION PERMISSIONS
+      if (hasRequestedNotificationPermissions.value === false) {
+        // console.log('STICKY: watchEffect > Request Push Notifications')
+        await $capacitor.pushNotificationsRequestAndRegisterPermissions().then(() => {
+          hasRequestedNotificationPermissions.value = true
+          $capacitor.pushNotificationsListeners()
+        })
+      }
+
+      // MICROPHONE PERMISSIONS
+      if (hasRequestedMicrophonePermissions.value === false) {
+        // console.log('STICKY: watchEffect > Request Microphone')
+        await $capacitor.microphonePermissions().then(() => {
+          hasRequestedMicrophonePermissions.value = true
+        })
+      }
+    })
 
     // MOUNTED
     onMounted(async () => {
       // GPS PERMISSIONS
       $capacitor.gpsCheckPermissions().then(async (has) => {
         if (has) {
-          console.log('STICKY: GPS > HAS PERMISSIONS')
+          // console.log('STICKY: GPS > HAS PERMISSIONS')
           await $capacitor.gpsGetCurrentPosition(l => {
             console.log('STICKY: GPS > ', l)
           })
         }
       })
-
-      // MICROPHONE PERMISSIONS
-      $capacitor.microphonePermissions()
-
-      // NOTIFICATION PERMISSIONS
-      if ($capacitor.pushNotificationsRequestAndRegisterPermissions()) {
-        console.log('STICKY: Notifications > Granted')
-      }
 
       // Check user if they have profile pieces
       setTimeout(() => {
@@ -119,7 +127,6 @@ export default defineComponent({
       loading,
       user,
       location,
-      posts
     }
   },
   head: {}

@@ -87,6 +87,8 @@ export default defineComponent({
           body: `You have been requested to check-in by @${loggedInProfile.value.username}`,
           goTo: '/',
           type: 'checkIn',
+          seen: false,
+          created_at: new Date(),
           meta: {
             checkInId: checkAddId.value,
             requestedBy: loggedInUser.value.uid

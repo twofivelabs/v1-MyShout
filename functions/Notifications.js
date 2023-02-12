@@ -94,6 +94,16 @@ exports.UserNotificationWrite = functions.firestore
                       status: "success",
                     },
                   }).then(() => {
+                    // Update user profile with "HAS NOTIFICATIONS"
+                    UsersCollection.doc(UserId).update({
+                      notifications: {
+                        hasMessages: true,
+                      },
+                      has: {
+                        messages: true,
+                      },
+                    }).catch((e) => console.log("UPDATING USER WITH HAS MESSAGES", e) );
+
                     return Promise.resolve(true);
                   }).catch((e) => {
                     functions.logger.log("updateNotificationResponse: error", e);
@@ -119,6 +129,16 @@ exports.UserNotificationWrite = functions.firestore
                       status: "success",
                     },
                   }).then(() => {
+                    // Update user profile with "HAS NOTIFICATIONS"
+                    UsersCollection.doc(UserId).update({
+                      notifications: {
+                        hasMessages: true,
+                      },
+                      has: {
+                        messages: true,
+                      },
+                    }).catch((e) => console.log("UPDATING USER WITH HAS MESSAGES", e) );
+
                     return Promise.resolve(true);
                   }).catch((e) => {
                     functions.logger.log("updateNotificationResponse: error", e);

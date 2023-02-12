@@ -42,15 +42,15 @@ export default defineComponent({
   directives: { Touch },
   setup() {
     const { state, dispatch } = useStore()
-    const { $system, $capacitor } = useContext()
+    const { $system } = useContext()
     const loading = ref(false)
     const showBottomSheet = ref(false)
-    const hasNotifications = computed(() => state.user.notifications.hasNotifications)
+    const hasNotifications = computed(() => state.user.profile.has.notifications || false)
 
     // METHODS
     const getNotifications = async () => {
+      loading.value = true
       try {
-        loading.value = true
         await dispatch('user/notifications/listen')
         // await dispatch('user/notifications/getAll')
       } catch(e) {
@@ -66,7 +66,7 @@ export default defineComponent({
     const openNotifications = async () => {
       showBottomSheet.value = true
       await getNotifications()
-      await $capacitor.pushNotificationsRemoveAllNotifications()
+      // await $capacitor.pushNotificationsRemoveAllNotifications()
     }
     const swipe = (direction) => {
       if (direction === 'Down') {

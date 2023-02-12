@@ -84,8 +84,8 @@ export default defineComponent({
 
     // GET CONTENT
     useFetch(async () => {
+      loading.value = true
       try {
-        loading.value = true
         if (isVendor.value) {
           router.push('/admin')
           return

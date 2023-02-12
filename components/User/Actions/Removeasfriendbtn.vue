@@ -15,7 +15,7 @@
     </template>
 
     <v-card class="rounded-xl pa-8">
-      <ElementH1 :text="$t('btn.remove_friend')" />
+      <ElementH1 :text="$t('remove_friend')" />
       <ElementP :text="$t('chats.confirm_remove_friend')" />
 
       <v-card-actions class="justify-center">
@@ -30,7 +30,7 @@
             class="elevation-0"
             @click="removeFriendship"
         >
-          {{ $t('btn.remove_friend') }}
+          {{ $t('remove_friend') }}
         </v-btn>
       </v-card-actions>
     </v-card>

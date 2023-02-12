@@ -38,7 +38,8 @@ import {
   defineComponent,
   onMounted,
   ref,
-  useStore
+  useStore,
+    watchEffect
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -47,8 +48,8 @@ export default defineComponent({
     const { state } = useStore()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
-    const hasNotifications = computed(() => state.user.notifications.hasNotifications)
-    const hasMessages = computed(() => state.user.profile.notifications.hasMessages)
+    const hasNotifications = computed(() => state.user.profile.has.notifications || false)
+    const hasMessages = computed(() => state.user.profile.has.messages || false)
 
     // DEFINE CONTENT
     const hasMounted = ref(false)
@@ -56,6 +57,11 @@ export default defineComponent({
     // MOUNT
     onMounted(() => {
       hasMounted.value = true
+    })
+
+    watchEffect(() => {
+      //console.log('WATCH > hasNotifications', hasNotifications.value)
+      //console.log('WATCH > hasMessages', hasMessages.value)
     })
 
     return {

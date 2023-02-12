@@ -1,5 +1,8 @@
 <template>
   <v-container class="pt-8 pl-0 pr-0">
+    <v-btn @click="$router.go(-1)" :title="$t('btn.back')" class="mt-2 mx-3" small fab text>
+      <v-icon>mdi-arrow-left</v-icon>
+    </v-btn>
     <div v-if="loading || !hasMounted">
       <v-row class="px-3">
         <v-col cols="12" md="4" sm="12">
@@ -11,15 +14,17 @@
         </v-col>
       </v-row>
     </div>
-    <div v-else-if="publicUser">
+
+    <div v-else-if="!loading && publicUser && friendshipAccess">
       <div class="text-center">
         <UserAvatar :user="publicUser" :size="120" />
         <ElementH1 v-if="publicUser.username" :text="`@${publicUser.username}`" />
-        <span v-if="publicUser.status === 'approved'" class="d-flex justify-center ">
+        <span v-if="friendshipAccess.status === 'approved'" class="d-flex justify-center ">
           <ElementH4 v-if="publicUser.location.country" :text="`${publicUser.location.city} ${publicUser.location.country}`" class="gray--text" />
         </span>
+        <NotificationsLastcheckedin :publicUser="publicUser" />
         <div class="d-flex justify-center my-6">
-          <UserActionsSendamessagebtn v-if="publicUser.status === 'approved'" :user="publicUser">
+          <UserActionsSendamessagebtn v-if="friendshipAccess.status === 'approved'" :user="publicUser">
             <v-btn color="myshoutGreen" class="elevation-0 rounded-lg white--text mr-2" large rounded>
               {{ $t('chats.send_message') }}
             </v-btn>
@@ -27,23 +32,24 @@
           <UserActionsbtn :user="publicUser" />
         </div>
 
-        <div v-if="publicUser.status !== 'approved'" class="mt-6">
+
+        <div v-if="friendshipAccess.status !== 'approved'" class="mt-6">
           <v-chip
-              v-if="publicUser.status"
-              :title="publicUser.status"
+              v-if="friendshipAccess.status"
+              :title="friendshipAccess.status"
               @click="$fetch()"
               color="myshoutOrange"
           ><v-icon class="">mdi-update</v-icon>
-            {{ $t('friendship_is') }} {{ publicUser.status }}</v-chip>
+            {{ $t('friendship_is') }} {{ friendshipAccess.status }}</v-chip>
           <ElementH4 v-else align="center" :text="$t('permission.no_user_profile')"/>
         </div>
       </div>
 
-
       <v-tabs
-              v-if="publicUser.status === 'approved'"
+              v-if="friendshipAccess.status === 'approved'"
               v-model="activeTab"
               background-color="transparent"
+              class="mb-12 pb-12"
               grow
           >
             <v-tab>
@@ -54,17 +60,19 @@
             </v-tab>
             <v-tabs-items v-model="activeTab" class="">
               <v-tab-item>
-                <MapGmbasic v-if="publicUser.permissions.shareLocationWithFriends" :lat="publicUser.gps.lat" :lng="publicUser.gps.lng" />
-                <ElementH4 v-else align="center" class="my-5" :text="$t('permission.no_view_location')"/>
+                <div v-if="activeTab === 0">
+                  <MapGmbasic v-if="friendshipAccess.isEmergency || publicUser.permissions.shareLocationWithFriends" :lat="publicUser.gps.lat" :lng="publicUser.gps.lng" />
+                  <ElementH4 v-else align="center" class="my-5" :text="$t('permission.no_view_location')"/>
+                </div>
               </v-tab-item>
               <v-tab-item class="pt-3">
-                <UserAccountAlerts :user="publicUser" />
+                <UserAccountAlerts v-if="activeTab === 1" :user="publicUser" />
               </v-tab-item>
             </v-tabs-items>
           </v-tabs>
     </div>
-    <div v-else>
-      <Global404/>
+    <div v-else-if="!loading">
+      <GlobalFourohfour />
     </div>
   </v-container>
 </template>
@@ -88,6 +96,9 @@ import {
 export default defineComponent({
   name: 'PageUsersId',
   middleware: 'authenticated',
+  watch: {
+    '$route.query': '$fetch'
+  },
   setup () {
     const {
       state,
@@ -107,23 +118,23 @@ export default defineComponent({
 
     // DEFINE CONTENT
     const hasMounted = ref(false)
-    const activeTab = ref('Alerts')
+    const activeTab = ref(0)
     const publicUser = ref(lodash.cloneDeep(state.user.one))
+    const friendshipAccess = ref(false)
     const loggedInUser = computed(() => state.user.data)
     const products = ref([])
     const posts = ref([])
 
     // GET CONTENT
     useFetch(async () => {
-      console.log('FETCHING')
       await getPageData()
     })
 
     // METHODS
     const getPageData = async () => {
+      loading.value = true
       try {
-        loading.value = true
-        await dispatch('user/getOne', route.value.params.id).then((res) => {
+        await dispatch('user/getOne', route.value?.params?.id).then((res) => {
           if (res !== false) {
             publicUser.value = lodash.cloneDeep(res)
           }
@@ -134,26 +145,27 @@ export default defineComponent({
             val: e
           })
         })
+
         // GET STATUS OF FRIENDSHIP
-        await dispatch('user/friends/getOne', {
-          userId: loggedInUser.value.uid,
-          id: route.value.params.id
+        await dispatch('user/friends/getAccess', {
+          userId: route.value?.params?.id,
+          id: loggedInUser.value?.uid,
         }).then((res) => {
           if (res !== false) {
-            publicUser.value = Object.assign({...res}, publicUser.value)
+            friendshipAccess.value = res
           }
         }).catch((e) => {
           $system.log({
             comp: 'PageUsersId',
-            msg: 'user/friends/getOne',
+            msg: 'user/friends/getAccess',
             val: e
           })
         })
 
         // PAGE META
         if (publicUser.value) {
-          title.value = `${publicUser.value.username} by ${$config.appTitle}`
-          if (publicUser.value.username) {
+          title.value = `${publicUser.value?.username} by ${$config.appTitle}`
+          if (publicUser.value?.username) {
             meta.value[0] = {
               hid: 'description',
               name: 'description',
@@ -187,6 +199,7 @@ export default defineComponent({
       products,
       posts,
       hasMounted,
+      friendshipAccess,
     }
   },
   head: {}

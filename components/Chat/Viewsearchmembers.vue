@@ -65,8 +65,8 @@ export default defineComponent({
 
     // METHODS
     const getFriends = async () => {
+      loading.value = true
       try {
-        loading.value = true
         await dispatch('user/friends/getAll', {
           uid: user.value.uid
         }).then((res) => {
@@ -105,8 +105,8 @@ export default defineComponent({
 
     // MOUNT
     onMounted(async () => {
+      loading.value = true
       try {
-        loading.value = true
         await getFriends()
       } catch(e) {
         $system.log({
