@@ -10,23 +10,23 @@
       <!-- WHITE CARD -->
       <div class="white pa-10 rounded-t-xl rounded-b-0 elevation-13" style="width:100vw; max-width:700px; height:77vh;" v-anime="{
                 translateY: [200, 0],
-                opacity: [0, 100],
+                opacity: [0, 1],
                 easing: 'easeInOutQuad',
-                duration: 900,
-                delay:900
+                duration: 600,
+                delay:600
               }">
         <div class="text-center d-flex flex-column justify-space-around">
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.thank_you_sub') }}</h5>
           <div class="text-center mt-15">
             <v-btn
                 :loading="loading"
+                @click="goNext"
                 color="primary"
                 fab
                 dark
                 x-large
                 type="submit"
                 class="white--text"
-                to="/"
             >
               <v-icon>mdi-arrow-right</v-icon>
             </v-btn>
@@ -43,22 +43,55 @@ import {
   defineComponent,
   ref,
   useContext,
-  useMeta,
+  useMeta, useRouter,
   useStore,
 } from '@nuxtjs/composition-api'
+import {PushNotifications} from '@capacitor/push-notifications'
 
 export default defineComponent({
   name: 'OnboardingPage8',
   layout: 'onboarding',
   setup () {
     const {
-      $config,
+      $config, $capacitor
     } = useContext()
     const {
-      state
+      state,
     } = useStore()
     const profile = computed(() => state.user.profile)
+    // const user = computed(() => state.user.data)
     const loading = ref(false)
+    const router = useRouter()
+
+    const goNext = () => {
+      loading.value = true
+
+      setTimeout(async () => {
+        // PUSH NOTIFICATION PERMISSIONS
+        try {
+          await PushNotifications.checkPermissions()
+          let permission = await PushNotifications.requestPermissions()
+
+          if (permission.receive === 'granted') {
+            await PushNotifications.register()
+            await PushNotifications.getDeliveredNotifications()
+            console.log("STICKY: REGISTERED")
+
+            await $capacitor.pushNotificationsListeners()
+            console.log('STICKY: NOTIFICATIONS > Mobile > True')
+
+            return true
+          }
+        } catch(e) {
+          console.log('STICKY: 8-CheckPermissions: ', e)
+
+        } finally {
+          loading.value = false
+          router.push('/')
+        }
+
+      },1500)
+    }
 
     // PAGE META
     useMeta({
@@ -72,7 +105,8 @@ export default defineComponent({
 
     return {
       loading,
-      profile
+      profile,
+      goNext
     }
   },
   head: {}

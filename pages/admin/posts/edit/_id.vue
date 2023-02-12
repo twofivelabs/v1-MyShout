@@ -161,12 +161,12 @@ export default defineComponent({
 
     // GET CONTENT
     useFetch(async () => {
+      loading.value = true
       try {
         if (typeof route.value.params.id === 'undefined') {
           form.value = lodash.cloneDeep(state.posts.default)
         }
         if (route.value.params.id) {
-          loading.value = true
           await dispatch('posts/getOne', route.value.params.id).then((res) => {
             if (res !== false) {
               form.value = lodash.cloneDeep(res)
@@ -201,8 +201,8 @@ export default defineComponent({
     }
     const submit = async () => {
       if (form.value.title) {
+        loading.value = true
         try {
-          loading.value = true
           await dispatch('posts/add', form.value)
           $notify.show({ text: i18n.t('notify.success') })
           router.push('/admin/posts')

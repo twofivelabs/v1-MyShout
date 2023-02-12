@@ -1,5 +1,6 @@
 export default {
     btn: {
+        delete_all: 'Delete All',
         back: 'Back',
         back_to_login: 'Back to login',
         save: 'Save',
@@ -179,7 +180,11 @@ export default {
         requested_to_be_your_friend: 'requested to be your friend.',
         accepted_your_friendship: 'accepted your friendship.',
         requested_to_check_in: 'You have been requested to check-in by',
-        this_is_emergency_alarm_from: 'This is an emergency alarm from'
+        this_is_emergency_alarm_from: 'This is an emergency alarm from',
+        checked_in_title: 'Checked-In',
+        has_checked_in: ' has checked-in.',
+        welcome_title: 'Welcome',
+        welcome_body: 'Welcome to MyShout'
     },
     gps: {
         gps: 'GPS',

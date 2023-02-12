@@ -80,8 +80,8 @@ export default defineComponent({
 
     // GET CONTENT
     useFetch(async () => {
+      loading.value = true
       try {
-        loading.value = true
         const whereQuery = []
         if (isVendor.value && !state.user.data.role.companyId) {
           return false

@@ -104,7 +104,9 @@ export const mutations = {
 
 export const actions = {
   async search ({ rootState }, { term, field = 'type', operator = '==', limit = null }) {
-    const uid = rootState.user.data.uid
+    const uid = rootState?.user?.data?.uid
+    if (!uid) return
+
     return await this.$db.search_collection({
       path: `Users/${uid}/${dbRootPath}`,
       term,
@@ -123,8 +125,8 @@ export const actions = {
       return response
     }
   },
-  async update ({ commit }, { data }) {
-    if (data.uid && data.id) {
+  async update ({ commit }, data) {
+    if (data?.uid && data?.id) {
       const response = await this.$db.update(`Users/${data.uid}/${dbRootPath}/${data.id}`, dataConverter, data)
       if (response) {
         await commit('SET_ALL', response)
@@ -133,13 +135,14 @@ export const actions = {
     }
   },
   async getAll ({ commit, rootState }, uid = null) {
-    uid = uid || rootState.user.data.uid
+    uid = uid || rootState?.user?.data?.uid
     if (uid) {
         const where = {}
+
         const response = await this.$db.get_all(`Users/${uid}/${dbRootPath}`, where, dataConverter, {
-            by: 'created_at',
+            by: 'updated_at',
             direction: 'desc'
-        })
+        }, 1)
       if (response) {
         await commit('SET_ALL', response)
       }
@@ -152,7 +155,7 @@ export const actions = {
         // await commit('SET_ONE', state.loaded[id])
         // return state.loaded[id]
       }
-      const uid = uid || rootState.user.data.uid
+      const uid = uid || rootState?.user?.data?.uid
       if (!uid) { return }
       const one = await this.$db.get_one(`Users/${uid}/${dbRootPath}/${id}`, dataConverter)
       if (one) {
@@ -170,7 +173,7 @@ export const actions = {
     }
   },
   async remove ({ rootState }, doc) {
-    const uid = rootState.user.data.uid
+    const uid = rootState?.user?.data?.uid
     return await this.$db.delete_doc(`Users/${uid}/${dbRootPath}/${doc}`)
   }
 }

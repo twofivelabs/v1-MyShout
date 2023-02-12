@@ -1,5 +1,6 @@
 export default {
     btn: {
+        delete_all: 'Supprimer tout',
         back: 'Retour',
         back_to_login: 'Retour connexion',
         save: 'Enregistrer',
@@ -180,7 +181,11 @@ export default {
         requested_to_be_your_friend: 'demandé à être ton ami.',
         accepted_your_friendship: 'accepté votre amitié.',
         requested_to_check_in: 'Vous avez été invité à vous enregistrer par',
-        this_is_emergency_alarm_from: 'Ceci est une alarme d\'urgence de'
+        this_is_emergency_alarm_from: 'Ceci est une alarme d\'urgence de',
+        checked_in_title: 'Enregistrée',
+        has_checked_in: ' s\'est enregistré.',
+        welcome_title: 'Bienvenue',
+        welcome_body: 'Bienvenue sur MyShout'
     },
     gps: {
         gps: 'GPS',

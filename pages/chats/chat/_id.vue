@@ -146,8 +146,8 @@ export default defineComponent({
     // METHODS
     const loadMessages = () => {
       messages.value = []
+      loading.value = true
       try {
-        loading.value = true
         messageListener.value = $fire.firestore
             .collection(`Chats/${chatId.value}/Messages`)
             .orderBy('created_at', 'asc')
@@ -245,15 +245,19 @@ export default defineComponent({
 
           // Update Chat of seen messages
           try {
-            if (!chat.value.seen.includes(user.value.data.uid)) {
+            if (!chat.value?.seen?.includes(user.value.data.uid)) {
               $fire.firestore.doc(`Chats/${chatId.value}`).update({
                 "seen": firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
               })
             }
             // update notification bubble
             $fire.firestore.doc(`Users/${user.value.data.uid}`).update({
-              "notifications.hasMessages": false
+              "notifications.hasMessages": false,
+              "has.messages": false,
             })
+            // Clear the app bubble
+            $capacitor.pushNotificationsClearBadge()
+
           } catch {
             // ...
           }

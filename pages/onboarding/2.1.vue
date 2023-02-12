@@ -10,8 +10,8 @@
                max-width="200"
                v-anime="{
                   translateY: [100, 0],
-                  duration: 1200,
-                  opacity: [0, 100],
+                  duration: 900,
+                  opacity: [0, 1],
                   easing: 'easeInOutQuad'
                }"
         />
@@ -23,7 +23,7 @@
                 translateY: [200, 0],
                 opacity: [0, 1],
                 easing: 'easeOutExpo',
-                duration: 900,
+                duration: 600,
                 delay:900
               }">
         <div>

@@ -92,7 +92,7 @@ export default defineComponent({
       dispatch
     } = useStore()
     const route = useRoute()
-    const hasNotifications = computed(() => state.user.notifications.hasNotifications)
+    const hasNotifications = computed(() => state.user.profile.has.notifications || false)
 
     // DEFINE CONTENT
     const sheet = ref(false)

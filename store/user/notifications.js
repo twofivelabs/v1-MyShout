@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import { reactive } from '@nuxtjs/composition-api'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
+//import {Badge} from '@robingenz/capacitor-badge'
 const dbRootPath = 'Notifications'
+let hasInitNotifications = false
 
 class Notification extends FirestoreHelpers {
   constructor (data) {
@@ -25,7 +27,11 @@ class Notification extends FirestoreHelpers {
     return this
   }
   read () {
-    this.fields.created_at_formatted = this.fields.created_at.toDate().toDateString() +" "+ this.fields.created_at.toDate().toTimeString()
+    try {
+      this.fields.created_at_formatted = this.fields.created_at.toDate().toDateString() + " " + this.fields.created_at.toDate().toTimeString()
+    } catch {
+        // ...
+    }
     return this
   }
 }
@@ -41,7 +47,6 @@ const dataConverter = {
 }
 
 export const state = () => reactive({
-  hasNotifications: false,
   all: [],
   unseen: [],
   loaded: {}
@@ -76,7 +81,7 @@ export const mutations = {
     if (!data) return
 
     let indexOfMatchingSlug = -1
-    if (data && data.id) {
+    if (data?.id) {
         indexOfMatchingSlug = state.all.findIndex(one => one.id === data.id)
     }
     if (indexOfMatchingSlug > -1) {
@@ -99,12 +104,7 @@ export const mutations = {
   },
   REMOVE: (state, data) => {
     Vue.delete(state.loaded, data.id)
-    // state.loaded[data.id] = data
   },
-  SET_HAS_NOTIFICATIONS: (state, data) => {
-    state.hasNotifications = data
-    Vue.set(state, 'hasNotifications', data)
-  }
 }
 
 export const actions = {
@@ -144,6 +144,8 @@ export const actions = {
       }
       const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, null, data)
       if (response) {
+        const position = (hasInitNotifications ? 'unshift' : 'push')
+        await commit('PUSH_TO_ALL', {data, position})
         await commit('PUSH_TO_LOADED', data)
       }
     }
@@ -156,11 +158,14 @@ export const actions = {
         direction: 'desc'
       }, 40)
       if (response) {
-        await commit('SET_ALL', response)
+        // await commit('SET_ALL', response)
         response.forEach((data) => {
-          if (data.seen === false) {
-            commit('SET_HAS_NOTIFICATIONS', true)
+          if (data?.seen === false) {
+              //commit('SET_HAS_NOTIFICATIONS', true)
+              commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
           }
+          const position = (hasInitNotifications ? 'unshift' : 'push')
+          commit('PUSH_TO_ALL', {data, position})
           commit('PUSH_TO_LOADED', data)
         })
       }
@@ -169,12 +174,13 @@ export const actions = {
   },
   async listen ({ rootState, commit }) {
     const uid = rootState.user.data.uid
-    let hasInitNotifications = false
 
     if (hasInitNotifications) {
         console.log('...ALREADY LISTENING TO NOTIFICATIONS...')
         return
     }
+    hasInitNotifications = true
+
     console.log('...LISTENING TO NOTIFICATIONS...')
     await this.$fire.firestore.collection(`Users/${uid}/${dbRootPath}`)
         .orderBy('created_at', 'desc')
@@ -184,7 +190,7 @@ export const actions = {
           snapshot.docChanges().forEach((change) => {
             const data = change.doc.data()
             data.id = change.doc.id
-              console.log('DATA DATE > ', data?.created_at?.seconds)
+
             try {
                 data.seconds = data?.created_at?.seconds
                 data.created_at = data.created_at.toDate().toDateString()
@@ -192,16 +198,16 @@ export const actions = {
                 // ...
             }
             if (change.type === 'modified') {
-                if (data && data.seen === false) {
-                    commit('SET_HAS_NOTIFICATIONS', true)
+                if (data?.seen === false) {
+                    commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
                 }
                 const position = (hasInitNotifications ? 'unshift' : 'push')
                 commit('PUSH_TO_ALL', {data, position})
                 commit('PUSH_TO_LOADED', data)
             }
             else if (change.type === 'added') {
-              if (data && data.seen === false) {
-                commit('SET_HAS_NOTIFICATIONS', true)
+              if (data?.seen === false) {
+                  commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
               }
               const position = (hasInitNotifications ? 'unshift' : 'push')
               commit('PUSH_TO_ALL', {data, position})
@@ -213,8 +219,10 @@ export const actions = {
           hasInitNotifications = true
         })
   },
-  async remove ({ rootState }, doc) {
+  async remove ({ commit, rootState }, doc) {
     const uid = rootState.user.data.uid
-    return await this.$db.delete_doc(`Users/${uid}/${dbRootPath}/${doc}`)
+    const docId = doc?.id || doc
+    commit('REMOVE', doc)
+    return await this.$db.delete_doc(`Users/${uid}/${dbRootPath}/${docId}`)
   }
 }

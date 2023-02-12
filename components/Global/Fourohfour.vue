@@ -14,7 +14,7 @@ import {
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
-  name: 'GlobalFourOhFour',
+  name: 'GlobalFourohfour',
   setup () {
     const { title } = useMeta()
     title.value = '404 Not Found'

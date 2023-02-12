@@ -57,14 +57,14 @@ import {
   defineComponent,
   onMounted,
   useStore,
-  ref, useContext,
+  ref, useContext, watchEffect
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
   name: 'ChatsIndex',
   middleware: 'authenticated',
   setup() {
-    const { state, commit } = useStore()
+    const { state, commit, dispatch } = useStore()
     const { $system, $fire, $capacitor } = useContext()
     const user = computed(() => state.user.data)
     const chatList2 = computed(() => state.chats.all)
@@ -114,6 +114,18 @@ export default defineComponent({
         $capacitor.AdMob_init()
         $capacitor.AdMob_banner()
       }
+    })
+
+    watchEffect(() => {
+      setTimeout(() => {
+        if(chatList2.value.length === 0) {
+          dispatch('user/updateField', {
+            has: {
+              messages: false
+            }
+          })
+        }
+      }, 3000)
     })
 
     return {

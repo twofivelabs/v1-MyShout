@@ -369,19 +369,20 @@ export default function ({
         try {
             const device = await this.device()
 
-            //const token = await app.$fire.messaging.getToken({ vapidKey: app.$config.firebase.fcmPublicVapidKey })
-            //console.log('KYLE: pushNotificationsGetToken', token)
-
             // Mobile notifications
             if (device.platform !== 'web') {
-                const permission = await PushNotifications.requestPermissions()
+                let permission = await PushNotifications.checkPermissions();
+                if (permission.receive === 'prompt') {
+                    permission = await PushNotifications.requestPermissions();
+                }
 
                 if (permission.receive === 'granted') {
+                    await PushNotifications.register();
+                    console.log("STICKY: REGISTERED")
+
                     await this.pushNotificationsListeners()
                     console.log('STICKY: NOTIFICATIONS > Mobile > True')
 
-                    await PushNotifications.register()
-                    console.log("STICKY: REGISTERED")
                     return true
                 } else {
                     app.$system.log({
@@ -389,6 +390,7 @@ export default function ({
                         msg: 'pushNotificationsRequestAndRegisterPermissions > Permission',
                         val: permission
                     })
+                    return false
                 }
             }
 
@@ -403,13 +405,16 @@ export default function ({
                     return true
                 }
                 console.log('STICKY: NOTIFICATIONS > Web > ', permission)
+                return false
             }
+
         } catch (e) {
             app.$system.log({
                 comp: 'Capacitor',
                 msg: 'pushNotificationsRequestAndRegisterPermissions 3',
                 val: e
             })
+            return false
         }
     },
     // Token Type: web/mobile
@@ -566,7 +571,12 @@ export default function ({
             // ..
         }
     },
-
+    async pushNotificationsSetBadge(counter) {
+        await Badge.set(counter)
+    },
+    async pushNotificationsClearBadge() {
+        await Badge.clear()
+    },
     // Camera
     // Will return a URL of the path we can use to upload
     async cameraTakePicture (allowEditing = true) {

@@ -147,17 +147,12 @@ export default class FirestoreHelpers {
  * @returns {FirestoreHelpers}
  */
   defaultWrite () {
-      // console.log('DEFAULT WRITE', this.fields.created_at, typeof this.fields.created_at)
-    if (this.fields.created_at == null) {
-      // this.fields.created_at = firebase.firestore.FieldValue.serverTimestamp()
-      this.fields.created_at = new Date()
-    } else {
-      // this.fields.updated_at = firebase.firestore.FieldValue.serverTimestamp()
-      this.fields.updated_at = new Date()
-      delete this.fields.created_at
+    const theDate = new Date()
+    if (!this.fields.created_at) {
+        this.fields.created_at = theDate
     }
-    if (this.fields.id) {
-      // delete this.fields.id
+    if (!this.fields.updated_at) {
+        this.fields.updated_at = theDate
     }
     return this
   }

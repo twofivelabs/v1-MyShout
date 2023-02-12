@@ -1,5 +1,6 @@
 <template>
   <div>
+
     <ElementH4 v-if="!loading && !canViewAlerts" align="center" class="my-5" :text="$t('must_be_emergency_contact')"/>
     <div v-else>
       <v-list v-if="alerts && alerts.length > 0" color="transparent" rounded>
@@ -23,6 +24,7 @@ import {
   onMounted,
   useStore,
 } from '@nuxtjs/composition-api'
+import lodash from 'lodash'
 
 export default defineComponent({
   name: 'UserAccountAlerts',
@@ -44,18 +46,40 @@ export default defineComponent({
     // DEFINE CONTENT
     const alerts = ref([])
     const alertsStore = computed(() => state.user.alerts.all)
+    const publicUser = ref()
     const canViewAlerts = ref(false)
+    const friendshipAccess = ref({
+      isEmergency: false
+    })
 
     // METHODS
     const getUserFriends = async () => {
+      loading.value = true
       try {
-        loading.value = true
-        await dispatch('user/friends/getOne', {
+        await dispatch('user/getOne', props.user.id).then((res) => {
+          if (res !== false) {
+            publicUser.value = lodash.cloneDeep(res)
+          }
+        }).catch((e) => {
+          $system.log({
+            comp: 'PageUsersId',
+            msg: 'user/getOne',
+            val: e
+          })
+        })
+        // GET STATUS OF FRIENDSHIP
+        await dispatch('user/friends/getAccess', {
           userId: props.user.id,
-          id: loggedInUser.value.uid
+          id: loggedInUser.value.uid,
         }).then((res) => {
           if (res !== false) {
-            canViewAlerts.value = res.isEmergency
+            friendshipAccess.value = res
+            if(friendshipAccess.value.isEmergency) {
+              canViewAlerts.value = true
+            }
+            if(publicUser.value.permissions.shareLocationWithFriends) {
+              // canViewAlerts.value = true
+            }
           }
         })
       } catch(e) {
@@ -69,8 +93,8 @@ export default defineComponent({
       }
     }
     const getAlerts = async () => {
+      loading.value = true
       try {
-        loading.value = true
         if (loggedInUser.value.uid === props.user.id) {
           canViewAlerts.value = true
         } else if(!canViewAlerts.value) {
@@ -103,7 +127,9 @@ export default defineComponent({
       loading,
       state,
       alerts,
-      canViewAlerts
+      canViewAlerts,
+      publicUser,
+      friendshipAccess
     }
   }
 })

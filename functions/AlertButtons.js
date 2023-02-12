@@ -70,6 +70,8 @@ exports.sendAlert = functions.https.onCall((data) => {
                     body: `This is an emergency alarm from ${data.data.user.username} **${data.type} alert**.`,
                     goTo: `/users/user/${data.data.user.id}`,
                     type: "alert",
+                    created_at: new Date(),
+                    seen: false,
                   }).then(() => {
                     return Promise.resolve(true);
                   }).catch(() => {

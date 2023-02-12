@@ -183,8 +183,8 @@ export default defineComponent({
     }
     const submit = async () => {
       if (form.value.title) {
+        loading.value = true
         try {
-          loading.value = true
           await dispatch('pages/add', form.value)
           $notify.show({ text: i18n.t('notify.success') })
           router.push('/admin/pages')

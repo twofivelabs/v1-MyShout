@@ -39,6 +39,7 @@ exports.ChatMessageCreated = functions.firestore
             // Update notification bubble
             db.doc(`Users/${userId}`).update({
               "notifications.hasMessages": true,
+              "has.messages": true,
             }).then(() => {
               return Promise.resolve(true);
             }).catch(() => {
@@ -70,6 +71,8 @@ exports.ChatMessageCreated = functions.firestore
                       title: notificationTitle,
                       body: chat.lastMessage,
                       goTo: goTo,
+                      created_at: new Date(),
+                      seen: false,
                       type: "chat",
                     }).then(() => {
                       return Promise.resolve(true);

@@ -117,8 +117,8 @@ export default defineComponent({
       }
     }
     const getUsers = async () => {
+      loading.value = true
       try {
-        loading.value = true
         await dispatch('user/getAll', {
           where: {},
           limit: 500,

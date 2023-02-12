@@ -60,7 +60,13 @@ export const mutations = {
         state.all = data
     },
     PUSH_TO_ALL: (state, data) => {
-        const indexOfMatchingSlug = state.all.findIndex(one => one.id === data.id)
+        if (!data) return
+
+        let indexOfMatchingSlug = -1
+        if (data?.id) {
+            indexOfMatchingSlug = state.all.findIndex(one => one.id === data.id)
+        }
+
         if (indexOfMatchingSlug > -1) {
             // !! Need to use Vue, to keep the properties Reactive
             Vue.set(state.all, indexOfMatchingSlug, data)
@@ -75,7 +81,12 @@ export const mutations = {
         state.one = data
     },
     REMOVE_ONE: (state, slug) => {
-        const indexOfMatchingSlug = state.all.findIndex(one => one.slug === slug)
+        if (!slug) return
+
+        let indexOfMatchingSlug = -1
+        if (slug) {
+            indexOfMatchingSlug = state.all.findIndex(one => one.slug === slug)
+        }
         if (indexOfMatchingSlug > -1) {
             state.all.splice(indexOfMatchingSlug, 1)
             return true

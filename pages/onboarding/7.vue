@@ -10,10 +10,10 @@
       <!-- WHITE CARD -->
       <div class="white pa-10 rounded-t-xl rounded-b-0 elevation-13" style="width:100vw; max-width:700px; height:77vh;" v-anime="{
                 translateY: [200, 0],
-                opacity: [0, 100],
+                opacity: [0, 1],
                 easing: 'easeInOutQuad',
-                duration: 900,
-                delay:900
+                duration: 600,
+                delay:600
               }">
         <div class="text-center">
           <h5 class="text-h5 text-center mb-6">
@@ -40,7 +40,7 @@
               size="120"
               v-anime="{
                 translateY: [100, 0],
-                duration: 1200
+                duration: 600
               }"
           >
             mdi-checkbox-marked-circle-outline
@@ -78,7 +78,6 @@ import {
   useStore,
   useRouter,
 } from '@nuxtjs/composition-api'
-import {PushNotifications} from '@capacitor/push-notifications'
 
 export default defineComponent({
   name: 'OnboardingPage7',
@@ -86,12 +85,13 @@ export default defineComponent({
   middleware: 'authenticated',
   setup () {
     const {
-      $config, $capacitor
+      $config, $capacitor, i18n
     } = useContext()
     const {
       state, dispatch
     } = useStore()
     const router = useRouter()
+    const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
     const hasPermission = ref(false)
@@ -101,21 +101,26 @@ export default defineComponent({
       loading.value = true
 
       setTimeout(async () => {
-        PushNotifications.requestPermissions().then(async (permission) => {
-          if (permission.receive === 'granted') {
-            hasPermission.value = true
-          }
+        // PUSH NOTIFICATION PERMISSIONS
+        await $capacitor.pushNotificationsRequestAndRegisterPermissions().then(async () => {
+          await $capacitor.pushNotificationsListeners()
+          await dispatch('user/notifications/add', {
+            // userId: props.user.id,
+            uid: user.value.uid,
+            title: i18n.t('notifications.welcome_title'),
+            body: i18n.t('notifications.welcome_body'),
+            seen: false,
+            created_at: new Date(),
+          })
+          await dispatch('user/updateField', {
+            permissions: {
+              notifications: true
+            }
+          })
         })
 
-        $capacitor.pushNotificationsRequestAndRegisterPermissions()
         // MICROPHONE PERMISSIONS
-        $capacitor.microphonePermissions()
-
-        await dispatch('user/updateField', {
-          permissions: {
-            notifications: true
-          }
-        })
+        await $capacitor.microphonePermissions()
 
         loading.value = false
         router.push('/onboarding/8')
