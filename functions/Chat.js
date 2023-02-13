@@ -38,8 +38,12 @@ exports.ChatMessageCreated = functions.firestore
           unseenParticipants.forEach((userId) => {
             // Update notification bubble
             db.doc(`Users/${userId}`).update({
-              "notifications.hasMessages": true,
-              "has.messages": true,
+              notifications: {
+                hasMessages: true,
+              },
+              has: {
+                messages: true,
+              },
             }).then(() => {
               return Promise.resolve(true);
             }).catch(() => {
