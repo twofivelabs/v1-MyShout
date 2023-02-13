@@ -3,6 +3,7 @@ import { Device } from '@capacitor/device'
 import { Share } from '@capacitor/share'
 import { FCM } from "@capacitor-community/fcm"
 import { PushNotifications } from '@capacitor/push-notifications'
+import { LocalNotifications } from '@capacitor/local-notifications'
 import { App } from '@capacitor/app'
 import { Camera, CameraResultType } from '@capacitor/camera'
 import { VoiceRecorder } from 'capacitor-voice-recorder'
@@ -571,12 +572,30 @@ export default function ({
             // ..
         }
     },
-    async pushNotificationsSetBadge(counter) {
-        await Badge.set(counter)
+    async pushNotificationsSetBadge(count) {
+        await Badge.set({ count })
     },
     async pushNotificationsClearBadge() {
         await Badge.clear()
     },
+
+    async localNotificationRequestPermission () {
+        await LocalNotifications.requestPermissions()
+    },
+
+    async localNotificationSchedule () {
+        await LocalNotifications.schedule({
+            notifications: [
+                {
+                    title: app.i18n.t('notifications.welcome_title'),
+                    body: app.i18n.t('notifications.welcome_body'),
+                    id: 1
+                }
+            ]
+        })
+    },
+
+
     // Camera
     // Will return a URL of the path we can use to upload
     async cameraTakePicture (allowEditing = true) {

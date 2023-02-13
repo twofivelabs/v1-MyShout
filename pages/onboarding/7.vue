@@ -85,13 +85,14 @@ export default defineComponent({
   middleware: 'authenticated',
   setup () {
     const {
-      $config, $capacitor, i18n
+      $config, $capacitor,
+      //i18n
     } = useContext()
     const {
       state, dispatch
     } = useStore()
     const router = useRouter()
-    const user = computed(() => state.user.data)
+    //const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
     const hasPermission = ref(false)
@@ -104,14 +105,6 @@ export default defineComponent({
         // PUSH NOTIFICATION PERMISSIONS
         await $capacitor.pushNotificationsRequestAndRegisterPermissions().then(async () => {
           await $capacitor.pushNotificationsListeners()
-          await dispatch('user/notifications/add', {
-            // userId: props.user.id,
-            uid: user.value.uid,
-            title: i18n.t('notifications.welcome_title'),
-            body: i18n.t('notifications.welcome_body'),
-            seen: false,
-            created_at: new Date(),
-          })
           await dispatch('user/updateField', {
             permissions: {
               notifications: true

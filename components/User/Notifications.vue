@@ -162,7 +162,6 @@ export default defineComponent({
     const {
       state,
       dispatch,
-      commit
     } = useStore()
     const { $system, $fire, $capacitor, $notify, i18n } = useContext()
     const router = useRouter()
@@ -179,10 +178,17 @@ export default defineComponent({
       const loaded = state.user.notifications.loaded
       const filtered = filter(loaded, ['seen', false])
       if (filtered?.length === 0) {
-        commit('user/SET_HAS_NOTIFICATIONS', false)
-        $capacitor.pushNotificationsRemoveAllNotifications()
+        console.log('updaate notifications to FALSE')
+        dispatch('user/setHas', {
+          type: 'notifications',
+          value: false
+        })
       } else {
-        commit('user/SET_HAS_NOTIFICATIONS', true)
+        console.log('updaate notifications to FALSE')
+        dispatch('user/setHas', {
+          type: 'notifications',
+          value: true
+        })
       }
       return orderBy(loaded, ['seconds'], ['desc'])
     })

@@ -46,7 +46,6 @@ import {
   useMeta, useRouter,
   useStore,
 } from '@nuxtjs/composition-api'
-import {PushNotifications} from '@capacitor/push-notifications'
 
 export default defineComponent({
   name: 'OnboardingPage8',
@@ -67,21 +66,22 @@ export default defineComponent({
       loading.value = true
 
       setTimeout(async () => {
+        try {
+          await $capacitor.localNotificationRequestPermission()
+          await $capacitor.localNotificationSchedule()
+
+        } catch(e) {
+          console.log('STICKY: local notifications issue', e)
+        }
+
         // PUSH NOTIFICATION PERMISSIONS
         try {
-          await PushNotifications.checkPermissions()
-          let permission = await PushNotifications.requestPermissions()
+          await $capacitor.pushNotificationsListeners()
+          await $capacitor.pushNotificationsGetToken()
+          await $capacitor.pushNotificationsListeners()
+          console.log('STICKY: NOTIFICATIONS > Mobile > True')
 
-          if (permission.receive === 'granted') {
-            await PushNotifications.register()
-            await PushNotifications.getDeliveredNotifications()
-            console.log("STICKY: REGISTERED")
-
-            await $capacitor.pushNotificationsListeners()
-            console.log('STICKY: NOTIFICATIONS > Mobile > True')
-
-            return true
-          }
+          return true
         } catch(e) {
           console.log('STICKY: 8-CheckPermissions: ', e)
 

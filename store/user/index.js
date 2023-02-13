@@ -574,5 +574,18 @@ export const actions = {
         val: e
       })
     }
+  },
+  async setHas ({ dispatch }, data) {
+    if (data.type === 'notifications') {
+      //commit('SET_HAS_NOTIFICATIONS', data.value)
+      dispatch('updateField', {
+        has: {
+          notifications: data.value
+        }
+      })
+      if (data.value === false) {
+        this.$capacitor.pushNotificationsRemoveAllNotifications()
+      }
+    }
   }
 }

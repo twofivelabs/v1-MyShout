@@ -26,8 +26,6 @@
 
         <AlertShoutbutton />
 
-        hasNotifications {{ $store.state.user.profile.has.notifications }}
-
       </div>
     </div>
   </v-container>
