@@ -97,10 +97,10 @@ exports.UserNotificationWrite = functions.firestore
                     // Update user profile with "HAS NOTIFICATIONS"
                     UsersCollection.doc(UserId).update({
                       notifications: {
-                        hasMessages: true,
+                        hasNotifications: true,
                       },
                       has: {
-                        messages: true,
+                        notifications: true,
                       },
                     }).catch((e) => console.log("UPDATING USER WITH HAS MESSAGES", e) );
 
@@ -132,10 +132,10 @@ exports.UserNotificationWrite = functions.firestore
                     // Update user profile with "HAS NOTIFICATIONS"
                     UsersCollection.doc(UserId).update({
                       notifications: {
-                        hasMessages: true,
+                        hasNotifications: true,
                       },
                       has: {
-                        messages: true,
+                        notifications: true,
                       },
                     }).catch((e) => console.log("UPDATING USER WITH HAS MESSAGES", e) );
 
