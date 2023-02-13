@@ -43,6 +43,7 @@ import {
   watchEffect,
 } from '@nuxtjs/composition-api'
 import {Preferences} from '@capacitor/preferences'
+import { LocalNotifications } from '@capacitor/local-notifications'
 
 export default defineComponent({
   name: 'HomePage',
@@ -54,7 +55,7 @@ export default defineComponent({
     } = useStore()
     const {
       $config,
-      $capacitor
+      $capacitor,
     } = useContext()
     const loading = ref(false)
     const user = computed(() => state.user)
@@ -63,6 +64,9 @@ export default defineComponent({
     const location = computed(() => state.user.location)
     const hasRequestedNotificationPermissions = ref(false)
     const hasRequestedMicrophonePermissions = ref(false)
+    const localNotificationRequestPermission = async () => {
+      await LocalNotifications.requestPermissions()
+    }
 
     // WATCH
     watchEffect(async () => {
@@ -108,6 +112,12 @@ export default defineComponent({
         } catch {
           // ...
         }
+
+        try {
+          localNotificationRequestPermission()
+        } catch {
+          // ...
+        }
       }, 2500)
     })
 
@@ -125,6 +135,7 @@ export default defineComponent({
       loading,
       user,
       location,
+      localNotificationRequestPermission,
     }
   },
   head: {}

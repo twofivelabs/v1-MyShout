@@ -46,13 +46,14 @@ import {
   useMeta, useRouter,
   useStore,
 } from '@nuxtjs/composition-api'
+import {LocalNotifications} from '@capacitor/local-notifications'
 
 export default defineComponent({
   name: 'OnboardingPage8',
   layout: 'onboarding',
   setup () {
     const {
-      $config, $capacitor
+      $config, $capacitor, i18n
     } = useContext()
     const {
       state,
@@ -67,9 +68,16 @@ export default defineComponent({
 
       setTimeout(async () => {
         try {
-          await $capacitor.localNotificationRequestPermission()
-          await $capacitor.localNotificationSchedule()
-
+          await LocalNotifications.requestPermissions()
+          await LocalNotifications.schedule({
+            notifications: [
+              {
+                title: i18n.t('notifications.welcome_title'),
+                body: i18n.t('notifications.welcome_body'),
+                id: 1
+              }
+            ]
+          })
         } catch(e) {
           console.log('STICKY: local notifications issue', e)
         }
