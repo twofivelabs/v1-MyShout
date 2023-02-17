@@ -96,12 +96,8 @@ exports.UserNotificationWrite = functions.firestore
                   }).then(() => {
                     // Update user profile with "HAS NOTIFICATIONS"
                     UsersCollection.doc(UserId).update({
-                      notifications: {
-                        hasNotifications: true,
-                      },
-                      has: {
-                        notifications: true,
-                      },
+                      "notifications.hasMessages": true,
+                      "has.notifications": true,
                     }).catch((e) => console.log("UPDATING USER WITH HAS MESSAGES", e) );
 
                     return Promise.resolve(true);

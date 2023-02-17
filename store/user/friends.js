@@ -189,8 +189,25 @@ export const actions = {
     try {
         const uid = data.userId || rootState.user.data.uid
         if (!uid) { return }
+        //console.log('FRIEND ACCESS', `Users/${data.id}/${dbRootPath}/${uid}`)
+        //return await this.$db.get_one(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter)
+        return await this.$db.get_one(`Users/${data.id}/${dbRootPath}/${uid}`, dataConverter)
+    } catch (e) {
+        this.$system.log({
+            comp: 'store/friends',
+            msg: 'getAccess',
+            val: e
+        })
+        return false
+    }
+  },
+  async getMyAccess ({ rootState }, data) {
+    try {
+        const uid = data.userId || rootState.user.data.uid
+        if (!uid) { return }
+        // console.log('FRIEND My ACCESS', `Users/${data.id}/${dbRootPath}/${uid}`)
         return await this.$db.get_one(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter)
-        // return await this.$db.get_one(`Users/${data.id}/${dbRootPath}/${uid}`, dataConverter)
+        //return await this.$db.get_one(`Users/${data.id}/${dbRootPath}/${uid}`, dataConverter)
     } catch (e) {
         this.$system.log({
             comp: 'store/friends',
@@ -202,7 +219,13 @@ export const actions = {
   },
   async remove ({ rootState }, doc) {
     const uid = rootState.user.data.uid
-    return await this.$db.delete_doc(`Users/${uid}/${dbRootPath}/${doc}`)
+    return await this.$db.delete_doc(`Users/${uid}/${dbRootPath}/${doc}`).then(async () => {
+        await this.$db.delete_doc(`Users/${doc}/${dbRootPath}/${uid}`)
+    }).then(() => {
+        return true
+    }).catch(() => {
+        return false
+    })
   },
   async joinUser({ commit }, user) {
     try {

@@ -181,6 +181,7 @@ export default {
         requested_to_be_your_friend: 'demandé à être ton ami.',
         accepted_your_friendship: 'accepté votre amitié.',
         requested_to_check_in: 'Vous avez été invité à vous enregistrer par',
+        contact_them: 'Contactez-les par téléphone ou SMS.',
         this_is_emergency_alarm_from: 'Ceci est une alarme d\'urgence de',
         checked_in_title: 'Enregistrée',
         has_checked_in: ' s\'est enregistré.',

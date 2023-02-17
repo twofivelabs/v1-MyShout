@@ -79,7 +79,6 @@ export default defineComponent({
       }
     }
     const toggleNotifications = async () => {
-      console.log('notificationPermissionGranted.value', notificationPermissionGranted.value)
       if (notificationPermissionGranted.value === true) {
         if (isWeb.value) {
           await requestWebPermissions()

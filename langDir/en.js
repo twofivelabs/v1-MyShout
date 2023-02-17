@@ -180,6 +180,7 @@ export default {
         requested_to_be_your_friend: 'requested to be your friend.',
         accepted_your_friendship: 'accepted your friendship.',
         requested_to_check_in: 'You have been requested to check-in by',
+        contact_them: 'Contact them by phone or text message.',
         this_is_emergency_alarm_from: 'This is an emergency alarm from',
         checked_in_title: 'Checked-In',
         has_checked_in: ' has checked-in.',

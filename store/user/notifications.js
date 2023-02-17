@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import { reactive } from '@nuxtjs/composition-api'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
+//import lodash from 'lodash'
 //import {Badge} from '@robingenz/capacitor-badge'
 const dbRootPath = 'Notifications'
 let hasInitNotifications = false
@@ -161,8 +162,10 @@ export const actions = {
         // await commit('SET_ALL', response)
         response.forEach((data) => {
           if (data?.seen === false) {
-              //commit('SET_HAS_NOTIFICATIONS', true)
               commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
+              //lodash.set(rootState.user.profile.has, 'notifications', true)
+              //rootState.user.profile.has.notifications = true
+              // commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
           }
           const position = (hasInitNotifications ? 'unshift' : 'push')
           commit('PUSH_TO_ALL', {data, position})
@@ -190,7 +193,7 @@ export const actions = {
           snapshot.docChanges().forEach((change) => {
             const data = change.doc.data()
             data.id = change.doc.id
-
+            console.log('doc changes')
             try {
                 data.seconds = data?.created_at?.seconds
                 data.created_at = data.created_at.toDate().toDateString()
@@ -199,6 +202,8 @@ export const actions = {
             }
             if (change.type === 'modified') {
                 if (data?.seen === false) {
+                    //lodash.set(rootState.user.profile.has, 'notifications', true)
+                    //rootState.user.profile.has.notifications = true
                     commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
                 }
                 const position = (hasInitNotifications ? 'unshift' : 'push')
@@ -207,6 +212,8 @@ export const actions = {
             }
             else if (change.type === 'added') {
               if (data?.seen === false) {
+                  //lodash.set(rootState.user.profile.has, 'notifications', true)
+                  //rootState.user.profile.has.notifications = true
                   commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
               }
               const position = (hasInitNotifications ? 'unshift' : 'push')

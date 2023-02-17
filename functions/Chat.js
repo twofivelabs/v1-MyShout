@@ -38,15 +38,13 @@ exports.ChatMessageCreated = functions.firestore
           unseenParticipants.forEach((userId) => {
             // Update notification bubble
             db.doc(`Users/${userId}`).update({
-              notifications: {
-                hasMessages: true,
-              },
-              has: {
-                messages: true,
-              },
+              "notifications.hasMessages": true,
+              "has.messages": true,
+              "has.notifications": true,
             }).then(() => {
               return Promise.resolve(true);
-            }).catch(() => {
+            }).catch((e) => {
+              console.log("CANNOT UPDATE unseenParticipants ", e);
               return Promise.resolve(false);
             });
             // Send notification
@@ -66,30 +64,30 @@ exports.ChatMessageCreated = functions.firestore
                 .then((snapshot) => {
                   // console.log("CHAT > snapshot", snapshot);
                   functions.logger.log("CHAT > snapshot", snapshot);
-                  if (snapshot.empty) {
-                    // ADD DOCUMENT
-                    // console.log("CHAT > ADD NEW");
-                    functions.logger.log("CHAT > ADD NEW");
-                    db.collection(`Users/${userId}/Notifications`).add({
-                      uid: userId,
-                      title: notificationTitle,
-                      body: chat.lastMessage,
-                      goTo: goTo,
-                      created_at: new Date(),
-                      seen: false,
-                      type: "chat",
-                    }).then(() => {
-                      return Promise.resolve(true);
-                    }).catch(() => {
-                      return Promise.resolve(false);
-                    });
-                  } else {
+
+                  // ADD DOCUMENT
+                  // console.log("CHAT > ADD NEW");
+                  functions.logger.log("CHAT > ADD NEW");
+                  db.collection(`Users/${userId}/Notifications`).add({
+                    uid: userId,
+                    title: notificationTitle,
+                    body: chat.lastMessage,
+                    goTo: goTo,
+                    created_at: new Date(),
+                    seen: false,
+                    type: "chat",
+                  }).then(() => {
+                    return Promise.resolve(true);
+                  }).catch(() => {
+                    return Promise.resolve(false);
+                  });
+
+                  if (!snapshot.empty) {
                     // UPDATE DOCUMENT
                     // console.log("CHAT > UPDATE EXISTING");
                     // functions.logger.log("CHAT > UPDATE EXISTING");
-                    db.doc(`Users/${userId}/Notifications/${snapshot.docs[0].id}`).update({
-                      body: chat.lastMessage,
-                      created_at: new Date(),
+                    db.doc(`Users/${userId}/Notifications/${snapshot.docs[0].id}`).delete().catch((e) => {
+                      console.log("Error deleting notification", e);
                     });
                   }
                 }).catch((e) => {

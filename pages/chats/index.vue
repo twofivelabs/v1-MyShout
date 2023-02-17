@@ -118,7 +118,9 @@ export default defineComponent({
 
     watchEffect(() => {
       setTimeout(() => {
+        console.log('CHATS', chatList2.value)
         if(chatList2.value.length === 0) {
+          console.log('Not chats to watch')
           dispatch('user/updateField', {
             has: {
               messages: false

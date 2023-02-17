@@ -225,10 +225,11 @@ export const mutations = {
     }
 
     if( typeof value === 'boolean' ) {
+        console.log('SET_HAS_NOTIFICATIONS', value)
         // state.has.notifications = value
         lodash.set(state.profile.has, 'notifications', value)
         Vue.set(state.profile.has, 'notifications', value)
-        console.log('USER STATE', state)
+        //console.log('USER STATE', state)
 
         if (value === true) {
             const count = 1
@@ -259,17 +260,18 @@ export const mutations = {
   },
   SET_USER_PROFILE_INIT: (state, userProfile) => {
     const combineUserProfile = Object.assign(state.profile, userProfile)
-
+      //console.log('SET_USER_PROFILE_INIT BEFORE>', state.profile)
     if (!lodash.has(state.profile, 'has.messages')) {
         console.log('STICKY: USER > no hasMessages')
-        lodash.set(state.profile, 'has.messages', false)
-        Vue.set(state.profile, 'has.messages', false)
+        //lodash.set(state.profile, 'has.messages', false)
+        //Vue.set(state.profile, 'has.messages', false)
     }
     if (!lodash.has(state.profile, 'has.notifications')) {
         console.log('STICKY: USER > no hasNotifications')
         lodash.set(state.profile, 'has.notifications', false)
         Vue.set(state.profile, 'has.notifications', false)
     }
+    //console.log('SET_USER_PROFILE_INIT AFTER>', state.profile)
 
     Vue.set(state, 'profile', combineUserProfile)
     if (userProfile?.first_name) {
@@ -358,9 +360,9 @@ export const actions = {
     } else if (data.id) {
         userId = data.id
     }
-      console.log(`STICKY: updateUserField,`)
+    //  console.log(`STICKY: updateUserField,`)
     if (userId && this.$db) {
-      console.log(`STICKY: updateUserField, ${dbRootPath}/${userId}`, data, JSON.stringify(data))
+      //console.log(`STICKY: updateUserField, ${dbRootPath}/${userId}`, data, JSON.stringify(data))
       const response = await this.$db.update(`${dbRootPath}/${userId}`, null, data)
       if (response) {
         await commit('SET_PROFILE_FIELD', data)
@@ -416,7 +418,7 @@ export const actions = {
     }
     const response = await this.$db.get_one(`${dbRootPath}/${id}`)
     if (response) {
-      await commit('SET_HAS_NOTIFICATIONS', { ...response })
+      //await commit('SET_HAS_NOTIFICATIONS', { ...response })
       await commit('SET_USER_PROFILE_INIT', { ...response })
     }
     return response
@@ -469,6 +471,7 @@ export const actions = {
       }
       const uid = id || rootState.user.data.uid
       if (!uid) { return }
+      //console.log(`${dbRootPath}/${id}`)
       const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
       if (one) {
         await commit('SET_ONE', one)

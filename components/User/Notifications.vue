@@ -91,7 +91,7 @@
                   {{ emergencyBodyNotification(notification.body) }}
                 </span>
                 <span v-else-if="notification.body && notification.body.includes('You have been requested to check-in by')">
-                  {{ notification.body.replace('You have been requested to check-in by', $t('notifications.requested_to_check_in')) }}
+                  {{ notification.body.replace('You have been requested to check-in by', $t('notifications.requested_to_check_in')).replace('Contact them by phone or text message.', $t('notifications.contact_them')) }}
                 </span>
                 <span v-else-if="notification.body && notification.body.includes(' has checked-in.')">
                   {{ notification.body.replace(' has checked-in.', $t('notifications.has_checked_in')) }}
@@ -119,9 +119,9 @@
               <v-btn text color="red" v-if="notification.type === 'friendRequest'" @click="declineFriendRequest(notification)">
                 <span v-if="!notification.completed"><v-icon>mdi-delete</v-icon></span>
               </v-btn>
-              <v-btn text color="green" v-else-if="notification.type === 'checkIn'" @click="checkInResponse(notification)">
+<!--              <v-btn text color="green" v-else-if="notification.type === 'checkIn'" @click="checkInResponse(notification)">
                 <span v-if="!notification.completed"><v-icon>mdi-check</v-icon></span>
-              </v-btn>
+              </v-btn>-->
               <v-btn text v-else-if="notification.goTo" @click="goTo(notification.goTo)">
                 <v-icon>mdi-arrow-right</v-icon>
               </v-btn>
@@ -178,17 +178,16 @@ export default defineComponent({
       const loaded = state.user.notifications.loaded
       const filtered = filter(loaded, ['seen', false])
       if (filtered?.length === 0) {
-        console.log('updaate notifications to FALSE')
         dispatch('user/setHas', {
           type: 'notifications',
           value: false
         })
       } else {
-        console.log('updaate notifications to FALSE')
         dispatch('user/setHas', {
           type: 'notifications',
           value: true
         })
+        $capacitor.pushNotificationsSetBadge(filtered?.length)
       }
       return orderBy(loaded, ['seconds'], ['desc'])
     })
@@ -332,7 +331,7 @@ export default defineComponent({
       const notificationId = entries[0].target.id
       const payload = { ...state.user.notifications.loaded[notificationId] }
 
-      // Bub fix in case the object doesn't have 'seen' in it.
+      // Bug fix in case the object doesn't have 'seen' in it.
       if (payload['seen'] === undefined) payload.seen = false
 
       if (payload.seen === false) {

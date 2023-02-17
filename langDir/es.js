@@ -181,6 +181,7 @@ export default {
         requested_to_be_your_friend: 'pidió ser su amigo.',
         accepted_your_friendship: 'acepto tu amistad.',
         requested_to_check_in: 'Se le ha solicitado que se registre por',
+        contact_them: 'Póngase en contacto con ellas por teléfono o mensaje de texto.',
         this_is_emergency_alarm_from: 'Esta es una alarma de emergencia de',
         checked_in_title: 'Registrada',
         has_checked_in: ' se ha registrado.',

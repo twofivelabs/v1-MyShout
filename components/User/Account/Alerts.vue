@@ -69,8 +69,8 @@ export default defineComponent({
         })
         // GET STATUS OF FRIENDSHIP
         await dispatch('user/friends/getAccess', {
-          userId: props.user.id,
-          id: loggedInUser.value.uid,
+          userId: loggedInUser.value.uid,
+          id: props.user.id,
         }).then((res) => {
           if (res !== false) {
             friendshipAccess.value = res

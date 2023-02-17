@@ -15,16 +15,16 @@
       </v-row>
     </div>
 
-    <div v-else-if="!loading && publicUser && friendshipAccess">
+    <div v-else-if="!loading && publicUser">
       <div class="text-center">
         <UserAvatar :user="publicUser" :size="120" />
         <ElementH1 v-if="publicUser.username" :text="`@${publicUser.username}`" />
-        <span v-if="friendshipAccess.status === 'approved'" class="d-flex justify-center ">
+        <span v-if="myFriendshipAccess.status === 'approved'" class="d-flex justify-center ">
           <ElementH4 v-if="publicUser.location.country" :text="`${publicUser.location.city} ${publicUser.location.country}`" class="gray--text" />
         </span>
-        <NotificationsLastcheckedin :publicUser="publicUser" />
+<!--        <NotificationsLastcheckedin :publicUser="publicUser" />-->
         <div class="d-flex justify-center my-6">
-          <UserActionsSendamessagebtn v-if="friendshipAccess.status === 'approved'" :user="publicUser">
+          <UserActionsSendamessagebtn v-if="myFriendshipAccess.status === 'approved'" :user="publicUser">
             <v-btn color="myshoutGreen" class="elevation-0 rounded-lg white--text mr-2" large rounded>
               {{ $t('chats.send_message') }}
             </v-btn>
@@ -33,20 +33,20 @@
         </div>
 
 
-        <div v-if="friendshipAccess.status !== 'approved'" class="mt-6">
+        <div v-if="myFriendshipAccess.status !== 'approved'" class="mt-6">
           <v-chip
-              v-if="friendshipAccess.status"
-              :title="friendshipAccess.status"
+              v-if="myFriendshipAccess.status"
+              :title="myFriendshipAccess.status"
               @click="$fetch()"
               color="myshoutOrange"
           ><v-icon class="">mdi-update</v-icon>
-            {{ $t('friendship_is') }} {{ friendshipAccess.status }}</v-chip>
+            {{ $t('friendship_is') }} {{ myFriendshipAccess.status }}</v-chip>
           <ElementH4 v-else align="center" :text="$t('permission.no_user_profile')"/>
         </div>
       </div>
 
       <v-tabs
-              v-if="friendshipAccess.status === 'approved'"
+              v-if="myFriendshipAccess.status === 'approved'"
               v-model="activeTab"
               background-color="transparent"
               class="mb-12 pb-12"
@@ -121,6 +121,7 @@ export default defineComponent({
     const activeTab = ref(0)
     const publicUser = ref(lodash.cloneDeep(state.user.one))
     const friendshipAccess = ref(false)
+    const myFriendshipAccess = ref(false)
     const loggedInUser = computed(() => state.user.data)
     const products = ref([])
     const posts = ref([])
@@ -147,9 +148,23 @@ export default defineComponent({
         })
 
         // GET STATUS OF FRIENDSHIP
+        await dispatch('user/friends/getMyAccess', {
+          userId: loggedInUser.value?.uid,
+          id: route.value?.params?.id,
+        }).then((res) => {
+          if (res !== false) {
+            myFriendshipAccess.value = res
+          }
+        }).catch((e) => {
+          $system.log({
+            comp: 'PageUsersId',
+            msg: 'user/friends/getMyAccess',
+            val: e
+          })
+        })
         await dispatch('user/friends/getAccess', {
-          userId: route.value?.params?.id,
-          id: loggedInUser.value?.uid,
+          userId: loggedInUser.value?.uid,
+          id: route.value?.params?.id,
         }).then((res) => {
           if (res !== false) {
             friendshipAccess.value = res
@@ -200,6 +215,7 @@ export default defineComponent({
       posts,
       hasMounted,
       friendshipAccess,
+      myFriendshipAccess
     }
   },
   head: {}

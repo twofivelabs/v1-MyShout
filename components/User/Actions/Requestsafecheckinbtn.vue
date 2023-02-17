@@ -84,7 +84,7 @@ export default defineComponent({
           // userId: props.user.id,
           uid: props.user.id,
           title: 'Check-In',
-          body: `You have been requested to check-in by @${loggedInProfile.value.username}`,
+          body: `You have been requested to check-in by @${loggedInProfile.value.username}. Contact them by phone or text message.`,
           goTo: '/',
           type: 'checkIn',
           seen: false,
