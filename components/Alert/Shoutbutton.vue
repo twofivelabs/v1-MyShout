@@ -71,10 +71,9 @@ export default defineComponent({
   name: 'AlertShoutbutton',
   setup () {
     const {
-      state, dispatch
+      state, dispatch, commit
     } = useStore()
     const {
-      $services,
       $system,
       $notify,
       $db,
@@ -93,41 +92,47 @@ export default defineComponent({
     const timerCount = ref(5)
     const isRecording = ref(false)
     const timerInterval = new Set()
+    const location = ref({city: 'N/A'})
 
     // METHODS
     const openDialog = async () => {
       dialog.value = true
       loading.value = true
 
-      await $capacitor.gpsGetCurrentPosition()
-      await $helper.sleep(500)
-
-      // Place alert info here
-      await $services.alertButton('shout', {
-        user: profile.value,
-        gps: profile.value.gps
+      // UPDATE CURRENT LOCATION
+      await $capacitor.gpsGetCurrentPosition().catch((e) => {
+        $system.log({ comp: 'AlertButton', msg: 'gpsGetCurrentPosition', val: e })
       })
 
-      // Add document to user
-      try {
-        const location = await $services.reverseGeocode(profile.value.gps.lat, profile.value.gps.lng)
-        await dispatch('user/alerts/add', {
-          type: 'shout',
-          audioUrl: audioUrl.value,
-          userId: user.value.uid,
-          gps: profile.value.gps,
-          location: location
-        })
-      } catch (e) {
-        $system.log({
-          comp: 'AlertShoutbutton',
-          msg: 'Trying to send alert',
-          val: e
-        })
+      await $helper.sleep(500)
+
+      // SENDS NOTIFICATIONS
+      /*await $services.alertButton('shout', {
+        user: profile.value,
+        gps: profile.value.gps
+      }).catch((e) => {
+        $system.log({ comp: 'AlertButton', msg: 'alertButton', val: e })
+      })*/
+
+      // GET LOCATION DETAILS OF USER
+      /*location.value = await $services.reverseGeocode(profile.value.gps.lat, profile.value.gps.lng).catch((e) => {
+        $system.log({ comp: 'AlertButton', msg: 'reverseGeocode', val: e })
+      })*/
+
+      // ADD NOTIFICATION TO USER
+      await dispatch('user/alerts/add', {
+        type: 'shout',
+        audioUrl: audioUrl.value,
+        userId: user.value.uid,
+        gps: profile.value.gps,
+        location: location.value
+      }).catch((e) => {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-      } finally {
-        loading.value = false
-      }
+        $system.log({ comp: 'AlertButton', msg: 'Trying to send alert', val: e })
+      })
+
+      commit('user/alerts/HAS_NEW_ALERTS', true)
+      loading.value = false
     }
     const startRecording = async () => {
       if (isRecording.value) return

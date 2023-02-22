@@ -1,5 +1,6 @@
 export default {
     btn: {
+        load_new: 'Load New',
         delete_all: 'Delete All',
         back: 'Back',
         back_to_login: 'Back to login',

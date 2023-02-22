@@ -45,6 +45,7 @@ export const state = () => reactive({
   default: new Alerts({}).fields,
   one: new Alerts({}).fields,
   loaded: {},
+  hasNewAlerts: false,
 })
 
 export const getters = {
@@ -75,6 +76,9 @@ export const getters = {
 }
 
 export const mutations = {
+  HAS_NEW_ALERTS: (state, data) => {
+    state.hasNewAlerts = data
+  },
   SET_ALL: (state, data) => {
     state.all = data
   },

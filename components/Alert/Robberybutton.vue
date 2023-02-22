@@ -64,12 +64,13 @@ export default defineComponent({
   name: 'AlertRobberybutton',
   setup () {
     const {
-      state, dispatch
+      state, dispatch, commit
     } = useStore()
-    const { $services, $capacitor, $helper, $system, $notify, i18n } = useContext()
+    const { $capacitor, $helper, $system, $notify, i18n } = useContext()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
+    const location = ref({city: 'N/A'})
 
     // DEFINE CONTENT
     const dialog = ref(false)
@@ -79,34 +80,39 @@ export default defineComponent({
       dialog.value = true
       loading.value = true
 
-      await $capacitor.gpsGetCurrentPosition()
-      await $helper.sleep(500)
-
-      // Place alert info here
-      await $services.alertButton('robbery', {
-        user: profile.value,
-        gps: profile.value.gps
+      // UPDATE CURRENT LOCATION
+      await $capacitor.gpsGetCurrentPosition().catch((e) => {
+        $system.log({ comp: 'AlertButton', msg: 'gpsGetCurrentPosition', val: e })
       })
 
-      // Add document to user
-      try {
-        const location = await $services.reverseGeocode(profile.value.gps.lat, profile.value.gps.lng)
-        await dispatch('user/alerts/add', {
-          type: 'robbery',
-          userId: user.value.uid,
-          gps: profile.value.gps,
-          location: location
-        })
-      } catch (e) {
-        $system.log({
-          comp: 'AlertRobberybutton',
-          msg: 'Trying to send alert',
-          val: e
-        })
+      await $helper.sleep(500)
+
+      // SENDS NOTIFICATIONS
+      /*await $services.alertButton('robbery', {
+        user: profile.value,
+        gps: profile.value.gps
+      }).catch((e) => {
+        $system.log({ comp: 'AlertButton', msg: 'alertButton', val: e })
+      })*/
+
+      // GET LOCATION DETAILS OF USER
+      /*location.value = await $services.reverseGeocode(profile.value.gps.lat, profile.value.gps.lng).catch((e) => {
+        $system.log({ comp: 'AlertButton', msg: 'reverseGeocode', val: e })
+      })*/
+
+      // ADD NOTIFICATION TO USER
+      await dispatch('user/alerts/add', {
+        type: 'robbery',
+        userId: user.value.uid,
+        gps: profile.value.gps,
+        location: location.value
+      }).catch((e) => {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-      } finally {
-        loading.value = false
-      }
+        $system.log({ comp: 'AlertButton', msg: 'Trying to send alert', val: e })
+      })
+
+      commit('user/alerts/HAS_NEW_ALERTS', true)
+      loading.value = false
     }
 
     return {

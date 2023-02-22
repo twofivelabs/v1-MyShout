@@ -1,5 +1,6 @@
 export default {
     btn: {
+        load_new: 'Cargar nueva',
         delete_all: 'Eliminar todos',
         back: 'atrás',
         back_to_login: 'Atrás para iniciar sesión',

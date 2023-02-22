@@ -1,5 +1,6 @@
 export default {
     btn: {
+        load_new: 'Charger nouveau',
         delete_all: 'Supprimer tout',
         back: 'Retour',
         back_to_login: 'Retour connexion',

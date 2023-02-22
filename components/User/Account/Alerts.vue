@@ -3,6 +3,13 @@
 
     <ElementH4 v-if="!loading && !canViewAlerts" align="center" class="my-5" :text="$t('must_be_emergency_contact')"/>
     <div v-else>
+      <div class="text-center">
+        <v-btn v-if="$store.state.user.alerts.hasNewAlerts" @click="getAlerts" color="myshoutOrange" class="my-3">
+          <v-icon small>mdi-refresh</v-icon>
+          {{ $t('btn.load_new') }}
+        </v-btn>
+      </div>
+
       <v-list v-if="alerts && alerts.length > 0" color="transparent" rounded>
         <v-list-item-group>
           <template v-for="(alert, index) in alerts">
@@ -39,7 +46,7 @@ export default defineComponent({
   },
   setup (props) {
     const { $system } = useContext()
-    const { dispatch, state } = useStore()
+    const { dispatch, state, commit } = useStore()
     const loggedInUser = computed(() => state.user.data)
     const loading = ref(false)
 
@@ -114,6 +121,7 @@ export default defineComponent({
         })
       } finally {
         loading.value = false
+        commit('user/alerts/HAS_NEW_ALERTS', false)
       }
     }
 
@@ -124,6 +132,7 @@ export default defineComponent({
 
     return {
       alertsStore,
+      getAlerts,
       loading,
       state,
       alerts,
