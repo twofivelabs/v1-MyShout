@@ -3,8 +3,8 @@ import { AdMob, BannerAdSize, BannerAdPosition, BannerAdPluginEvents } from '@ca
 import { Device } from '@capacitor/device'
 
 // CREATE AN AD-UNIT
-const androidAdId = 'ca-app-pub-3229537799718618/9457588974'
-const iosAdId = 'ca-app-pub-3229537799718618/3131853774'
+const androidAdId = 'ca-app-pub-6103815777122570/3451916387'
+const iosAdId = 'ca-app-pub-6103815777122570/7918878659'
 let bannerAdId = androidAdId
 let admobHasInit = false
 
