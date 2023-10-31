@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.firebase.firebase-perf'
 
 android {
+    namespace "org.myshout.app"
     compileSdk 31
     defaultConfig {
         applicationId "org.myshout.app"
