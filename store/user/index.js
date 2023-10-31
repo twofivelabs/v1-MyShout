@@ -3,7 +3,7 @@ import Vue from 'vue'
 import { reactive } from '@nuxtjs/composition-api'
 import { geohashForLocation } from 'geofire-common'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
-import {Badge} from '@robingenz/capacitor-badge'
+import {Badge} from '@capawesome/capacitor-badge'
 
 const dbRootPath = 'Users'
 

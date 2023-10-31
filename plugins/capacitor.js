@@ -9,7 +9,7 @@ import { Camera, CameraResultType } from '@capacitor/camera'
 import { VoiceRecorder } from 'capacitor-voice-recorder'
 
 import { Contacts } from '@capacitor-community/contacts'
-import { Badge } from '@robingenz/capacitor-badge'
+import { Badge } from '@capawesome/capacitor-badge'
 
 import admob from './cap.admob'
 // import background from './cap.background'

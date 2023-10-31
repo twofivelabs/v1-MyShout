@@ -20,8 +20,8 @@
 		"classpath": "com.getcapacitor.plugin.http.Http"
 	},
 	{
-		"pkg": "@robingenz/capacitor-badge",
-		"classpath": "dev.robingenz.capacitor.badge.BadgePlugin"
+		"pkg": "@capawesome/capacitor-badge",
+		"classpath": "dev.capawesome.capacitor.badge.BadgePlugin"
 	},
 	{
 		"pkg": "capacitor-firebase-auth",

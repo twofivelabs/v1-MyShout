@@ -1,8 +1,7 @@
 import Vue from 'vue'
 import { reactive } from '@nuxtjs/composition-api'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
-//import lodash from 'lodash'
-//import {Badge} from '@robingenz/capacitor-badge'
+
 const dbRootPath = 'Notifications'
 let hasInitNotifications = false
 

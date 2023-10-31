@@ -41,8 +41,8 @@ project(':capacitor-push-notifications').projectDir = new File('../node_modules/
 include ':capacitor-share'
 project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/share/android')
 
-include ':robingenz-capacitor-badge'
-project(':robingenz-capacitor-badge').projectDir = new File('../node_modules/@robingenz/capacitor-badge/android')
+include ':capawesome-capacitor-badge'
+project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/@capawesome/capacitor-badge/android')
 
 include ':capacitor-firebase-auth'
 project(':capacitor-firebase-auth').projectDir = new File('../node_modules/capacitor-firebase-auth/android')
