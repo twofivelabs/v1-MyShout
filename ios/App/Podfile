@@ -1,3 +1,5 @@
+require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
+
 platform :ios, '13.0'
 use_frameworks!
 
@@ -39,4 +41,9 @@ target 'App' do
 
   pod 'GoogleSignIn', '~> 5.0.2'
 
+end
+
+
+post_install do |installer|
+  assertDeploymentTarget(installer)
 end

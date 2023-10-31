@@ -20,38 +20,6 @@
 		"classpath": "com.getcapacitor.plugin.http.Http"
 	},
 	{
-		"pkg": "@capacitor/app",
-		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
-	},
-	{
-		"pkg": "@capacitor/camera",
-		"classpath": "com.capacitorjs.plugins.camera.CameraPlugin"
-	},
-	{
-		"pkg": "@capacitor/device",
-		"classpath": "com.capacitorjs.plugins.device.DevicePlugin"
-	},
-	{
-		"pkg": "@capacitor/geolocation",
-		"classpath": "com.capacitorjs.plugins.geolocation.GeolocationPlugin"
-	},
-	{
-		"pkg": "@capacitor/local-notifications",
-		"classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin"
-	},
-	{
-		"pkg": "@capacitor/preferences",
-		"classpath": "com.capacitorjs.plugins.preferences.PreferencesPlugin"
-	},
-	{
-		"pkg": "@capacitor/push-notifications",
-		"classpath": "com.capacitorjs.plugins.pushnotifications.PushNotificationsPlugin"
-	},
-	{
-		"pkg": "@capacitor/share",
-		"classpath": "com.capacitorjs.plugins.share.SharePlugin"
-	},
-	{
 		"pkg": "@robingenz/capacitor-badge",
 		"classpath": "dev.robingenz.capacitor.badge.BadgePlugin"
 	},
