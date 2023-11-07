@@ -1,16 +1,17 @@
 apply plugin: 'com.android.application'
 // Apply the Performance Monitoring plugin
-apply plugin: 'com.google.firebase.firebase-perf'
+//apply plugin: 'com.google.firebase.firebase-perf'
 
 android {
     namespace "org.myshout.app"
-    compileSdk 31
+    compileSdk 33
     defaultConfig {
+        targetSdk 33
         applicationId "org.myshout.app"
         minSdk rootProject.ext.minSdkVersion
         targetSdk defaultTargetSdkVersion
-        versionCode 33
-        versionName '1.4'
+        versionCode 41
+        versionName '1.5'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
     }
@@ -43,8 +44,8 @@ dependencies {
 	implementation platform('com.google.firebase:firebase-bom:29.0.0')
 	// Declare the dependency for the Performance Monitoring library
 	// When using the BoM, you don't specify versions in Firebase library dependencies
-	implementation 'com.google.firebase:firebase-perf'
-	implementation 'com.google.firebase:firebase-iid'
+	//implementation 'com.google.firebase:firebase-perf'
+	//implementation 'com.google.firebase:firebase-iid'
 }
 
 apply from: 'capacitor.build.gradle'

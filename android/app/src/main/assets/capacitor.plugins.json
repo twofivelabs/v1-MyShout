@@ -9,7 +9,7 @@
 	},
 	{
 		"pkg": "@capacitor-community/contacts",
-		"classpath": "ch.byrds.capacitor.contacts.Contacts"
+		"classpath": "getcapacitor.community.contacts.ContactsPlugin"
 	},
 	{
 		"pkg": "@capacitor-community/fcm",
@@ -20,8 +20,40 @@
 		"classpath": "com.getcapacitor.plugin.http.Http"
 	},
 	{
+		"pkg": "@capacitor/app",
+		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
+	},
+	{
+		"pkg": "@capacitor/camera",
+		"classpath": "com.capacitorjs.plugins.camera.CameraPlugin"
+	},
+	{
+		"pkg": "@capacitor/device",
+		"classpath": "com.capacitorjs.plugins.device.DevicePlugin"
+	},
+	{
+		"pkg": "@capacitor/geolocation",
+		"classpath": "com.capacitorjs.plugins.geolocation.GeolocationPlugin"
+	},
+	{
+		"pkg": "@capacitor/local-notifications",
+		"classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin"
+	},
+	{
+		"pkg": "@capacitor/preferences",
+		"classpath": "com.capacitorjs.plugins.preferences.PreferencesPlugin"
+	},
+	{
+		"pkg": "@capacitor/push-notifications",
+		"classpath": "com.capacitorjs.plugins.pushnotifications.PushNotificationsPlugin"
+	},
+	{
+		"pkg": "@capacitor/share",
+		"classpath": "com.capacitorjs.plugins.share.SharePlugin"
+	},
+	{
 		"pkg": "@capawesome/capacitor-badge",
-		"classpath": "dev.capawesome.capacitor.badge.BadgePlugin"
+		"classpath": "io.capawesome.capacitorjs.plugins.badge.BadgePlugin"
 	},
 	{
 		"pkg": "capacitor-firebase-auth",
