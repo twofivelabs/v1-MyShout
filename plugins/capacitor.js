@@ -65,9 +65,17 @@ export default function ({
       //...background,
 
       async getContacts() {
-          return await Contacts.getPermissions().then(async (permission) => {
-              if (permission.granted) {
-                return await Contacts.getContacts()
+          const projection = {
+              // Specify which fields should be retrieved.
+              name: true,
+              phones: true,
+              emails: true,
+              image: true
+          }
+
+          return await Contacts.requestPermissions().then(async (permission) => {
+              if (permission.contacts === 'granted') {
+                  return await Contacts.getContacts({ projection })
               }
           })
       },

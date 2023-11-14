@@ -202,7 +202,7 @@ export default ({
     hasOnlyDigits(value) {
         return /^[0-9]+$/.test(value);
     },
-    normalizeDeviceContacts(contacts, device='ios') {
+    normalizeDeviceContacts(contacts) {
       if (contacts) {
         // Fix for Android to get the main property of the contact array
         if (contacts.contacts) {
@@ -212,34 +212,21 @@ export default ({
 
         contacts.forEach(c => {
             let nc = {};
-            // IOS
-            // Desktop is for testing purposes here
-            if ('ios' === device) {
-                // Make sure we have a name to begin with, we don't want empty contacts
-                if (c.displayName && c.displayName.length > 1) {
-                      nc.name = c.displayName;
-                      if (c.photoThumbnail) {
-                        nc.photo = c.photoThumbnail
-                      }
-                      if (c.emails && c.emails[0] && c.emails[0].address) {
-                        nc.email = c.emails[0].address
-                      }
-                      if (c.phoneNumbers && c.phoneNumbers[0] && c.phoneNumbers[0].number) {
-                        nc.phone = c.phoneNumbers[0].number.replace(/[^0-9]/g, '')
-                      }
+
+            // console.log('NORMALIZED NAME', c.name.display, c.name.given, c.name.family)
+            if (c.name.display && c.name.display.length > 1) {
+                nc.name = c.name.display;
+            }
+            if (!nc.name) {
+                if (c.name.given && c.name.given.length > 1) {
+                    nc.name = c.name.given +' '+ c.name?.family
                 }
             }
-            // ANDROID - Coming in future versions
-            if ('android' === device) {
-                if (c.displayName && c.displayName.length > 1) {
-                    nc.name = c.displayName;
-                }
-                if (c.emails && c.emails[0] && c.emails[0].address) {
-                    nc.email = c.emails[0].address
-                }
-                if (c.phoneNumbers && c.phoneNumbers[0] && c.phoneNumbers[0].number) {
-                    nc.phone = c.phoneNumbers[0].number.replace(/[^0-9]/g, '')
-                }
+            if (c.emails && c.emails[0] && c.emails[0].address) {
+                nc.email = c.emails[0].address
+            }
+            if (c.phones && c.phones[0] && c.phones[0].number) {
+                nc.phone = c.phones[0].number.replace(/[^0-9]/g, '')
             }
 
             // Only push contacts that have a phone number / email

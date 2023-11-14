@@ -87,7 +87,7 @@ export default defineComponent({
           const deviceContacts = await $capacitor.getContacts().then(async () => {
             return await $capacitor.getContacts()
           })
-          const unsortedContacts = $helper.normalizeDeviceContacts(deviceContacts, device.value.platform)
+          const unsortedContacts = $helper.normalizeDeviceContacts(deviceContacts)
           contacts.value = lodash.sortBy(unsortedContacts, ['name'])
           console.log('STICKY: NORMALIZED:' + JSON.stringify(contacts.value))
         } catch(e) {
