@@ -36,7 +36,7 @@ target 'App' do
 
   pod 'FirebaseAuth', '= 9.6.0'
   pod 'FirebaseMessaging'
-  pod 'FirebaseAnalytics'
+  pod 'FirebaseAnalytics', '= 9.6.0'
 
   pod 'GoogleSignIn', '~> 5.0.2'
 
