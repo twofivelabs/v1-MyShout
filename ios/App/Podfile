@@ -13,8 +13,10 @@ def capacitor_pods
   pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
   pod 'ByteowlsCapacitorSms', :path => '../../node_modules/@byteowls/capacitor-sms'
   pod 'CapacitorCommunityAdmob', :path => '../../node_modules/@capacitor-community/admob'
+  pod 'CapacitorCommunityContacts', :path => '../../node_modules/@capacitor-community/contacts'
   pod 'CapacitorCommunityFcm', :path => '../../node_modules/@capacitor-community/fcm'
   pod 'CapacitorCommunityHttp', :path => '../../node_modules/@capacitor-community/http'
+  pod 'CapacitorFirebaseAuthentication', :path => '../../node_modules/@capacitor-firebase/authentication'
   pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
   pod 'CapacitorCamera', :path => '../../node_modules/@capacitor/camera'
   pod 'CapacitorDevice', :path => '../../node_modules/@capacitor/device'
@@ -33,11 +35,12 @@ target 'App' do
 
   capacitor_pods
 
-  pod 'FirebaseAuth', '= 9.6.0'
+  pod 'FirebaseCore'
+  pod 'FirebaseAuth'
   pod 'FirebaseMessaging'
-  pod 'FirebaseAnalytics', '= 9.6.0'
+  pod 'FirebaseAnalytics'
 
-  pod 'GoogleSignIn', '~> 5.0.2'
+  pod 'GoogleSignIn'
 
 end
 

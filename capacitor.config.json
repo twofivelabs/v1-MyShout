@@ -36,24 +36,10 @@
         "alert"
       ]
     },
-    "CapacitorFirebaseAuth": {
-			"providers": [
-				"phone"
-			],
-			"languageCode": "en",
-			"nativeAuth": false,
-			"properties": {
-				"google": {
-					"hostedDomain": "https://admin.myshout.net/"
-				}
-			},
-			"permissions": {
-				"google": [
-					"profile",
-					"https://www.googleapis.com/auth/drive"
-				]
-			}
-		}
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": ["phone"]
+    }
   },
   "cordova": {}
 }

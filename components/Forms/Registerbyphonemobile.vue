@@ -79,6 +79,8 @@ import formRules from '~/classes/formRules'
 import VuePhoneNumberInput from 'vue-phone-number-input'
 import 'vue-phone-number-input/dist/vue-phone-number-input.css'
 
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+
 export default defineComponent({
   name: 'FormsRegisterbyphonemobile',
   components: {
@@ -94,14 +96,14 @@ export default defineComponent({
     },
   },
   setup (props, { emit }) {
-    const { $fireModule, $notify, $system, $ttlStorage, i18n } = useContext()
+    const { $notify, $system, $ttlStorage, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
 
     // DEFINE CONTENT
     const valid = ref(true)
-    const appVerifier = ref(null)
+    //const appVerifier = ref(null)
     const agreeToTerms = ref(false)
     const rules = formRules
     const formEl = ref(null)
@@ -112,6 +114,7 @@ export default defineComponent({
       showOtpInput: false,
       otpProvided: null
     })
+    const verificationId = ref(null)
 
     // METHODS
     const updatePhoneNumber = (e) => {
@@ -137,36 +140,14 @@ export default defineComponent({
       form.value.showOtpInput = true
       
       try {
-        // Should be before sign in
-        /*cfaSignInPhoneOnCodeSent().subscribe(
-            (verificationId) => {
-              appVerifier.value = verificationId
-            },
-            (e) => {
-              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-              $system.log({
-                comp: 'FormsRegisterbyphonemobile',
-                msg: 'registerPhoneNumber > cfaSignInPhoneOnCodeSent',
-                val: e
-              })
-            },
-        )
-        cfaSignIn('phone', {
-          phone: form.value.phone.trim().toLowerCase()
-        }).subscribe(
-            () => {
-              //This block is never called
-              console.log('Sent to number ' + form.value.phone.trim().toLowerCase() + ' successfully!');
-            },
-            (e) => {
-              form.value.showOtpInput = true
+        const sendCode = await FirebaseAuthentication.signInWithPhoneNumber({
+          phoneNumber: form.value.phone.trim().toLowerCase(),
+        });
 
-              $system.log({
-                comp: 'FormsRegisterbyphonemobile',
-                msg: 'registerPhoneNumber > cfaSignIn',
-                val: e
-              })
-            },)*/
+        if (sendCode) {
+          verificationId.value = sendCode;
+          form.value.showOtpInput = true;
+        }
       } catch (e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         if(e) {
@@ -183,11 +164,12 @@ export default defineComponent({
     const registerWithOTPCode = async () => {
       loading.value = true
       try {
-        // Create firebase credentials
-        const credentials = $fireModule.auth.PhoneAuthProvider.credential(appVerifier.value, form.value.otpProvided)
-
-        // Now sign user in
-        $fireModule.auth().signInWithCredential(credentials).then((result) => {
+        const result = await FirebaseAuthentication.confirmVerificationCode({
+            verificationId: verificationId.value,
+            verificationCode: form.value.otpProvided,
+          });
+        
+          console.log(result);
 
           // Update Profile
           dispatch('user/updateField', {
@@ -222,7 +204,7 @@ export default defineComponent({
             router.push(props.goTo)
           }
 
-        })
+        //})
       } catch (e) {
         $system.log({
           comp: 'FormsRegisterbyphonemobile',
