@@ -42,7 +42,6 @@
     "@nuxtjs/pwa": "^3.3.5",
     "@nuxtjs/universal-storage": "^0.5.9",
     "animejs": "^3.2.1",
-    "capacitor-firebase-auth": "^3.0.0",
     "capacitor-voice-recorder": "^5.0.0",
     "core-js": "^3.18.3",
     "firebase": "^8.10.0",

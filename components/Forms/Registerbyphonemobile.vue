@@ -79,11 +79,6 @@ import formRules from '~/classes/formRules'
 import VuePhoneNumberInput from 'vue-phone-number-input'
 import 'vue-phone-number-input/dist/vue-phone-number-input.css'
 
-import { cfaSignInPhoneOnCodeSent, cfaSignIn } from 'capacitor-firebase-auth'
-
-//import firebase from "firebase/app";
-// import "firebase/auth";
-
 export default defineComponent({
   name: 'FormsRegisterbyphonemobile',
   components: {
@@ -140,9 +135,10 @@ export default defineComponent({
     const registerPhoneNumber = async () => {
       loading.value = true
       form.value.showOtpInput = true
+      
       try {
         // Should be before sign in
-        cfaSignInPhoneOnCodeSent().subscribe(
+        /*cfaSignInPhoneOnCodeSent().subscribe(
             (verificationId) => {
               appVerifier.value = verificationId
             },
@@ -170,7 +166,7 @@ export default defineComponent({
                 msg: 'registerPhoneNumber > cfaSignIn',
                 val: e
               })
-            },)
+            },)*/
       } catch (e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         if(e) {
