@@ -126,6 +126,7 @@ export default defineComponent({
       hasValidatedAccount.value = true
     }
     const emittedResponseFunc = (res) => {
+      console.log("emittedResponseFunc", res)
       if (res.status === 'success') {
         showBottomSheet.value = false
         validate(true)

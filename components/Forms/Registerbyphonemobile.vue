@@ -24,7 +24,7 @@
 
       <div class="text-center mt-5">
         <OnboardingPrivacypolicy class="mt-15" />
-        <div class="d-inline-flex justify-center agreeToTerms">
+        <div v-if="false" class="d-inline-flex justify-center agreeToTerms">
           <v-checkbox
             v-model="agreeToTerms"
             :label="$t('onboarding.agree_to_terms')"
@@ -104,7 +104,7 @@ export default defineComponent({
     // DEFINE CONTENT
     const valid = ref(true)
     //const appVerifier = ref(null)
-    const agreeToTerms = ref(false)
+    const agreeToTerms = ref(true)
     const rules = formRules
     const formEl = ref(null)
     const form = ref({
@@ -114,7 +114,6 @@ export default defineComponent({
       showOtpInput: false,
       otpProvided: null
     })
-    const verificationId = ref(null)
 
     // METHODS
     const updatePhoneNumber = (e) => {
@@ -137,17 +136,16 @@ export default defineComponent({
     }
     const registerPhoneNumber = async () => {
       loading.value = true
-      form.value.showOtpInput = true
       
-      try {
-        const sendCode = await FirebaseAuthentication.signInWithPhoneNumber({
-          phoneNumber: form.value.phone.trim().toLowerCase(),
-        });
+      const phone = form.value.phone.trim().toLowerCase();
 
-        if (sendCode) {
-          verificationId.value = sendCode;
-          form.value.showOtpInput = true;
-        }
+      try {
+        // Start sign in with phone number and send the SMS
+        await FirebaseAuthentication.signInWithPhoneNumber({
+          phoneNumber: phone,
+        });
+        
+        form.value.showOtpInput = true
       } catch (e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         if(e) {
@@ -164,47 +162,33 @@ export default defineComponent({
     const registerWithOTPCode = async () => {
       loading.value = true
       try {
-        const result = await FirebaseAuthentication.confirmVerificationCode({
-            verificationId: verificationId.value,
+        await FirebaseAuthentication.addListener('phoneCodeSent', async event => {
+          // Confirm the verification code
+          const result = await FirebaseAuthentication.confirmVerificationCode({
+            verificationId: event.verificationId,
             verificationCode: form.value.otpProvided,
           });
-        
-          console.log(result);
 
           // Update Profile
           dispatch('user/updateField', {
             phone: form.value.phone.trim().toLowerCase()
           })
 
-          // Technically they have an account now, so we can bypass onboarding IF they are already a user
           $ttlStorage.set('onboardingComplete', true)
 
-          // If EXISTING user show logged in message
-          if (!result.additionalUserInfo.isNewUser) {
-            $notify.show({ text: i18n.t('notify.success'), color: 'green' })
-            emit('response', { status: 'success', message: 'Successfully signed in', 'goTo': '/' })
-
-            if (props.goTo) {
-              router.push(props.goTo)
-            }
-            return
+          if (!result.additionalUserInfo.isNewUser)  emit('response', { status: 'success', message: 'Successfully signed in', 'goTo': '/' })
+          else {
+            emit('response', { status: 'success', message: 'Successfully registered', 'goTo': '/onboarding/2.1' })
+            
+            dispatch('user/updateField', {
+              created_at: new Date()
+            })
           }
+          
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' })          
 
-          // If NEW user
-          form.value.showOtpInput = false
-          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
-          emit('response', { status: 'success', message: 'Successfully registered', 'goTo': '/onboarding/2.1' })
-
-          // Update Profile
-          dispatch('user/updateField', {
-            created_at: new Date()
-          })
-
-          if (props.goTo) {
-            router.push(props.goTo)
-          }
-
-        //})
+          return router.push(props.goTo)
+        });
       } catch (e) {
         $system.log({
           comp: 'FormsRegisterbyphonemobile',
