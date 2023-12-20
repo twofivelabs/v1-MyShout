@@ -87,15 +87,17 @@ export default defineComponent({
           const deviceContacts = await $capacitor.getContacts().then(async () => {
             return await $capacitor.getContacts()
           })
+          // console.log('Device Contacts', JSON.stringify(deviceContacts))
           const unsortedContacts = $helper.normalizeDeviceContacts(deviceContacts)
           contacts.value = lodash.sortBy(unsortedContacts, ['name'])
-          console.log('STICKY: NORMALIZED:' + JSON.stringify(contacts.value))
+          // console.log('STICKY: NORMALIZED:' + JSON.stringify(contacts.value))
         } catch(e) {
           $system.log({
             comp: 'ContactsInvitebtn',
             msg: 'showBottomSheet',
             val: e
           })
+          console.log('Not able to get contacts:', e)
         } finally {
           loading.value = false
         }

@@ -214,23 +214,23 @@ export default ({
             let nc = {};
 
             // console.log('NORMALIZED NAME', c.name.display, c.name.given, c.name.family)
-            if (c.name.display && c.name.display.length > 1) {
+            if (c.name?.display && c.name?.display.length > 1) {
                 nc.name = c.name.display;
             }
             if (!nc.name) {
-                if (c.name.given && c.name.given.length > 1) {
+                if (c.name?.given && c.name?.given.length > 1) {
                     nc.name = c.name.given +' '+ c.name?.family
                 }
             }
-            if (c.emails && c.emails[0] && c.emails[0].address) {
+            if (c?.emails && c?.emails[0] && c?.emails[0]?.address) {
                 nc.email = c.emails[0].address
             }
-            if (c.phones && c.phones[0] && c.phones[0].number) {
+            if (c?.phones && c?.phones[0] && c?.phones[0]?.number) {
                 nc.phone = c.phones[0].number.replace(/[^0-9]/g, '')
             }
 
             // Only push contacts that have a phone number / email
-            if (nc.email || nc.phone) {
+            if (nc?.email || nc?.phone) {
                 formattedContacts.push(nc)
             }
         }); // forEach

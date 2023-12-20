@@ -60,6 +60,10 @@
 		"classpath": "io.capawesome.capacitorjs.plugins.badge.BadgePlugin"
 	},
 	{
+		"pkg": "capacitor-firebase-auth",
+		"classpath": "com.baumblatt.capacitor.firebase.auth.CapacitorFirebaseAuth"
+	},
+	{
 		"pkg": "capacitor-voice-recorder",
 		"classpath": "com.tchvu3.capacitorvoicerecorder.VoiceRecorder"
 	}

@@ -76,6 +76,8 @@ export default function ({
           return await Contacts.requestPermissions().then(async (permission) => {
               if (permission.contacts === 'granted') {
                   return await Contacts.getContacts({ projection })
+              } else {
+                  console.log('STICKY: no permission for contacts:', permission)
               }
           })
       },

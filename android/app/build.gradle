@@ -10,7 +10,7 @@ android {
         applicationId "org.myshout.app"
         minSdk rootProject.ext.minSdkVersion
         targetSdk defaultTargetSdkVersion
-        versionCode 41
+        versionCode 42
         versionName '1.5'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
