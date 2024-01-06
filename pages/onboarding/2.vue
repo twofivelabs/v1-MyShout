@@ -118,7 +118,7 @@ export default defineComponent({
     } = useContext()
     const loading = ref(false)
     const activeTab = ref('Login')
-    const phoneAuth = ref(true)
+    const phoneAuth = ref(false)
     const device = ref('mobile')
 
     // MOUNTED
