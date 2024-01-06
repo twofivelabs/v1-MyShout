@@ -67,6 +67,7 @@ export default defineComponent({
     const { state, commit, dispatch } = useStore()
     const { $system, $fire, $capacitor } = useContext()
     const user = computed(() => state.user.data)
+    const profile = computed(() => state.user.profile)
     const chatList2 = computed(() => state.chats.all)
     const loading = ref(false)
 
@@ -111,16 +112,20 @@ export default defineComponent({
       if (user.value.uid) {
         getChats()
 
-        $capacitor.AdMob_init()
-        $capacitor.AdMob_banner()
+        setTimeout(() => {
+          //Do not initiate AdMob if the user's role is Admin
+          if (profile.value.role.isAdmin) return;
+
+          $capacitor.AdMob_init()
+          $capacitor.AdMob_banner()
+
+        }, 2500)
       }
     })
 
     watchEffect(() => {
       setTimeout(() => {
-        console.log('CHATS', chatList2.value)
         if(chatList2.value.length === 0) {
-          console.log('Not chats to watch')
           dispatch('user/updateField', {
             has: {
               messages: false

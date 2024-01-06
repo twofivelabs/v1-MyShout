@@ -124,6 +124,9 @@ export default defineComponent({
       }
 
       setTimeout(() => {
+        //Do not initiate AdMob if the user's role is Admin
+        if (state.user.profile.role.isAdmin) return;
+
         $capacitor.AdMob_init()
         $capacitor.AdMob_banner()
 
