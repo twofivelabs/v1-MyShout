@@ -1,9 +1,9 @@
 <template>
-  <v-app :style="`${$vuetify.breakpoint.smAndDown ? 'overflow-x:hidden' : '' }`"
-         class="grey lighten-5"
-         dark
+  <v-app 
+    :style="`${$vuetify.breakpoint.smAndDown ? 'overflow-x:hidden' : '' }`"
+    class="grey lighten-5"
+    dark
   >
-    <!--<GlobalNavbar/>-->
     <v-main>
       <div>
         <GlobalIsoffline/>
@@ -11,9 +11,7 @@
       </div>
     </v-main>
     <GlobalSnackbar/>
-    <GlobalFooter/>
     <GlobalMobilefooter/>
-    <!-- <NotificationsPush />-->
   </v-app>
 </template>
 <script>
@@ -36,7 +34,7 @@ export default defineComponent({
       state,
       dispatch
     } = useStore()
-    //const router = useRouter()
+
     const {
       $config,
       $remoteConfig,
@@ -47,18 +45,8 @@ export default defineComponent({
       i18n,
       $capacitor
     } = useContext()
-    //const route = useRoute()
     const loading = ref(false)
 
-    // DEFINE CONTENT
-    /*const isIphone = route.value.query.isIphone
-    const isAndroid = route.value.query.isAndroid
-    const isIpad = route.value.query.isIpad
-    const location = route.value.query.location*/
-
-    // METHODS
-
-    // MOUNT
     onBeforeMount(async () => {
       /**
        * Check if user has completed onboarding. We check on mobile and storage

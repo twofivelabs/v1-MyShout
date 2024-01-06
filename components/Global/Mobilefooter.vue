@@ -1,9 +1,9 @@
 <template>
   <v-footer v-if="hasMounted" app class="pb-10">
     <v-bottom-navigation
-        :height="75"
-        absolute
-        grow
+      :height="75"
+      absolute
+      grow
     >
       <v-btn class="pb-3" color="accent-4" style="height:inherit" text to="/">
         <v-icon>mdi-home</v-icon>
