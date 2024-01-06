@@ -87,6 +87,7 @@ export default defineComponent({
         $fire.firestore
             .collection('Chats')
             .where('participants', 'array-contains', user.value.uid)
+            .orderBy('last_created', 'desc')
             .onSnapshot((docs) => {
               commit('chats/SET_ALL', []) // RESET CHATS TO ZERO, Used when removing
               docs.forEach((doc) => {

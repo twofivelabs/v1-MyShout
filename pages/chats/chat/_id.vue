@@ -220,6 +220,7 @@ export default defineComponent({
         // Update chat last message
         await dispatch('chats/updateField', {
           id: chatId.value,
+          last_created: new Date(),
           lastMessage: newMessage.value || null,
           seen: [
             user.value.data.uid

@@ -20,6 +20,7 @@ class Chats extends FirestoreHelpers {
       owner: null,
       title: null,
       participants: [],
+      last_created: null,
       seen: [],
       lastMessage: null
     }
