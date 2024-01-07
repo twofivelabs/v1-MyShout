@@ -11,7 +11,7 @@
       <ChatNewchatbtn />
     </v-app-bar>
     <v-container class="pt-4 pb-12 mt-7">
-      <v-row class="pa-6" v-if="loading">
+      <v-row class="pa-6" v-if="isLoading">
         <v-col>
           <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
           <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
@@ -25,7 +25,7 @@
         </div>
       </template>
       <v-list two-line class="pb-9">
-        <template v-for="item in chatList2">
+        <template v-for="item in filteredChatList">
           <v-list-item v-if="item && (!Array.isArray(item))" :key="item.id">
             <NuxtLink :to="`/chats/chat/${item.id}`">
               <ChatTopavatar :chat="item" class="mr-3" />
@@ -65,56 +65,67 @@ export default defineComponent({
   middleware: 'authenticated',
   setup() {
     const { state, commit, dispatch } = useStore()
-    const { $system, $fire, $capacitor } = useContext()
+    const { $fire, $capacitor } = useContext()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
-    const chatList2 = computed(() => state.chats.all)
-    const loading = ref(false)
+    const filteredChatList = computed(() => state.chats.all)
+    const isLoading = ref(false)
 
     // DEFINE
     const chatList = ref([])
-    const showBottomSheet = ref(false)
-    const sheetData = ref({})
+    const isBottomSheetVisible = ref(false)
+    const bottomSheetData = ref({})
 
     // METHODS
-    const setSheetData = (data) => {
-      sheetData.value = data
-      showBottomSheet.value = true
+    const openBottomSheet = (data) => {
+      bottomSheetData.value = data
+      isBottomSheetVisible.value = true
     }
-    const getChats = async () => {
-      loading.value = true
+    const fetchChats = async () => {
+      isLoading.value = true
+
       try {
-        $fire.firestore
-            .collection('Chats')
-            .where('participants', 'array-contains', user.value.uid)
-            .orderBy('last_created', 'desc')
-            .onSnapshot((docs) => {
-              commit('chats/SET_ALL', []) // RESET CHATS TO ZERO, Used when removing
-              docs.forEach((doc) => {
-                chatList.value = []
-                const data = doc.data()
-                data.id = doc.id
-                commit('chats/PUSH_TO_ALL', data)
-                chatList.value.push(data)
-              })
-            })
-      } catch(e) {
-        $system.log({
-          comp: 'ChatsIndex',
-          msg: 'getChats',
-          val: e
-        })
+        // Fetch user's chats from Firestore
+        const querySnapshot = await $fire.firestore
+          .collection('Chats')
+          .where('participants', 'array-contains', user.value.uid)
+          .orderBy('last_created', 'desc')
+          .get();
+
+          if (!querySnapshot.empty) {
+            const chatsData = [];
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              data.id = doc.id;
+              chatsData.push(data);
+            });
+
+            // Update Vuex state with the chat data
+            commit('chats/SET_ALL', chatsData);
+            chatList.value = chatsData;
+          } else {
+            // Handle case when there are no chat documents
+            chatList.value = [];
+          }  
+      } catch(error) {
+        // Handle specific errors and log them
+        if (error.code === 'permission-denied') {
+          console.error('Permission denied. User does not have access to chats.');
+        } else {
+          console.error('Error fetching chats:', error.message);
+        }
       } finally {
-        loading.value = false
+        isLoading.value = false
       }
     }
 
+    // Fetch chats when component is mounted
     onMounted(() => {
       if (user.value.uid) {
-        getChats()
+        fetchChats()
 
+        // Do not initiate AdMob if the user's role is Admin
         setTimeout(() => {
-          //Do not initiate AdMob if the user's role is Admin
           if (profile.value.role.isAdmin) return;
 
           $capacitor.AdMob_init()
@@ -124,9 +135,10 @@ export default defineComponent({
       }
     })
 
+    // Check for messages and update user's state
     watchEffect(() => {
       setTimeout(() => {
-        if(chatList2.value.length === 0) {
+        if(filteredChatList.value.length === 0) {
           dispatch('user/updateField', {
             has: {
               messages: false
@@ -137,14 +149,14 @@ export default defineComponent({
     })
 
     return {
-      loading,
+      isLoading,
       user,
-      showBottomSheet,
-      sheetData,
+      isBottomSheetVisible,
+      bottomSheetData,
       chatList,
       state,
-      chatList2,
-      setSheetData,
+      filteredChatList,
+      openBottomSheet,
     }
   }
 })
