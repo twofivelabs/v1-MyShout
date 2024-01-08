@@ -7,7 +7,7 @@ import webpack from 'webpack'
 // const baseHref = process.env.BASE_HREF || '/'
 const baseHref = '/'
 // const isDev = process.env.NODE_ENV === 'development'
-const isDev = false
+const isDev = true
 const useSSL = false
 const useEmulators = false // manually change if emulators needed
 const testMessaging = false
@@ -278,13 +278,13 @@ const config = {
   firebase: {
     lazy: false,
     config: {
-        apiKey: "AIzaSyDzL5T3aUM7GGvTR_dh84Tm_D01T8pAGYM",
-        authDomain: "my-shout-app.firebaseapp.com",
-        projectId: "my-shout-app",
-        storageBucket: "my-shout-app.appspot.com",
-        messagingSenderId: "137661141174",
-        appId: "1:137661141174:web:c00c73c494443d7e449617",
-        measurementId: "G-6D1EY1D843"
+        apiKey: isDev ? "AIzaSyChwP2vZ1Q4E_6wFIr0Pb_mfDFq_ThSas4" : "AIzaSyDzL5T3aUM7GGvTR_dh84Tm_D01T8pAGYM",
+        authDomain: isDev ? "my-shout-staging.firebaseapp.com" : "my-shout-app.firebaseapp.com",
+        projectId: isDev ? "my-shout-staging" : "my-shout-app",
+        storageBucket: isDev ? "my-shout-staging.appspot.com" : "my-shout-app.appspot.com",
+        messagingSenderId: isDev ? "777569508563" : "137661141174",
+        appId: isDev ? "1:777569508563:web:f205aa7aea3820e0230826" : "1:137661141174:web:c00c73c494443d7e449617",
+        measurementId: isDev ? "" : "G-6D1EY1D843"
     },
     onFirebaseHosting: false,
     services: {
@@ -457,7 +457,7 @@ const config = {
             url: '/profile'
           }
         ],
-        fcmPublicVapidKey: 'BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco'
+        fcmPublicVapidKey: isDev? "BAJjXZ0Yn1FI1sJexv41IjHTJCYXNUK_KGjct3N5bVvxGE3m6olax8OlenN4MZfhwMOLn6Ei1L7h-EFnaG0owrU" : "BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco"
       }
     }
   },
@@ -536,6 +536,7 @@ const config = {
 
 // IS DEVELOPMENT
 console.log('IS DEVELOPMENT? ', isDev)
+
 if (useSSL) {
   config.server = {
     port: 8000, // default: 3000
