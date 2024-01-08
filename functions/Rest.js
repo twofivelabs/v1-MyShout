@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const serviceAccount = functions.config().env.production ? require("./service-production.json") : require("./service-development.json");
+const serviceAccount = functions.config().env.production==="true" ? require("./service-production.json") : require("./service-development.json");
 const {geohashForLocation} = require("geofire-common");
 // const got = require("got");
 if (!admin.apps.length) {

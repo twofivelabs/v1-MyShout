@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
-const serviceAccount = functions.config().env.production ? require("./service-production.json") : require("./service-development.json");
+const serviceAccount = functions.config().env.production==="true" ? require("./service-production.json") : require("./service-development.json");
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -23,7 +23,6 @@ exports.Rest = require("./Rest");
 // trigger function on new user creation.
 // firebase deploy --only functions:AddUserRole
 exports.AddUserRole = functions.auth.user().onCreate((authUser) => {
-  console.log("Creating New User", authUser);
   if (authUser.email || authUser.phoneNumber) {
     const customClaims = {
       // admin: true,
