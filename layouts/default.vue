@@ -39,7 +39,6 @@ export default defineComponent({
       $config,
       $remoteConfig,
       $ttlStorage,
-      $vuetify,
       $fire,
       $system,
       i18n,
@@ -48,17 +47,6 @@ export default defineComponent({
     const loading = ref(false)
 
     onBeforeMount(async () => {
-      /**
-       * Check if user has completed onboarding. We check on mobile and storage
-       * TODO: Save this in user profile
-       */
-      if (!$ttlStorage.get('onboardingComplete') && $vuetify.breakpoint.mdAndDown) {
-        if (window.location.pathname !== '/onboarding') {
-          console.log('go to onboarding, default')
-          //router.push('/onboarding')
-        }
-      }
-
       try {
         // If state is available load the UID
         let uid = null

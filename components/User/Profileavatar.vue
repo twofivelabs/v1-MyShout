@@ -50,6 +50,12 @@ export default defineComponent({
       default: () => {
         return 'black'
       }
+    },
+    profile: {
+      type: Object,
+      default: () => {
+        return null
+      }
     }
   },
   setup () {

@@ -1,6 +1,8 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const serviceAccount = require("./service-key.json");
+
+const serviceAccount = functions.config().env.production==="true" ? require("./service-production.json") : require("./service-development.json");
+
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -8,8 +10,6 @@ if (!admin.apps.length) {
 }
 const db = admin.firestore();
 
-// exports.StripeWebhooks = require("./StripeWebhooks");
-// exports.Orders = require("./Orders");
 exports.MailerLite = require("./MailerLite");
 exports.MailerSend = require("./MailerSend");
 exports.Location = require("./Location");

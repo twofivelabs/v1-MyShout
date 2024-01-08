@@ -43,7 +43,7 @@ export default async function ({ app, store, redirect }) {
     }
     else {
         console.log('Redirect to onboarding authenticated.js')
-        return redirect('/onboarding/')
+        return redirect('/auth/')
     }
 }
 

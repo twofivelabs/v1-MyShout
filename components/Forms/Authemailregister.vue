@@ -63,7 +63,7 @@ import formRules from '~/classes/formRules'
 export default defineComponent({
   name: 'FormsAuthemailregister',
   setup () {
-    const { $fire, $notify, $ttlStorage, i18n } = useContext()
+    const { $fire, $notify, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
@@ -98,11 +98,9 @@ export default defineComponent({
         try {
           if ($fire.auth.currentUser === null) {
             const authentication = await $fire.auth.createUserWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
-            console.log("Authentication results", authentication)
             if (authentication.user) {
               $fire.analytics.logEvent('signup')
-              $ttlStorage.set('onboardingComplete', true)
-              await router.push('/')
+              await router.push('/auth/setup-profile')
             } else {
               $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
             }

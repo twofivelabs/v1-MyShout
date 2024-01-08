@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const got = require("got");
-const serviceAccount = require("./service-key.json");
+const serviceAccount = functions.config().env.production==="true" ? require("./service-production.json") : require("./service-development.json");
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),

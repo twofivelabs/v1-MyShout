@@ -1,8 +1,7 @@
 {
   "projects": {
-    "main": "myshout",
-    "default": "myshout",
-    "accessability": "accessability-85e51"
+    "default": "my-shout-app",
+    "staging": "my-shout-staging"
   },
   "targets": {}
 }

@@ -36,6 +36,14 @@ Download your indexes to firestore.indexes.json for deployment
 firebase firestore:indexes > firestore.indexes.json
 ```
 
+# Node Version
+* My Shout requires a specific node version. To install locally, run the following script then set your system to use.
+nvm install v16.18.0
+nvm use v16.18.0
+
+To get a list of all node version installed locally, use the following command.
+nvm list
+
 # Live Editing
 
 * Might run into issues, but possibly gets you in the right direction faster

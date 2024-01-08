@@ -25,9 +25,7 @@ export default defineComponent({
     const {
       $capacitor
     } = useContext()
-    // DEFINE CONTENT
 
-    // MOUNT
     onMounted(() => {
       $capacitor.AdMob_hideBanner()
     })

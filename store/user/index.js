@@ -258,26 +258,26 @@ export const mutations = {
       state.profile.initial = 'A'
     }
   },
-  SET_USER_PROFILE_INIT: (state, userProfile) => {
+  SET_USER_PROFILE_INIT: async (state, userProfile) => {
     const combineUserProfile = Object.assign(state.profile, userProfile)
-      //console.log('SET_USER_PROFILE_INIT BEFORE>', state.profile)
+
     if (!lodash.has(state.profile, 'has.messages')) {
         console.log('STICKY: USER > no hasMessages')
         //lodash.set(state.profile, 'has.messages', false)
         //Vue.set(state.profile, 'has.messages', false)
     }
     if (!lodash.has(state.profile, 'has.notifications')) {
-        console.log('STICKY: USER > no hasNotifications')
         lodash.set(state.profile, 'has.notifications', false)
         Vue.set(state.profile, 'has.notifications', false)
     }
-    //console.log('SET_USER_PROFILE_INIT AFTER>', state.profile)
 
     Vue.set(state, 'profile', combineUserProfile)
+
     if (userProfile?.first_name) {
       Vue.set(state.profile, 'initial', userProfile.first_name.charAt(0).toUpperCase())
     }
   },
+
   ON_AUTH_STATE_CHANGED_MUTATION: (state, { authUser, claims }) => {
     if (!authUser) {
       // NO USER
@@ -360,9 +360,8 @@ export const actions = {
     } else if (data.id) {
         userId = data.id
     }
-    //  console.log(`STICKY: updateUserField,`)
+
     if (userId && this.$db) {
-      //console.log(`STICKY: updateUserField, ${dbRootPath}/${userId}`, data, JSON.stringify(data))
       const response = await this.$db.update(`${dbRootPath}/${userId}`, null, data)
       if (response) {
         await commit('SET_PROFILE_FIELD', data)
@@ -423,11 +422,9 @@ export const actions = {
     }
     return response
   },
-  async listen({ commit }, id) {
+  async listen({ commit, dispatch }, id) {
       try {
         if(id) {
-          console.log(' listening to user', id)
-
           return this.$fire.firestore
               .doc(`Users/${id}`)
               .onSnapshot(async (doc) => {
@@ -435,6 +432,8 @@ export const actions = {
                   const data = doc.data()
                   data.id = doc.id
                   await commit('SET_USER_PROFILE_INIT', {...data})
+                  await dispatch("checkUserData")
+
                 }
               })
         }
@@ -443,14 +442,15 @@ export const actions = {
       }
   },
   async checkUserData ({ state }) {
-      console.log('checking user data')
-    if (state.profile && state.profile.role.isActive) {
-        // CHECK IS USERNAME IS AVAILABLE
-        if (!state.profile.username || state.profile.username.length === 0) {
-            // Make sure were not on the page we are redirecting to [could cause loop]
-            console.log('... Redirecting to onboarding 4')
-            return this.$router.push('/onboarding/4')
-        }
+    if (window.location.pathname !== '/auth' && (state.profile && state.profile.role.isActive)) {
+      // CHECK IS USERNAME IS AVAILABLE
+      if (state.profile.username===null || state.profile.username===undefined || state.profile.username.length === 0) {
+        // Make sure were not on the page we are redirecting to [could cause loop]
+        return this.$router.push('/auth/setup-profile')
+      } else if (state.profile.email===null || state.profile.email===undefined || state.profile.email.length === 0) {
+        // Make sure were not on the page we are redirecting to [could cause loop]
+        return this.$router.push('/auth/setup-profile')
+      }
     }
   },
   async getAll ({ commit, rootState }, { where = {}, limit = 20, order = {}, uid = null }) {
@@ -471,7 +471,7 @@ export const actions = {
       }
       const uid = id || rootState.user.data.uid
       if (!uid) { return }
-      //console.log(`${dbRootPath}/${id}`)
+
       const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
       if (one) {
         await commit('SET_ONE', one)
@@ -523,6 +523,7 @@ export const actions = {
       await dispatch('noUserCleanUp')
       return
     }
+
     try {
       await this.$storage.setUniversal('uid', authUser.uid)
     } catch (e) {
@@ -532,17 +533,17 @@ export const actions = {
         val: e
       })
     }
-    // console.log('onAuthStateChanged, before setting auth user', authUser)
     // await commit('SET_AUTH_USER', { authUser, claims })
     await commit('ON_AUTH_STATE_CHANGED_MUTATION', {
       authUser,
       claims
     })
+
     await dispatch('setUserProfile', authUser.uid)
   },
   async setUserProfile ({ dispatch }, authUserUid) {
     if (authUserUid) {
-      if (this.$db) {
+      //if (this.$db) { // This was stopping things from working....
         // await dispatch('get', authUserUid)
         await dispatch('listen', authUserUid)
         //await dispatch('cart/getCurrent', authUserUid, { root: true })
@@ -550,7 +551,7 @@ export const actions = {
         //await dispatch('user/tagging/getAll', authUserUid, { root: true })
         //await dispatch('user/notifications/getAll', {}, { root: true })
         await dispatch('user/notifications/listen', null, { root:true })
-      }
+      //}
     }
   },
   async noUserCleanUp ({ commit }) {
@@ -568,7 +569,7 @@ export const actions = {
         .signOut()
         .then(() => {
           dispatch('noUserCleanUp')
-          this.$router.push('/onboarding/')
+          this.$router.push('/auth/')
         })
     } catch (e) {
       this.$system.log({
