@@ -1,5 +1,5 @@
 node_modules/
 .env
 .env.local
-.env.my-shout-app
-.env.my-shout-staging
+.env.default
+.env.staging
