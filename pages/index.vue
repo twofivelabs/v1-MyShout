@@ -51,7 +51,6 @@ export default defineComponent({
   setup () {
     const {
       state,
-      dispatch
     } = useStore()
     const {
       $config,
@@ -102,8 +101,6 @@ export default defineComponent({
 
       // Check user if they have profile pieces
       setTimeout(() => {
-        dispatch('user/checkUserData')
-
         try {
           Preferences.set({
             key: 'currentUserId',

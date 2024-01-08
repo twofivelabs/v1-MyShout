@@ -14,7 +14,7 @@ export default async function ({ app, store, redirect }) {
                 return true
             }
             console.log('go to onboarding, admin')
-            redirect('/onboarding/')
+            redirect('/auth/')
             return false
         }
     }
@@ -25,6 +25,6 @@ export default async function ({ app, store, redirect }) {
     }
     else {
         console.log('go to onboarding, admin')
-        return redirect('/onboarding/')
+        return redirect('/auth/')
     }
 }
