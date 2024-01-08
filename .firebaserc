@@ -1,7 +1,7 @@
 {
   "projects": {
-    "default": "myshout",
-    "staging": "myshout-staging"
+    "default": "my-shout-app",
+    "staging": "my-shout-staging"
   },
   "targets": {}
 }
