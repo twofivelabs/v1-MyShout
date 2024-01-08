@@ -1,0 +1,14 @@
+{
+    "type": "service_account",
+    "project_id": "my-shout-staging",
+    "private_key_id": "f037d45161dae2befa5b42356ef880316b0dba65",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDBpSNV14TO+oVD\nsGcTXwNVAI8rYhscpFcEsVB1NaaKVBteI8Bx79BaIFU3RvQ906W/w/SYLNB7v99P\nmiu6qe0GxNraDlNb/MH+BOeCbgJqFSnDwPSoZEFTrZeLCqYgRDoy8G1jRJUMUPhp\nXkX3dr7//LvigYl3JlYhFAD6YNfxLGruZcE1+oc9r1sRRxQ9+HeZf3tdT/LEnjEw\nJ63xgXYXJDiLCmms0YA8iSMwimKrdcIiWtdI1dMTTyhxBaNNYK0XGJPs8vSQluYx\nJp8qcs1OqY6ZFQ8YZBYS0Wo9j8iyKhWZtxsRVnnF9MpOjQYr5Xz7homZwcG0hS5q\ndXg0QuoJAgMBAAECggEAPKXJPtHcfOyWP0Boz/bSdtVRga9cuWg4/rW/8q2mZq13\n0tCUrbqDgS6eMc1Nom1+fGRVXzGt7AwIVwh8iJ4+p3+Q4XlaHzW21iVYEo/8vpe5\nOF9e4Lxhf2EfVMM1i2aC6cBGKjBpE+3qFyoY9Kuin07a01JpqMD/eaWntsMM7rHE\nAw/Vxn+M2khkPDh73plMe7+4yUtif4I6dQKups3+uxca5H8i3jxOafAaLVl/FhFV\nMTQj3GAmOqZg5gdntULWJKdjpVAseVpGDLaxwZBgeZ9Czq9VW8FuRWTm1hKyPeWJ\nsrCE/9o4rRtfWfPy+27NNHXAHuhqMw6XzHBpyVjylwKBgQD1AGjtG0L2mtNWAlyQ\nxlsSUSY2SSti8W/q2kQZ+6gJr4unjbBODZOCvPms9qQLHpzR1qm+nyKH4kqkCyBG\nwjjl19ld8/J9Px+JXVpQ6v76fKBNCMjK4FBx8o5M2OKkh3BrIJE0f0RGBxwfgjLB\np8bGJ6hJH6dsHssY5fjnugVQewKBgQDKVohCH+BjfqsFqwKiQqL9CeKKGAnMgptg\nZLROU+UQ3pVq1e09LJHaH7K7ZemN7bbnnui0B69oRFLK7HsLc/GjJWkAcf9tY9Qg\nYWr6f9uRSoJhsv57hSOvtwgDEiDJYtwLauIeHhapHj10ztGA6Iyv1wFpBbxndtkc\nVU64OswiSwKBgDeVBDjmemaf8VoN5xohJgAd0OF38BPeWlmZcuHCKfkojjJQ/rJ2\negSrAqmuusCbDVC9tny8dYUGXZChxYzH+0iJk5KxCU5Ix8rOFvNMnNQO+f8AAy2j\nfhybvpTIj4JsB6EGHmsehEquyj6LtyAgBARoctFEESOCSOk5IyLPHO2JAoGBAMBW\nhWwmFQ0/KZ9XskdABON4dApFU3s+ZCi7UdJrWYIxs+M8vCm8pmCsZSBSfjNWVtnS\nau5Hp+v7lqAjL8vxSS+GrkuoEeCQVuL499Jrm/J+23W3ysTsCMJNwKX6o4QMH5QS\n5CMxAuV8Q3s35lsdtC6quUJ2G2RWy4dtaEkkS0wFAoGAByuInIkEFTYvmZA6XNAh\nd/S/dJNIbfFUddY6LWApgdLSlkTizlV5h4XvhBSHS5NOhxnAml2blo9dAvjFCkY0\n4n+6ZjfILlMVZTmdXIqmr3QxGjk6lvmdVOHYLABMdVWU1Pw1hI/CdbU8TTNiMfV6\n73CoBfZeIfDkl+sljHIZDyc=\n-----END PRIVATE KEY-----\n",
+    "client_email": "firebase-adminsdk-4p4ub@my-shout-staging.iam.gserviceaccount.com",
+    "client_id": "107582008481945035755",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-4p4ub%40my-shout-staging.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+  }
+  

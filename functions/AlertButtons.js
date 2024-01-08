@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const serviceAccount = require("./service-key.json");
+const serviceAccount = functions.config().env.production ? require("./service-production.json") : require("./service-development.json");
 const got = require("got");
 const lodash = require("lodash");
 
