@@ -1,6 +1,6 @@
 <template>
   <div>
-    <main class="mb-3">
+    <main class="mb-3 px-3">
       <div style="" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
         <ChatAvatar class="mx-2" v-if="message.ownerData" :user="message.ownerData" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
         <div style="max-width:350px;" :class="(message.owner === userId) ? 'primary rounded-tr-0 ml-2' : 'rounded-tl-0 gray mr-2'" class="white--text break-words rounded-lg py-2 px-3">
@@ -31,13 +31,7 @@
             </v-bottom-sheet>
           </div>
           <div class="caption">
-               {{ message.created_at.toDate().toLocaleString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric'
-                }) }}
+               {{ formatMessageDate(message.created_at) }}
             <span v-if="message.audioUrl" class="pl-3">
               <v-btn @click="downloadFile(message.audioUrl)" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.download')}}</v-btn>
               <v-btn @click="deleteFile(message.audioUrl)" :loading="loading" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.delete')}}</v-btn>
@@ -113,6 +107,34 @@ export default defineComponent({
         loading.value = false
       }
     }
+    const formatMessageDate = (timestamp) => {
+      const messageDate = timestamp.toDate();
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - messageDate) / 1000);
+
+      // Less than 1 hour (3600 seconds)
+      if (diffInSeconds < 3600) {
+        return Math.floor(diffInSeconds / 60) + 'm ago';
+      }
+      // Less than 6 hours
+      else if (diffInSeconds < 21600) {
+        return Math.floor(diffInSeconds / 3600) + 'h ago';
+      }
+      // Less than 24 hours
+      else if (diffInSeconds < 86400) {
+        return messageDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      }
+      // Less than 7 days
+      else if (diffInSeconds < 604800) {
+        return Math.floor(diffInSeconds / 86400) + 'd ago';
+      }
+      // Default date format
+      return messageDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
 
     return {
       user,
@@ -120,7 +142,8 @@ export default defineComponent({
       showMedia,
       loading,
       downloadFile,
-      deleteFile
+      deleteFile,
+      formatMessageDate
     }
   }
 })
