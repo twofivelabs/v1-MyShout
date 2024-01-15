@@ -74,7 +74,7 @@ import {
   useStore,
   useRouter
 } from '@nuxtjs/composition-api'
-import {Geolocation} from '@capacitor/geolocation'
+// import {Geolocation} from '@capacitor/geolocation'
 
 export default defineComponent({
   name: 'OnboardingPage6',
@@ -97,11 +97,11 @@ export default defineComponent({
       loading.value = true
 
       setTimeout(async () => {
-        Geolocation.checkPermissions().then(async (permission) => {
+        /* Geolocation.checkPermissions().then(async (permission) => {
           if (permission.location === 'granted') {
             hasPermission.value = true
           }
-        })
+        }) */
 
         await $capacitor.positionPermissions()
         await $services.getSetUserGeneralLocation()

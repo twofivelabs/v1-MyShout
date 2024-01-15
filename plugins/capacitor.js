@@ -1,4 +1,4 @@
-import { Geolocation } from '@capacitor/geolocation'
+// import { Geolocation } from '@capacitor/geolocation'
 import { Device } from '@capacitor/device'
 import { Share } from '@capacitor/share'
 import { FCM } from "@capacitor-community/fcm"
@@ -12,7 +12,7 @@ import { Contacts } from '@capacitor-community/contacts'
 import { Badge } from '@capawesome/capacitor-badge'
 
 import admob from './cap.admob'
-// import background from './cap.background'
+import backgroundGPS from './cap.backgroundGPS'
 
 // VARIABLES
 let watchCallbackId = null
@@ -62,7 +62,7 @@ export default function ({
 
   inject('capacitor', {
       ...admob,
-      //...background,
+      ...backgroundGPS,
 
       async getContacts() {
           const projection = {
@@ -96,7 +96,6 @@ export default function ({
         // console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
         await store.dispatch('user/updateGPS', gps)
     },
-
     async gpsGetCurrentPosition () {
         const device = await Device.getInfo()
         let gps = null
@@ -118,7 +117,7 @@ export default function ({
         }
         // MOBILE DEVICES
         else {
-            await Geolocation.getCurrentPosition({enableHighAccuracy: true}).then((coordinates) => {
+            /* await Geolocation.getCurrentPosition({enableHighAccuracy: true}).then((coordinates) => {
                 if (coordinates && coordinates.coords) {
                     gps = coordinates.coords
                     console.log('LOGGER: PHONE COORDS', coordinates)
@@ -129,7 +128,7 @@ export default function ({
                         data: null
                     })
                 }
-            })
+            }) */
         }
         // GET BY IP
         // TODO: Need to tweak, because this might always run
@@ -149,16 +148,16 @@ export default function ({
     },
     async gpsCheckPermissions () {
         // DESKTOP / WEB, When requesting location will auto pop-up with location
-
+        return true
         // 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'
         try {
-            const permission = await Geolocation.checkPermissions()
+            /* const permission = await Geolocation.checkPermissions()
             if (permission.location === 'denied') {
                 await Geolocation.requestPermissions()
                 app.$notify.show({ text: app.i18n.t('notify.gps_permission_denied'), color: 'error' })
                 return false
-            }
-            else if (permission.location === 'prompt' || permission.location === 'prompt-with-rationale') {
+            } */
+            /* else if (permission.location === 'prompt' || permission.location === 'prompt-with-rationale') {
                 await Geolocation.requestPermissions().catch((e) => {
                     // app.$notify.show({ text: app.i18n.t('notify.gps_permission_prompt'), color: 'error' })
                     app.$system.log({
@@ -168,11 +167,12 @@ export default function ({
                     })
                 })
                 return false
-            }
-            else if (permission.location === 'granted') {
+            } */
+            /* else if (permission.location === 'granted') {
                 // app.$notify.show({ text: 'Permission Location Success', color: 'green' })
                 return true
-            }
+            } */
+            return true
         } catch (e) {
             if ('UNIMPLEMENTED' === e.code) {
                 // ... Don't record error
@@ -196,11 +196,12 @@ export default function ({
           speed: null,
           data: null
         }
-        const coordinates = await Geolocation.getCurrentPosition({
+        const coordinates = false
+        /* const coordinates = await Geolocation.getCurrentPosition({
           enableHighAccuracy: true
         }).catch(() => {
           return false
-        })
+        }) */
         if (coordinates) {
           // console.log('$capacitor > getSetCurrentPosition > coordinates', coordinates)
           retCoordinates = {
@@ -242,7 +243,7 @@ export default function ({
         if (info && info.platform === 'web') {
           return this.getSetCurrentPosition()
         }
-        watchCallbackId = await Geolocation.watchPosition({
+        /* watchCallbackId = await Geolocation.watchPosition({
           enableHighAccuracy: true
         }, (coordinates) => {
           // This log will load the database up so much, careful
@@ -258,7 +259,7 @@ export default function ({
                 msg: 'watchPosition',
                 val: e
             })
-        })
+        }) */
       } catch (e) {
         app.$system.log({
           comp: 'Capacitor',
@@ -268,7 +269,7 @@ export default function ({
       }
     },
     async clearWatchPosition () {
-      try {
+      /* try {
         await Geolocation.clearWatch({ id: watchCallbackId })
       } catch (e) {
         app.$system.log({
@@ -276,11 +277,11 @@ export default function ({
           msg: 'clearWatchPosition',
           val: e
         })
-      }
+      } */
     },
     async positionPermissions () {
       let hasPermission = false
-      try {
+      /* try {
         // 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'
         await Geolocation.checkPermissions()
           .then(async (permission) => {
@@ -329,7 +330,7 @@ export default function ({
           val: e
         })
         hasPermission = false
-      }
+      } */
       console.log('STICKY: positionPermissions, ', hasPermission)
       return hasPermission
     },

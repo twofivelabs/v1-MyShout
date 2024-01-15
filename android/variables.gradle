@@ -1,18 +1,25 @@
 ext {
-    minSdkVersion = 22
-    compileSdkVersion = 33
-    targetSdkVersion = 33
-    androidxActivityVersion = '1.7.0'
+	namespace = 'org.myshout.app'
+	minSdkVersion = 22
+	compileSdkVersion = 33
+	targetSdkVersion = 33
+	versionCode = 42
+	versionName = '1.5'
+	androidxActivityVersion = '1.7.0'
 	androidxAppCompatVersion = '1.6.1'
 	androidxCoordinatorLayoutVersion = '1.2.0'
 	androidxCoreVersion = '1.10.0'
 	androidxFragmentVersion = '1.5.6'
-	firebaseMessagingVersion = '23.1.2'
-    playServicesLocationVersion = '21.0.1'
+	coreSplashScreenVersion = '1.0.1'
+	androidxWebkitVersion = '1.6.1'
 	junitVersion = '4.13.2'
 	androidxJunitVersion = '1.1.5'
 	androidxEspressoCoreVersion = '3.5.1'
-    cordovaAndroidVersion = '10.1.1'
-    coreSplashScreenVersion = '1.0.0'
-    androidxWebkitVersion = '1.6.1'
+	cordovaAndroidVersion = '10.1.1'
+	firebaseMessagingVersion = '23.1.2'
+	playServicesLocationVersion = '21.0.1'
+	googlePlayServicesLocationVersion = '21.0.1'
+	hmsLocationVersion = '6.0.0.302'
+	okHttpVersion = '4.9.1'
+	localBroadcastManagerVersion = '1.0.0'
 }

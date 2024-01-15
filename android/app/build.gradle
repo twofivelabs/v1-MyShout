@@ -1,15 +1,25 @@
 apply plugin: 'com.android.application'
 // Apply the Performance Monitoring plugin
 //apply plugin: 'com.google.firebase.firebase-perf'
+apply from: "../variables.gradle"
+
+Project background_geolocation = project(':transistorsoft-capacitor-background-geolocation')
+apply from: "${background_geolocation.projectDir}/app.gradle"
 
 android {
-    namespace "org.myshout.app"
+    // Conditional for compatibility with AGP <4.2.
+    if (project.android.hasProperty("namespace")) {
+        namespace "org.myshout.app"
+    }
+
     compileSdk 33
+
     defaultConfig {
         targetSdk 33
+        minSdk 22
+        compileSdk 33
+        compileSdkVersion 33
         applicationId "org.myshout.app"
-        minSdk rootProject.ext.minSdkVersion
-        targetSdk defaultTargetSdkVersion
         versionCode 42
         versionName '1.5'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -19,6 +29,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            // [background-geolocation] Proguard-rules
+            proguardFiles "${background_geolocation.projectDir}/proguard-rules.pro"
         }
     }
 }

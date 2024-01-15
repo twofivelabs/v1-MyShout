@@ -29,9 +29,6 @@ project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/c
 include ':capacitor-device'
 project(':capacitor-device').projectDir = new File('../node_modules/@capacitor/device/android')
 
-include ':capacitor-geolocation'
-project(':capacitor-geolocation').projectDir = new File('../node_modules/@capacitor/geolocation/android')
-
 include ':capacitor-local-notifications'
 project(':capacitor-local-notifications').projectDir = new File('../node_modules/@capacitor/local-notifications/android')
 
@@ -46,6 +43,12 @@ project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/sh
 
 include ':capawesome-capacitor-badge'
 project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/@capawesome/capacitor-badge/android')
+
+include ':transistorsoft-capacitor-background-fetch'
+project(':transistorsoft-capacitor-background-fetch').projectDir = new File('../node_modules/@transistorsoft/capacitor-background-fetch/android')
+
+include ':transistorsoft-capacitor-background-geolocation'
+project(':transistorsoft-capacitor-background-geolocation').projectDir = new File('../node_modules/@transistorsoft/capacitor-background-geolocation/android')
 
 include ':capacitor-firebase-auth'
 project(':capacitor-firebase-auth').projectDir = new File('../node_modules/capacitor-firebase-auth/android')

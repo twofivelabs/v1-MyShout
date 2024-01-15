@@ -21,4 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 # [capacitor-background-fetch]
-# -keep class **BackgroundFetchHeadlessTask { *; }
+-keep class **BackgroundFetchHeadlessTask { *; }

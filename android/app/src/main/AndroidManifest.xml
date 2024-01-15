@@ -10,6 +10,11 @@
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
 
+        <!-- capacitor-background-geolocation licence -->
+        <meta-data
+            android:name="com.transistorsoft.locationmanager.license"
+            android:value="f466abcd2f7295c7ecf54f472536f9af96cb7ce4c9b805cb3edb950280045b34"/>
+
         <!-- AD-MOB -->
         <meta-data
                 android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -40,8 +45,8 @@
                 android:exported="false"
                 android:grantUriPermissions="true">
             <meta-data
-                    android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/file_paths"/>
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
         </provider>
 
         <service
@@ -75,9 +80,11 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <!-- Camera, Photos, input file -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!--<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>-->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <!-- Navigator.getUserMedia -->
     <!-- Video -->
@@ -96,7 +103,7 @@
     <!-- Geolocation API -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <!--<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>-->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-feature android:name="android.hardware.location.gps"/>
 

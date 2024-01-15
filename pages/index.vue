@@ -92,6 +92,8 @@ export default defineComponent({
     onMounted(async () => {
       // GPS PERMISSIONS
       $capacitor.gpsCheckPermissions().then(async (has) => {
+        await $capacitor.background_gpsInit()
+
         if (has) {
           // console.log('STICKY: GPS > HAS PERMISSIONS')
           await $capacitor.gpsGetCurrentPosition(l => {
