@@ -20,7 +20,7 @@
       <ChatActionsbtn v-if="chat && chat.id" :chatId="chat.id" />
     </v-app-bar>
     <v-container class="pa-0 fill-height align-end">
-      <v-row class="pa-6 mt-5" v-if="loading">
+      <v-row class="pa-6 mt-5" v-if="messagesLoading">
         <v-col>
           <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
           <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
@@ -39,7 +39,7 @@
           <div id="bottomOfChat"></div>
       </v-card>
 
-      <v-app-bar color="transparent" class="align-center formMessageInput" flat bottom fixed style="top:calc(100% - 180px)">
+      <v-app-bar color="transparent" class="align-center formMessageInput" flat bottom fixed style="top:calc(100% - 145px)">
         <v-text-field
             v-model="newMessage"
             @keydown.enter="sendMessage"
@@ -82,7 +82,8 @@ import {
   useStore,
   computed,
   watch,
-  onMounted, onUnmounted
+  onMounted,
+  onUnmounted
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -90,209 +91,205 @@ export default defineComponent({
   middleware: 'authenticated',
   directives: { Intersect },
   setup () {
+    // Extracting various functionalities and state from the context.
     const {
-      $notify,
-      $fire,
-      $vuetify,
-      $capacitor,
-      $encryption,
-      $system, i18n,
-      error
-    } = useContext()
+      $notify, // Notification functionality.
+      $fire, // Firebase functionality.
+      $vuetify, // Vuetify functionality.
+      $capacitor, // Capacitor (for native mobile functionality).
+      $encryption, // Encryption functionality.
+      i18n, // Internationalization.
+    } = useContext();
+
     const {
-      dispatch,
-      state
-    } = useStore()
-    const loading = ref(true)
-    const chatLoading = ref(true)
-    const route = useRoute()
-    const user = computed(() => state.user)
+      dispatch, // Vuex dispatch function.
+      state // Vuex state.
+    } = useStore();
+    
+    const route = useRoute(); // Current route information.
+    const user = computed(() => state.user); // Computed property for the current user.
 
-    // DEFINE CONTENT
-    const newMessage = ref()
-    const messages = ref([])
-    const chat = ref()
-    const chatId = ref()
-    const users = ref({})
-    const messageListener = ref()
-    const imageMessageUrl = ref()
+    // State variables
+    const chatLoading = ref(true); // Indicates if the chat document is loading.
+    const chatListener = ref(); // Reference for the chat listener
+    const chatId = ref(); // ID of the current chat.
+    const chat = ref(); // Current chat information.
+    const participants = ref({}); // Object of users involved in the chat.
+    const messagesLoading = ref(true); // Indicates if the chat messages are loading.
+    const messages = ref([]); // Array of chat messages.
+    const messageListener = ref(); // Listener for message changes.
+    const isTyping = ref(false); // Indicates if the current user is typing.
+    const typingUsers = ref([]); // Array of users who are currently typing.
+    const newMessage = ref(); // New message input.
+    const imageMessageUrl = ref(); // URL for an image message.  
 
-    const isTyping = ref(false);
-    const typingUsers = ref([]);
+    $capacitor.AdMob_hideBanner(); // Hides the AdMob banner.
 
-    $capacitor.AdMob_hideBanner()
-
-    // METHODS
+    // Load chat document information
     const loadChat = () => {
       chatLoading.value = true
-      
+     
       try {
         if (chatId.value) {
-          const chatDocRef = $fire.firestore.collection('Chats').doc(chatId.value);
-          chatDocRef.onSnapshot(async (res) => {
-            if (res.exists) {
-              chat.value = res.data();
-              
-              for(const id in chat.value.participants) {
-                const u = await dispatch('user/getOne', chat.value.participants[id])
-                if (u) {
-                  users.value[chat.value.participants[id]] = {...u}
+          // Listening for changes in the chat document.
+          chatListener.value = $fire.firestore.collection('Chats').doc(chatId.value)
+            .onSnapshot(async (res) => {
+              if (res.exists) {
+                chat.value = res.data();
+                
+                // Looping through the participants of the chat to get their details.
+                for(const id in chat.value.participants) {
+                  const u = await dispatch('user/getOne', chat.value.participants[id])
+                  if (u) {
+                    participants.value[chat.value.participants[id]] = {...u}
+                  }
                 }
               }
-            }
-          }, error => {
-            console.error("Error listening to chat updates:", error);
-          });
+            }, error => {
+              console.error("Error listening to chat updates:", error);
+            });
         }
       } catch(e) {
-        console.log(e)
-        $system.log({
-          comp: 'ChatsChatId',
-          msg: 'getOne',
-          val: e
-        })
-        error({ statusCode: 404 })
+        console.log("Error Loading Chat", e)
       } finally {
+        // Sets chatLoading to false once the operation is complete
         chatLoading.value = false
       }
     };
+
+    // Function to load messages of the chat.
     const loadMessages = () => {
-      messages.value = []
-      loading.value = true
+      messages.value = []; // Resets the messages array.
+      messagesLoading.value = true // Indicates that message loading is in progress.
+
       try {
+        // Setting up a listener for new messages in the chat.
         messageListener.value = $fire.firestore
           .collection(`Chats/${chatId.value}/Messages`)
-          .orderBy('created_at', 'asc')
-          .limitToLast(100)
+          .orderBy('created_at', 'asc') // Orders messages by creation time.
+          .limitToLast(100) // Limits the number of messages to the last 100.
           .onSnapshot((snapshot) => {
+            // Handling document changes in the chat messages.
             snapshot.docChanges().forEach((change) => {
               if (change.type === 'added') {
                 const data = change.doc.data()
-                data.id = change.doc.id
-                // MERGE user data with the message
-                data.ownerData = users.value[data.owner]
+                data.id = change.doc.id // Setting message ID.
+                // Merging user data with the message.
+                data.ownerData = participants.value[data.owner]
 
                 if (data.message) {
-                  data.message = $encryption.decrypt(data.message)
+                  data.message = $encryption.decrypt(data.message) // Decrypting the message.
                 }
-                messages.value.push(data)
-                goToBottom()
+                messages.value.push(data) // Adding the message to the messages array.
+                goToBottom() // Scrolls to the bottom of the chat.
               }
             })
           })
       } catch (e) {
         console.log('ERROR LOADING MESSAGES', e)
       } finally {
-        loading.value = false
+        // Indicates that message loading is complete.
+        messagesLoading.value = false
       }
     }
+
+    // Function to update typing status in Firestore.
     const updateTypingStatus = async (typing) => {
       try {
-        const value = typing ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
+        const value = typing ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) 
+                            : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
+        // Dispatches an action to update the 'typing' field in the chat document.
         return await dispatch('chats/updateField', {
             id: chatId.value,
             typing: value
           })
       } catch (error) {
-        console.error('Error updating typing status', error);
+        console.error('Error updating typing status', error); // Logs error on failure.
       }
     };
+
+    // Function to format the usernames of users who are typing.
     const formatTypingUsers = (typingUsers) => {
-      const userNames = typingUsers
-        .map(userId => {
-          const user = users.value[userId];
-          return user ? user.username : null;
-        })
-        .filter(name => name != null);
+      const otherTypingUsers = typingUsers.filter(userId => userId !== user.value.data.uid);
       
+      const userNames = otherTypingUsers
+        .map(userId => {
+          const user = participants.value[userId];
+          return user ? user.username : null; // Maps user IDs to usernames.
+        })
+        .filter(name => name != null); // Filters out null values.
+
+      // Formats the string based on the number of users typing.
       if (userNames.length === 0) {
-        return ''; // No users are typing
+        return '';
       } else if (userNames.length === 1) {
         return `${userNames[0]} is typing...`;
       } else {
         return `${userNames.join(', ')} are typing...`;
       }
     };
+
+    // Sends a new message.
     const sendMessage = async () => {
       try {
         if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
           $notify.show({
             text: i18n.t('notify.error_try_again'),
             color: 'error'
-          })
-          return
+          });
+          return;
         }
 
-        let encryptedMessage = null
+        let encryptedMessage = null;
 
-        // Encrypt message
         if (newMessage.value) {
-          encryptedMessage = $encryption.encrypt(newMessage.value)
+          encryptedMessage = $encryption.encrypt(newMessage.value);
         }
 
-        // Save message
+        // Dispatch action to add a new message.
         await dispatch('chats/messages/add', {
           chatId: chatId.value,
           message: {
             message: encryptedMessage,
             image: imageMessageUrl.value || null,
             owner: user.value.data.uid,
-            seen: [
-              user.value.data.uid
-            ]
+            seen: [user.value.data.uid]
           }
-        })
-        // Update chat last message
+        });
+
+        // Update chat's last message information.
         await dispatch('chats/updateField', {
           id: chatId.value,
           lastMessageSent: new Date(),
           lastMessage: newMessage.value || null,
-          seen: [
-            user.value.data.uid
-          ]
-        })
+          seen: [user.value.data.uid]
+        });
 
-        // Reset
-        newMessage.value = null
-        imageMessageUrl.value = null
-        await goToBottom(0)
+        newMessage.value = null;
+        imageMessageUrl.value = null;
+        await goToBottom(0); // Scroll to bottom after sending a message.
       } catch (e) {
         $notify.show({
           text: i18n.t('notify.error_try_again'),
           color: 'error'
-        })
-        console.log("STICKY: Cannot Send Message", e)
-
+        });
+        console.log("STICKY: Cannot Send Message", e);
       }
-    }
+    };
+
+    // Scrolls to the bottom of the chat.
     const goToBottom = async (delay = 1000) => {
       setTimeout(() => {
-        $vuetify.goTo('#bottomOfChat').then(() => {
+        $vuetify.goTo('#bottomOfChat');
+      }, delay);
+    };
 
-          // Update Chat of seen messages
-          try {
-            if (!chat.value?.seen?.includes(user.value.data.uid)) {
-              $fire.firestore.doc(`Chats/${chatId.value}`).update({
-                "seen": firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
-              })
-            }
-            // update notification bubble
-            $fire.firestore.doc(`Users/${user.value.data.uid}`).update({
-              "notifications.hasMessages": false,
-              "has.messages": false,
-            })
-            // Clear the app bubble
-            $capacitor.pushNotificationsClearBadge()
-
-          } catch {
-            // ...
-          }
-        })
-      }, delay)
-    }
+    // Scrolls to a specific message.
     const goTo = (messageId) => {
-      $vuetify.goTo(`#message-${messageId}`)
-    }
+      $vuetify.goTo(`#message-${messageId}`);
+    };
+    
+    // Intersection handler for messages (e.g., for read receipts).
     const onIntersect = (entries) => {
       const messageId = entries[0].target.id.substring(8)
       const message = lodash.find(messages.value, { id:messageId })
@@ -308,52 +305,30 @@ export default defineComponent({
         // ...
       }
     }
+
+    // Callback for uploading image URL.
     const imageMessageUrlCallback = (url) => {
       imageMessageUrl.value = url
     }
 
-    // WATCH
-    // Wait for chat to finish loading then messages
-    watch(chatLoading, () => {
-      if (chatLoading.value === false) {
-        if (route.value.params.id) {
-          $capacitor.AdMob_hideBanner()
+    // Watch for changes in route
+    watch(route, (newRoute, oldRoute) => {
+      chatId.value = newRoute.params.id
 
-          chatId.value = route.value.params.id
-          loadMessages()
-          goToBottom(2500)
-        }
+      if (chatId.value && newRoute !== oldRoute) {
+        $capacitor.AdMob_hideBanner();
+        loadChat(); // Load chat details when route changes
       }
-    })
-    // This will load with moving back and forth
-    watch(route, (r) => {
-      // console.log('r/route', r)
-      if (r.name.includes('chats-chat-id')) {
-        $capacitor.AdMob_hideBanner()
-
-        chatId.value = route.value.params.id
-        loadMessages()
-        goToBottom()
-
-      } else {
-        // Need to stop listening to the changes made to the chat
-        try {
-          console.log('STICKY: REMOVE CHAT MESSAGE LISTENER')
-          messageListener.value()
-
-          $capacitor.AdMob_init()
-          $capacitor.AdMob_banner()
-        } catch {
-          // ...
-        }
-      }
-    })
-    
-    watch(route, (newRoute) => {
-      chatId.value = newRoute.params.id;
-      loadChat();
-      //loadMessages();
     }, { immediate: true });
+
+
+    // Watch for changes in chat data to load messages
+    watch(chat, (newChat, oldChat) => {
+      // Load messages only if chat data changes
+      if (newChat && (!oldChat || newChat.id !== oldChat.id)) loadMessages();
+    });
+   
+    // Watches for changes in the newMessage to update typing status.
     watch(newMessage, (newValue) => {
       if (newValue && !isTyping.value) {
         isTyping.value = true;
@@ -364,37 +339,42 @@ export default defineComponent({
       }
     }, { immediate: true });
 
+    // Handles updating the typing status when the window is unloaded or navigated away from.
     const handleBeforeUnload = () => {
       if (isTyping.value && chatId.value) {
-      // Directly update Firestore
-      const chatRef = $fire.firestore.collection('Chats').doc(chatId.value);
-      chatRef.update({
-        typing: firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
-      }).catch(error => {
-        console.error('Error updating typing status on beforeunload', error);
-      });
-      isTyping.value = false; // Set isTyping to false
-    }
+        updateTypingStatus(false);
+        isTyping.value = false;
+      }
     };
 
+    // Registers event listeners for window unload and navigation away.
     onMounted(() => {
       window.addEventListener('beforeunload', handleBeforeUnload);
     });
 
+    // Cleans up event listeners and updates typing status when the component is unmounted.
     onUnmounted(() => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (isTyping.value) {
+      
+      // Detach Firestore listeners
+      if (messageListener.value) messageListener.value();
+      if (chatListener && chatListener.value) chatListener.value();
+      
+      $capacitor.AdMob_init();
+      $capacitor.AdMob_banner();
+
+      // Update typing status if it hasn't been updated already
+      if (isTyping.value && chatId.value) {
         updateTypingStatus(false);
       }
     });
 
     return {
-      loading,
+      messagesLoading,
       chat,
       newMessage,
       messages,
       typingUsers, formatTypingUsers,
-      users,
       user,
       imageMessageUrl,
       sendMessage,
