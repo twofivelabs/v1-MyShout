@@ -40,7 +40,7 @@
         <v-text-field
             :label="$t('form.code')"
             :placeholder="$t('form.code')"
-            class="mt-5 mx-8"
+            class="mt-5 mx-8 pl-2"
             outlined background-color="#f8f9fa"
             max=6
             type="number"

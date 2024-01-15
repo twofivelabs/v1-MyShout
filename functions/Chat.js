@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const serviceAccount = functions.config().env.production==="true" ? require("./service-production.json") : require("./service-development.json");
 
+const cors = require('cors')({origin: true});
 const moment = require("moment");
 
 if (!admin.apps.length) {
@@ -14,6 +15,30 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 const bucket = admin.storage().bucket("gs://my-shout-app.appspot.com");
 
+// firebase deploy --only functions:Chat-getChatRoom
+exports.getChatRoom = functions.https.onCall((data, context) => {
+  return cors(async (req, res) => {
+    // Check if user is authenticated
+    if (!context.auth) {
+     throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+    }
+
+    try {
+      const chatId = data.id 
+      const chatRef = admin.firestore().collection('Chats').doc(chatId);
+      const chatDoc = await chatRef.get();
+   
+      if (!chatDoc.exists) {
+        throw new functions.https.HttpsError('not-found', 'Chat not found');
+      }
+   
+      return { chat: chatDoc.data() };
+    } catch (error) {
+      console.error('Error fetching chat:', error);
+      throw new functions.https.HttpsError('unknown', 'An unknown error occurred');
+    }
+  })
+});
 
 // firebase deploy --only functions:Chat
 // firebase deploy --only functions:Chat-ChatMessageCreated

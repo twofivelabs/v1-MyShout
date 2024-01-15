@@ -251,6 +251,7 @@ export default defineComponent({
     // Watch for changes in user state to update the step
     watch(user.value, (profile) => {
       if (profile) {
+        console.log("KYLE", profile)
         if (!profile.username) {
           // Force user to set a username
           step.value = 1;

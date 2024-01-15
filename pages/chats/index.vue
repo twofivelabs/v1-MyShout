@@ -89,7 +89,7 @@ export default defineComponent({
         const querySnapshot = await $fire.firestore
           .collection('Chats')
           .where('participants', 'array-contains', user.value.uid)
-          .orderBy('last_created', 'desc')
+          .orderBy('lastMessageSent', 'desc')
           .get();
 
           if (!querySnapshot.empty) {

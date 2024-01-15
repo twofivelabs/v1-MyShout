@@ -33,6 +33,9 @@
           <template v-for="(message, index) in messages">
             <ChatMessage :message="message" :chat="chat" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" />
           </template>
+          <div v-if="chat && chat.typing.length > 0" class="typing-indicator">
+            {{ formatTypingUsers(chat.typing) }}
+          </div>
           <div id="bottomOfChat"></div>
       </v-card>
 
@@ -65,19 +68,21 @@
 // https://fireship.io/courses/vue/
 // https://github.com/berksaribas/vuetify-chat/blob/master/src/components/Chat/Chat.vue
 // https://github.com/prateekgurnani10/walkie-talkie-chatapp
-import lodash from 'lodash'
-import firebase from 'firebase'
-import { Intersect } from 'vuetify/lib/directives'
+import lodash from 'lodash';
+import firebase from 'firebase';
+import 'firebase/functions';
+
+import { Intersect } from 'vuetify/lib/directives';
 
 import {
   defineComponent,
   ref,
   useContext,
   useRoute,
-  useFetch,
   useStore,
   computed,
-  watch
+  watch,
+  onMounted, onUnmounted
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -112,26 +117,35 @@ export default defineComponent({
     const messageListener = ref()
     const imageMessageUrl = ref()
 
+    const isTyping = ref(false);
+    const typingUsers = ref([]);
+
     $capacitor.AdMob_hideBanner()
 
-    // GET CONTENT
-    useFetch(async () => {
+    // METHODS
+    const loadChat = () => {
       chatLoading.value = true
+      
       try {
-        await dispatch('chats/getOne', route.value.params.id).then(async (res) => {
-          if (res !== false) {
-            chat.value = res
-
-            // LOAD USERS
-            for(const id in res.participants) {
-              const u = await dispatch('user/getOne', res.participants[id])
-              if (u) {
-                users.value[res.participants[id]] = {...u}
+        if (chatId.value) {
+          const chatDocRef = $fire.firestore.collection('Chats').doc(chatId.value);
+          chatDocRef.onSnapshot(async (res) => {
+            if (res.exists) {
+              chat.value = res.data();
+              
+              for(const id in chat.value.participants) {
+                const u = await dispatch('user/getOne', chat.value.participants[id])
+                if (u) {
+                  users.value[chat.value.participants[id]] = {...u}
+                }
               }
             }
-          }
-        })
+          }, error => {
+            console.error("Error listening to chat updates:", error);
+          });
+        }
       } catch(e) {
+        console.log(e)
         $system.log({
           comp: 'ChatsChatId',
           msg: 'getOne',
@@ -141,45 +155,67 @@ export default defineComponent({
       } finally {
         chatLoading.value = false
       }
-    })
-
-    // METHODS
+    };
     const loadMessages = () => {
       messages.value = []
       loading.value = true
       try {
         messageListener.value = $fire.firestore
-            .collection(`Chats/${chatId.value}/Messages`)
-            .orderBy('created_at', 'asc')
-            .limitToLast(100)
-            .onSnapshot((snapshot) => {
-              snapshot.docChanges().forEach((change) => {
-                // TODO: Add 'modified' / 'removed' as options here too
-                // console.log('MESSAGE LISTENER', change, change.type, $encryption.decrypt(change.doc.data().message))
-                if (change.type === 'added') {
-                  const data = change.doc.data()
-                  data.id = change.doc.id
-                  // MERGE user data with the message
-                  data.ownerData = users.value[data.owner]
+          .collection(`Chats/${chatId.value}/Messages`)
+          .orderBy('created_at', 'asc')
+          .limitToLast(100)
+          .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+              if (change.type === 'added') {
+                const data = change.doc.data()
+                data.id = change.doc.id
+                // MERGE user data with the message
+                data.ownerData = users.value[data.owner]
 
-                  if (data.message) {
-                    data.message = $encryption.decrypt(data.message)
-                  }
-                  messages.value.push(data)
-                  goToBottom()
+                if (data.message) {
+                  data.message = $encryption.decrypt(data.message)
                 }
-              })
+                messages.value.push(data)
+                goToBottom()
+              }
             })
+          })
       } catch (e) {
         console.log('ERROR LOADING MESSAGES', e)
       } finally {
         loading.value = false
       }
     }
+    const updateTypingStatus = async (typing) => {
+      try {
+        const value = typing ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
+        return await dispatch('chats/updateField', {
+            id: chatId.value,
+            typing: value
+          })
+      } catch (error) {
+        console.error('Error updating typing status', error);
+      }
+    };
+    const formatTypingUsers = (typingUsers) => {
+      const userNames = typingUsers
+        .map(userId => {
+          const user = users.value[userId];
+          return user ? user.username : null;
+        })
+        .filter(name => name != null);
+      
+      if (userNames.length === 0) {
+        return ''; // No users are typing
+      } else if (userNames.length === 1) {
+        return `${userNames[0]} is typing...`;
+      } else {
+        return `${userNames.join(', ')} are typing...`;
+      }
+    };
     const sendMessage = async () => {
       try {
         if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
-          console.log("STICKY: No Message To Send....")
           $notify.show({
             text: i18n.t('notify.error_try_again'),
             color: 'error'
@@ -195,17 +231,6 @@ export default defineComponent({
         }
 
         // Save message
-        /*console.log({
-          chatId: chatId.value,
-          message: {
-            message: encryptedMessage,
-            image: imageMessageUrl.value || null,
-            owner: user.value.data.uid,
-            seen: [
-              user.value.data.uid
-            ]
-          }
-        })*/
         await dispatch('chats/messages/add', {
           chatId: chatId.value,
           message: {
@@ -220,7 +245,7 @@ export default defineComponent({
         // Update chat last message
         await dispatch('chats/updateField', {
           id: chatId.value,
-          last_created: new Date(),
+          lastMessageSent: new Date(),
           lastMessage: newMessage.value || null,
           seen: [
             user.value.data.uid
@@ -323,12 +348,52 @@ export default defineComponent({
         }
       }
     })
+    
+    watch(route, (newRoute) => {
+      chatId.value = newRoute.params.id;
+      loadChat();
+      //loadMessages();
+    }, { immediate: true });
+    watch(newMessage, (newValue) => {
+      if (newValue && !isTyping.value) {
+        isTyping.value = true;
+        updateTypingStatus(true);
+      } else if (!newValue && isTyping.value) {
+        isTyping.value = false;
+        updateTypingStatus(false);
+      }
+    }, { immediate: true });
+
+    const handleBeforeUnload = () => {
+      if (isTyping.value && chatId.value) {
+      // Directly update Firestore
+      const chatRef = $fire.firestore.collection('Chats').doc(chatId.value);
+      chatRef.update({
+        typing: firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
+      }).catch(error => {
+        console.error('Error updating typing status on beforeunload', error);
+      });
+      isTyping.value = false; // Set isTyping to false
+    }
+    };
+
+    onMounted(() => {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (isTyping.value) {
+        updateTypingStatus(false);
+      }
+    });
 
     return {
       loading,
       chat,
       newMessage,
       messages,
+      typingUsers, formatTypingUsers,
       users,
       user,
       imageMessageUrl,
@@ -357,6 +422,12 @@ export default defineComponent({
 }
 .v-text-field .v-input__append-outer {
   margin-top:0 !important;
+}
+.typing-indicator {
+  padding: 10px;
+  text-align: center;
+  color: #666;
+  font-size:11px;
 }
 
 </style>
