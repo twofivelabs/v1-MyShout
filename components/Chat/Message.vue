@@ -3,7 +3,7 @@
     <main class="mb-3 px-3">
       <div style="" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
         <ChatAvatar class="mx-2" v-if="message.ownerData" :user="message.ownerData" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
-        <div style="max-width:350px;" :class="(message.owner === userId) ? 'primary rounded-tr-0 ml-2' : 'rounded-tl-0 gray mr-2'" class="white--text break-words rounded-lg py-2 px-3">
+        <div style="max-width:400px;min-width:120px" :class="(message.owner === userId) ? 'primary rounded-tr-0 ml-2' : 'rounded-tl-0 gray mr-2'" class="white--text break-words rounded-lg py-2 px-3">
           <div v-if="message.message" class="mb-3">
             {{ message.message }}
           </div>
@@ -14,6 +14,7 @@
             </audio>-->
             <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
           </div>
+
           <div v-if="message.image">
             <v-bottom-sheet v-model="showMedia" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
               <template v-slot:activator="{ on, attrs }">
@@ -30,8 +31,11 @@
               </div>
             </v-bottom-sheet>
           </div>
-          <div class="caption">
-               {{ formatMessageDate(message.created_at) }}
+
+          <div class="caption text-right">
+            {{ formatMessageDate(message.created_at) }}
+            <v-icon small color="white">{{ getReadStatusIcon(message) }}</v-icon>
+
             <span v-if="message.audioUrl" class="pl-3">
               <v-btn @click="downloadFile(message.audioUrl)" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.download')}}</v-btn>
               <v-btn @click="deleteFile(message.audioUrl)" :loading="loading" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.delete')}}</v-btn>
@@ -113,6 +117,9 @@ export default defineComponent({
       const diffInSeconds = Math.floor((now - messageDate) / 1000);
 
       // Less than 1 hour (3600 seconds)
+      if (diffInSeconds < 61) {
+        return 'now';
+      }
       if (diffInSeconds < 3600) {
         return Math.floor(diffInSeconds / 60) + 'm ago';
       }
@@ -135,6 +142,18 @@ export default defineComponent({
         day: 'numeric'
       });
     }
+    const getReadStatusIcon = (message) => {
+      const totalParticipants = Object.keys(props.chat.participants).length;
+      const seenCount = message.seen.length;
+
+      if (seenCount === 0) {
+        return 'mdi-eye-off'; // icon when no one has read
+      } else if (seenCount < totalParticipants) {
+        return 'mdi-eye'; // icon when partially read
+      } else {
+        return 'mdi-eye-check'; // icon when fully read
+      }
+    };
 
     return {
       user,
@@ -143,7 +162,8 @@ export default defineComponent({
       loading,
       downloadFile,
       deleteFile,
-      formatMessageDate
+      formatMessageDate,
+      getReadStatusIcon
     }
   }
 })
