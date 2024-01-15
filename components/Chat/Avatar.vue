@@ -1,14 +1,13 @@
 <template>
   <v-avatar size="30" elevation="10" :color="`${color} lighten-2`" rounded>
-    <v-img v-if="url" :src="url" />
-    <span v-else class="white--text headline">{{ initial }}</span>
+    <v-img v-if="user.photoURL" :src="user.photoURL" />
+    <span v-else class="white--text headline">{{ user.initial ? user.initial : (user.username ? user.username.charAt(0) : ':)') }}</span>
   </v-avatar>
 </template>
 <script>
 
 import {
-  defineComponent,
-  ref
+  defineComponent
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -25,15 +24,6 @@ export default defineComponent({
       default: () => {
         return 'primary'
       }
-    }
-  },
-  setup(props) {
-    const url = ref(props.user.photoURL)
-    const initial = ref(props.user.initial)
-
-    return {
-      url,
-      initial
     }
   }
 })

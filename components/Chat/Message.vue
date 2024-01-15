@@ -2,7 +2,7 @@
   <div>
     <main class="mb-3 px-3">
       <div style="" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
-        <ChatAvatar class="mx-2" v-if="message.ownerData" :user="message.ownerData" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
+        <ChatAvatar class="mx-2" v-if="owner" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
         <div style="max-width:400px;min-width:120px" :class="(message.owner === userId) ? 'primary rounded-tr-0 ml-2' : 'rounded-tl-0 gray mr-2'" class="white--text break-words rounded-lg py-2 px-3">
           <div v-if="message.message" class="mb-3">
             {{ message.message }}
@@ -34,7 +34,7 @@
 
           <div class="caption text-right">
             {{ formatMessageDate(message.created_at) }}
-            <v-icon small color="white">{{ getReadStatusIcon(message) }}</v-icon>
+            <v-icon small color="white">{{ getReadStatusIcon(chat, message) }}</v-icon>
 
             <span v-if="message.audioUrl" class="pl-3">
               <v-btn @click="downloadFile(message.audioUrl)" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.download')}}</v-btn>
@@ -66,6 +66,12 @@ export default defineComponent({
       }
     },
     message: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    owner: {
       type: Object,
       default: () => {
         return {}
@@ -142,13 +148,15 @@ export default defineComponent({
         day: 'numeric'
       });
     }
-    const getReadStatusIcon = (message) => {
-      const totalParticipants = Object.keys(props.chat.participants).length;
-      const seenCount = message.seen.length;
+    const getReadStatusIcon = (chat, message) => {
+      // Calculate total participants excluding the message sender
+      const totalParticipantsExcludingSender = chat.participants.length - 1;
+      // Filter out the sender from the seen array
+      const seenCountExcludingSender = message.seen.filter(userId => userId !== message.owner).length;
 
-      if (seenCount === 0) {
+      if (seenCountExcludingSender  === 0) {
         return 'mdi-eye-off'; // icon when no one has read
-      } else if (seenCount < totalParticipants) {
+      } else if (seenCountExcludingSender < totalParticipantsExcludingSender) {
         return 'mdi-eye'; // icon when partially read
       } else {
         return 'mdi-eye-check'; // icon when fully read

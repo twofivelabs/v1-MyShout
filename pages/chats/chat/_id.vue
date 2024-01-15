@@ -31,7 +31,7 @@
 
       <v-card color="transparent" class="chatBox elevation-0 pt-14 mt-5 mb-14">
           <template v-for="(message, index) in messages">
-            <ChatMessage :message="message" :chat="chat" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" />
+            <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" />
           </template>
           <div v-if="chat && chat.typing.length > 0" class="typing-indicator">
             {{ formatTypingUsers(chat.typing) }}
@@ -132,22 +132,15 @@ export default defineComponent({
       try {
         if (chatId.value) {
           // Listening for changes in the chat document.
-          chatListener.value = $fire.firestore.collection('Chats').doc(chatId.value)
-            .onSnapshot(async (res) => {
-              if (res.exists) {
-                chat.value = res.data();
-                
-                // Looping through the participants of the chat to get their details.
-                for(const id in chat.value.participants) {
-                  const u = await dispatch('user/getOne', chat.value.participants[id])
-                  if (u) {
-                    participants.value[chat.value.participants[id]] = {...u}
-                  }
-                }
-              }
-            }, error => {
-              console.error("Error listening to chat updates:", error);
-            });
+          chatListener.value = $fire.firestore.collection("Chats").doc(chatId.value).onSnapshot(async (res) => {
+            if (res.exists) {
+              chat.value = res.data(); 
+              await loadParticipants();
+              await loadMessages();
+            }
+          }, error => {
+            console.error("Error listening to chat updates:", error);
+          });
         }
       } catch(e) {
         console.log("Error Loading Chat", e)
@@ -156,6 +149,20 @@ export default defineComponent({
         chatLoading.value = false
       }
     };
+
+    const loadParticipants = async () => {
+      try {
+        // Looping through the participants of the chat to get their details.
+        for(const index in chat.value.participants) {
+          const participantUid = chat.value.participants[index]
+          const participantProfile = await dispatch('user/getOne', participantUid)
+          if (participantProfile) participants.value[participantUid] = participantProfile
+
+        }
+      } catch (e) {
+        console.log("Error Loading Participants", e)
+      }
+    }
 
     // Function to load messages of the chat.
     const loadMessages = () => {
@@ -211,7 +218,7 @@ export default defineComponent({
     // Function to format the usernames of users who are typing.
     const formatTypingUsers = (typingUsers) => {
       const otherTypingUsers = typingUsers.filter(userId => userId !== user.value.data.uid);
-      
+
       const userNames = otherTypingUsers
         .map(userId => {
           const user = participants.value[userId];
@@ -321,12 +328,6 @@ export default defineComponent({
       }
     }, { immediate: true });
 
-
-    // Watch for changes in chat data to load messages
-    watch(chat, (newChat, oldChat) => {
-      // Load messages only if chat data changes
-      if (newChat && (!oldChat || newChat.id !== oldChat.id)) loadMessages();
-    });
    
     // Watches for changes in the newMessage to update typing status.
     watch(newMessage, (newValue) => {
@@ -373,7 +374,7 @@ export default defineComponent({
       messagesLoading,
       chat,
       newMessage,
-      messages,
+      messages, participants,
       typingUsers, formatTypingUsers,
       user,
       imageMessageUrl,
@@ -388,7 +389,7 @@ export default defineComponent({
 </script>
 <style>
 
-.chatBox { z-index:0; width: 100%; padding-bottom:120px !important; }
+.chatBox { z-index:0; width: 100%; padding-bottom:80px !important; }
 
 #bottomOfChat {
   overflow-anchor: auto;
