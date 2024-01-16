@@ -1,5 +1,5 @@
 <template>
-  <v-avatar size="30" elevation="10" :color="`${color} lighten-2`" rounded>
+  <v-avatar :size="size" elevation="10" :color="`${color} lighten-2`" rounded>
     <v-img v-if="user.photoURL" :src="user.photoURL" />
     <span v-else class="white--text headline">{{ user.initial ? user.initial : (user.username ? user.username.charAt(0) : ':)') }}</span>
   </v-avatar>
@@ -23,6 +23,12 @@ export default defineComponent({
       type: String,
       default: () => {
         return 'primary'
+      }
+    },
+    size: {
+      type: Number,
+      default: () => {
+        return 30
       }
     }
   }
