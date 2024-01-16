@@ -22,6 +22,7 @@ class Chats extends FirestoreHelpers {
       description: null,
       photoUrl: null,
       participants: [],
+      admins: [],
       seen: [],
       typing: [],
       muted: [],

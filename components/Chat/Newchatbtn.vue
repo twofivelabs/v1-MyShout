@@ -75,6 +75,7 @@ export default defineComponent({
         loading.value = true
         newChatFriends.value.push(user.value.uid)
         await dispatch('chats/add', {
+          admins: [user.value.uid],
           owner: user.value.uid,
           participants: newChatFriends.value
       }).then(async (room) => {
