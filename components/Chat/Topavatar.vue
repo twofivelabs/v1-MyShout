@@ -1,15 +1,14 @@
 <template>
-  <div>
-    <v-badge v-if="participantCount > 1" bordered inline :content="`+${participantCount}`" color="myshoutOrange">
-      <v-avatar :class="`white--text rounded-lg ${(url) ? 'mt-2' : '' }`" size="40" color="primary" rounded>
-        <v-img v-if="url" :src="url" />
-        <span v-else class="white--text headline">{{ initial }}</span>
-      </v-avatar>
-    </v-badge>
-    <v-avatar v-else class="white--text rounded-lg" size="40" color="primary" rounded>
-      <v-img v-if="url" :src="url" />
-      <span v-else class="white--text headline">{{ initial }}</span>
+  <div v-if="chat && chat.participants">
+    <v-avatar v-if="chat.participants > 1" :class="`white--text rounded-lg ${(chat.photoUrl) ? 'mt-2' : '' }`" :size="size" color="primary" rounded>
+      <v-img v-if="url" :src="chat.photoUrl" />
+      <span v-else class="white--text headline">{{ `+${chat.participants.length}` }}</span>
     </v-avatar>
+    <v-avatar v-else-if="participant" class="white--text rounded-lg" :size="size" color="primary" rounded>
+      <v-img v-if="participant.photoUrl" :src="articipant.photoUrl" />
+      <span v-else class="white--text headline">{{ participant.initial ? participant.initial : (participant.username ? participant.username.charAt(0) : ':)') }}</span>
+    </v-avatar>
+    <v-skeleton-loader v-else type="avatar" :size="size" />
   </div>
 </template>
 <script>
@@ -17,7 +16,9 @@
 import {
   computed,
   defineComponent,
-  ref, useStore, onMounted
+  ref,
+  useStore,
+  watch
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -28,42 +29,30 @@ export default defineComponent({
       default: () => {
         return {}
       }
-    }
+    },
+    size: {
+      type: Number,
+      default: () => {
+        return 40
+      }
+    },
   },
   setup(props) {
     const { state, dispatch } = useStore()
-    // const user = computed(() => state.user)
-    const profile = computed(() => state.user.profile)
-    const avatar = ref()
-    const url = ref()
-    const initial = ref()
-    let participantCount = 0
+    const user = computed(() => state.user.data)
 
-    if(props.chat.participants) {
-      participantCount = props.chat.participants.length - 1
-    }
+    const participant = ref(null)
 
-    // METHODS
-    onMounted(async () => {
-      if (participantCount >= 1) {
-        for (const uid of props.chat.participants) {
-          if (profile.value.id !== uid) {
-            const u = await dispatch('user/getOne', uid)
-            if (u) {
-              initial.value = u.initial
-              url.value = u.photoUrl
-            }
-          }
-        }
+    watch(() => props.chat, async (chat) => {
+      if(chat && chat.participants.length === 2) {
+        const filtedParticipants = chat.participants.filter(uid => uid !== user.value.uid)
+        participant.value = await dispatch('user/getOne', filtedParticipants[0]);
       }
-    })
+    }, { immediate: true });
 
     return {
-      avatar,
-      participantCount,
-      profile,
-      url,
-      initial
+      user,
+      participant
     }
   }
 })

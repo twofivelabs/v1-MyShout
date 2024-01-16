@@ -1,23 +1,73 @@
 <template>
   <div>
-    <v-icon class="pa-3 rounded-lg" color="myshoutDarkGrey" @click="showChatActions()">
+    <v-icon class="pa-3 rounded-lg" color="myshoutDarkGrey" @click="showBottomSheet = true">
       mdi-dots-vertical
     </v-icon>
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
-      <v-sheet height="50vh" class="rounded-t-xl">
+      <v-sheet height="95vh" class="rounded-t-xl">
         <div class="ma-3" style="padding-bottom:180px;">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
-          <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
-          <ElementH3 align="center" :text="$t('actions')" />
+          <v-row no-gutters class="text-center mb-10">
+            <v-col cols="12">
+              <ChatTopavatar v-if="chat" :chat="chat" :size="80"/>
+            </v-col>
+            <v-col cols="12" class="text-h2 pt-5 pb-2">
+              {{ chat.title ? chat.title : 'Add title' }}
+            </v-col>
+            <v-col cols="12" class="caption">
+              {{ chat.description ? chat.description : 'Add group description...' }}
+            </v-col>
+          </v-row>
+            
 
-          <v-list-item-group>
-            <ChatActionsRenamebtn :chatId="chatId" />
-            <ChatActionsViewmembersbtn :chatId="chatId" />
-            <ChatActionsRemovechatbtn :chatId="chatId" />
+          <v-list-item-group v-if="participants">
+            Members
+            <v-list-item key="add-member">
+              <v-list-item-avatar>
+                <v-icon small>mdi-account-plus</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-title>
+                Add Members
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              v-for="(participant, index) in participants"
+              :key="index"
+            >
+              <v-list-item-avatar>
+                <ChatAvatar :user="participant" />
+              </v-list-item-avatar>
+              <v-list-item-title>
+                {{ participant.username }}
+              </v-list-item-title>
+            </v-list-item>
           </v-list-item-group>
+
+          <v-list-item-group class="mt-10" v-if="chat && participants">
+            <v-list-item key="mute-chat" @click="setChatMuteState()">
+              <v-list-item-avatar>
+                <v-icon small>mdi-volume-off</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-title>
+                {{ !chat.muted.includes(user.data.uid) ? 'Mute Notifications' : 'Unmute Notification'}}
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item key="leave-group">
+              <v-list-item-avatar>
+                <v-icon small color="red">mdi-exit-to-app</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-title class="red--text">
+                {{ participants.size > 1 ? 'Leave Group' : 'Leave Chat' }}
+              </v-list-item-title>
+            </v-list-item>
+          </v-list-item-group>
+            <!--
+              <ChatActionsViewmembersbtn :chat="chat" :participants="participants" />
+              <ChatActionsRenamebtn :chatId="chat.id" />
+              <ChatActionsRemovechatbtn :chatId="chat.id" />
+            -->
+          
 
         </div>
       </v-sheet>
@@ -27,72 +77,56 @@
 <script>
 import {
   defineComponent,
-  ref, useContext, useStore,
+  ref, 
+  useStore,
+  computed,
 } from '@nuxtjs/composition-api'
+
 import { Touch } from 'vuetify/lib/directives'
+import firebase from 'firebase';
+import 'firebase/functions';
 
 export default defineComponent({
   name: 'ChatActionsbtn',
   directives: { Touch },
   props: {
-    chatId: {
-      type: String,
+    chat: {
+      type: Object,
       default: () => {
-        return null
+        return {}
+      }
+    },
+    participants: {
+      type: Object,
+      default: () => {
+        return {}
       }
     }
   },
   setup(props) {
-    const { $system } = useContext()
-    const { dispatch } = useStore()
-    const loading = ref(false)
+    const { state, dispatch } = useStore()
+    const user = computed(() => state.user);
+    
     const showBottomSheet = ref(false)
-    const chat = ref()
 
-    // METHODS
-    const showChatActions = async () => {
-      try {
-        loading.value = true
-
-        try {
-          loading.value = true
-          await dispatch('chats/getOne', props.chatId).then((res) => {
-            if (res !== false) {
-              chat.value = res
-              showBottomSheet.value = true
-            }
-          })
-        } catch(e) {
-          $system.log({
-            comp: 'ChatActions',
-            msg: 'useFetch',
-            val: e
-          })
-        } finally {
-          loading.value = false
-        }
-      } catch(e) {
-        $system.log({
-          comp: 'ChatsIndex',
-          msg: 'showChatActions',
-          val: e
-        })
-      } finally {
-        loading.value = false
-      }
-    }
     const swipe = (direction) => {
       if (direction === 'Down') {
         showBottomSheet.value = false
       }
     }
 
+    const setChatMuteState = async () => {
+      console.log(`Mute Button Selected For User ${user.value.data.uid}`, props.chat.muted)
+      return await dispatch('chats/updateField', {
+        id: props.chat.id,
+        muted: !props.chat.muted.includes(user.value.data.uid) ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
+      })
+    }
+
     return {
-      loading,
-      chat,
       showBottomSheet,
-      showChatActions,
-      swipe,
+      user,
+      swipe, setChatMuteState
     }
   }
 })

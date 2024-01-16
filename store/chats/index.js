@@ -19,11 +19,15 @@ class Chats extends FirestoreHelpers {
     this.fields = {
       owner: null,
       title: null,
+      description: null,
+      photoUrl: null,
       participants: [],
       seen: [],
       typing: [],
+      muted: [],
       lastMessage: null,
-      lastMessageSent: null
+      lastMessageSent: null,
+      lastMessageSender: null
     }
     return this
   }

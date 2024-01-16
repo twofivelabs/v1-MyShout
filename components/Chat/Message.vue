@@ -3,7 +3,7 @@
     <main class="mb-3 px-3">
       <div style="" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
         <ChatAvatar class="mx-2" v-if="owner" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
-        <div style="max-width:400px;min-width:120px" :class="(message.owner === userId) ? 'primary rounded-tr-0 ml-2' : 'rounded-tl-0 gray mr-2'" class="white--text break-words rounded-lg py-2 px-3">
+        <div style="max-width:80%;min-width:50%" :class="(message.owner === userId) ? 'primary rounded-tr-0 ml-2' : 'rounded-tl-0 gray mr-2'" class="white--text break-words rounded-lg py-2 px-3">
           <div v-if="message.message" class="mb-3">
             {{ message.message }}
           </div>
@@ -33,7 +33,7 @@
           </div>
 
           <div class="caption text-right">
-            {{ formatMessageDate(message.created_at) }}
+            {{ moment(message.created_at.toDate()).fromNow() }}
             <v-icon small color="white">{{ getReadStatusIcon(chat, message) }}</v-icon>
 
             <span v-if="message.audioUrl" class="pl-3">
@@ -55,6 +55,8 @@ import {
   useContext,
   ref
 } from '@nuxtjs/composition-api'
+
+import moment from 'moment'
 
 export default defineComponent({
   name: 'ChatMessage',
@@ -117,37 +119,6 @@ export default defineComponent({
         loading.value = false
       }
     }
-    const formatMessageDate = (timestamp) => {
-      const messageDate = timestamp.toDate();
-      const now = new Date();
-      const diffInSeconds = Math.floor((now - messageDate) / 1000);
-
-      // Less than 1 hour (3600 seconds)
-      if (diffInSeconds < 61) {
-        return 'now';
-      }
-      if (diffInSeconds < 3600) {
-        return Math.floor(diffInSeconds / 60) + 'm ago';
-      }
-      // Less than 6 hours
-      else if (diffInSeconds < 21600) {
-        return Math.floor(diffInSeconds / 3600) + 'h ago';
-      }
-      // Less than 24 hours
-      else if (diffInSeconds < 86400) {
-        return messageDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      }
-      // Less than 7 days
-      else if (diffInSeconds < 604800) {
-        return Math.floor(diffInSeconds / 86400) + 'd ago';
-      }
-      // Default date format
-      return messageDate.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    }
     const getReadStatusIcon = (chat, message) => {
       // Calculate total participants excluding the message sender
       const totalParticipantsExcludingSender = chat.participants.length - 1;
@@ -164,13 +135,13 @@ export default defineComponent({
     };
 
     return {
+      moment,
       user,
       userId,
       showMedia,
       loading,
       downloadFile,
       deleteFile,
-      formatMessageDate,
       getReadStatusIcon
     }
   }

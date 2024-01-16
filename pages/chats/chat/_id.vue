@@ -11,13 +11,13 @@
       <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
           <ChatTopavatar v-if="chat" :chat="chat" class="mr-2" />
-          <ChatUsername v-if="chat" :chat="chat" :loggedInUser="user" />
+          <ChatUsername v-if="chat" :chat="chat" :loggedInUser="user.data.uid" />
         </div>
       </v-toolbar-title>
 
       <v-spacer />
 
-      <ChatActionsbtn v-if="chat && chat.id" :chatId="chat.id" />
+      <ChatActionsbtn v-if="chat && participants" :chat="chat" :participants="participants" />
     </v-app-bar>
     <v-container class="pa-0 fill-height align-end">
       <v-row class="pa-6 mt-5" v-if="messagesLoading">
