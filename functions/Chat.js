@@ -15,84 +15,60 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 const bucket = admin.storage().bucket("gs://my-shout-app.appspot.com");
 
-// firebase deploy --only functions:Chat-getChatRoom
-exports.getChatRoom = functions.https.onCall((data, context) => {
-  return cors(async (req, res) => {
-    // Check if user is authenticated
-    if (!context.auth) {
-     throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
-    }
-
-    try {
-      const chatId = data.id 
-      const chatRef = admin.firestore().collection('Chats').doc(chatId);
-      const chatDoc = await chatRef.get();
-   
-      if (!chatDoc.exists) {
-        throw new functions.https.HttpsError('not-found', 'Chat not found');
-      }
-   
-      return { chat: chatDoc.data() };
-    } catch (error) {
-      console.error('Error fetching chat:', error);
-      throw new functions.https.HttpsError('unknown', 'An unknown error occurred');
-    }
-  })
-});
-
 // firebase deploy --only functions:Chat
 // firebase deploy --only functions:Chat-ChatMessageCreated
 exports.ChatMessageCreated = functions.firestore
     .document("Chats/{ChatId}/Messages/{MessageId}")
     .onCreate((messageDoc, context) => {
+      // Extract ChatId from the context provided by the Firestore trigger
       const {
         params: {
           ChatId,
         },
       } = context;
+
+      // Get the data of the created message
       const message = messageDoc.data();
 
-      if (message) {
-        return db.doc(`Chats/${ChatId}`).get().then((doc) => {
-          const chat = doc.data();
-          // functions.logger.log(chat.participants, chat.seen);
-          const unseenParticipants = chat.participants.filter((x) => !chat.seen.includes(x));
-          // functions.logger.log("unseenParticipants", unseenParticipants);
+      // End function if the message does not exist
+      if (!message) return;
 
-          // Update user docs that they have un-seen messages
+      // Retrieve the corresponding chat document using ChatId
+      return db.doc(`Chats/${ChatId}`).get().then((doc) => {
+        const chat = doc.data();
+
+        // Filter out participants who haven't seen the message and are not muted
+        const unseenParticipants = chat.participants
+            .filter((participant) => !chat.seen.includes(participant) && !chat.muted.includes(participant));
+
+          // Loop through each applicable participant to notifiy of new chat message
           unseenParticipants.forEach((userId) => {
-            // Update notification bubble
+            // Update each user's document to indicate they have unread messages
             db.doc(`Users/${userId}`).update({
-              "notifications.hasMessages": true,
-              "has.messages": true,
-              "has.notifications": true,
+              "has.messages": true
             }).then(() => {
               return Promise.resolve(true);
             }).catch((e) => {
               console.log("CANNOT UPDATE unseenParticipants ", e);
               return Promise.resolve(false);
             });
-            // Send notification
+
+            // Prepare notification details
             let notificationTitle = `Notification from ${chat.title}`;
             if (!chat.title) {
               notificationTitle = "Chat Notification";
             }
             // GET ANY PREVIOUS NOTIFICATIONS AND UPDATED IT
             const goTo = `/chats/chat/${chat.id}`;
-            // console.log(`CHAT > Users/${userId}/Notifications`);
-            // console.log(`CHAT > goTo > ${goTo}`);
+
+            // Check for any existing notifications for the same chat and update them
             db.collection(`Users/${userId}/Notifications`)
                 .where("goTo", "==", goTo)
                 .orderBy("created_at", "desc")
                 .limit(1)
                 .get()
                 .then((snapshot) => {
-                  // console.log("CHAT > snapshot", snapshot);
-                  functions.logger.log("CHAT > snapshot", snapshot);
-
-                  // ADD DOCUMENT
-                  // console.log("CHAT > ADD NEW");
-                  functions.logger.log("CHAT > ADD NEW");
+                  // Add a new notification for the user
                   db.collection(`Users/${userId}/Notifications`).add({
                     uid: userId,
                     title: notificationTitle,
@@ -107,22 +83,17 @@ exports.ChatMessageCreated = functions.firestore
                     return Promise.resolve(false);
                   });
 
+                  // Delete any previous notifications for the same chat
                   if (!snapshot.empty) {
-                    // UPDATE DOCUMENT
-                    // console.log("CHAT > UPDATE EXISTING");
-                    // functions.logger.log("CHAT > UPDATE EXISTING");
                     db.doc(`Users/${userId}/Notifications/${snapshot.docs[0].id}`).delete().catch((e) => {
                       console.log("Error deleting notification", e);
                     });
                   }
                 }).catch((e) => {
-                  // CATCH
-                  console.log("CHAT > CATCH > ", e);
-                  functions.logger.log("CHAT > CATCH > ", e);
+                  functions.logger.log("CHAT > NEW MESSAGE > CATCH > ", e);
                 });
           });
-        });
-      }
+      });
     });
 
 // firebase deploy --only functions:Chat-scheduledFunctionExpireAudioMessages
