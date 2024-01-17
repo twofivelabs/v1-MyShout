@@ -5,7 +5,7 @@
         <v-icon small>mdi-account-lock</v-icon>
       </v-list-item-avatar>
       <v-list-item-title>
-        Admins
+        {{ $t('chat.admins') }}
       </v-list-item-title>
     </v-list-item>
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">

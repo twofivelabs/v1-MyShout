@@ -17,24 +17,16 @@
               <ChatTopavatar v-if="chat" :chat="chat" :size="80"/>
             </v-col>
             <v-col cols="12" class="text-h2 pt-5 pb-2">
-              {{ chat.title ? chat.title : 'Add title' }}
+              <ChatActionsEditchat :type="`title`" :chat="chat" />
             </v-col>
             <v-col cols="12" class="caption">
-              {{ chat.description ? chat.description : 'Add group description...' }}
+              <ChatActionsEditchat :type="`description`" :chat="chat" />
             </v-col>
           </v-row>
             
 
-          <ChatActionsMemberslist :chat="chat" :participants="participants" />
-          <ChatActionsSettingslist :chat="chat" :participants="participants" />
-
-          
-            <!--
-              <ChatActionsViewmembersbtn :chat="chat" :participants="participants" />
-              <ChatActionsRenamebtn :chatId="chat.id" />
-              <ChatActionsRemovechatbtn :chatId="chat.id" />
-            -->
-          
+          <ChatActionsMemberslist :chat="chat" :participants="participants" :admins="admins" />
+          <ChatActionsSettingslist :chat="chat" :participants="participants" :admins="admins" />         
 
         </div>
       </v-sheet>
@@ -44,7 +36,7 @@
 <script>
 import {
   defineComponent,
-  ref, 
+  ref,
   useStore,
   computed,
 } from '@nuxtjs/composition-api'
@@ -62,6 +54,12 @@ export default defineComponent({
       }
     },
     participants: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    admins: {
       type: Object,
       default: () => {
         return {}

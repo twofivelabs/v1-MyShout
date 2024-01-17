@@ -8,7 +8,7 @@
         <v-icon small>mdi-volume-off</v-icon>
       </v-list-item-avatar>
       <v-list-item-title>
-        {{ !chat.muted.includes(user.data.uid) ? 'Mute Notifications' : 'Unmute Notification'}}
+        {{ !chat.muted.includes(user.data.uid) ? $t('chat.mute_notifications') : $t('chat.unmute_notifications') }}
       </v-list-item-title>
     </v-list-item>
     <ChatActionsAdminssheet :chat="chat" :admins="admins" />
@@ -17,7 +17,7 @@
         <v-icon small color="red">mdi-exit-to-app</v-icon>
       </v-list-item-avatar>
       <v-list-item-title class="red--text">
-        {{ participants.size > 1 ? 'Leave Group' : 'Leave Chat' }}
+        {{ participants.size > 1 ? $t('chat.leave_group') : $t('chat.leave_chat') }}
       </v-list-item-title>
     </v-list-item>
   </v-list-item-group>
@@ -26,11 +26,9 @@
 <script> 
   import {
     defineComponent,
-    ref,
     useStore,
-    useRoute,
+    useRouter,
     computed,
-    watch
   } from '@nuxtjs/composition-api'
 
   import firebase from 'firebase';
@@ -50,15 +48,19 @@
         default: () => {
           return {}
         }
+      },
+      admins: {
+        type: Object,
+        default: () => {
+          return {}
+        }
       }
     },
     setup(props) {
       const { state, dispatch } = useStore()
-      const route = useRoute()
+      const router = useRouter()
       const user = computed(() => state.user); 
-
-      const admins = ref({})
-          
+         
       const setChatMuteState = async () => {
         return await dispatch('chats/updateField', {
             id: props.chat.id,
@@ -71,22 +73,11 @@
           id: props.chat.id,
           participants: firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
         })
-        if (res) return route.push('/chsts')
+        if (res) return router.push('/chsts')
       }
-
-      watch(() => props.chat, (newChat) => {
-        if (newChat && newChat.admins && props.participants) {
-          newChat.admins.forEach((adminUid) => {
-            if (props.participants[adminUid]) {
-                admins.value[adminUid] = props.participants[adminUid];
-            }
-          });
-        }
-      }, { immediate: true, deep: true })
       
       return {
         user,
-        admins,
         setChatMuteState,
         leaveChat
       }

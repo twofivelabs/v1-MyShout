@@ -45,8 +45,8 @@
           <v-tabs-items v-model="activeTab" class="">
             <v-tab-item>
               <div v-if="phoneAuth">
-                <FormsRegisterbyphoneweb v-if="device === 'web'" goTo="/auth/setup-profile" />
-                <FormsRegisterbyphonemobile v-else goTo="/auth/setup-profile" />
+                <FormsRegisterbyphoneweb v-if="device === 'web'" goTo="/" />
+                <FormsRegisterbyphonemobile v-else goTo="/" />
 
                 <v-btn
                   text block

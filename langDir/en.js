@@ -66,6 +66,8 @@ export default {
         agree_to_terms: 'You must agree to terms before continuing',
         validate_your_phone: 'You must validate your phone number before continuing',
 
+        not_enough_admins: 'Chat must have at least one admin.',
+
         gps_permission_denied: 'Permission Location Denied',
         gps_permission_prompt: 'Permission Location Prompt',
 
@@ -253,6 +255,20 @@ export default {
         no_status: 'You cannot access that, your status is not active.',
         no_user_profile: 'You do not have permission to view their profile.',
         no_view_location: 'Your are not able to view their location.'
+    },
+    chat: {
+        admins: 'Admins',
+        members: "Members",
+        add_member: "Add Member",
+        mute_notifications: 'Mute Notifications',
+        unmute_notifications: 'Unmute Notifications',
+        view_profile: 'View Profile',  
+        leave_group: 'Leave Group',
+        remove_from_group: 'Remove From Group',
+        leave_chat: 'Leave Chat',
+        add_title: 'Add title',
+        add_group_description: 'Add group description',
+        error_updating: 'There was a problem updating...',
     },
 
     no_results: 'No results',

@@ -2,9 +2,10 @@
   <div v-if="!admins"> 
     <v-skeleton-loader v-for="x in 3" :key="x" type="list-item	" />
   </div>
-  <v-list-item-group v-else>
-    Admins
+  <v-list-item-group v-else class="text-center">
+    {{ $t('chat.admins') }}
     <v-list-item
+      class="text-left"
       v-for="(admin, index) in admins"
       :key="index"
     >

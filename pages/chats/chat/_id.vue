@@ -17,7 +17,7 @@
 
       <v-spacer />
 
-      <ChatActionsbtn v-if="chat && participants" :chat="chat" :participants="participants" />
+      <ChatActionsbtn v-if="chat && participants" :chat="chat" :participants="participants" :admins="admins" />
     </v-app-bar>
     <v-container class="pa-0 fill-height align-end">
       <v-row class="pa-6 mt-5" v-if="messagesLoading">
@@ -114,6 +114,7 @@ export default defineComponent({
     const chatListener = ref(); // Reference for the chat listener
     const chatId = ref(); // ID of the current chat.
     const chat = ref(); // Current chat information.
+    const admins = ref({}); // Object of admins in the chat.
     const participants = ref({}); // Object of users involved in the chat.
     const messagesLoading = ref(true); // Indicates if the chat messages are loading.
     const messages = ref([]); // Array of chat messages.
@@ -156,7 +157,14 @@ export default defineComponent({
         for(const index in chat.value.participants) {
           const participantUid = chat.value.participants[index]
           const participantProfile = await dispatch('user/getOne', participantUid)
-          if (participantProfile) participants.value[participantUid] = participantProfile
+          if (participantProfile) {
+            participants.value[participantUid] = participantProfile
+
+            chat.value.admins.forEach((admin) => {
+              admins.value[admin] = participants.value[admin]
+            })
+
+          }
 
         }
       } catch (e) {
@@ -165,13 +173,13 @@ export default defineComponent({
     }
 
     // Function to load messages of the chat.
-    const loadMessages = () => {
+    const loadMessages = async () => {
       messages.value = []; // Resets the messages array.
       messagesLoading.value = true // Indicates that message loading is in progress.
 
       try {
         // Setting up a listener for new messages in the chat.
-        messageListener.value = $fire.firestore
+        messageListener.value = await $fire.firestore
           .collection(`Chats/${chatId.value}/Messages`)
           .orderBy('created_at', 'asc') // Orders messages by creation time.
           .limitToLast(100) // Limits the number of messages to the last 100.
@@ -374,7 +382,7 @@ export default defineComponent({
       messagesLoading,
       chat,
       newMessage,
-      messages, participants,
+      messages, participants, admins,
       typingUsers, formatTypingUsers,
       user,
       imageMessageUrl,

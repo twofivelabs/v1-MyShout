@@ -42,11 +42,9 @@ export default defineComponent({
 
     watch(() => props.chat, async (chat) => {
       if(chat && chat.participants) {
-        console.log("Chat", chat)
         users.value = ''
         for (const participant of chat.participants) {
           if (participant !== props.loggedInUser) {
-            console.log("participant", participant)
             const joinedUser = await dispatch('user/getOne', participant)
               if (joinedUser && (props.loggedInUser !== joinedUser.id)) {
                 users.value = users.value + `@${joinedUser.username} `

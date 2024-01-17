@@ -90,7 +90,6 @@ export default defineComponent({
               chatList.value =  [];
 
               for (const doc of snapshot.docs) {
-                console.log(doc)
                 const data = doc.data();
                 data.id = doc.id;
 
