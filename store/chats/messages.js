@@ -11,6 +11,8 @@ class Messages extends FirestoreHelpers {
         this.fields = {
             owner: '',
             message: '',
+            deleted: false,
+            hide: [],
             image: null,
             audioUrl: '',
             seen: []
@@ -168,8 +170,7 @@ export const actions = {
     },
     async updateField ({ commit }, data) {
         if (this.$db) {
-            console.log('updateField', `Chats/${data.chatId}/${dbRootPath}/${data.id}`)
-            const response = await this.$db.update(`Chats/${data.chatId}/${dbRootPath}/${data.id}`, dataConverter, data.message)
+            const response = await this.$db.update(`Chats/${data.chatId}/${dbRootPath}/${data.id}`, null, data.data)
             if (response) {
                 await commit('SET_STATE_FIELD', data)
             }

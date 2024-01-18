@@ -269,6 +269,12 @@ export default {
         add_title: 'Add title',
         add_group_description: 'Add group description',
         error_updating: 'There was a problem updating...',
+        action: 'Actions',
+        reply_to_message: 'Reply To Message',
+        forward_message: 'Forward Message',
+        message_deleted: 'This message was deleted',
+        delete_for_me: 'Delete For Me',
+        delete_for_everyone: 'Delete For Everyone'
     },
 
     no_results: 'No results',

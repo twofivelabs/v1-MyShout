@@ -267,7 +267,10 @@ export default {
         leave_chat: 'Quitter le chat',
         add_title: 'ajouter un titre',
         add_group_description: 'ajouter une description de groupe',
-        error_updating: 'Il y a eu un problème lors de la mise à jour...'
+        error_updating: 'Il y a eu un problème lors de la mise à jour...',
+        message_deleted: 'This message was deleted',
+        delete_for_me: 'Supprimer pour moi',
+        delete_for_everyone: 'Supprimer pour tout le monde'
     },
 
     no_results: 'Aucun résultat',

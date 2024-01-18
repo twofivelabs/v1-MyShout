@@ -1,40 +1,46 @@
 <template>
   <div>
+    <div v-if="menu" class="blurred">j</div>
     <main class="mb-3 px-3">
-      <div style="" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
-        <ChatAvatar class="mx-2" v-if="owner" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
-        <div style="max-width:80%;min-width:50%" :class="(message.owner === userId) ? 'primary rounded-tr-0 ml-2' : 'rounded-tl-0 gray mr-2'" class="white--text break-words rounded-lg py-2 px-3">
-          <div v-if="message.message" class="mb-3">
-            {{ message.message }}
+      <div v-if="!message.hide || !message.hide.includes(userId)" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
+        <ChatAvatar  v-if="owner && message.owner !== userId" class="mx-2" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
+        <div v-longpress="openMenu" style="max-width:80%;min-width:50%" :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-deleted caption'" class="break-words rounded-lg py-2 px-3">
+          <div v-if="message.deleted">
+            {{ $t('chat.message_deleted') }}
           </div>
-          <div v-if="message.audioUrl">
-            <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />
-<!--            <audio v-if="!message.audioExpired" controls preload="metadata" style="min-width:220px">
-              <source :src="`${message.audioUrl}`">
-            </audio>-->
-            <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
-          </div>
+          <div v-else>
+            <div v-if="message.message" class="mb-3">
+              {{ message.message }}
+            </div>
+            <div v-if="message.audioUrl">
+              <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />
+  <!--            <audio v-if="!message.audioExpired" controls preload="metadata" style="min-width:220px">
+                <source :src="`${message.audioUrl}`">
+              </audio>-->
+              <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
+            </div>
 
-          <div v-if="message.image">
-            <v-bottom-sheet v-model="showMedia" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
-              <template v-slot:activator="{ on, attrs }">
-                <v-img :src="`${message.image}`" v-bind="attrs" v-on="on" />
-              </template>
+            <div v-if="message.image">
+              <v-bottom-sheet v-model="showMedia" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-img :src="`${message.image}`" v-bind="attrs" v-on="on" />
+                </template>
 
-              <div style="margin-bottom:45%;">
-                <v-img :src="`${message.image}`" class="elevation-12 rounded-lg mx-1" />
-                <div class="text-center">
-                  <v-btn @click="showMedia = !showMedia" color="primary" class="mt-n7" fab>
-                    <v-icon>mdi-close</v-icon>
-                  </v-btn>
+                <div style="margin-bottom:45%;">
+                  <v-img :src="`${message.image}`" class="elevation-12 rounded-lg mx-1" />
+                  <div class="text-center">
+                    <v-btn @click="showMedia = !showMedia" color="primary" class="mt-n7" fab>
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                  </div>
                 </div>
-              </div>
-            </v-bottom-sheet>
+              </v-bottom-sheet>
+            </div>
           </div>
 
           <div class="caption text-right">
             {{ moment(message.created_at.toDate()).fromNow() }}
-            <v-icon small color="white">{{ getReadStatusIcon(chat, message) }}</v-icon>
+            <v-icon v-if="!message.deleted && message.owner === userId" small color="white">{{ getReadStatusIcon(chat, message) }}</v-icon>
 
             <span v-if="message.audioUrl" class="pl-3">
               <v-btn @click="downloadFile(message.audioUrl)" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.download')}}</v-btn>
@@ -42,6 +48,53 @@
             </span>
           </div>
         </div>
+        <v-menu v-model="menu" :close-on-content-click="false" offset-y>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                {{ message.text }}
+              </div>
+            </template>
+
+            <v-card>
+              <v-card-title>{{ $t('chat.action') }}</v-card-title>
+              <v-card-text class="pr-10">
+                <v-list-item-group>
+                  <v-list-item :key="`edit-message-${message.id}`">
+                    <v-list-item-avatar>
+                      <v-icon small>mdi-account-plus</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-title>
+                      {{ $t('chat.reply_to_message' )}}
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item :key="`forward-message-${message.id}`">
+                    <v-list-item-avatar>
+                      <v-icon small>mdi-account-plus</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-title>
+                      {{ $t('chat.forward_message' )}}
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item :key="`delete-message-me-${message.id}`" @click="deleteMessage(0)">
+                    <v-list-item-avatar>
+                      <v-icon small color="red">mdi-account-plus</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-title class="text--red">
+                      {{ $t('chat.delete_for_me' )}}
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item v-if="message.owner === userId" :key="`delete-message-everyone-${message.id}`" @click="deleteMessage(1)">
+                    <v-list-item-avatar>
+                      <v-icon small color="red">mdi-account-plus</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-title class="text--red">
+                      {{ $t('chat.delete_for_everyone' )}}
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list-item-group>
+              </v-card-text>
+            </v-card>
+        </v-menu>
       </div>
     </main>
   </div>
@@ -57,6 +110,8 @@ import {
 } from '@nuxtjs/composition-api'
 
 import moment from 'moment'
+import firebase from 'firebase';
+import 'firebase/functions';
 
 export default defineComponent({
   name: 'ChatMessage',
@@ -93,6 +148,7 @@ export default defineComponent({
     const userId = computed(() => state.user.data.uid)
     const showMedia = ref(false)
     const loading = ref(false)
+    const menu = ref(false)
 
     // DEFINE CONTENT
     const downloadFile = (file) => {
@@ -133,13 +189,31 @@ export default defineComponent({
         return 'mdi-eye-check'; // icon when fully read
       }
     };
+    const openMenu = () => {
+      console.log("Open Menu for message " + props.message.id)
+      return menu.value = true
+    }
+
+    const deleteMessage = async (d) => {
+      const res = await dispatch('chats/messages/updateField', {
+          chatId: props.chat.id,
+          id: props.message.id,
+          data: {
+            deleted: d === 1 ? true : false,
+            hide: d === 0 ? firebase.firestore.FieldValue.arrayUnion(userId.value) : []
+          }
+        })
+      if (res) return menu.value = false
+    }
 
     return {
       moment,
       user,
       userId,
       showMedia,
-      loading,
+      loading, 
+      openMenu, menu,
+      deleteMessage,
       downloadFile,
       deleteFile,
       getReadStatusIcon
@@ -148,7 +222,34 @@ export default defineComponent({
 })
 </script>
 <style >
+
+.blurred {
+  position: absolute;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  filter: blur(50px);
+  top: -10vh;
+  left: 0px;
+  background-color: #ffffff70
+}
+
+.menu-active {
+  position: absolute;
+  z-index: 10000;
+}
+
 .v-dialog {
   box-shadow: none !important;
 }
+
+.message-deleted {
+  border: 1px solid #979797;
+  color: #000000;
+}
+
+.v-list-item {
+ padding:0 !important
+}
+
 </style>

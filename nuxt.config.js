@@ -146,6 +146,7 @@ const config = {
     '~/plugins/services',
     '~/plugins/encryption',
     '~/plugins/language',
+    '~/plugins/longpress',
      {
        src: '~/plugins/animation',
        mode: 'client'

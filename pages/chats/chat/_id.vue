@@ -197,6 +197,10 @@ export default defineComponent({
                 }
                 messages.value.push(data) // Adding the message to the messages array.
                 goToBottom() // Scrolls to the bottom of the chat.
+              } else if (change.type === 'modified') {
+                const data = change.doc.data()
+                messages.value[change.oldIndex].deleted = data.deleted
+                messages.value[change.oldIndex].hide = data.hide
               }
             })
           })

@@ -267,7 +267,10 @@ export default {
         leave_chat: 'Salir del Chat',
         add_title: 'ajouter un titre',
         add_group_description: 'ajouter une description de groupe',
-        error_updating: 'Hubo un problema al actualizar...'
+        error_updating: 'Hubo un problema al actualizar...',
+        message_deleted: 'This message was deleted',
+        delete_for_me: 'Eliminar para mí',
+        delete_for_everyone: 'Eliminar para todos'
     },
 
     no_results: 'No hay resultados',
