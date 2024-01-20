@@ -31,7 +31,7 @@
 
       <v-card color="transparent" class="chatBox elevation-0 pt-14 mt-5 mb-14">
           <template v-for="(message, index) in messages">
-            <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" />
+            <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
           </template>
           <div v-if="chat && chat.typing.length > 0" class="typing-indicator">
             {{ formatTypingUsers(chat.typing) }}
@@ -39,26 +39,37 @@
           <div id="bottomOfChat"></div>
       </v-card>
 
-      <v-app-bar color="transparent" class="align-center formMessageInput" flat bottom fixed style="top:calc(100% - 145px)">
-        <v-text-field
+      <v-app-bar color="transparent" class="align-center formMessageInput" flat bottom fixed :style="`${!reply ? 'top:calc(100% - 145px)' : 'top:calc(100% - 165px)'}`">
+        <div>
+          <div v-if="reply" class="d-flex align-center justify-space-between caption primary rounded white--text ml-2 break-words rounded-lg py-2 px-3">
+            <div class="flex-grow-1">
+              Replying to: {{ reply.message.slice(0, 25) + '...' }}
+            </div>
+            <v-btn icon small @click="reply = null">
+              <v-icon color="white" small>mdi-close</v-icon>
+            </v-btn>
+          </div>
+          
+          <v-text-field
             v-model="newMessage"
             @keydown.enter="sendMessage"
             :label="$t('form.message')"
             type="text"
             hide-details
             solo
-        >
-          <template v-slot:append-outer>
-            <v-btn @click="sendMessage" fab>
-              <v-icon>mdi-send</v-icon>
-            </v-btn>
-          </template>
-          <template v-slot:append>
-            <ChatUploadimage :chat="chat" :currentUrl="imageMessageUrl" @url="imageMessageUrlCallback" />
-            <ChatRecordaudio :chat="chat" />
+          >
+            <template v-slot:append-outer>
+              <v-btn @click="sendMessage" fab>
+                <v-icon>mdi-send</v-icon>
+              </v-btn>
+            </template>
+            <template v-slot:append>
+              <ChatUploadimage :chat="chat" :currentUrl="imageMessageUrl" @url="imageMessageUrlCallback" />
+              <ChatRecordaudio :chat="chat" />
 
-          </template>
-        </v-text-field>
+            </template>
+          </v-text-field>
+        </div>
       </v-app-bar>
   </v-container>
   </div>
@@ -119,6 +130,7 @@ export default defineComponent({
     const messagesLoading = ref(true); // Indicates if the chat messages are loading.
     const messages = ref([]); // Array of chat messages.
     const messageListener = ref(); // Listener for message changes.
+    const reply = ref();
     const isTyping = ref(false); // Indicates if the current user is typing.
     const typingUsers = ref([]); // Array of users who are currently typing.
     const newMessage = ref(); // New message input.
@@ -266,15 +278,22 @@ export default defineComponent({
         }
 
         // Dispatch action to add a new message.
-        await dispatch('chats/messages/add', {
+        const res = await dispatch('chats/messages/add', {
           chatId: chatId.value,
           message: {
             message: encryptedMessage,
+            replyTo: reply?.value ? reply.value.id : null,
             image: imageMessageUrl.value || null,
             owner: user.value.data.uid,
             seen: [user.value.data.uid]
           }
         });
+
+        if (res && reply?.value) {
+          await $fire.firestore.collection("Chats").doc(chatId.value).collection("Messages").doc(reply.value.id).update({
+            replies: firebase.firestore.FieldValue.arrayUnion(res.id)
+          })
+        } 
 
         // Update chat's last message information.
         await dispatch('chats/updateField', {
@@ -284,6 +303,7 @@ export default defineComponent({
           seen: [user.value.data.uid]
         });
 
+        reply.value = null;
         newMessage.value = null;
         imageMessageUrl.value = null;
         await goToBottom(0); // Scroll to bottom after sending a message.
@@ -328,6 +348,10 @@ export default defineComponent({
     // Callback for uploading image URL.
     const imageMessageUrlCallback = (url) => {
       imageMessageUrl.value = url
+    }
+
+    const handleReply = (m) => {
+      reply.value = m
     }
 
     // Watch for changes in route
@@ -385,7 +409,7 @@ export default defineComponent({
     return {
       messagesLoading,
       chat,
-      newMessage,
+      newMessage, reply,
       messages, participants, admins,
       typingUsers, formatTypingUsers,
       user,
@@ -393,7 +417,8 @@ export default defineComponent({
       sendMessage,
       onIntersect,
       goTo,
-      imageMessageUrlCallback
+      imageMessageUrlCallback,
+      handleReply
     }
   }
 })

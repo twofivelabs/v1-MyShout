@@ -2,9 +2,18 @@
   <div>
     <div v-if="menu" class="blurred">j</div>
     <main class="mb-3 px-3">
+      <div v-if="message.replyTo && reply && reply.message" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse text-right'" class="caption pb-2">
+        <div>
+          <div>You replied to {{ reply.owner ? reply.owner.username : '' }}</div>
+          <div class=" pa-2 rounded-lg message-border">
+            <v-icon small>mdi-reply</v-icon>        
+            {{ reply.message ? reply.message : '' }}
+          </div>        
+        </div>
+      </div>
       <div v-if="!message.hide || !message.hide.includes(userId)" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
         <ChatAvatar  v-if="owner && message.owner !== userId" class="mx-2" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
-        <div v-longpress="openMenu" style="max-width:80%;min-width:50%" :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-deleted caption'" class="break-words rounded-lg py-2 px-3">
+        <div v-longpress="openMenu" style="max-width:80%;min-width:50%" :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" class="break-words rounded-lg py-2 px-3">
           <div v-if="message.deleted">
             {{ $t('chat.message_deleted') }}
           </div>
@@ -57,9 +66,9 @@
 
             <v-card>
               <v-card-title>{{ $t('chat.action') }}</v-card-title>
-              <v-card-text class="pr-10">
+              <v-card-text>
                 <v-list-item-group>
-                  <v-list-item :key="`edit-message-${message.id}`">
+                  <v-list-item v-if="message.owner !== userId" :key="`edit-message-${message.id}`" @click="startMessageReply">
                     <v-list-item-avatar>
                       <v-icon small>mdi-account-plus</v-icon>
                     </v-list-item-avatar>
@@ -106,12 +115,14 @@ import {
   computed,
   useStore,
   useContext,
-  ref
+  ref,
+  watch
 } from '@nuxtjs/composition-api'
 
 import moment from 'moment'
 import firebase from 'firebase';
 import 'firebase/functions';
+import { DocumentSnapshot } from '@google-cloud/firestore';
 
 export default defineComponent({
   name: 'ChatMessage',
@@ -134,6 +145,12 @@ export default defineComponent({
         return {}
       }
     },
+    participants: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
     chat: {
       type: Object,
       default: () => {
@@ -141,14 +158,19 @@ export default defineComponent({
       }
     }
   },
-  setup(props) {
+  emits: [
+    'reply'
+  ],
+  setup(props, { emit }) {
     const { state, dispatch } = useStore()
-    const { $helper, $fire } = useContext()
+    const { $helper, $fire, $encryption} = useContext()
     const user = computed(() => state.user)
     const userId = computed(() => state.user.data.uid)
     const showMedia = ref(false)
     const loading = ref(false)
+    
     const menu = ref(false)
+    const reply = ref();
 
     // DEFINE CONTENT
     const downloadFile = (file) => {
@@ -189,9 +211,14 @@ export default defineComponent({
         return 'mdi-eye-check'; // icon when fully read
       }
     };
+
     const openMenu = () => {
-      console.log("Open Menu for message " + props.message.id)
       return menu.value = true
+    }
+
+    const startMessageReply = () => {
+      emit('reply', props.message);
+      return menu.value = false
     }
 
     const deleteMessage = async (d) => {
@@ -206,17 +233,30 @@ export default defineComponent({
       if (res) return menu.value = false
     }
 
+    watch(() => props.message, async (m) => {
+      if (m && m.replyTo) {
+        const snapshot = await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(m.replyTo).get()
+        console.log("snapshot", DocumentSnapshot)
+        reply.value = snapshot.data()
+
+        if (reply.value.message) reply.value.message = $encryption.decrypt(reply.value.message)
+        if (reply.value.owner) reply.value.owner = props.participants[reply.value.owner];
+      }
+    }, { immediate: true });   
+
     return {
       moment,
       user,
       userId,
       showMedia,
       loading, 
+      reply,
       openMenu, menu,
       deleteMessage,
       downloadFile,
       deleteFile,
-      getReadStatusIcon
+      getReadStatusIcon,
+      startMessageReply
     }
   }
 })
@@ -243,7 +283,7 @@ export default defineComponent({
   box-shadow: none !important;
 }
 
-.message-deleted {
+.message-border {
   border: 1px solid #979797;
   color: #000000;
 }

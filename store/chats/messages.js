@@ -11,6 +11,8 @@ class Messages extends FirestoreHelpers {
         this.fields = {
             owner: '',
             message: '',
+            replies: [],
+            replyTo: null,
             deleted: false,
             hide: [],
             image: null,
@@ -132,8 +134,8 @@ export const actions = {
     async getOne ({ state, commit }, id) {
         try {
             if (state.loaded && state.loaded[id]) {
-                await commit('SET_ONE', state.loaded[id])
-                return state.loaded[id]
+              await commit('SET_ONE', state.loaded[id])
+              return state.loaded[id]
             }
             const one = await this.$db.get_one(`Chats/${id}/${dbRootPath}`, dataConverter)
             if (one) {
