@@ -122,7 +122,6 @@ import {
 import moment from 'moment'
 import firebase from 'firebase';
 import 'firebase/functions';
-import { DocumentSnapshot } from '@google-cloud/firestore';
 
 export default defineComponent({
   name: 'ChatMessage',
@@ -163,7 +162,7 @@ export default defineComponent({
   ],
   setup(props, { emit }) {
     const { state, dispatch } = useStore()
-    const { $helper, $fire, $encryption} = useContext()
+    const { $helper, $fire, $encryption } = useContext()
     const user = computed(() => state.user)
     const userId = computed(() => state.user.data.uid)
     const showMedia = ref(false)
@@ -236,13 +235,16 @@ export default defineComponent({
     watch(() => props.message, async (m) => {
       if (m && m.replyTo) {
         const snapshot = await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(m.replyTo).get()
-        console.log("snapshot", DocumentSnapshot)
         reply.value = snapshot.data()
-
-        if (reply.value.message) reply.value.message = $encryption.decrypt(reply.value.message)
-        if (reply.value.owner) reply.value.owner = props.participants[reply.value.owner];
       }
-    }, { immediate: true });   
+    }, { immediate: true });  
+
+    watch(reply, async (r) => {
+      if (r && r.message && r.owner) {
+        reply.value.message = $encryption.decrypt(reply.value.message)
+        reply.value.owner = props.participants[reply.value.owner];
+      }
+    }, { immediate: true });  
 
     return {
       moment,
