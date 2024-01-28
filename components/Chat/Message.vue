@@ -2,15 +2,8 @@
   <div>
     <div v-if="menu" class="blurred">j</div>
     <main class="mb-3 px-3">
-      <div v-if="message.replyTo && reply && reply.message" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse text-right'" class="caption pb-2">
-        <div>
-          <div>You replied to {{ reply.owner ? reply.owner.username : '' }}</div>
-          <div class=" pa-2 rounded-lg message-border">
-            <v-icon small>mdi-reply</v-icon>        
-            {{ reply.message ? reply.message : '' }}
-          </div>        
-        </div>
-      </div>
+      <ChatMessageReply v-if="message.replyTo" :chat="chat" :message="message" :participants="participants"/>
+      
       <div v-if="!message.hide || !message.hide.includes(userId)" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
         <ChatAvatar  v-if="owner && message.owner !== userId" class="mx-2" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
         <div v-longpress="openMenu" style="max-width:80%;min-width:50%" :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" class="break-words rounded-lg py-2 px-3">
@@ -68,6 +61,14 @@
               <v-card-title>{{ $t('chat.action') }}</v-card-title>
               <v-card-text>
                 <v-list-item-group>
+                  <v-list-item :key="`info-message-${message.id}`" @click="viewMessageInfo">
+                    <v-list-item-avatar>
+                      <v-icon small>mdi-information-variant-box-outline</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-title>
+                      {{ $t('chat.info' )}}
+                    </v-list-item-title>
+                  </v-list-item>
                   <v-list-item v-if="message.owner !== userId" :key="`edit-message-${message.id}`" @click="startMessageReply">
                     <v-list-item-avatar>
                       <v-icon small>mdi-account-plus</v-icon>
@@ -115,8 +116,7 @@ import {
   computed,
   useStore,
   useContext,
-  ref,
-  watch
+  ref
 } from '@nuxtjs/composition-api'
 
 import moment from 'moment'
@@ -162,14 +162,14 @@ export default defineComponent({
   ],
   setup(props, { emit }) {
     const { state, dispatch } = useStore()
-    const { $helper, $fire, $encryption } = useContext()
+    const { $helper, $fire } = useContext()
     const user = computed(() => state.user)
     const userId = computed(() => state.user.data.uid)
     const showMedia = ref(false)
     const loading = ref(false)
     
     const menu = ref(false)
-    const reply = ref();
+
 
     // DEFINE CONTENT
     const downloadFile = (file) => {
@@ -232,19 +232,9 @@ export default defineComponent({
       if (res) return menu.value = false
     }
 
-    watch(() => props.message, async (m) => {
-      if (m && m.replyTo) {
-        const snapshot = await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(m.replyTo).get()
-        reply.value = snapshot.data()
-      }
-    }, { immediate: true });  
-
-    watch(reply, async (r) => {
-      if (r && r.message && r.owner) {
-        reply.value.message = $encryption.decrypt(reply.value.message)
-        reply.value.owner = props.participants[reply.value.owner];
-      }
-    }, { immediate: true });  
+    const viewMessageInfo = async () => {
+      console.log(props.message)
+    }
 
     return {
       moment,
@@ -252,13 +242,13 @@ export default defineComponent({
       userId,
       showMedia,
       loading, 
-      reply,
       openMenu, menu,
       deleteMessage,
       downloadFile,
       deleteFile,
       getReadStatusIcon,
-      startMessageReply
+      startMessageReply,
+      viewMessageInfo
     }
   }
 })
