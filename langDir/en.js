@@ -274,7 +274,8 @@ export default {
         forward_message: 'Forward Message',
         message_deleted: 'This message was deleted',
         delete_for_me: 'Delete For Me',
-        delete_for_everyone: 'Delete For Everyone'
+        delete_for_everyone: 'Delete For Everyone',
+        info: 'Info'
     },
 
     no_results: 'No results',

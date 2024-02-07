@@ -270,7 +270,8 @@ export default {
         error_updating: 'Il y a eu un problème lors de la mise à jour...',
         message_deleted: 'This message was deleted',
         delete_for_me: 'Supprimer pour moi',
-        delete_for_everyone: 'Supprimer pour tout le monde'
+        delete_for_everyone: 'Supprimer pour tout le monde',
+        info: 'Info'
     },
 
     no_results: 'Aucun résultat',
