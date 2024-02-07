@@ -16,7 +16,7 @@ export default ({
   inject('services', {
     getSetUserLocation () {
       // Set GPS LAT/LNG through GPS
-      app.$capacitor.watchPosition().then((coordinates) => {
+      /* app.$capacitor.watchPosition().then((coordinates) => {
         store.dispatch('user/updateGPS', {
           lat: coordinates.lat,
           lng: coordinates.lng
@@ -30,7 +30,7 @@ export default ({
           msg: 'getSetUserLocation',
           val: e
         })
-      })
+      }) */
     },
     async getSetUserGeneralLocation () {
       // If we don't have a user postal/city for shipping calculations
@@ -130,8 +130,8 @@ export default ({
        * User: object
        * GPS: object
        */
-    async restUpdateGPS (gps={}) {
-          if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: no gps data')
+    async restUpdateGPS () {
+          /* if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: no gps data')
 
           const user = app.$fire.auth.currentUser
           const userToken = user ? await user.getIdTokenResult() : false
@@ -147,7 +147,7 @@ export default ({
           console.log('STICKY: restUpdateGPS PAYLOAD', payload)
           const res = await responseFunc(payload)
           console.log('STICKY: RES BUTTON RESPONSE FROM FB', res)
-          return res
+          return res */
     },
     /**
     * Twilio Send SMS

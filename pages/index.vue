@@ -51,6 +51,7 @@ export default defineComponent({
   setup () {
     const {
       state,
+      dispatch
     } = useStore()
     const {
       $config,
@@ -90,17 +91,21 @@ export default defineComponent({
     // MOUNTED
     onMounted(async () => {
       // GPS PERMISSIONS
-      $capacitor.gpsCheckPermissions().then(async (has) => {
+      // await $capacitor.gps_init()
+
+      /* $capacitor.gpsCheckPermissions().then(async (has) => {
         if (has) {
           // console.log('STICKY: GPS > HAS PERMISSIONS')
           await $capacitor.gpsGetCurrentPosition(l => {
             console.log('STICKY: GPS > ', l)
           })
         }
-      })
+      }) */
 
-      // Check user if they have profile pieces
+      // Check user if they have profile  pieces
       setTimeout(() => {
+        dispatch('user/checkUserData')
+
         try {
           Preferences.set({
             key: 'currentUserId',

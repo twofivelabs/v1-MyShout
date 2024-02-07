@@ -41,7 +41,21 @@
 			"providers": [
 				"phone"
 			]
+		},
+		"BackgroundRunner": {
+			"label": "com.example.background.task",
+			"src": "background.js",
+			"event": "myCustomEvent",
+			"repeat": true,
+			"interval": 2,
+			"autoStart": false
+		},
+		"CapacitorHttp": {
+			"enabled": true
 		}
 	},
-	"cordova": {}
+	"cordova": {},
+	"android": {
+		"useLegacyBridge": true
+	}
 }

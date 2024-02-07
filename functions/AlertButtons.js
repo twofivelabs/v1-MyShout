@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const serviceAccount = functions.config().env.production==="true" ? require("./service-production.json") : require("./service-development.json");
+const serviceAccount = require("./service-key.json");
 const got = require("got");
 const lodash = require("lodash");
 
@@ -10,7 +10,10 @@ if (!admin.apps.length) {
   });
 }
 const db = admin.firestore();
-const GOOGLE_MAPS_API_KEY = functions.config().google.maps_api_key;
+/* const db = admin.firestore();
+const UsersCollection = admin.firestore().collection("Users");
+const Messaging = admin.messaging();*/
+const GOOGLE_MAPS_API_KEY = "AIzaSyBAD2Twrykrl6E3PmuTRMFkIuDc_hWaBFc";
 
 
 /**
@@ -40,6 +43,21 @@ exports.sendAlert = functions.https.onCall((data) => {
               u.id = doc.id;
               functions.logger.log("USER LOG 2", u);
 
+              let dataUsername = null;
+              try {
+                dataUsername = data.data.user.username;
+              } catch (e) {
+                console.log("No data username");
+              }
+
+              let dataUserId = null;
+              try {
+                dataUserId = data.data.user.id;
+              } catch (e) {
+                console.log("No data userId");
+              }
+
+
               // ADD SMS TO USER DOC
               /* admin.firestore()
                   .collection(`Users/${u.id}/SMS`)
@@ -62,8 +80,8 @@ exports.sendAlert = functions.https.onCall((data) => {
                   .add({
                     uid: u.id,
                     title: `${data.type} alert`,
-                    body: `This is an emergency alarm from ${data.data.user.username} **${data.type} alert**.`,
-                    goTo: `/users/user/${data.data.user.id}`,
+                    body: `This is an emergency alarm from ${dataUsername} **${data.type} alert**.`,
+                    goTo: `/users/user/${dataUserId}`,
                     type: "alert",
                     created_at: new Date(),
                     seen: false,

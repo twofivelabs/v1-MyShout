@@ -93,6 +93,9 @@ export default defineComponent({
           // Save User
           await dispatch('user/updateField', {
             username: username
+          }).catch((e) => {
+            loading.value = false
+            console.log('Error updating username:', e, JSON.stringify(e))
           })
           // Move on
           await router.push('/onboarding/5')

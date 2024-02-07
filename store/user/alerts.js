@@ -128,6 +128,7 @@ export const actions = {
       }
       return response
     }
+    return false
   },
   async update ({ commit }, { data }) {
     if (data.uid && data.id) {

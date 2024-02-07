@@ -75,7 +75,7 @@ export default defineComponent({
     // const userCenter = ref('')
     const markers = ref({})
 
-    $capacitor.positionPermissions()
+    $capacitor.gps_init()
 
     // GET CONTENT
     useFetch(async () => {
@@ -194,15 +194,11 @@ export default defineComponent({
       window.currentMap = currentMap.value
 
       // Center on me
-      if (user.value.gps.lat) {
-        console.log('Init map with a center of', user.value.gps.lat)
-        centerOn({
-          lat: user.value.gps.lat,
-          lng: user.value.gps.lng
-        })
-      } else {
-        console.log('STICKY: not able to center map with empty coords')
-      }
+      console.log('STICKY: Init map with a center of', user.value.gps.lat)
+      centerOn({
+        lat: user.value.gps.lat || 33.8188446,
+        lng: user.value.gps.lng || -109.0781904
+      })
 
       // Color theme
       if ($vuetify.theme.dark) {
@@ -420,7 +416,7 @@ export default defineComponent({
       try {
         if (!gps.value || !gps.value.lat) {
           // We are going to watch position in case they are driving or moving
-          $capacitor.watchPosition()
+          $capacitor.gps_watcher()
         }
       } catch(e) {
         $system.log({
@@ -433,7 +429,7 @@ export default defineComponent({
       }
     })
     onUnmounted(() => {
-      $capacitor.clearWatchPosition()
+      // $capacitor.clearWatchPosition()
     })
 
     // WATCH

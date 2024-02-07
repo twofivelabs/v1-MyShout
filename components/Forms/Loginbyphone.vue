@@ -134,7 +134,7 @@ export default defineComponent({
       loading.value = true
       window.confirmationResult.confirm(form.value.otpProvided).then(result => {
         if (!result.additionalUserInfo.isNewUser) {
-          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
+          c
           router.push('/')
           return
         }

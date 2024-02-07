@@ -205,9 +205,10 @@ const config = {
         langDir: 'langDir',
         skipSettingLocaleOnNavigate: true,
         locales: [
-            { code: 'en', iso: 'en-US', file: 'en.js', dir: 'ltr', name: 'English', local: 'English' },
-            { code: 'es', iso: 'es-ES', file: 'es.js', name: 'Spanish', local: 'Español' },
-            { code: 'fr', iso: 'fr', file: 'fr.js', name: 'French', local: 'Français' }
+            { code: 'en', iso: 'en-US', file: 'en.js', dir: 'ltr', name: 'English', local: 'English' }
+            //,
+            //{ code: 'es', iso: 'es-ES', file: 'es.js', name: 'Spanish', local: 'Español' },
+            //{ code: 'fr', iso: 'fr', file: 'fr.js', name: 'French', local: 'Français' }
         ],
         defaultLocale: 'en',
         detectBrowserLanguage: {
@@ -283,8 +284,7 @@ const config = {
         projectId: isDev ? "my-shout-staging" : "my-shout-app",
         storageBucket: isDev ? "my-shout-staging.appspot.com" : "my-shout-app.appspot.com",
         messagingSenderId: isDev ? "777569508563" : "137661141174",
-        appId: isDev ? "1:777569508563:web:f205aa7aea3820e0230826" : "1:137661141174:web:c00c73c494443d7e449617",
-        measurementId: isDev ? "" : "G-6D1EY1D843"
+        appId: isDev ? "1:777569508563:web:f205aa7aea3820e0230826" : "1:1376"
     },
     onFirebaseHosting: false,
     services: {
@@ -301,7 +301,12 @@ const config = {
       firestore: {
         memoryOnly: false,
         enablePersistence: true,
-        emulatorPort: isDev && useEmulators ? 8080 : undefined
+        emulatorPort: isDev && useEmulators ? 8080 : undefined,
+        settings: {
+          merge:true,
+          experimentalForceLongPolling: true
+          //experimentalAutoDetectLongPolling: true
+        }
       },
       functions: {
         emulatorPort: isDev && useEmulators ? 12345 : undefined
@@ -457,7 +462,7 @@ const config = {
             url: '/profile'
           }
         ],
-        fcmPublicVapidKey: isDev? "BAJjXZ0Yn1FI1sJexv41IjHTJCYXNUK_KGjct3N5bVvxGE3m6olax8OlenN4MZfhwMOLn6Ei1L7h-EFnaG0owrU" : "BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco"
+        fcmPublicVapidKey: 'BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco'
       }
     }
   },
@@ -536,7 +541,6 @@ const config = {
 
 // IS DEVELOPMENT
 console.log('IS DEVELOPMENT? ', isDev)
-
 if (useSSL) {
   config.server = {
     port: 8000, // default: 3000

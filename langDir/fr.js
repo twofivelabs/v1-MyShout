@@ -54,6 +54,7 @@ export default {
         confirm_request: 'Confirmer la requête'
     },
     notify: {
+        not_available: 'Fonctionnalité non disponible',
         no_audio: 'Pas de son',
         success: 'Succès',
         check_your_email: 'Merci de consulter vos emails',
@@ -221,7 +222,6 @@ export default {
         thank_you_sub: 'Merci d\'avoir créé votre profil.',
         username_heading: 'Comment doit-on vous appelez?',
         username_sub: 'Définissez un nom d\'affichage pour que les autres sachent à qui ils parlent.',
-        email_sub: 'Fournissez votre adresse e-mail. Elle sera utilisée pour récupérer votre compte en cas de perte de votre numéro de téléphone.',
         error_wrong_password: `Le mot de passe saisi est incorrect.`,
         error_user_not_found: `Aucun utilisateur n'existe. Veuillez créer un nouveau compte.`,
         error_email_in_use: `L'adresse email est déjà utilisée.`,

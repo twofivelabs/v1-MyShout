@@ -23,9 +23,7 @@ export default ({ app }, inject) => {
           term = parseInt(term)
       }
       console.log('SEARCH', path, field, operator, term)
-      let searchRef = app.$fire.firestore
-        .collection(path)
-        .where(field, operator, term)
+      let searchRef = app.$fire.firestore.collection(path).where(field, operator, term)
       if (operator !== '==') {
         searchRef.orderBy(field, 'asc')
       }
@@ -35,8 +33,7 @@ export default ({ app }, inject) => {
       if (dataConverter) {
         searchRef = searchRef.withConverter(dataConverter)
       }
-      return await searchRef.get()
-        .then((docs) => {
+      return await searchRef.get().then((docs) => {
           const data = []
           docs.forEach((doc) => {
               const d = doc.data()
@@ -150,11 +147,7 @@ export default ({ app }, inject) => {
     },
     async get_one (path, dataConverter) {
       try {
-        return await app.$fire.firestore
-          .doc(path)
-          .withConverter(dataConverter)
-          .get()
-          .then((doc) => {
+        return await app.$fire.firestore.doc(path).withConverter(dataConverter).get().then((doc) => {
             if (doc.exists) {
               const data = doc.data()
               data.id = doc.id
@@ -207,32 +200,30 @@ export default ({ app }, inject) => {
       }
     },
     async add (path, dataConverter = null, data) {
-      try {
         let addThis = await app.$fire.firestore.collection(path)
         if (dataConverter) {
-          addThis = addThis.withConverter(dataConverter)
+          // TESTING PURPOSES
+          if (path === "Users/Y0r6XwxLzcP6LEiM4LxTUdCtrgo2/Alerts") {
+              console.log('STICKY: FB ADD - PATH MATCHES NO CONVERTER')
+              data = {"type":"kidnapping","userId":"Y0r6XwxLzcP6LEiM4LxTUdCtrgo2","gps":{"city":null,"geoHash":"c2gj54fqys","is_moving":null,"lat":50.1139479,"lng":-119.3960432},"location":{"city":"N/A"}}
+          } else {
+            addThis = addThis.withConverter(dataConverter)
+          }
         }
-        return await addThis.add(data)
-          .then((response) => {
+        console.log('STICKY: FB ADD PRE 1', data, JSON.stringify(data))
+        return await addThis.add(data).then((response) => {
+            console.log('STICKY: FB ADD RESPONSE', response.id)
             data.id = response.id
             return data
-          })
-          .catch((e) => {
-            app.$system.log({
+          }).catch((e) => {
+              console.log('STICKY: FB ADD 1 ERROR:', e, JSON.stringify(e))
+              app.$system.log({
               comp: 'Firebase',
               msg: `ADD: ${path}`,
               val: { error: e, data: data }
             })
             return false
           })
-      } catch (e) {
-          app.$system.log({
-              comp: 'Firebase',
-              msg: `ADD 2: ${path}`,
-              val: { error: e, data: data }
-          })
-        return false
-      }
     },
     async group (what, where = {}, dataConverter, order = {}, limit = null, paginate = false, direction = 'next') {
           let getAll = await app.$fire.firestore.collectionGroup(what).withConverter(dataConverter)

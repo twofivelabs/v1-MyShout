@@ -38,10 +38,10 @@
         <div v-else class="pt-4 pa-2">
           <v-card-actions class="justify-center">
             <v-btn
+                @click="dialog = false"
                 :loading="loading"
                 color="grey darken-1"
                 text
-                @click="dialog = false"
             >
               {{ $t('btn.close') }}
             </v-btn>
@@ -64,13 +64,15 @@ export default defineComponent({
   name: 'AlertKidnappingbutton',
   setup () {
     const {
-      state, dispatch, commit
+      state,
+      dispatch,
+      commit
     } = useStore()
-    const { $capacitor, $helper, $system, $notify, i18n } = useContext()
+    const { $system, $helper, $capacitor,  $notify, i18n } = useContext()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
-    const location = ref({city: 'N/A'})
+    // const location = ref({city: 'N/A'})
 
     // DEFINE CONTENT
     const dialog = ref(false)
@@ -80,25 +82,18 @@ export default defineComponent({
       dialog.value = true
       loading.value = true
 
-      // UPDATE CURRENT LOCATION
-      await $capacitor.gpsGetCurrentPosition().catch((e) => {
+      await $capacitor.gps_getLocation().then((gps) => {
+        console.log('STICKY: BUTTON gps_getLocation', gps, JSON.stringify(gps))
+
+      }).catch((e) => {
+        loading.value = false
+        dialog.value = false
+        console.log('STICKY: BUTTON ERROR GETTING LOCATION', e, JSON.stringify(e))
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         $system.log({ comp: 'AlertButton', msg: 'gpsGetCurrentPosition', val: e })
       })
 
       await $helper.sleep(500)
-
-      // SENDS NOTIFICATIONS
-      /*await $services.alertButton('kidnapping', {
-        user: profile.value,
-        gps: profile.value.gps
-      }).catch((e) => {
-        $system.log({ comp: 'AlertButton', msg: 'alertButton', val: e })
-      })*/
-
-      // GET LOCATION DETAILS OF USER
-      /*location.value = await $services.reverseGeocode(profile.value.gps.lat, profile.value.gps.lng).catch((e) => {
-        $system.log({ comp: 'AlertButton', msg: 'reverseGeocode', val: e })
-      })*/
 
       // ADD NOTIFICATION TO USER
       await dispatch('user/alerts/add', {
@@ -106,13 +101,22 @@ export default defineComponent({
         userId: user.value.uid,
         gps: profile.value.gps,
         location: location.value
+      }).then(() => {
+        console.log('STICKY: BUTTON ADDED Alert')
       }).catch((e) => {
+        loading.value = false
+        console.log('STICKY: BUTTON ERROR', e, JSON.stringify(e))
+
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         $system.log({ comp: 'AlertButton', msg: 'Trying to send alert', val: e })
       })
 
       commit('user/alerts/HAS_NEW_ALERTS', true)
+      $notify.show({ text: i18n.t('notify.success'), color: 'green' })
       loading.value = false
+      await $helper.sleep(200)
+      dialog.value = false
+
     }
 
     return {

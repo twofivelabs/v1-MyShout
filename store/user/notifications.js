@@ -122,10 +122,12 @@ export const actions = {
     // Using the rootState was causing abnormal notifications
     // const uid = data.uid || rootState.user.data.uid
     const uid = data.uid
+
     if (uid) {
       if(!data.imageUrl) {
           data.imageUrl = 'https://firebasestorage.googleapis.com/v0/b/my-shout-app.appspot.com/o/ADMIN%2FMyShout%20200X200.png?alt=media&token=2e8bf86d-c111-47e2-b320-9e6724c1d017'
       }
+        console.log('STICKY: NOTIFICATIONS dataConverter:', dataConverter, JSON.stringify(dataConverter))
       const response = await this.$db.add(`Users/${uid}/${dbRootPath}`, dataConverter, data)
       if (response) {
         // Causing to show the notification in my own notifications
