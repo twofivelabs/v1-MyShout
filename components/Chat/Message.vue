@@ -1,6 +1,5 @@
 <template>
   <div>
-    <div v-if="menu" class="blurred">j</div>
     <main class="mb-3 px-3">
       <ChatMessageReply v-if="message.replyTo" :chat="chat" :message="message" :participants="participants"/>
       
@@ -50,7 +49,7 @@
             </span>
           </div>
         </div>
-        <v-menu v-model="menu" :close-on-content-click="false" offset-y>
+        <v-menu v-model="menu" :close-on-content-click="true" offset-y>
             <template v-slot:activator="{ on }">
               <div v-on="on">
                 {{ message.text }}
@@ -175,6 +174,7 @@ export default defineComponent({
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
     }
+
     const deleteFile = async (file) => {
       loading.value = true
       try {
@@ -196,6 +196,7 @@ export default defineComponent({
         loading.value = false
       }
     }
+
     const getReadStatusIcon = (chat, message) => {
       // Calculate total participants excluding the message sender
       const totalParticipantsExcludingSender = chat.participants.length - 1;
@@ -254,22 +255,6 @@ export default defineComponent({
 })
 </script>
 <style >
-
-.blurred {
-  position: absolute;
-  z-index: 9999;
-  width: 100vw;
-  height: 100vh;
-  filter: blur(50px);
-  top: -10vh;
-  left: 0px;
-  background-color: #ffffff70
-}
-
-.menu-active {
-  position: absolute;
-  z-index: 10000;
-}
 
 .v-dialog {
   box-shadow: none !important;
