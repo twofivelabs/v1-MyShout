@@ -1,117 +1,123 @@
 <template #activator="{ isActive, props }">
-    <main class="mb-3 px-3">
-      <ChatMessageReply v-if="message.replyTo" :chat="chat" :message="message" :participants="participants"/>
-      
-      <div v-if="!message.hide || !message.hide.includes(userId)" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
-        <ChatAvatar  v-if="owner && message.owner !== userId" class="mx-2" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
-        <div v-longpress="triggerMessageMenu" style="max-width:80%;min-width:50%" :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" class="break-words rounded-lg py-2 px-3">
-          <div v-if="message.deleted">
-            {{ $t('chat.message_deleted') }}
+  <main class="mb-3 px-3">
+    <ChatMessageReply v-if="message.replyTo" :chat="chat" :message="message" :participants="participants"/>
+
+    <v-card 
+      v-if="!message.hide || !message.hide.includes(userId)"
+      v-longpress="triggerMessageMenu"
+      flat color="transparent"
+      :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'"
+    >
+      <ChatAvatar v-if="owner && message.owner !== userId" class="mx-2" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
+
+      <v-card-text
+        style="max-width:80%;min-width:50%" 
+        :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" 
+        class="break-words rounded-lg py-2 px-3"
+      >
+        <div v-if="message.deleted">
+          {{ $t('chat.message_deleted') }}
+        </div>
+
+        <div v-else>
+          <div v-if="message.message" class="mb-3">
+            {{ message.message }}
           </div>
-          <div v-else>
-            <div v-if="message.message" class="mb-3">
-              {{ message.message }}
-            </div>
-            <div v-if="message.audioUrl">
-              <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />
-  <!--            <audio v-if="!message.audioExpired" controls preload="metadata" style="min-width:220px">
-                <source :src="`${message.audioUrl}`">
-              </audio>-->
-              <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
-            </div>
 
-            <div v-if="message.image">
-              <v-bottom-sheet v-model="showMedia" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-img :src="`${message.image}`" v-bind="attrs" v-on="on" />
-                </template>
+          <div v-if="message.audioUrl">
+            <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />
+            <!-- <audio v-if="!message.audioExpired" controls preload="metadata" style="min-width:220px">
+              <source :src="`${message.audioUrl}`">
+            </audio>-->
+            <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
+          </div>
 
-                <div style="margin-bottom:45%;">
-                  <v-img :src="`${message.image}`" class="elevation-12 rounded-lg mx-1" />
-                  <div class="text-center">
-                    <v-btn @click="showMedia = !showMedia" color="primary" class="mt-n7" fab>
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                  </div>
+          <div v-if="message.image">
+            <v-bottom-sheet v-model="showMedia" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
+              <template v-slot:activator="{ on, attrs }">
+                <v-img :src="`${message.image}`" v-bind="attrs" v-on="on" />
+              </template>
+
+              <div style="margin-bottom:45%;">
+                <v-img :src="`${message.image}`" class="elevation-12 rounded-lg mx-1" />
+                <div class="text-center">
+                  <v-btn @click="showMedia = !showMedia" color="primary" class="mt-n7" fab>
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
                 </div>
-              </v-bottom-sheet>
-            </div>
-          </div>
-
-          <div class="caption text-right">
-            {{ moment(message.created_at.toDate()).fromNow() }}
-            <v-icon v-if="!message.deleted && message.owner === userId" small color="white">{{ getReadStatusIcon(chat, message) }}</v-icon>
-
-            <span v-if="message.audioUrl" class="pl-3">
-              <v-btn @click="downloadFile(message.audioUrl)" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.download')}}</v-btn>
-              <v-btn @click="deleteFile(message.audioUrl)" :loading="loading" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.delete')}}</v-btn>
-            </span>
+              </div>
+            </v-bottom-sheet>
           </div>
         </div>
 
-        <v-menu v-model="messageMenu" offset-y>
-          <template v-slot:activator="{ on }">
-              <div v-on="on">
-                {{ message.text }}
-              </div>
-          </template>
+        <div class="caption text-right">
+          {{ moment(message.created_at.toDate()).fromNow() }}
+          <v-icon v-if="!message.deleted && message.owner === userId" small color="white">{{ getReadStatusIcon(chat, message) }}</v-icon>
 
-          <v-card>
-              <v-card-title>{{ $t('chat.action') }}</v-card-title>
-              <v-card-text>
-                <v-list-item-group>
-                  <v-list-item :key="`info-message-${message.id}`" @click="viewMessageInfo">
-                    <v-list-item-avatar>
-                      <v-icon small>mdi-information-variant-box-outline</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-title>
-                      {{ $t('chat.info' )}}
-                    </v-list-item-title>
-                  </v-list-item>
-                  <v-list-item v-if="message.owner !== userId" :key="`edit-message-${message.id}`" @click="startMessageReply">
-                    <v-list-item-avatar>
-                      <v-icon small>mdi-account-plus</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-title>
-                      {{ $t('chat.reply_to_message' )}}
-                    </v-list-item-title>
-                  </v-list-item>
-                  <v-list-item :key="`forward-message-${message.id}`">
-                    <v-list-item-avatar>
-                      <v-icon small>mdi-account-plus</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-title>
-                      {{ $t('chat.forward_message' )}}
-                    </v-list-item-title>
-                  </v-list-item>
-                  <v-list-item :key="`delete-message-me-${message.id}`" @click="deleteMessage(0)">
-                    <v-list-item-avatar>
-                      <v-icon small color="red">mdi-account-plus</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-title class="text--red">
-                      {{ $t('chat.delete_for_me' )}}
-                    </v-list-item-title>
-                  </v-list-item>
-                  <v-list-item v-if="message.owner === userId" :key="`delete-message-everyone-${message.id}`" @click="deleteMessage(1)">
-                    <v-list-item-avatar>
-                      <v-icon small color="red">mdi-account-plus</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-title class="text--red">
-                      {{ $t('chat.delete_for_everyone' )}}
-                    </v-list-item-title>
-                  </v-list-item>
-                </v-list-item-group>
-              </v-card-text>
-          </v-card>
-        </v-menu>
-      </div>
+          <span v-if="message.audioUrl" class="pl-3">
+            <v-btn @click="downloadFile(message.audioUrl)" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.download')}}</v-btn>
+            <v-btn @click="deleteFile(message.audioUrl)" :loading="loading" plain text small class="pa-0 ma-0 white--text text-capitalize">{{$t('btn.delete')}}</v-btn>
+          </span>
+        </div>
+      </v-card-text>
 
-      <v-overlay
-        v-model="messageMenu"
-        scroll-strategy="block"
-      >
-      </v-overlay>
+       <!-- Tooltip -->
+      <v-tooltip top v-model="messageMenu">
+        <template v-slot:activator="{ on, attrs }">
+          <div v-bind="attrs" v-on="on"></div>
+        </template>
+        <span>Emoji Bubbles</span>
+      </v-tooltip>
+
+      <!-- Message Menu -->
+      <v-menu v-model="messageMenu" offset-y transition="slide-y-transition">
+        <template v-slot:activator="{ on }">
+          <div v-on="on" ref="menuActivator"></div>
+        </template>
+        <v-card>
+          <v-card-text class="pa-0">
+            <v-list class="py-0">
+              <ChatMessageHistorysheet :message="message" />
+              <v-list-item v-if="message.owner !== userId" :key="`edit-message-${message.id}`" @click="startMessageReply">
+                <v-list-item-avatar class="my-0">
+                  <v-icon small>mdi-account-plus</v-icon>
+                </v-list-item-avatar>
+                <v-list-item-title class="text-caption">
+                  {{ $t('chat.reply_to_message' )}}
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item :key="`forward-message-${message.id}`">
+                <v-list-item-avatar class="my-0">
+                  <v-icon small>mdi-account-plus</v-icon>
+                </v-list-item-avatar>
+                <v-list-item-title class="text-caption">
+                  {{ $t('chat.forward_message' )}}
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item :key="`delete-message-me-${message.id}`" @click="deleteMessage(0)">
+                <v-list-item-avatar class="my-0">
+                  <v-icon small color="red">mdi-account-plus</v-icon>
+                </v-list-item-avatar>
+                <v-list-item-title class="text--red text-caption">
+                  {{ $t('chat.delete_for_me' )}}
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item v-if="message.owner === userId" :key="`delete-message-everyone-${message.id}`" @click="deleteMessage(1)">
+                <v-list-item-avatar class="my-0">
+                  <v-icon small color="red">mdi-account-plus</v-icon>
+                </v-list-item-avatar>
+                <v-list-item-title class="text--red text-caption">
+                  {{ $t('chat.delete_for_everyone' )}}
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
+      </v-menu>
+    </v-card>
       
+    <v-overlay v-model="messageMenu" scroll-strategy="block" />
+          
     </main>
 </template>
 <script>
@@ -237,10 +243,6 @@ export default defineComponent({
       if (res) return triggerMessageMenu()
     }
 
-    const viewMessageInfo = async () => {
-      console.log(props.message)
-    }
-
     return {
       moment,
       user,
@@ -252,13 +254,12 @@ export default defineComponent({
       deleteMessage,
       downloadFile, deleteFile,
       getReadStatusIcon,
-      startMessageReply,
-      viewMessageInfo
+      startMessageReply
     }
   }
 })
 </script>
-<style >
+<style>
 
 .v-dialog {
   box-shadow: none !important;
@@ -270,7 +271,8 @@ export default defineComponent({
 }
 
 .v-list-item {
- padding:0 !important
+ min-height:25px;
+ padding:0 20px 0 0;
 }
 
 </style>
