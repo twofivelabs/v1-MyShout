@@ -1,11 +1,10 @@
-<template>
-  <div>
+<template #activator="{ isActive, props }">
     <main class="mb-3 px-3">
       <ChatMessageReply v-if="message.replyTo" :chat="chat" :message="message" :participants="participants"/>
       
       <div v-if="!message.hide || !message.hide.includes(userId)" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'">
         <ChatAvatar  v-if="owner && message.owner !== userId" class="mx-2" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
-        <div v-longpress="openMenu" style="max-width:80%;min-width:50%" :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" class="break-words rounded-lg py-2 px-3">
+        <div v-longpress="triggerMessageMenu" style="max-width:80%;min-width:50%" :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" class="break-words rounded-lg py-2 px-3">
           <div v-if="message.deleted">
             {{ $t('chat.message_deleted') }}
           </div>
@@ -49,14 +48,15 @@
             </span>
           </div>
         </div>
-        <v-menu v-model="menu" :close-on-content-click="true" offset-y>
-            <template v-slot:activator="{ on }">
+
+        <v-menu v-model="messageMenu" offset-y>
+          <template v-slot:activator="{ on }">
               <div v-on="on">
                 {{ message.text }}
               </div>
-            </template>
+          </template>
 
-            <v-card>
+          <v-card>
               <v-card-title>{{ $t('chat.action') }}</v-card-title>
               <v-card-text>
                 <v-list-item-group>
@@ -102,11 +102,17 @@
                   </v-list-item>
                 </v-list-item-group>
               </v-card-text>
-            </v-card>
+          </v-card>
         </v-menu>
       </div>
+
+      <v-overlay
+        v-model="messageMenu"
+        scroll-strategy="block"
+      >
+      </v-overlay>
+      
     </main>
-  </div>
 </template>
 <script>
 
@@ -167,10 +173,8 @@ export default defineComponent({
     const showMedia = ref(false)
     const loading = ref(false)
     
-    const menu = ref(false)
+    const messageMenu = ref(false)
 
-
-    // DEFINE CONTENT
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
     }
@@ -197,6 +201,10 @@ export default defineComponent({
       }
     }
 
+    const triggerMessageMenu = () => {
+      messageMenu.value = !messageMenu.value
+    }
+
     const getReadStatusIcon = (chat, message) => {
       // Calculate total participants excluding the message sender
       const totalParticipantsExcludingSender = chat.participants.length - 1;
@@ -212,13 +220,9 @@ export default defineComponent({
       }
     };
 
-    const openMenu = () => {
-      return menu.value = true
-    }
-
     const startMessageReply = () => {
       emit('reply', props.message);
-      return menu.value = false
+      return triggerMessageMenu()
     }
 
     const deleteMessage = async (d) => {
@@ -230,7 +234,7 @@ export default defineComponent({
             hide: d === 0 ? firebase.firestore.FieldValue.arrayUnion(userId.value) : []
           }
         })
-      if (res) return menu.value = false
+      if (res) return triggerMessageMenu()
     }
 
     const viewMessageInfo = async () => {
@@ -243,10 +247,10 @@ export default defineComponent({
       userId,
       showMedia,
       loading, 
-      openMenu, menu,
+      messageMenu,
+      triggerMessageMenu,
       deleteMessage,
-      downloadFile,
-      deleteFile,
+      downloadFile, deleteFile,
       getReadStatusIcon,
       startMessageReply,
       viewMessageInfo
