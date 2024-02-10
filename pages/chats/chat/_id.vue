@@ -20,14 +20,16 @@
       <v-row v-if="messagesLoading" class="pa-6 mt-5">
         <v-skeleton-loader v-for="x of 4" :key="x" width="100%" max-height="50" type="text" class="mb-6" />
       </v-row>
-      <v-card v-else color="transparent" class="chatBox elevation-0 pt-14 mt-5 mb-14" ref="chatBox">
+      <v-card color="transparent" class="chatBox elevation-0 pt-14 mt-5 mb-14">
         <template v-for="(message, index) in messages">
-          <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
+          <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" :key="index" v-intersect="onMessageInterest(message.id)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
         </template>
+        
         <ChatTyping :chat="chat" :participants="participants" />
+
         <div id="bottomOfChat"></div>
       </v-card>
-      <ChatInput :chat="chat" :reply="isReply" @updateReply="handleReply" @updateTyping="updateTypingStatus" @messageSent="goToBottom" />
+      <ChatInput :chat="chat" :reply="isReply" @updateReply="handleReply" @updateTyping="updateTypingStatus" @messageSent="scrollToBottom" />
     </v-container>
   </div>
 </template>
@@ -42,8 +44,7 @@ import {
   useStore,
   computed,
   watch,
-  onMounted,
-  onUnmounted
+  onMounted, onUnmounted
 } from '@nuxtjs/composition-api';
 
 import { Intersect } from 'vuetify/lib/directives';
@@ -56,12 +57,11 @@ export default defineComponent({
   middleware: 'authenticated',
   directives: { Intersect },
   setup() {
-    const { $fire, $capacitor, $encryption } = useContext();
+    const { $vuetify, $fire, $capacitor, $encryption } = useContext();
     const { dispatch, state } = useStore();
     const route = useRoute();
     const user = computed(() => state.user);
 
-    const chatBoxRef = ref(null);
     const chatLoading = ref(true);
     const chatListener = ref(null);
     const chatId = ref('');
@@ -76,29 +76,35 @@ export default defineComponent({
     $capacitor.AdMob_hideBanner();
 
     const loadChat = async () => {
-      chatLoading.value = true;
-      if (chatId.value) {
-        chatListener.value = $fire.firestore.doc(`Chats/${chatId.value}`).onSnapshot(doc => {
-          if (doc.exists) {
-            chat.value = doc.data();
-            loadParticipants();
-            loadMessages();
-          }
-        }, error => console.error("Error listening to chat updates:", error));
-        chatLoading.value = false;
+      try {
+        chatLoading.value = true;
+        if (chatId.value) {
+          chatListener.value = $fire.firestore.doc(`Chats/${chatId.value}`).onSnapshot(doc => {
+            if (doc.exists) {
+              chat.value = doc.data();
+              loadParticipants();
+              loadMessages();
+            }
+          }, error => console.error("Error listening to chat updates:", error));
+          chatLoading.value = false;
+        }
+      } catch (e) {
+        console.log("Error Loading Chat", e)
       }
     };
 
     const loadParticipants = async () => {
       try {
-        chat.value.participants.forEach(async participantUid => {
-          const participantProfile = await dispatch('user/getOne', participantUid);
-          if (participantProfile) {
-            participants.value[participantUid] = participantProfile;
-          }
+        const participantProfiles = await Promise.all(
+          chat.value.participants.map(participantUid => dispatch('user/getOne', participantUid))
+        );
+        
+        participantProfiles.forEach(profile => {
+          if (profile) participants.value[profile.uid] = profile;
         });
-        chat.value.admins.forEach(admin => {
-          admins.value[admin] = participants.value[admin];
+
+        chat.value.admins.forEach(adminUid => {
+          if (participants.value[adminUid]) admins.value[adminUid] = participants.value[adminUid];
         });
       } catch (e) {
         console.error("Error Loading Participants", e);
@@ -107,27 +113,33 @@ export default defineComponent({
 
     const loadMessages = async () => {
       messagesLoading.value = true;
-      messageListener.value = $fire.firestore.collection(`Chats/${chatId.value}/Messages`).orderBy('created_at', 'asc').limitToLast(100).onSnapshot(snapshot => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === 'added') {
-            const data = change.doc.data();
-            data.id = change.doc.id;
-            data.ownerData = participants.value[data.owner];
-            if (data.message) {
-              data.message = $encryption.decrypt(data.message);
+      messageListener.value = await $fire.firestore
+        .collection(`Chats/${chatId.value}/Messages`)
+        .orderBy('created_at', 'asc')
+        .limitToLast(100)
+        .onSnapshot((snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added') {
+              const data = change.doc.data();
+              data.id = change.doc.id;
+              data.ownerData = participants.value[data.owner];
+              if (data.message) data.message = $encryption.decrypt(data.message);
+
+              // Check if the message already exists before adding
+              const messageExists = messages.value.some(message => message.id === data.id);
+              if (!messageExists) messages.value.push(data);
+            } else if (change.type === 'modified') {
+              const data = change.doc.data();
+              const index = messages.value.findIndex(m => m.id === change.doc.id);
+
+              if (index !== -1) messages.value[index] = { ...messages.value[index], ...data };
             }
-            messages.value.push(data);
-          } else if (change.type === 'modified') {
-            const data = change.doc.data();
-            const index = messages.value.findIndex(m => m.id === change.doc.id);
-            if (index !== -1) {
-              messages.value[index] = { ...messages.value[index], ...data };
-            }
-          }
+          });
+          messagesLoading.value = false;
+        }, error => {
+          console.error('ERROR LOADING MESSAGES', error);
+          messagesLoading.value = false;
         });
-        goToBottom();
-        messagesLoading.value = false;
-      });
     };
 
     const updateTypingStatus = (typing) => {
@@ -135,28 +147,31 @@ export default defineComponent({
       dispatch('chats/updateField', { id: chatId.value, typing: value });
     };
 
-    const goToBottom = () => {
+    const scrollToBottom = () => {
       nextTick(() => {
-        const chatBoxElement = chatBoxRef.value.$el;
-        if (chatBoxElement) {
-          const shouldScroll = chatBoxElement.scrollHeight - chatBoxElement.scrollTop - chatBoxElement.clientHeight < 100; // Adjust as needed
-          if (shouldScroll) {
-            chatBoxElement.scrollTop = chatBoxElement.scrollHeight;
-          }
-        }
+        $vuetify.goTo('#bottomOfChat')
       });
     };
+
+    const onMessageInterest = (id) => {
+      console.log("Intersected", id)
+    }
 
     const handleReply = message => isReply.value = message;
 
     watch(route, (to, from) => {
       chatId.value = to.params.id;
-      if (to.params.id !== from.params.id) {
-        loadChat();
-      }
+      if (to.params.id && !from || (to.params.id !== from.params.id)) loadChat();
     }, { immediate: true });
 
-    onMounted(() => $capacitor.AdMob_hideBanner());
+    watch(() => messages.value, () => {
+      scrollToBottom();
+    }, { deep: true });
+
+    onMounted(() => {
+      $capacitor.AdMob_hideBanner();
+    });
+
     onUnmounted(() => {
       $capacitor.AdMob_init();
       $capacitor.AdMob_banner();
@@ -172,8 +187,8 @@ export default defineComponent({
       participants,
       admins,
       user,
-      handleReply,
-      updateTypingStatus
+      scrollToBottom, onMessageInterest,
+      handleReply, updateTypingStatus
     };
   }
 });

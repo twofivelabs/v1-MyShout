@@ -1,5 +1,5 @@
 <template>
-    <div v-if="typingMessage" class="typing-indicator">
+    <div v-if="chat && typingMessage" class="typing-indicator">
       {{ typingMessage }}
     </div>
   </template>
