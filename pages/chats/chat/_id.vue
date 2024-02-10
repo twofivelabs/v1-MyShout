@@ -6,31 +6,28 @@
           <v-icon class="pr-2 py-3 pl-2" color="myshoutDarkGrey">mdi-arrow-left</v-icon>
         </v-btn>
       </v-app-bar-nav-icon>
-      <v-toolbar-title class="pl-0">
+      <v-toolbar-title class="pl-0" v-if="chat">
         <div class="d-flex align-center">
-          <ChatTopavatar v-if="chat" :chat="chat" class="mr-2" />
-          <ChatUsername v-if="chat" :chat="chat" :loggedInUser="user.data.uid" />
+          <ChatTopavatar :chat="chat" class="mr-2" />
+          <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
         </div>
       </v-toolbar-title>
       <v-spacer />
       <ChatActionsbtn v-if="chat && participants" :chat="chat" :participants="participants" :admins="admins" />
     </v-app-bar>
 
-    <v-container class="pa-0 fill-height align-end">
-      <v-row v-if="messagesLoading" class="pa-6 mt-5">
-        <v-skeleton-loader v-for="x of 4" :key="x" width="100%" max-height="50" type="text" class="mb-6" />
-      </v-row>
-      <v-card color="transparent" class="chatBox elevation-0 pt-14 mt-5 mb-14">
-        <template v-for="(message, index) in messages">
-          <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" :key="index" v-intersect="onMessageInterest(message.id)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
-        </template>
-        
-        <ChatTyping :chat="chat" :participants="participants" />
-
-        <div id="bottomOfChat"></div>
-      </v-card>
-      <ChatInput :chat="chat" :reply="isReply" @updateReply="handleReply" @updateTyping="updateTypingStatus" @messageSent="scrollToBottom" />
+    <v-container v-if="messages && messages.length > 0" style=" z-index: 0; width: 100%; padding-bottom: 100px !important;">
+      <template v-for="(message, index) in messages">
+        <ChatMessage :key="index" :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" v-intersect="onMessageInterest(message)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
+      </template>
+      <div id="bottomOfChat" />
+      <ChatTyping :chat="chat" :participants="participants" />
     </v-container>
+    <v-container v-else class="pa-6 mt-5">
+      <v-skeleton-loader v-for="x of 4" :key="x" width="100%" max-height="50" type="text" class="mb-6" />
+    </v-container>
+
+    <ChatInput :chat="chat" :reply="isReply" @updateReply="handleReply" @updateTyping="updateTypingStatus" />
   </div>
 </template>
 
@@ -147,14 +144,31 @@ export default defineComponent({
       dispatch('chats/updateField', { id: chatId.value, typing: value });
     };
 
-    const scrollToBottom = () => {
+    const scrollToUnseenMessage = () => {
       nextTick(() => {
-        $vuetify.goTo('#bottomOfChat')
+        const unseenMessage = messages.value.find(message => !message.seen.includes(user.value.data.uid));
+
+        if (unseenMessage) {
+          const messageElement = document.getElementById(`message-${unseenMessage.id}`);
+          if (messageElement) {
+            messageElement.scrollIntoView({ behavior: "smooth" });
+          }
+        } else {
+          $vuetify.goTo('#bottomOfChat', { behavior: "smooth" });
+        }
       });
     };
 
-    const onMessageInterest = (id) => {
-      console.log("Intersected", id)
+    const onMessageInterest = (message) => {
+      if (!message.seen.includes(user.value.data.uid)) {
+        dispatch('chats/messages/updateField', {
+          chatId: chatId.value,
+          id: message.id,
+          data: {
+            seen: firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
+          }
+        })
+      }
     }
 
     const handleReply = message => isReply.value = message;
@@ -165,7 +179,7 @@ export default defineComponent({
     }, { immediate: true });
 
     watch(() => messages.value, () => {
-      scrollToBottom();
+      scrollToUnseenMessage();
     }, { deep: true });
 
     onMounted(() => {
@@ -187,14 +201,29 @@ export default defineComponent({
       participants,
       admins,
       user,
-      scrollToBottom, onMessageInterest,
+      onMessageInterest,
       handleReply, updateTypingStatus
     };
   }
 });
 </script>
 
-<style>
-.chatBox { z-index: 0; width: 100%; padding-bottom: 80px !important; }
-#bottomOfChat { overflow-anchor: auto; height: 1px; }
+<style scope>
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  padding: 0 0 100px;
+}
+
+.messages-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  overflow-y: hidden;
+  padding: 0 16px;
+}
 </style>
