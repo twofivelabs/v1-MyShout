@@ -3,9 +3,7 @@
     <v-app-bar color="white" class="mobileNotch pb-1" app fixed top>
       <v-app-bar-nav-icon>
         <v-btn to="/chats" text color="transparent">
-          <v-icon class="pr-2 py-3 pl-2" color="myshoutDarkGrey">
-            mdi-arrow-left
-          </v-icon>
+          <v-icon class="pr-2 py-3 pl-2" color="myshoutDarkGrey">mdi-arrow-left</v-icon>
         </v-btn>
       </v-app-bar-nav-icon>
       <v-toolbar-title class="pl-0">
@@ -14,79 +12,30 @@
           <ChatUsername v-if="chat" :chat="chat" :loggedInUser="user.data.uid" />
         </div>
       </v-toolbar-title>
-
       <v-spacer />
-
       <ChatActionsbtn v-if="chat && participants" :chat="chat" :participants="participants" :admins="admins" />
     </v-app-bar>
+
     <v-container class="pa-0 fill-height align-end">
-      <v-row class="pa-6 mt-5" v-if="messagesLoading">
-        <v-col>
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-        </v-col>
+      <v-row v-if="messagesLoading" class="pa-6 mt-5">
+        <v-skeleton-loader v-for="x of 4" :key="x" width="100%" max-height="50" type="text" class="mb-6" />
       </v-row>
-
-      <v-card color="transparent" class="chatBox elevation-0 pt-14 mt-5 mb-14">
-          <template v-for="(message, index) in messages">
-            <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
-          </template>
-          <div v-if="chat && chat.typing.length > 0" class="typing-indicator">
-            {{ formatTypingUsers(chat.typing) }}
-          </div>
-          <div id="bottomOfChat"></div>
+      <v-card v-else color="transparent" class="chatBox elevation-0 pt-14 mt-5 mb-14" ref="chatBox">
+        <template v-for="(message, index) in messages">
+          <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
+        </template>
+        <ChatTyping :chat="chat" :participants="participants" />
+        <div id="bottomOfChat"></div>
       </v-card>
-
-      <v-app-bar color="transparent" class="align-center formMessageInput" flat bottom fixed :style="`${!reply ? 'top:calc(100% - 145px)' : 'top:calc(100% - 165px)'}`">
-        <div>
-          <div v-if="reply" class="d-flex align-center justify-space-between caption primary rounded white--text ml-2 break-words rounded-lg py-2 px-3">
-            <div class="flex-grow-1">
-              Replying to: {{ reply.message.slice(0, 25) + '...' }}
-            </div>
-            <v-btn icon small @click="reply = null">
-              <v-icon color="white" small>mdi-close</v-icon>
-            </v-btn>
-          </div>
-          
-          <v-text-field
-            v-model="newMessage"
-            @keydown.enter="sendMessage"
-            :label="$t('form.message')"
-            type="text"
-            hide-details
-            solo
-          >
-            <template v-slot:append-outer>
-              <v-btn @click="sendMessage" fab>
-                <v-icon>mdi-send</v-icon>
-              </v-btn>
-            </template>
-            <template v-slot:append>
-              <ChatUploadimage :chat="chat" :currentUrl="imageMessageUrl" @url="imageMessageUrlCallback" />
-              <ChatRecordaudio :chat="chat" />
-
-            </template>
-          </v-text-field>
-        </div>
-      </v-app-bar>
-  </v-container>
+      <ChatInput :chat="chat" :reply="isReply" @updateReply="handleReply" @updateTyping="updateTypingStatus" @messageSent="goToBottom" />
+    </v-container>
   </div>
 </template>
+
 <script>
-
-// https://fireship.io/courses/vue/
-// https://github.com/berksaribas/vuetify-chat/blob/master/src/components/Chat/Chat.vue
-// https://github.com/prateekgurnani10/walkie-talkie-chatapp
-import lodash from 'lodash';
-import firebase from 'firebase';
-import 'firebase/functions';
-
-import { Intersect } from 'vuetify/lib/directives';
-
 import {
   defineComponent,
+  nextTick,
   ref,
   useContext,
   useRoute,
@@ -95,357 +44,142 @@ import {
   watch,
   onMounted,
   onUnmounted
-} from '@nuxtjs/composition-api'
+} from '@nuxtjs/composition-api';
+
+import { Intersect } from 'vuetify/lib/directives';
+
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 
 export default defineComponent({
   name: 'ChatsChatId',
   middleware: 'authenticated',
   directives: { Intersect },
-  setup () {
-    // Extracting various functionalities and state from the context.
-    const {
-      $notify, // Notification functionality.
-      $fire, // Firebase functionality.
-      $vuetify, // Vuetify functionality.
-      $capacitor, // Capacitor (for native mobile functionality).
-      $encryption, // Encryption functionality.
-      i18n, // Internationalization.
-    } = useContext();
+  setup() {
+    const { $fire, $capacitor, $encryption } = useContext();
+    const { dispatch, state } = useStore();
+    const route = useRoute();
+    const user = computed(() => state.user);
 
-    const {
-      dispatch, // Vuex dispatch function.
-      state // Vuex state.
-    } = useStore();
-    
-    const route = useRoute(); // Current route information.
-    const user = computed(() => state.user); // Computed property for the current user.
+    const chatBoxRef = ref(null);
+    const chatLoading = ref(true);
+    const chatListener = ref(null);
+    const chatId = ref('');
+    const chat = ref(null);
+    const admins = ref({});
+    const participants = ref({});
+    const messagesLoading = ref(true);
+    const messages = ref([]);
+    const messageListener = ref(null);
+    const isReply = ref(null);
 
-    // State variables
-    const chatLoading = ref(true); // Indicates if the chat document is loading.
-    const chatListener = ref(); // Reference for the chat listener
-    const chatId = ref(); // ID of the current chat.
-    const chat = ref(); // Current chat information.
-    const admins = ref({}); // Object of admins in the chat.
-    const participants = ref({}); // Object of users involved in the chat.
-    const messagesLoading = ref(true); // Indicates if the chat messages are loading.
-    const messages = ref([]); // Array of chat messages.
-    const messageListener = ref(); // Listener for message changes.
-    const reply = ref();
-    const isTyping = ref(false); // Indicates if the current user is typing.
-    const typingUsers = ref([]); // Array of users who are currently typing.
-    const newMessage = ref(); // New message input.
-    const imageMessageUrl = ref(); // URL for an image message.  
+    $capacitor.AdMob_hideBanner();
 
-    $capacitor.AdMob_hideBanner(); // Hides the AdMob banner.
-
-    // Load chat document information
-    const loadChat = () => {
-      chatLoading.value = true
-     
-      try {
-        if (chatId.value) {
-          // Listening for changes in the chat document.
-          chatListener.value = $fire.firestore.collection("Chats").doc(chatId.value).onSnapshot(async (res) => {
-            if (res.exists) {
-              chat.value = res.data(); 
-              await loadParticipants();
-              await loadMessages();
-            }
-          }, error => {
-            console.error("Error listening to chat updates:", error);
-          });
-        }
-      } catch(e) {
-        console.log("Error Loading Chat", e)
-      } finally {
-        // Sets chatLoading to false once the operation is complete
-        chatLoading.value = false
+    const loadChat = async () => {
+      chatLoading.value = true;
+      if (chatId.value) {
+        chatListener.value = $fire.firestore.doc(`Chats/${chatId.value}`).onSnapshot(doc => {
+          if (doc.exists) {
+            chat.value = doc.data();
+            loadParticipants();
+            loadMessages();
+          }
+        }, error => console.error("Error listening to chat updates:", error));
+        chatLoading.value = false;
       }
     };
 
     const loadParticipants = async () => {
       try {
-        // Looping through the participants of the chat to get their details.
-        for(const index in chat.value.participants) {
-          const participantUid = chat.value.participants[index]
-          const participantProfile = await dispatch('user/getOne', participantUid)
+        chat.value.participants.forEach(async participantUid => {
+          const participantProfile = await dispatch('user/getOne', participantUid);
           if (participantProfile) {
-            participants.value[participantUid] = participantProfile
-
-            chat.value.admins.forEach((admin) => {
-              admins.value[admin] = participants.value[admin]
-            })
-
+            participants.value[participantUid] = participantProfile;
           }
-
-        }
+        });
+        chat.value.admins.forEach(admin => {
+          admins.value[admin] = participants.value[admin];
+        });
       } catch (e) {
-        console.log("Error Loading Participants", e)
+        console.error("Error Loading Participants", e);
       }
-    }
+    };
 
-    // Function to load messages of the chat.
     const loadMessages = async () => {
-      messages.value = []; // Resets the messages array.
-      messagesLoading.value = true // Indicates that message loading is in progress.
-
-      try {
-        // Setting up a listener for new messages in the chat.
-        messageListener.value = await $fire.firestore
-          .collection(`Chats/${chatId.value}/Messages`)
-          .orderBy('created_at', 'asc') // Orders messages by creation time.
-          .limitToLast(100) // Limits the number of messages to the last 100.
-          .onSnapshot((snapshot) => {
-            // Handling document changes in the chat messages.
-            snapshot.docChanges().forEach((change) => {
-              if (change.type === 'added') {
-                const data = change.doc.data()
-                data.id = change.doc.id // Setting message ID.
-                // Merging user data with the message.
-                data.ownerData = participants.value[data.owner]
-
-                if (data.message) {
-                  data.message = $encryption.decrypt(data.message) // Decrypting the message.
-                }
-                messages.value.push(data) // Adding the message to the messages array.
-                goToBottom() // Scrolls to the bottom of the chat.
-              } else if (change.type === 'modified') {
-                const data = change.doc.data()
-                messages.value[change.oldIndex].deleted = data.deleted
-                messages.value[change.oldIndex].hide = data.hide
-              }
-            })
-          })
-      } catch (e) {
-        console.log('ERROR LOADING MESSAGES', e)
-      } finally {
-        // Indicates that message loading is complete.
-        messagesLoading.value = false
-      }
-    }
-
-    // Function to update typing status in Firestore.
-    const updateTypingStatus = async (typing) => {
-      try {
-        const value = typing ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) 
-                            : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
-        // Dispatches an action to update the 'typing' field in the chat document.
-        return await dispatch('chats/updateField', {
-            id: chatId.value,
-            typing: value
-          })
-      } catch (error) {
-        console.error('Error updating typing status', error); // Logs error on failure.
-      }
-    };
-
-    // Function to format the usernames of users who are typing.
-    const formatTypingUsers = (typingUsers) => {
-      const otherTypingUsers = typingUsers.filter(userId => userId !== user.value.data.uid);
-
-      const userNames = otherTypingUsers
-        .map(userId => {
-          const user = participants.value[userId];
-          return user ? user.username : null; // Maps user IDs to usernames.
-        })
-        .filter(name => name != null); // Filters out null values.
-
-      // Formats the string based on the number of users typing.
-      if (userNames.length === 0) {
-        return '';
-      } else if (userNames.length === 1) {
-        return `${userNames[0]} is typing...`;
-      } else {
-        return `${userNames.join(', ')} are typing...`;
-      }
-    };
-
-    // Sends a new message.
-    const sendMessage = async () => {
-      try {
-        if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'error'
-          });
-          return;
-        }
-
-        let encryptedMessage = null;
-
-        if (newMessage.value) {
-          encryptedMessage = $encryption.encrypt(newMessage.value);
-        }
-
-        // Dispatch action to add a new message.
-        const res = await dispatch('chats/messages/add', {
-          chatId: chatId.value,
-          message: {
-            message: encryptedMessage,
-            replyTo: reply?.value ? reply.value.id : null,
-            image: imageMessageUrl.value || null,
-            owner: user.value.data.uid,
-            seen: [user.value.data.uid]
+      messagesLoading.value = true;
+      messageListener.value = $fire.firestore.collection(`Chats/${chatId.value}/Messages`).orderBy('created_at', 'asc').limitToLast(100).onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            const data = change.doc.data();
+            data.id = change.doc.id;
+            data.ownerData = participants.value[data.owner];
+            if (data.message) {
+              data.message = $encryption.decrypt(data.message);
+            }
+            messages.value.push(data);
+          } else if (change.type === 'modified') {
+            const data = change.doc.data();
+            const index = messages.value.findIndex(m => m.id === change.doc.id);
+            if (index !== -1) {
+              messages.value[index] = { ...messages.value[index], ...data };
+            }
           }
         });
-
-        if (res && reply?.value) {
-          await $fire.firestore.collection("Chats").doc(chatId.value).collection("Messages").doc(reply.value.id).update({
-            replies: firebase.firestore.FieldValue.arrayUnion(res.id)
-          })
-        } 
-
-        // Update chat's last message information.
-        await dispatch('chats/updateField', {
-          id: chatId.value,
-          lastMessageSent: new Date(),
-          lastMessage: newMessage.value || null,
-          seen: [user.value.data.uid]
-        });
-
-        reply.value = null;
-        newMessage.value = null;
-        imageMessageUrl.value = null;
-        await goToBottom(0); // Scroll to bottom after sending a message.
-      } catch (e) {
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'error'
-        });
-        console.log("STICKY: Cannot Send Message", e);
-      }
+        goToBottom();
+        messagesLoading.value = false;
+      });
     };
 
-    // Scrolls to the bottom of the chat.
-    const goToBottom = async (delay = 1000) => {
-      setTimeout(() => {
-        $vuetify.goTo('#bottomOfChat');
-      }, delay);
+    const updateTypingStatus = (typing) => {
+      const value = typing ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid);
+      dispatch('chats/updateField', { id: chatId.value, typing: value });
     };
 
-    // Scrolls to a specific message.
-    const goTo = (messageId) => {
-      $vuetify.goTo(`#message-${messageId}`);
-    };
-    
-    // Intersection handler for messages (e.g., for read receipts).
-    const onIntersect = (entries) => {
-      const messageId = entries[0].target.id.substring(8)
-      const message = lodash.find(messages.value, { id:messageId })
-
-      // Add update chat message
-      try {
-        if (!message.seen.includes(user.value.data.uid)) {
-          $fire.firestore.doc(`Chats/${chatId.value}/Messages/${messageId}`).update({
-            "seen": firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
-          })
+    const goToBottom = () => {
+      nextTick(() => {
+        const chatBoxElement = chatBoxRef.value.$el;
+        if (chatBoxElement) {
+          const shouldScroll = chatBoxElement.scrollHeight - chatBoxElement.scrollTop - chatBoxElement.clientHeight < 100; // Adjust as needed
+          if (shouldScroll) {
+            chatBoxElement.scrollTop = chatBoxElement.scrollHeight;
+          }
         }
-      } catch (e) {
-        // ...
-      }
-    }
-
-    // Callback for uploading image URL.
-    const imageMessageUrlCallback = (url) => {
-      imageMessageUrl.value = url
-    }
-
-    const handleReply = (m) => {
-      reply.value = m
-    }
-
-    // Watch for changes in route
-    watch(route, (newRoute, oldRoute) => {
-      chatId.value = newRoute.params.id
-
-      if (chatId.value && newRoute !== oldRoute) {
-        $capacitor.AdMob_hideBanner();
-        loadChat(); // Load chat details when route changes
-      }
-    }, { immediate: true });
-
-   
-    // Watches for changes in the newMessage to update typing status.
-    watch(newMessage, (newValue) => {
-      if (newValue && !isTyping.value) {
-        isTyping.value = true;
-        updateTypingStatus(true);
-      } else if (!newValue && isTyping.value) {
-        isTyping.value = false;
-        updateTypingStatus(false);
-      }
-    }, { immediate: true });
-
-    // Handles updating the typing status when the window is unloaded or navigated away from.
-    const handleBeforeUnload = () => {
-      if (isTyping.value && chatId.value) {
-        updateTypingStatus(false);
-        isTyping.value = false;
-      }
+      });
     };
 
-    // Registers event listeners for window unload and navigation away.
-    onMounted(() => {
-      window.addEventListener('beforeunload', handleBeforeUnload);
-    });
+    const handleReply = message => isReply.value = message;
 
-    // Cleans up event listeners and updates typing status when the component is unmounted.
+    watch(route, (to, from) => {
+      chatId.value = to.params.id;
+      if (to.params.id !== from.params.id) {
+        loadChat();
+      }
+    }, { immediate: true });
+
+    onMounted(() => $capacitor.AdMob_hideBanner());
     onUnmounted(() => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      
-      // Detach Firestore listeners
-      if (messageListener.value) messageListener.value();
-      if (chatListener && chatListener.value) chatListener.value();
-      
       $capacitor.AdMob_init();
       $capacitor.AdMob_banner();
-
-      // Update typing status if it hasn't been updated already
-      if (isTyping.value && chatId.value) {
-        updateTypingStatus(false);
-      }
+      messageListener.value && messageListener.value();
+      chatListener.value && chatListener.value();
     });
 
     return {
       messagesLoading,
       chat,
-      newMessage, reply,
-      messages, participants, admins,
-      typingUsers, formatTypingUsers,
+      isReply,
+      messages,
+      participants,
+      admins,
       user,
-      imageMessageUrl,
-      sendMessage,
-      onIntersect,
-      goTo,
-      imageMessageUrlCallback,
-      handleReply
-    }
+      handleReply,
+      updateTypingStatus
+    };
   }
-})
-
+});
 </script>
+
 <style>
-
-.chatBox { z-index:0; width: 100%; padding-bottom:80px !important; }
-
-#bottomOfChat {
-  overflow-anchor: auto;
-  height: 1px;
-}
-.formMessageInput {
-  z-index: 999999999;
-}
-.v-text-field .v-input__control {
-  margin-top:5px !important;
-}
-.v-text-field .v-input__append-outer {
-  margin-top:0 !important;
-}
-.typing-indicator {
-  padding: 10px;
-  text-align: center;
-  color: #666;
-  font-size:11px;
-}
-
+.chatBox { z-index: 0; width: 100%; padding-bottom: 80px !important; }
+#bottomOfChat { overflow-anchor: auto; height: 1px; }
 </style>
