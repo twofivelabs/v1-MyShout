@@ -96,7 +96,7 @@ const config = {
       mapsApiKey: 'AIzaSyCdk1YDkjNrxjmojCyJhBB-6cEedG0nTt4'
     },
     firebase: {
-        fcmPublicVapidKey: 'BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco'
+        fcmPublicVapidKey: isDev ? 'BAJjXZ0Yn1FI1sJexv41IjHTJCYXNUK_KGjct3N5bVvxGE3m6olax8OlenN4MZfhwMOLn6Ei1L7h-EFnaG0owrU' : 'BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco'
     }
   },
 
@@ -458,7 +458,7 @@ const config = {
             url: '/profile'
           }
         ],
-        fcmPublicVapidKey: isDev? "BAJjXZ0Yn1FI1sJexv41IjHTJCYXNUK_KGjct3N5bVvxGE3m6olax8OlenN4MZfhwMOLn6Ei1L7h-EFnaG0owrU" : "BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco"
+        fcmPublicVapidKey: isDev ? "BAJjXZ0Yn1FI1sJexv41IjHTJCYXNUK_KGjct3N5bVvxGE3m6olax8OlenN4MZfhwMOLn6Ei1L7h-EFnaG0owrU" : "BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco"
       }
     }
   },
