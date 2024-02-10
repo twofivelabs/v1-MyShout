@@ -38,12 +38,12 @@ allprojects {
     repositories {
         google()
         jcenter()
-       /*  mavenCentral()
-        	maven {
-        	// capacitor-background-fetch
-        	url("${project(':transistorsoft-capacitor-background-fetch').projectDir}/libs")
-        } */
         mavenCentral()
+		// capacitor-background-geolocation
+        maven { url("${project(':transistorsoft-capacitor-background-geolocation').projectDir}/libs") }
+        maven { url 'https://developer.huawei.com/repo/' }
+        // capacitor-background-fetch
+        maven { url("${project(':transistorsoft-capacitor-background-fetch').projectDir}/libs") }
     }
 }
 
