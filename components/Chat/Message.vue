@@ -77,7 +77,14 @@
         <v-card>
           <v-card-text class="pa-0">
             <v-list class="py-0">
-              <ChatMessageHistorysheet :message="message" />
+              <v-list-item :key="`info-message-${message.id}`" @click="triggerInfoSheet">
+                <v-list-item-avatar class="my-0">
+                  <v-icon small>mdi-information-variant-box-outline</v-icon>
+                </v-list-item-avatar>
+                <v-list-item-title class="text-caption">
+                  {{ $t('chat.info' )}}
+                </v-list-item-title>
+              </v-list-item>
               <v-list-item v-if="message.owner !== userId" :key="`edit-message-${message.id}`" @click="startMessageReply">
                 <v-list-item-avatar class="my-0">
                   <v-icon small>mdi-account-plus</v-icon>
@@ -114,6 +121,17 @@
           </v-card-text>
         </v-card>
       </v-menu>
+
+      <v-bottom-sheet v-model="messageInfoSheet" :scrollable="true" max-width="700">
+        <v-sheet height="93vh" class="rounded-t-xl">
+          <div class="ma-3" style="padding-bottom:180px;">
+            <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
+
+            History
+
+          </div>
+        </v-sheet>
+      </v-bottom-sheet>
     </v-card>
       
     <v-overlay v-model="messageMenu" scroll-strategy="block" />
@@ -129,6 +147,8 @@ import {
   useContext,
   ref
 } from '@nuxtjs/composition-api'
+
+import { Touch } from 'vuetify/lib/directives'
 
 import moment from 'moment'
 import firebase from 'firebase';
@@ -171,6 +191,7 @@ export default defineComponent({
   emits: [
     'reply'
   ],
+  directives: { Touch },
   setup(props, { emit }) {
     const { state, dispatch } = useStore()
     const { $helper, $fire } = useContext()
@@ -180,6 +201,13 @@ export default defineComponent({
     const loading = ref(false)
     
     const messageMenu = ref(false)
+    const messageInfoSheet = ref(false)
+
+    const swipe = (direction) => {
+      if (direction === 'Down') {
+        messageInfoSheet.value = false
+      }
+    }
 
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
@@ -209,6 +237,11 @@ export default defineComponent({
 
     const triggerMessageMenu = () => {
       messageMenu.value = !messageMenu.value
+    }
+
+    const triggerInfoSheet = () => {
+      console.log("let's see")
+      messageInfoSheet.value = !messageInfoSheet.value
     }
 
     const getReadStatusIcon = (chat, message) => {
@@ -249,12 +282,14 @@ export default defineComponent({
       userId,
       showMedia,
       loading, 
-      messageMenu,
+      messageMenu, messageInfoSheet,
       triggerMessageMenu,
       deleteMessage,
       downloadFile, deleteFile,
       getReadStatusIcon,
-      startMessageReply
+      startMessageReply,
+
+      triggerInfoSheet, swipe
     }
   }
 })
