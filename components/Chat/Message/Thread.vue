@@ -1,11 +1,9 @@
 <template>
-  <div style="margin-top:65px;">
-    <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" class="chat-message" :id="`message-${message.id}`" />
-    <div v-for="(reply,index) in replies" :key="`reply-${index}`">
-      {{ reply }}
-      <!--<ChatMessage :message="reply" :chat="chat" :owner="participants[reply.owner]" :participants="participants" class="chat-message" :id="`message-${reply.id}`" @reply="null" />-->
-    </div>
-  </div>  
+  <v-row style="margin:65px 0 0;padding:0;">
+    <v-col cols="12" v-for="(reply,index) in thread" :key="`reply-${index}`">
+      <ChatMessage :thread="true" :message="reply" :chat="chat" :owner="participants[reply.owner]" :participants="participants" class="chat-message" :id="`message-${reply.id}`" />
+    </v-col>
+  </v-row>  
 </template>
 
 <script>
@@ -21,7 +19,7 @@ import {
 import moment from 'moment'
 
 export default defineComponent({
-  name: 'MessageHistory',
+  name: 'MessageThread',
   directives: { Touch },
   props: {
     chat: {
@@ -55,7 +53,7 @@ export default defineComponent({
     const user = computed(() => state.user);
 
     const showBottomSheet = ref(false)
-    const replies = ref([])
+    const thread = ref([])
 
     const getReadStatusIcon = (chat, message) => {
       const totalParticipantsExcludingSender = chat.participants.length - 1;
@@ -72,30 +70,51 @@ export default defineComponent({
 
     const loadReplies = async () => {
       try {
-        replies.value = []
+        thread.value = [];
 
         if (!props.message.replyTo) return;
 
-        const response = await $fire.firestore
-          .collection(`Chats/${props.chat.id}/Messages`)
-          .where('replies', 'array-contains', props.message.replyTo)
-          .orderBy('created_at', 'asc')
-          .get()
+        const replyToRef = $fire.firestore.collection(`Chats/${props.chat.id}/Messages`).doc(props.message.replyTo);
+        const replyTo = await replyToRef.get();
 
-          console.log("response", response)
+        if (!replyTo.exists) {
+          console.log("Original message does not exist.");
+          return;
+        }
 
-        response.forEach(doc => {
-          replies.value.push({
-            id: doc.id,
-            ownerData: props.participants.value[doc.owner],
-            message: doc.message ? $encryption.decrypt(doc.message) : '',
-            ...doc.data()
-          })
-        })  
+
+
+        thread.value.push({
+          id: replyTo.id,
+          ownerData: props.participants[replyTo.data().owner],
+          message: replyTo.data().message ? $encryption.decrypt(replyTo.data().message) : '',
+          ...replyTo.data()
+        });
+
+        console.log("Thread", thread.value)
+
+        const repliesPromises = replyTo.data().replies.map(docId => $fire.firestore.collection(`Chats/${props.chat.id}/Messages`).doc(docId).get());
+        const repliesDocs = await Promise.all(repliesPromises);
+        console.log("repliesDocs", repliesDocs)
+
+        repliesDocs.forEach(response => {
+          if (!response.exists) return; // Skip if the document doesn't exist
+          
+          thread.value.push({
+            id: response.id,
+            ownerData: props.participants[response.data().owner],
+            message: response.data().message ? $encryption.decrypt(response.data().message) : '',
+            ...response.data()
+          });
+        });
+
+        console.log("Thread", thread.value);
+
       } catch (e) {
-        console.log("Error loading replies", e)
+        console.log("Error loading replies", e);
       }
     };
+
     
     watch([() => props.message, () => props.chat], ([newMessage], [oldMessage]) => {
       if (newMessage !== oldMessage) {
@@ -106,7 +125,7 @@ export default defineComponent({
     return {
       moment,
       user,
-      replies,
+      thread,
       showBottomSheet,
       getReadStatusIcon
     }

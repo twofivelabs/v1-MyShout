@@ -271,7 +271,8 @@ export default {
         message_deleted: 'This message was deleted',
         delete_for_me: 'Eliminar para mí',
         delete_for_everyone: 'Eliminar para todos',
-        info: 'Info'
+        info: 'Info',
+        thread: 'Ver hilo'
     },
 
     no_results: 'No hay resultados',

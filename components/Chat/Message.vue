@@ -1,6 +1,6 @@
 <template #activator="{ isActive, props }">
   <main class="mb-3 px-3">
-    <ChatMessageReply v-if="message.replyTo" :chat="chat" :message="message" :participants="participants"/>
+    <ChatMessageReply v-if="!thread && message.replyTo" :chat="chat" :message="message" :participants="participants"/>
 
     <v-card 
       v-if="!message.hide || !message.hide.includes(userId)"
@@ -62,7 +62,7 @@
       </v-card-text>
 
        <!-- Tooltip -->
-      <v-tooltip v-if="longpress" top v-model="messageMenu">
+      <v-tooltip v-if="!thread" top v-model="messageMenu">
         <template v-slot:activator="{ on, attrs }">
           <div v-bind="attrs" v-on="on"></div>
         </template>
@@ -70,19 +70,19 @@
       </v-tooltip>
 
       <!-- Message Menu -->
-      <v-menu v-if="longpress" v-model="messageMenu" offset-y transition="slide-y-transition">
+      <v-menu v-if="!thread" v-model="messageMenu" offset-y transition="slide-y-transition">
         <template v-slot:activator="{ on }">
           <div v-on="on" ref="menuActivator"></div>
         </template>
         <v-card>
           <v-card-text class="pa-0">
             <v-list class="py-0">
-              <v-list-item :key="`info-message-${message.id}`" @click="triggerMessageInfo">
+              <v-list-item v-if="message.replyTo" :key="`thread-message-${message.id}`" @click="triggerMessageThread">
                 <v-list-item-avatar class="my-0">
                   <v-icon small>mdi-information-variant-box-outline</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-title class="text-caption">
-                  {{ $t('chat.info' )}}
+                  {{ $t('chat.thread' )}}
                 </v-list-item-title>
               </v-list-item>
               <v-list-item v-if="message.owner !== userId" :key="`edit-message-${message.id}`" @click="startMessageReply">
@@ -123,21 +123,21 @@
       </v-menu>
     </v-card>
       
-    <v-overlay v-model="messageMenu" scroll-strategy="block" />
+    <v-overlay v-if="!thread" v-model="messageMenu" scroll-strategy="block" />
 
-    <v-bottom-sheet v-model="messageInfo" :scrollable="true" max-width="700" fullscreen>
-      <v-sheet class="ma-3" style="padding-bottom:180px;">
+    <v-bottom-sheet v-if="!thread" v-model="messageThread" :scrollable="true" max-width="700" fullscreen>
+      <v-sheet class="ma-3" style="margin:0 !important;padding-bottom:180px;">
         <v-app-bar color="white" class="mobileNotch pb-1" app fixed top>
           <v-app-bar-nav-icon>
-            <v-btn @click="messageInfo=false" text color="transparent">
+            <v-btn @click="messageThread=false" text color="transparent">
               <v-icon class="pr-2 py-3 pl-2" color="myshoutDarkGrey">mdi-arrow-left</v-icon>
             </v-btn>
           </v-app-bar-nav-icon>
           <v-toolbar-title class="pl-0 d-flex align-center">
-            Message Details
+            Message Thread
           </v-toolbar-title>
         </v-app-bar>
-        <ChatMessageHistory :chat="chat" :message="message" :participants="participants" :owner="participants[message.owner]"  />
+        <ChatMessageThread :chat="chat" :message="message" :participants="participants" :owner="participants[message.owner]"  />
       </v-sheet>
     </v-bottom-sheet>
           
@@ -192,10 +192,10 @@ export default defineComponent({
         return {}
       }
     },
-    longpress: {
+    thread: {
       type: Boolean,
       default: () => {
-        return true
+        return false
       }
     }
   },
@@ -212,7 +212,7 @@ export default defineComponent({
     const loading = ref(false)
     
     const messageMenu = ref(false)
-    const messageInfo = ref(false)
+    const messageThread = ref(false)
 
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
@@ -241,12 +241,12 @@ export default defineComponent({
     }
 
     const triggerMessageMenu = () => {
-      if (!props.longpress) return;
+      if (props.thread) return;
       messageMenu.value = !messageMenu.value
     }
 
-    const triggerMessageInfo = () => {
-      messageInfo.value = !messageInfo.value
+    const triggerMessageThread = () => {
+      messageThread.value = !messageThread.value
     }
 
     const getReadStatusIcon = (chat, message) => {
@@ -286,7 +286,7 @@ export default defineComponent({
       showMedia,
       loading, 
       messageMenu, triggerMessageMenu,
-      messageInfo,triggerMessageInfo,
+      messageThread, triggerMessageThread,
       deleteMessage,
       downloadFile, deleteFile,
       getReadStatusIcon,

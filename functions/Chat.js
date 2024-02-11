@@ -16,85 +16,52 @@ const db = admin.firestore();
 const bucket = admin.storage().bucket("gs://my-shout-app.appspot.com");
 
 // firebase deploy --only functions:Chat
-// firebase deploy --only functions:Chat-ChatMessageCreated
-exports.ChatMessageCreated = functions.firestore
-    .document("Chats/{ChatId}/Messages/{MessageId}")
-    .onCreate((messageDoc, context) => {
-      // Extract ChatId from the context provided by the Firestore trigger
-      const {
-        params: {
-          ChatId,
-        },
-      } = context;
+// firebase deploy --only functions:Chat-ChatMessageOnWrite
+exports.ChatMessageOnWrite = functions.firestore
+  .document("Chats/{ChatId}/Messages/{MessageId}")
+  .onWrite((change, context) => {
+      const before = change.before.exists ? change.before.data() : null;
+      const after = change.after.exists ? change.after.data() : null;
+      const { ChatId } = context.params; // Extracting ChatId from context
 
-      // Get the data of the created message
-      const message = messageDoc.data();
+      if (!before && after) { // Handling new message creation
+            return db.doc(`Chats/${ChatId}`).get().then((doc) => {
+                const chat = doc.data();
+                if (!chat) return null;
 
-      // End function if the message does not exist
-      if (!message) return;
+                const participantsToUpdate = chat.participants.filter(participant => !after.seen.includes(participant));
 
-      // Retrieve the corresponding chat document using ChatId
-      return db.doc(`Chats/${ChatId}`).get().then((doc) => {
-        const chat = doc.data();
+                let batch = db.batch();
 
-        // Filter out participants who haven't seen the message and are not muted
-        const unseenParticipants = chat.participants
-            .filter((participant) => !chat.seen.includes(participant) && !chat.muted.includes(participant));
+                participantsToUpdate.forEach(userId => {
+                    const userRef = db.doc(`Users/${userId}`);
+                    batch.update(userRef, {
+                        "notifications.unseen": admin.firestore.FieldValue.increment(1)
+                    });
+                });
 
-          // Loop through each applicable participant to notifiy of new chat message
-          unseenParticipants.forEach((userId) => {
-            // Update each user's document to indicate they have unread messages
-            db.doc(`Users/${userId}`).update({
-              "has.messages": true
-            }).then(() => {
-              return Promise.resolve(true);
-            }).catch((e) => {
-              console.log("CANNOT UPDATE unseenParticipants ", e);
-              return Promise.resolve(false);
+                return batch.commit().then(() => {
+                    console.log(`Unseen count incremented for new message in chat ${ChatId}`);
+                }).catch(error => {
+                    console.error("Error updating unseen counts:", error);
+                });
+            });
+      }
+
+      if (before && after && JSON.stringify(before.seen) !== JSON.stringify(after.seen)) { // Handling 'seen' array update
+            const newSeenUsers = after.seen.filter(userId => !before.seen.includes(userId));
+
+            newSeenUsers.forEach(userId => {
+                db.doc(`Users/${userId}`).update({
+                    "notifications.unseen": admin.firestore.FieldValue.increment(-1)
+                }).catch(error => console.error("Error updating unseen count for user:", userId, error));
             });
 
-            // Prepare notification details
-            let notificationTitle = `Notification from ${chat.title}`;
-            if (!chat.title) {
-              notificationTitle = "Chat Notification";
-            }
-            // GET ANY PREVIOUS NOTIFICATIONS AND UPDATED IT
-            const goTo = `/chats/chat/${chat.id}`;
+            return null;
+      }
 
-            // Check for any existing notifications for the same chat and update them
-            db.collection(`Users/${userId}/Notifications`)
-                .where("goTo", "==", goTo)
-                .orderBy("created_at", "desc")
-                .limit(1)
-                .get()
-                .then((snapshot) => {
-                  // Add a new notification for the user
-                  db.collection(`Users/${userId}/Notifications`).add({
-                    uid: userId,
-                    title: notificationTitle,
-                    body: chat.lastMessage,
-                    goTo: goTo,
-                    created_at: new Date(),
-                    seen: false,
-                    type: "chat",
-                  }).then(() => {
-                    return Promise.resolve(true);
-                  }).catch(() => {
-                    return Promise.resolve(false);
-                  });
-
-                  // Delete any previous notifications for the same chat
-                  if (!snapshot.empty) {
-                    db.doc(`Users/${userId}/Notifications/${snapshot.docs[0].id}`).delete().catch((e) => {
-                      console.log("Error deleting notification", e);
-                    });
-                  }
-                }).catch((e) => {
-                  functions.logger.log("CHAT > NEW MESSAGE > CATCH > ", e);
-                });
-          });
-      });
-    });
+      return null;
+  });
 
 // firebase deploy --only functions:Chat-scheduledFunctionExpireAudioMessages
 exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 * * *")
