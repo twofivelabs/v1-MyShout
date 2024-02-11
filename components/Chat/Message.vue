@@ -127,7 +127,17 @@
           <div class="ma-3" style="padding-bottom:180px;">
             <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
-            History
+            <v-row no-gutters class="text-center mb-10">
+              <v-col cols="12">
+                <ChatTopavatar v-if="chat" :chat="chat" :size="80"/>
+              </v-col>
+              <v-col v-if="chat.title" cols="12" class="text-h2 pt-5 pb-2">
+                {{chat.title}}
+              </v-col>
+              <v-col v-if="chat.description" cols="12" class="caption">
+                {{ chat.description }}
+              </v-col>
+            </v-row>
 
           </div>
         </v-sheet>
