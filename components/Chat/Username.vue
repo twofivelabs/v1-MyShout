@@ -6,7 +6,7 @@
 
 import {
   defineComponent,
-  ref,
+  ref, computed,
   useStore,
   watch
 } from '@nuxtjs/composition-api'
@@ -20,15 +20,10 @@ export default defineComponent({
         return {}
       }
     },
-    loggedInUser: {
-      type: String,
-      default: () => {
-        return null
-      }
-    },
   },
   setup(props) {
-    const { dispatch } = useStore()
+    const { state, dispatch } = useStore()
+    const user = computed(() => state.user)
     
     const users = ref('')
 
@@ -44,9 +39,9 @@ export default defineComponent({
       if(chat && chat.participants) {
         users.value = ''
         for (const participant of chat.participants) {
-          if (participant !== props.loggedInUser) {
+          if (participant !== user.value.data.uid) {
             const joinedUser = await dispatch('user/getOne', participant)
-              if (joinedUser && (props.loggedInUser !== joinedUser.id)) {
+              if (joinedUser && (user.value.data.uid !== joinedUser.id)) {
                 users.value = users.value + `@${joinedUser.username} `
               }
           }

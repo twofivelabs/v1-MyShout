@@ -62,7 +62,7 @@
       </v-card-text>
 
        <!-- Tooltip -->
-      <v-tooltip top v-model="messageMenu">
+      <v-tooltip v-if="longpress" top v-model="messageMenu">
         <template v-slot:activator="{ on, attrs }">
           <div v-bind="attrs" v-on="on"></div>
         </template>
@@ -70,14 +70,14 @@
       </v-tooltip>
 
       <!-- Message Menu -->
-      <v-menu v-model="messageMenu" offset-y transition="slide-y-transition">
+      <v-menu v-if="longpress" v-model="messageMenu" offset-y transition="slide-y-transition">
         <template v-slot:activator="{ on }">
           <div v-on="on" ref="menuActivator"></div>
         </template>
         <v-card>
           <v-card-text class="pa-0">
             <v-list class="py-0">
-              <v-list-item :key="`info-message-${message.id}`" @click="triggerInfoSheet">
+              <v-list-item :key="`info-message-${message.id}`" @click="triggerMessageInfo">
                 <v-list-item-avatar class="my-0">
                   <v-icon small>mdi-information-variant-box-outline</v-icon>
                 </v-list-item-avatar>
@@ -121,30 +121,27 @@
           </v-card-text>
         </v-card>
       </v-menu>
-
-      <v-bottom-sheet v-model="messageInfoSheet" :scrollable="true" max-width="700">
-        <v-sheet height="93vh" class="rounded-t-xl">
-          <div class="ma-3" style="padding-bottom:180px;">
-            <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
-
-            <v-row no-gutters class="text-center mb-10">
-              <v-col cols="12">
-                <ChatTopavatar v-if="chat" :chat="chat" :size="80"/>
-              </v-col>
-              <v-col cols="12" class="text-h2 pt-5 pb-2">
-                <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
-              </v-col>
-              
-            </v-row>
-
-          </div>
-        </v-sheet>
-      </v-bottom-sheet>
     </v-card>
       
     <v-overlay v-model="messageMenu" scroll-strategy="block" />
+
+    <v-bottom-sheet v-model="messageInfo" :scrollable="true" max-width="700" fullscreen>
+      <v-sheet class="ma-3" style="padding-bottom:180px;">
+        <v-app-bar color="white" class="mobileNotch pb-1" app fixed top>
+          <v-app-bar-nav-icon>
+            <v-btn @click="messageInfo=false" text color="transparent">
+              <v-icon class="pr-2 py-3 pl-2" color="myshoutDarkGrey">mdi-arrow-left</v-icon>
+            </v-btn>
+          </v-app-bar-nav-icon>
+          <v-toolbar-title class="pl-0 d-flex align-center">
+            Message Details
+          </v-toolbar-title>
+        </v-app-bar>
+        <ChatMessageHistory :chat="chat" :message="message" :participants="participants" :owner="participants[message.owner]"  />
+      </v-sheet>
+    </v-bottom-sheet>
           
-    </main>
+   </main>
 </template>
 <script>
 
@@ -194,6 +191,12 @@ export default defineComponent({
       default: () => {
         return {}
       }
+    },
+    longpress: {
+      type: Boolean,
+      default: () => {
+        return true
+      }
     }
   },
   emits: [
@@ -209,13 +212,7 @@ export default defineComponent({
     const loading = ref(false)
     
     const messageMenu = ref(false)
-    const messageInfoSheet = ref(false)
-
-    const swipe = (direction) => {
-      if (direction === 'Down') {
-        messageInfoSheet.value = false
-      }
-    }
+    const messageInfo = ref(false)
 
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
@@ -244,18 +241,16 @@ export default defineComponent({
     }
 
     const triggerMessageMenu = () => {
+      if (!props.longpress) return;
       messageMenu.value = !messageMenu.value
     }
 
-    const triggerInfoSheet = () => {
-      console.log("let's see")
-      messageInfoSheet.value = !messageInfoSheet.value
+    const triggerMessageInfo = () => {
+      messageInfo.value = !messageInfo.value
     }
 
     const getReadStatusIcon = (chat, message) => {
-      // Calculate total participants excluding the message sender
       const totalParticipantsExcludingSender = chat.participants.length - 1;
-      // Filter out the sender from the seen array
       const seenCountExcludingSender = message.seen.filter(userId => userId !== message.owner).length;
 
       if (seenCountExcludingSender  === 0) {
@@ -290,14 +285,12 @@ export default defineComponent({
       userId,
       showMedia,
       loading, 
-      messageMenu, messageInfoSheet,
-      triggerMessageMenu,
+      messageMenu, triggerMessageMenu,
+      messageInfo,triggerMessageInfo,
       deleteMessage,
       downloadFile, deleteFile,
       getReadStatusIcon,
       startMessageReply,
-
-      triggerInfoSheet, swipe
     }
   }
 })

@@ -1,5 +1,15 @@
 <template>
-  <div v-if="message && reply" :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse text-right'" class="caption pb-2">
+  <div
+    v-if="message && reply" 
+    :class="[
+      'caption pb-2',
+      !details
+        ? !(message.owner === userId)
+          ? 'd-flex'
+          : 'd-flex flex-row-reverse text-right'
+        : 'd-flex'
+    ]"
+  >
     <div>
       <div>You replied to {{ reply.owner ? reply.owner.username : '' }}</div>
       <div class=" pa-2 rounded-lg message-border">
@@ -41,6 +51,12 @@ export default defineComponent({
         return {}
       }
     },
+    details: {
+      type: Boolean,
+      default: () => {
+        return false
+      }
+    }
   },
   setup(props) {
     const { state } = useStore()
