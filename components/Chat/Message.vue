@@ -131,12 +131,10 @@
               <v-col cols="12">
                 <ChatTopavatar v-if="chat" :chat="chat" :size="80"/>
               </v-col>
-              <v-col v-if="chat.title" cols="12" class="text-h2 pt-5 pb-2">
-                {{chat.title}}
+              <v-col cols="12" class="text-h2 pt-5 pb-2">
+                <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
               </v-col>
-              <v-col v-if="chat.description" cols="12" class="caption">
-                {{ chat.description }}
-              </v-col>
+              
             </v-row>
 
           </div>
