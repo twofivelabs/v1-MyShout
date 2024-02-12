@@ -272,7 +272,10 @@ export default {
         delete_for_me: 'Eliminar para mí',
         delete_for_everyone: 'Eliminar para todos',
         info: 'Info',
-        thread: 'Ver hilo'
+        thread: 'Ver hilo',
+        message_thread: 'Hilo de Mensajes',
+        forward_to: 'Reenviar a',
+        recent_chats: 'Chats Recientes'
     },
 
     no_results: 'No hay resultados',

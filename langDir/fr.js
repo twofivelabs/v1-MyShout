@@ -51,7 +51,8 @@ export default {
         send_password_reset: 'Envoyer la réinitialisation du mot de passe',
         deactivate: 'Désactiver',
         reactivate: 'Réactiver',
-        confirm_request: 'Confirmer la requête'
+        confirm_request: 'Confirmer la requête',
+        recent_chats: 'Chats Récents'
     },
     notify: {
         no_audio: 'Pas de son',
@@ -272,7 +273,9 @@ export default {
         delete_for_me: 'Supprimer pour moi',
         delete_for_everyone: 'Supprimer pour tout le monde',
         info: 'Info',
-        thread: 'Voir la discussion'
+        thread: 'Voir la discussion',
+        message_thread: 'Fil de Messages',
+        forward_to: 'Transférer à'
     },
 
     no_results: 'Aucun résultat',

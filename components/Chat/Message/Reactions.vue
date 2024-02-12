@@ -128,7 +128,6 @@ import {
   
   .reactions-display {
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
     margin-top: 4px; /* Adjust based on your layout */
   }

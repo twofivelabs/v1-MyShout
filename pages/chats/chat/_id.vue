@@ -20,12 +20,12 @@
       <div v-for="(message) in messages" :key="message.id">
         <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" v-intersect="onMessageInterest(message)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
       </div>
-      <div id="bottomOfChat" />
       <ChatTyping :chat="chat" :participants="participants" />
     </v-container>
     <v-container v-else class="pa-6 mt-5">
       <v-skeleton-loader v-for="x of 4" :key="x" width="100%" max-height="50" type="text" class="mb-6" />
     </v-container>
+    <div id="bottomOfChat" />
 
     <ChatInput :chat="chat" :reply="isReply" @updateReply="handleReply" @updateTyping="updateTypingStatus" />
   </div>

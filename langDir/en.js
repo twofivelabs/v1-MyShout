@@ -276,7 +276,10 @@ export default {
         delete_for_me: 'Delete For Me',
         delete_for_everyone: 'Delete For Everyone',
         info: 'Info',
-        thread: 'View Thread'
+        thread: 'View Thread',
+        message_thread: 'Message Thread',
+        forward_to: 'Forward To',
+        recent_chats: 'Recent Chats'
     },
 
     no_results: 'No results',

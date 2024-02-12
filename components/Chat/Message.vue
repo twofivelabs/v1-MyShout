@@ -1,7 +1,6 @@
 <template #activator="{ isActive, props }">
   <main class="mb-3 px-3">
-    <div>
-      
+    <div v-if="!message.forward">
       <v-row
         class="align-center py-3"
         :class="message.owner === userId ? 'flex-row-reverse ' : ''"
@@ -39,9 +38,6 @@
 
               <div v-if="message.audioUrl">
                 <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />
-                <!-- <audio v-if="!message.audioExpired" controls preload="metadata" style="min-width:220px">
-                  <source :src="`${message.audioUrl}`">
-                </audio>-->
                 <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
               </div>
 
@@ -83,7 +79,6 @@
             <v-icon small>mdi-dots-horizontal</v-icon>
           </v-btn>
 
-          <!-- Message Menu -->
           <v-menu v-if="!thread" v-model="messageMenu" offset-y transition="slide-y-transition">
             <template v-slot:activator="{ on }">
               <div v-on="on" ref="menuActivator"></div>
@@ -107,7 +102,7 @@
                       {{ $t('chat.reply_to_message' )}}
                     </v-list-item-title>
                   </v-list-item>
-                  <v-list-item :key="`forward-message-${message.id}`">
+                  <v-list-item :key="`forward-message-${message.id}`" @click="triggerMessageForward">
                     <v-list-item-avatar class="my-0">
                       <v-icon small>mdi-account-plus</v-icon>
                     </v-list-item-avatar>
@@ -142,11 +137,15 @@
           <ChatMessageReactions :chat="chat" :message="message" :thread="thread" />
         </v-col>
       </v-row>
-
     </div>
 
+    <v-bottom-sheet v-if="!thread && !message.forward && messageForward" v-model="messageForward" :scrollable="true" max-width="700">
+      <v-sheet height="60vh" class="ma-3 rounded-t-xl px-5" style="margin:0 !important;padding-bottom:180px;">
+        <ChatMessageForward :chat="chat" :message="message" :participants="participants" />
+      </v-sheet>
+    </v-bottom-sheet>
 
-    <v-bottom-sheet v-if="!thread" v-model="messageThread" :scrollable="true" max-width="700" fullscreen>
+    <v-bottom-sheet v-if="!thread && !message.forward && messageThread" v-model="messageThread" :scrollable="true" max-width="700" fullscreen>
       <v-sheet class="ma-3" style="margin:0 !important;padding-bottom:180px;">
         <v-app-bar color="white" class="mobileNotch pb-1" app fixed top>
           <v-app-bar-nav-icon>
@@ -155,7 +154,7 @@
             </v-btn>
           </v-app-bar-nav-icon>
           <v-toolbar-title class="pl-0 d-flex align-center">
-            Message Thread
+            {{ $t('chat.messagE_thread' )}}
           </v-toolbar-title>
         </v-app-bar>
         <ChatMessageThread :chat="chat" :message="message" :participants="participants" :owner="participants[message.owner]"  />
@@ -235,6 +234,7 @@ export default defineComponent({
     const messageHover = ref(false)
     const messageMenu = ref(false)
     const messageThread = ref(false)
+    const messageForward = ref(false)
  
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
@@ -269,6 +269,10 @@ export default defineComponent({
 
     const triggerMessageThread = () => {
       messageThread.value = !messageThread.value
+    }
+
+    const triggerMessageForward = () => {
+      messageForward.value = !messageForward.value
     }
 
     const getReadStatusIcon = (chat, message) => {
@@ -317,6 +321,7 @@ export default defineComponent({
       loading, 
       messageMenu, triggerMessageMenu,
       messageThread, triggerMessageThread,
+      messageForward, triggerMessageForward,
       deleteMessage,
       downloadFile, deleteFile,
       getReadStatusIcon,
