@@ -137,36 +137,9 @@
           </v-menu>
         </v-col>
         <v-col
-          cols="10" class="reactions-display pa-0 align-center justify-end" style="margin-top:-5px;"
+          cols="10" style="margin-top:-2px;" class="pa-0" 
         >
-          <div v-if="!message.deleted && reactions.length">
-            <template v-for="reaction in reactions">
-              <div class="reaction-item" :key="reaction.emoji">
-                <span>{{ reaction.emoji }}</span>
-                <span>{{ reaction.count }}</span>
-              </div>
-            </template>
-          </div>
-
-          <v-btn icon @click="triggerEmojiMenu">
-            <v-icon small>mdi-emoticon-happy-outline</v-icon>
-          </v-btn>
-          
-          <!-- Emoji Menu -->
-          <v-menu v-if="!thread" v-model="emojiMenu" bottom right transition="slide-y-transition">
-            <template v-slot:activator="{ on }">
-              <div v-on="on"></div>
-            </template>
-            <v-card>
-              <v-card-text class="pa-0">
-                <div class="py-0 d-flex justify-space-around">
-                  <div v-for="emoji in emojis" :key="emoji.name" @click="selectEmoji(emoji)" class="px-2">
-                    <span class="emoji-style">{{ emoji.value }}</span>
-                  </div>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-menu>
+          <ChatMessageReactions :thread="thread" :message="message" />
         </v-col>
       </v-row>
 
@@ -198,7 +171,7 @@ import {
   computed,
   useStore,
   useContext,
-  ref, watch
+  ref,
 } from '@nuxtjs/composition-api'
 
 import { Touch } from 'vuetify/lib/directives'
@@ -262,15 +235,6 @@ export default defineComponent({
     const messageHover = ref(false)
     const messageMenu = ref(false)
     const messageThread = ref(false)
-    const reactions = ref([])
-    const emojiMenu = ref(false)
-    const emojis = ref([
-      { name: 'smile', value: '😀' },
-      { name: 'laugh', value: '😂' },
-      { name: 'love', value: '😍' },
-      { name: 'sad', value: '😢' },
-      { name: 'angry', value: '😡' }
-    ]);
  
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
@@ -296,29 +260,6 @@ export default defineComponent({
       } finally {
         loading.value = false
       }
-    }
-
-    const triggerEmojiMenu = () => {
-      if (props.thread) return;
-      emojiMenu.value = !emojiMenu.value
-    }
-
-    const selectEmoji = async (emoji) => {
-      await dispatch('chats/messages/updateField', {
-        chatId: props.chat.id,
-        id: props.message.id,
-        data: {
-          reactions: { [emoji.name]: firebase.firestore.FieldValue.increment(1) }
-        }
-      }).catch((error) => {
-        console.error('Error incrementing reaction:', error);
-      });
-
-      const index = reactions.value.findIndex(reaction => reaction.emoji === emoji.value);
-      if (index !== -1) reactions.value[index].count += 1;
-      else reactions.value.push({ emoji: emoji.value, count: 1 });
-      
-      emojiMenu.value = false;
     }
 
     const triggerMessageMenu = () => {
@@ -368,28 +309,12 @@ export default defineComponent({
       if (messageHover.value) messageHover.value = false
     }
 
-    watch(() => props.message.reactions, (newReactions) => {
-      if (newReactions) {
-        reactions.value = Object.entries(newReactions).map(([name, count]) => {
-          const emojiObj = emojis.value.find(emoji => emoji.name === name);
-          return {
-            emoji: emojiObj ? emojiObj.value : '',
-            count: count
-          };
-        });
-      } else {
-        reactions.value = [];
-      }
-    }, { deep: true, immediate: true });
-
     return {
       moment,
       user,
       userId,
       showMedia,
       loading, 
-      emojiMenu, triggerEmojiMenu, 
-      emojis, selectEmoji, reactions,
       messageMenu, triggerMessageMenu,
       messageThread, triggerMessageThread,
       deleteMessage,
@@ -419,26 +344,6 @@ export default defineComponent({
 .v-list-item {
  min-height:25px;
  padding:0 20px 0 0;
-}
-
-.emoji-style {
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.reactions-display {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-top: 4px; /* Adjust based on your layout */
-}
-
-.reaction-item {
-  display: inline-flex;
-  align-items: center;
-  margin-right: 8px;
-  font-size: 0.75rem; /* Small font size for emoji and count */
-  white-space: nowrap;
 }
 
 
