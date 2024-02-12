@@ -43,6 +43,12 @@ import {
   export default defineComponent({
     name: 'ChatMessageReactions',
     props: {
+      chat: {
+        type: Object,
+        default: () => {
+          return {}
+        }
+      },
       message: {
         type: Object,
         default: () => {

@@ -139,7 +139,7 @@
         <v-col
           cols="10" style="margin-top:-2px;" class="pa-0" 
         >
-          <ChatMessageReactions :thread="thread" :message="message" />
+          <ChatMessageReactions :chat="chat" :message="message" :thread="thread" />
         </v-col>
       </v-row>
 
