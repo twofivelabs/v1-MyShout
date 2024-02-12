@@ -205,9 +205,9 @@ const config = {
         langDir: 'langDir',
         skipSettingLocaleOnNavigate: true,
         locales: [
-            { code: 'en', iso: 'en-US', file: 'en.js', dir: 'ltr', name: 'English', local: 'English' },
-            { code: 'es', iso: 'es-ES', file: 'es.js', name: 'Spanish', local: 'Español' },
-            { code: 'fr', iso: 'fr', file: 'fr.js', name: 'French', local: 'Français' }
+            { code: 'en', iso: 'en-US', file: 'en.js', dir: 'ltr', name: 'English', local: 'English' }
+            //{ code: 'es', iso: 'es-ES', file: 'es.js', name: 'Spanish', local: 'Español' },
+            //{ code: 'fr', iso: 'fr', file: 'fr.js', name: 'French', local: 'Français' }
         ],
         defaultLocale: 'en',
         detectBrowserLanguage: {

@@ -81,30 +81,14 @@ export default defineComponent({
       loading.value = true
 
       // UPDATE CURRENT LOCATION
-      await $capacitor.gpsGetCurrentPosition().catch((e) => {
-        $system.log({ comp: 'AlertButton', msg: 'gpsGetCurrentPosition', val: e })
-      })
-
-      await $helper.sleep(500)
-
-      // SENDS NOTIFICATIONS
-      /*await $services.alertButton('robbery', {
-        user: profile.value,
-        gps: profile.value.gps
-      }).catch((e) => {
-        $system.log({ comp: 'AlertButton', msg: 'alertButton', val: e })
-      })*/
-
-      // GET LOCATION DETAILS OF USER
-      /*location.value = await $services.reverseGeocode(profile.value.gps.lat, profile.value.gps.lng).catch((e) => {
-        $system.log({ comp: 'AlertButton', msg: 'reverseGeocode', val: e })
-      })*/
+      const coords = await $capacitor.gpsGetCurrentPosition()
 
       // ADD NOTIFICATION TO USER
       await dispatch('user/alerts/add', {
         type: 'robbery',
         userId: user.value.uid,
-        gps: profile.value.gps,
+        // gps: profile.value.gps,
+        gps: coords,
         location: location.value
       }).catch((e) => {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
@@ -113,6 +97,8 @@ export default defineComponent({
 
       commit('user/alerts/HAS_NEW_ALERTS', true)
       loading.value = false
+      await $helper.sleep(500)
+      dialog.value = false
     }
 
     return {

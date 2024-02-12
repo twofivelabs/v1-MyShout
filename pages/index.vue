@@ -89,15 +89,8 @@ export default defineComponent({
 
     // MOUNTED
     onMounted(async () => {
-      // GPS PERMISSIONS
-      $capacitor.gpsCheckPermissions().then(async (has) => {
-        if (has) {
-          // console.log('STICKY: GPS > HAS PERMISSIONS')
-          await $capacitor.gpsGetCurrentPosition(l => {
-            console.log('STICKY: GPS > ', l)
-          })
-        }
-      })
+      // NEW GPS
+      await $capacitor.gpsInit()
 
       // Check user if they have profile pieces
       setTimeout(() => {

@@ -13,6 +13,7 @@ import { Badge } from '@capawesome/capacitor-badge'
 
 import admob from './cap.admob'
 // import background from './cap.background'
+import gps from './cap.gps'
 
 // VARIABLES
 let watchCallbackId = null
@@ -60,11 +61,12 @@ export default function ({
       })
   }
 
-  inject('capacitor', {
-      ...admob,
-      //...background,
+inject('capacitor', {
+    ...admob,
+    ...gps,
+    //...background,
 
-      async getContacts() {
+    async getContacts() {
           const projection = {
               // Specify which fields should be retrieved.
               name: true,
@@ -92,12 +94,12 @@ export default function ({
      longitude: -119.396922
      speed: null
      */
-    async gpsSetPosition (gps) {
+    async gpsSetPosition_OLD (gps) {
         // console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
         await store.dispatch('user/updateGPS', gps)
     },
 
-    async gpsGetCurrentPosition () {
+    async gpsGetCurrentPosition_OLD () {
         const device = await Device.getInfo()
         let gps = null
 
@@ -147,7 +149,7 @@ export default function ({
 
         return gps
     },
-    async gpsCheckPermissions () {
+    async gpsCheckPermissions_OLD () {
         // DESKTOP / WEB, When requesting location will auto pop-up with location
 
         // 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'
@@ -188,7 +190,7 @@ export default function ({
     },
 
     // Older GPS functions
-    async getSetCurrentPosition () {
+    async getSetCurrentPosition_OLD () {
       try {
         let retCoordinates = {
           lat: null,
@@ -236,7 +238,7 @@ export default function ({
         return false
       }
     },
-    async watchPosition () {
+    async watchPosition_OLD () {
       const info = await Device.getInfo()
       try {
         if (info && info.platform === 'web') {
@@ -267,7 +269,7 @@ export default function ({
         })
       }
     },
-    async clearWatchPosition () {
+    async clearWatchPosition_OLD () {
       try {
         await Geolocation.clearWatch({ id: watchCallbackId })
       } catch (e) {
@@ -278,7 +280,7 @@ export default function ({
         })
       }
     },
-    async positionPermissions () {
+    async positionPermissions_OLD () {
       let hasPermission = false
       try {
         // 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'
