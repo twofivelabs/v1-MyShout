@@ -13,10 +13,7 @@
     <v-container class="pt-4 pb-12">
       <v-row class="pa-6" v-if="isLoading">
         <v-col>
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
+          <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
         </v-col>
       </v-row>
       <template v-if="chatList && chatList.length === 0">
@@ -28,8 +25,15 @@
         <template v-for="(chat, index) in chatList">
           <v-list-item v-if="chat" :key="index">
             <NuxtLink :to="`/chats/chat/${chat.id}`">
-              <ChatTopavatar :chat="chat" class="mr-3" />
+              <v-badge v-if="chat.unseenMessages && chat.unseenMessages[user.data.uid] > 0" 
+                :content="chat.unseenMessages[user.data.uid]" 
+                color="myshoutRed" overlap offset-x="25"
+              >
+                <ChatTopavatar :chat="chat" class="mr-3" />
+              </v-badge>
+              <ChatTopavatar v-else :chat="chat" class="mr-3" />
             </NuxtLink>
+              
             <NuxtLink :to="`/chats/chat/${chat.id}`" style="width:100%;" color="myshoutDarkGrey">
               <v-list-item-content>
                 <v-list-item-title class="d-flex justify-start align-center myshoutDarkGrey--text">
@@ -38,7 +42,6 @@
                   <span class="caption">{{ moment(chat.created_at.toDate()).fromNow() }}</span>
                 </v-list-item-title>
                 <v-list-item-subtitle>
-                  <v-badge v-if="chat.seen && !chat.seen.includes(user.data.uid)" dot inline color="myshoutRed" />
                   <Span v-if="chat.lastMessageSender">{{ chat.lastMessageSender }}: </Span>{{ chat.lastMessage }}
                 </v-list-item-subtitle>
               </v-list-item-content>
@@ -76,9 +79,8 @@ export default defineComponent({
     const chatsListener = ref();
     const chatList = ref([])
 
-    // METHODS
     const fetchChats = async () => {
-      isLoading.value = true
+      isLoading.value = true;
 
       try {
         chatsListener.value = await $fire.firestore
@@ -86,36 +88,37 @@ export default defineComponent({
           .where('participants', 'array-contains', user.value.data.uid)
           .orderBy('lastMessageSent', 'desc')
           .onSnapshot(async (snapshot) => {
-            if (!snapshot.empty) {
-              chatList.value =  [];
+            let updatedChatList = [...chatList.value]; // Create a copy of the current chat list
 
-              for (const doc of snapshot.docs) {
-                const data = doc.data();
-                data.id = doc.id;
+            snapshot.docChanges().forEach(async (change) => {
+              const data = change.doc.data();
+              data.id = change.doc.id;
 
-                if (data.lastMessageSender) {
-                  const u = await dispatch('user/getOne', data.lastMessageSender)
-                  data.lastMessageSender = u.first_name ?? u.username
-                }
-
-                chatList.value.push(data);
+              if (data.lastMessageSender) {
+                const u = await dispatch('user/getOne', data.lastMessageSender);
+                data.lastMessageSender = u.first_name ?? u.username;
               }
-            } else {
-              // Handle case when there are no chat documents
-              chatList.value = [];
-            }  
+
+              const existingIndex = updatedChatList.findIndex((chat) => chat.id === data.id);
+
+              if (existingIndex > -1) {
+                // If the chat already exists, update it
+                updatedChatList[existingIndex] = data;
+              } else {
+                // If the chat does not exist, add it
+                updatedChatList.push(data);
+              }
+            });
+
+            chatList.value = updatedChatList; // Update the chat list with the new data
           });
-      } catch(error) {
-        // Handle specific errors and log them
-        if (error.code === 'permission-denied') {
-          console.error('Permission denied. User does not have access to chats.');
-        } else {
-          console.error('Error fetching chats:', error.message);
-        }
+      } catch (error) {
+        console.error('Error fetching chats:', error.message);
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
-    }
+    };
+
 
     watch(user, (userData) => {
       if (userData && userData.data.uid) {

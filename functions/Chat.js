@@ -19,45 +19,71 @@ const bucket = admin.storage().bucket("gs://my-shout-app.appspot.com");
 // firebase deploy --only functions:Chat-ChatMessageOnWrite
 exports.ChatMessageOnWrite = functions.firestore
   .document("Chats/{ChatId}/Messages/{MessageId}")
-  .onWrite((change, context) => {
+  .onWrite(async (change, context) => {
+      const { ChatId } = context.params;
       const before = change.before.exists ? change.before.data() : null;
       const after = change.after.exists ? change.after.data() : null;
-      const { ChatId } = context.params; // Extracting ChatId from context
+      const db = admin.firestore();
 
-      if (!before && after) { // Handling new message creation
-            return db.doc(`Chats/${ChatId}`).get().then((doc) => {
-                const chat = doc.data();
-                if (!chat) return null;
+      if (!before && after) {
+        // Handling new message creation
+        const chatDocRef = db.doc(`Chats/${ChatId}`);
+        const chatSnapshot = await chatDocRef.get();
+        const chat = chatSnapshot.data();
+        if (!chat) return null;
 
-                const participantsToUpdate = chat.participants.filter(participant => !after.seen.includes(participant));
+        const participantsToUpdate = chat.participants.filter(participant => !after.seen.includes(participant));
+        let batch = db.batch();
 
-                let batch = db.batch();
-
-                participantsToUpdate.forEach(userId => {
-                    const userRef = db.doc(`Users/${userId}`);
-                    batch.update(userRef, {
-                        "notifications.unseen": admin.firestore.FieldValue.increment(1)
-                    });
-                });
-
-                return batch.commit().then(() => {
-                    console.log(`Unseen count incremented for new message in chat ${ChatId}`);
-                }).catch(error => {
-                    console.error("Error updating unseen counts:", error);
-                });
+        participantsToUpdate.forEach(userId => {
+            const userRef = db.doc(`Users/${userId}`);
+            batch.update(userRef, {
+                "notifications.unseen": admin.firestore.FieldValue.increment(1)
             });
+            
+            const unseenCountKey = `unseenMessages.${userId}`;
+            batch.update(chatDocRef, {
+                [unseenCountKey]: admin.firestore.FieldValue.increment(1)
+            });
+        });
+
+        await batch.commit();
+        console.log(`Unseen count incremented for new message in chat ${ChatId}`);
+        return null;
       }
 
-      if (before && after && JSON.stringify(before.seen) !== JSON.stringify(after.seen)) { // Handling 'seen' array update
-            const newSeenUsers = after.seen.filter(userId => !before.seen.includes(userId));
+      if (before && after && JSON.stringify(before.seen) !== JSON.stringify(after.seen)) {
+        // Handling 'seen' array update
+        const newSeenUsers = after.seen.filter(userId => !before.seen.includes(userId));
 
-            newSeenUsers.forEach(userId => {
-                db.doc(`Users/${userId}`).update({
+        await Promise.all(newSeenUsers.map(async userId => {
+            const userRef = db.doc(`Users/${userId}`);
+            const userSnap = await userRef.get();
+            const userData = userSnap.data();
+
+            if (userData.notifications.unseen > 0) {
+                // Ensure unseen count never goes below zero
+                await userRef.update({
                     "notifications.unseen": admin.firestore.FieldValue.increment(-1)
-                }).catch(error => console.error("Error updating unseen count for user:", userId, error));
-            });
+                });
+            }
 
-            return null;
+            const chatDocRef = db.doc(`Chats/${ChatId}`);
+            const unseenCountKey = `unseenMessages.${userId}`;
+            const chatSnap = await chatDocRef.get();
+            const chatData = chatSnap.data();
+            
+            if (chatData.unseenMessages && chatData.unseenMessages[userId] > 0) {
+                // Ensure unseen message count per chat never goes below zero
+                await chatDocRef.update({
+                    [unseenCountKey]: admin.firestore.FieldValue.increment(-1)
+                });
+            }
+            
+            console.log(`Unseen count decremented for user: ${userId} in chat ${ChatId}`);
+        }));
+
+        return null;
       }
 
       return null;

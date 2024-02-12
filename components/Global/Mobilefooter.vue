@@ -17,7 +17,7 @@
         </v-btn>
       </NotificationsButton>
       <v-btn class="pb-3" color="accent-4" style="height:inherit" text to="/chats">
-        <v-badge v-if="hasMessages" dot overlap color="myshoutRed">
+        <v-badge v-if="messages" overlap :content="messages" :bordered="false" color="myshoutRed">
           <v-icon>mdi-forum</v-icon>
         </v-badge>
         <v-icon v-else>mdi-forum</v-icon>
@@ -39,7 +39,6 @@ import {
   onMounted,
   ref,
   useStore,
-    watchEffect
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -49,7 +48,7 @@ export default defineComponent({
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const hasNotifications = computed(() => state.user.profile.has.notifications || false)
-    const hasMessages = computed(() => state.user.profile.has.messages || false)
+    const messages = computed(() => state.user.profile.notifications.unseen || 0)
 
     // DEFINE CONTENT
     const hasMounted = ref(false)
@@ -59,17 +58,12 @@ export default defineComponent({
       hasMounted.value = true
     })
 
-    watchEffect(() => {
-      //console.log('WATCH > hasNotifications', hasNotifications.value)
-      //console.log('WATCH > hasMessages', hasMessages.value)
-    })
-
     return {
       user,
       profile,
       hasMounted,
       hasNotifications,
-      hasMessages
+      messages
     }
   }
 })
