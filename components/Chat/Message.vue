@@ -9,12 +9,13 @@
       @mouseover="onHoverMessage"
 			@mouseleave="onLeaveMessage"
     >
-      <ChatAvatar v-if="owner && message.owner !== userId" class="mx-2" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
+      <ChatAvatar v-if="owner && message.owner !== userId" class="mx-2 avatar-align-top" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
 
       <v-card-text
         style="max-width:70%;min-width:50%" 
         :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" 
         class="break-words rounded-lg py-2 px-3"
+        @click="messageHover = !messageHover"
       >
         <div v-if="message.deleted">
           {{ $t('chat.message_deleted') }}
@@ -49,6 +50,7 @@
               </div>
             </v-bottom-sheet>
           </div>
+          
         </div>
 
         <div class="caption text-right">
@@ -61,6 +63,15 @@
           </span>
         </div>
       </v-card-text>
+      <v-card-actions v-if="!message.deleted && processedReactions.length" class="reactions-display">
+        <template v-for="reaction in processedReactions">
+          <div class="reaction-item" :key="reaction.emoji">
+            <span>{{ reaction.emoji }}</span>
+            <span>{{ reaction.count }}</span>
+          </div>
+        </template>
+      </v-card-actions>
+
 
       <div :class="message.owner === userId ? ' text-right' : 'text-left'">
         <v-btn v-if="messageHover"  icon @click="triggerMessageMenu">
@@ -71,16 +82,16 @@
         </v-btn>
       </div>    
 
-       <!-- Emoji Menu -->
-       <v-menu v-if="!thread" v-model="emojiMenu" offset-y transition="slide-y-transition">
+      <!-- Emoji Menu -->
+      <v-menu v-if="!thread" v-model="emojiMenu" bottom right transition="slide-y-transition">
         <template v-slot:activator="{ on }">
-          <div v-on="on" ref="menuActivator"></div>
+          <div v-on="on"></div>
         </template>
         <v-card>
           <v-card-text class="pa-0">
             <div class="py-0 d-flex justify-space-around">
-              <div v-for="(emoji, index) in emojis" :key="index" @click="selectEmoji(emoji)" class="px-2">
-                <span class="emoji-style">{{ emoji }}</span>
+              <div v-for="emoji in emojis" :key="emoji.name" @click="selectEmoji(emoji)" class="px-2">
+                <span class="emoji-style">{{ emoji.value }}</span>
               </div>
             </div>
           </v-card-text>
@@ -231,7 +242,21 @@ export default defineComponent({
     const messageMenu = ref(false)
     const messageThread = ref(false)
     const emojiMenu = ref(false)
-    const emojis = ref(['😀', '😂', '😍', '😢', '😡'])
+    const emojis = ref([
+      { name: 'smile', value: '😀' },
+      { name: 'laugh', value: '😂' },
+      { name: 'love', value: '😍' },
+      { name: 'sad', value: '😢' },
+      { name: 'angry', value: '😡' }
+    ]);
+
+    const processedReactions = computed(() => {
+      const reactions = props.message.reactions || {};
+      return Object.entries(reactions).map(([name, count]) => {
+        const emojiObj = emojis.value.find(emoji => emoji.name === name);
+        return { emoji: emojiObj ? emojiObj.value : '', count };
+      });
+    });
   
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
@@ -264,8 +289,18 @@ export default defineComponent({
       emojiMenu.value = !emojiMenu.value
     }
 
-    const selectEmoji = (emoji) => {
-      console.log('Selected emoji:', emoji);
+    const selectEmoji = async (emoji) => {
+      await dispatch('chats/messages/updateField', {
+        chatId: props.chat.id,
+        id: props.message.id,
+        data: {
+          reactions: { [emoji.name]: firebase.firestore.FieldValue.increment(1) }
+        }
+      }).then(() => {
+        console.log(`Incremented ${emoji.name}`);
+      }).catch((error) => {
+        console.error('Error incrementing reaction:', error);
+      });
       emojiMenu.value = false;
     }
 
@@ -323,7 +358,7 @@ export default defineComponent({
       showMedia,
       loading, 
       emojiMenu, triggerEmojiMenu, 
-      emojis, selectEmoji,
+      emojis, selectEmoji, processedReactions,
       messageMenu, triggerMessageMenu,
       messageThread, triggerMessageThread,
       deleteMessage,
@@ -336,6 +371,10 @@ export default defineComponent({
 })
 </script>
 <style>
+
+.avatar-align-top {
+  align-self: start;
+}
 
 .v-dialog {
   box-shadow: none !important;
@@ -354,6 +393,21 @@ export default defineComponent({
 .emoji-style {
   cursor: pointer;
   font-size: 18px;
+}
+
+.reactions-display {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 4px; /* Adjust based on your layout */
+}
+
+.reaction-item {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+  font-size: 0.75rem; /* Small font size for emoji and count */
+  white-space: nowrap;
 }
 
 
