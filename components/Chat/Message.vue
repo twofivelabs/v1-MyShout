@@ -77,29 +77,11 @@
         </v-col>
         <v-col 
           cols="2" class="pa-0"
-          :class="message.owner === userId ? ' text-right' : 'text-left'">
+          :class="message.owner === userId ? ' text-right' : 'text-left'"
+        >
           <v-btn v-if="messageHover"  icon @click="triggerMessageMenu">
             <v-icon small>mdi-dots-horizontal</v-icon>
           </v-btn>
-          <v-btn v-if="messageHover"  icon @click="triggerEmojiMenu">
-            <v-icon small>mdi-emoticon-happy-outline</v-icon>
-          </v-btn>
-
-          <!-- Emoji Menu -->
-          <v-menu v-if="!thread" v-model="emojiMenu" bottom right transition="slide-y-transition">
-            <template v-slot:activator="{ on }">
-              <div v-on="on"></div>
-            </template>
-            <v-card>
-              <v-card-text class="pa-0">
-                <div class="py-0 d-flex justify-space-around">
-                  <div v-for="emoji in emojis" :key="emoji.name" @click="selectEmoji(emoji)" class="px-2">
-                    <span class="emoji-style">{{ emoji.value }}</span>
-                  </div>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-menu>
 
           <!-- Message Menu -->
           <v-menu v-if="!thread" v-model="messageMenu" offset-y transition="slide-y-transition">
@@ -155,15 +137,36 @@
           </v-menu>
         </v-col>
         <v-col
-          cols="10" class="reactions-display mb-2 pa-0 align-center justify-end"
-          v-if="!message.deleted && processedReactions.length"
+          cols="10" class="reactions-display pa-0 align-center justify-end" style="margin-top:-5px;"
         >
-          <template v-for="reaction in processedReactions">
-            <div class="reaction-item" :key="reaction.emoji">
-              <span>{{ reaction.emoji }}</span>
-              <span>{{ reaction.count }}</span>
-            </div>
-          </template>
+          <div v-if="!message.deleted && reactions.length">
+            <template v-for="reaction in reactions">
+              <div class="reaction-item" :key="reaction.emoji">
+                <span>{{ reaction.emoji }}</span>
+                <span>{{ reaction.count }}</span>
+              </div>
+            </template>
+          </div>
+
+          <v-btn icon @click="triggerEmojiMenu">
+            <v-icon small>mdi-emoticon-happy-outline</v-icon>
+          </v-btn>
+          
+          <!-- Emoji Menu -->
+          <v-menu v-if="!thread" v-model="emojiMenu" bottom right transition="slide-y-transition">
+            <template v-slot:activator="{ on }">
+              <div v-on="on"></div>
+            </template>
+            <v-card>
+              <v-card-text class="pa-0">
+                <div class="py-0 d-flex justify-space-around">
+                  <div v-for="emoji in emojis" :key="emoji.name" @click="selectEmoji(emoji)" class="px-2">
+                    <span class="emoji-style">{{ emoji.value }}</span>
+                  </div>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-menu>
         </v-col>
       </v-row>
 
@@ -195,7 +198,7 @@ import {
   computed,
   useStore,
   useContext,
-  ref
+  ref, watch
 } from '@nuxtjs/composition-api'
 
 import { Touch } from 'vuetify/lib/directives'
@@ -259,6 +262,7 @@ export default defineComponent({
     const messageHover = ref(false)
     const messageMenu = ref(false)
     const messageThread = ref(false)
+    const reactions = ref([])
     const emojiMenu = ref(false)
     const emojis = ref([
       { name: 'smile', value: '😀' },
@@ -267,15 +271,7 @@ export default defineComponent({
       { name: 'sad', value: '😢' },
       { name: 'angry', value: '😡' }
     ]);
-
-    const processedReactions = computed(() => {
-      const reactions = props.message.reactions || {};
-      return Object.entries(reactions).map(([name, count]) => {
-        const emojiObj = emojis.value.find(emoji => emoji.name === name);
-        return { emoji: emojiObj ? emojiObj.value : '', count };
-      });
-    });
-  
+ 
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
     }
@@ -314,11 +310,14 @@ export default defineComponent({
         data: {
           reactions: { [emoji.name]: firebase.firestore.FieldValue.increment(1) }
         }
-      }).then(() => {
-        console.log(`Incremented ${emoji.name}`);
       }).catch((error) => {
         console.error('Error incrementing reaction:', error);
       });
+
+      const index = reactions.value.findIndex(reaction => reaction.emoji === emoji.value);
+      if (index !== -1) reactions.value[index].count += 1;
+      else reactions.value.push({ emoji: emoji.value, count: 1 });
+      
       emojiMenu.value = false;
     }
 
@@ -369,6 +368,20 @@ export default defineComponent({
       if (messageHover.value) messageHover.value = false
     }
 
+    watch(() => props.message.reactions, (newReactions) => {
+      if (newReactions) {
+        reactions.value = Object.entries(newReactions).map(([name, count]) => {
+          const emojiObj = emojis.value.find(emoji => emoji.name === name);
+          return {
+            emoji: emojiObj ? emojiObj.value : '',
+            count: count
+          };
+        });
+      } else {
+        reactions.value = [];
+      }
+    }, { deep: true, immediate: true });
+
     return {
       moment,
       user,
@@ -376,7 +389,7 @@ export default defineComponent({
       showMedia,
       loading, 
       emojiMenu, triggerEmojiMenu, 
-      emojis, selectEmoji, processedReactions,
+      emojis, selectEmoji, reactions,
       messageMenu, triggerMessageMenu,
       messageThread, triggerMessageThread,
       deleteMessage,
