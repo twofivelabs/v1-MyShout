@@ -48,7 +48,7 @@ export default defineComponent({
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const hasNotifications = computed(() => state.user.profile.has.notifications || false)
-    const messages = computed(() => state.user.profile.notifications.unseen || 0)
+    const messages = computed(() => state.user.profile.notifications?.unseen || 0)
 
     // DEFINE CONTENT
     const hasMounted = ref(false)

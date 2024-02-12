@@ -4,14 +4,15 @@
 
     <v-card 
       v-if="!message.hide || !message.hide.includes(userId)"
-      v-longpress="triggerMessageMenu"
       flat color="transparent"
-      :class="!(message.owner === userId) ? 'd-flex' : 'd-flex flex-row-reverse'"
+      :class="message.owner === userId ? 'd-flex flex-row-reverse align-center' : 'd-flex align-center'"
+      @mouseover="onHoverMessage"
+			@mouseleave="onLeaveMessage"
     >
       <ChatAvatar v-if="owner && message.owner !== userId" class="mx-2" :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
 
       <v-card-text
-        style="max-width:80%;min-width:50%" 
+        style="max-width:70%;min-width:50%" 
         :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" 
         class="break-words rounded-lg py-2 px-3"
       >
@@ -61,13 +62,30 @@
         </div>
       </v-card-text>
 
-       <!-- Tooltip -->
-      <v-tooltip v-if="!thread" top v-model="messageMenu">
-        <template v-slot:activator="{ on, attrs }">
-          <div v-bind="attrs" v-on="on"></div>
+      <div :class="message.owner === userId ? ' text-right' : 'text-left'">
+        <v-btn v-if="messageHover"  icon @click="triggerMessageMenu">
+          <v-icon small>mdi-dots-horizontal</v-icon>
+        </v-btn>
+        <v-btn v-if="messageHover"  icon @click="triggerEmojiMenu">
+          <v-icon small>mdi-emoticon-happy-outline</v-icon>
+        </v-btn>
+      </div>    
+
+       <!-- Emoji Menu -->
+       <v-menu v-if="!thread" v-model="emojiMenu" offset-y transition="slide-y-transition">
+        <template v-slot:activator="{ on }">
+          <div v-on="on" ref="menuActivator"></div>
         </template>
-        <span>Emoji Bubbles</span>
-      </v-tooltip>
+        <v-card>
+          <v-card-text class="pa-0">
+            <div class="py-0 d-flex justify-space-around">
+              <div v-for="(emoji, index) in emojis" :key="index" @click="selectEmoji(emoji)" class="px-2">
+                <span class="emoji-style">{{ emoji }}</span>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-menu>
 
       <!-- Message Menu -->
       <v-menu v-if="!thread" v-model="messageMenu" offset-y transition="slide-y-transition">
@@ -122,8 +140,6 @@
         </v-card>
       </v-menu>
     </v-card>
-      
-    <v-overlay v-if="!thread" v-model="messageMenu" scroll-strategy="block" />
 
     <v-bottom-sheet v-if="!thread" v-model="messageThread" :scrollable="true" max-width="700" fullscreen>
       <v-sheet class="ma-3" style="margin:0 !important;padding-bottom:180px;">
@@ -210,10 +226,13 @@ export default defineComponent({
     const userId = computed(() => state.user.data.uid)
     const showMedia = ref(false)
     const loading = ref(false)
-    
+
+    const messageHover = ref(false)
     const messageMenu = ref(false)
     const messageThread = ref(false)
-
+    const emojiMenu = ref(false)
+    const emojis = ref(['😀', '😂', '😍', '😢', '😡'])
+  
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
     }
@@ -238,6 +257,16 @@ export default defineComponent({
       } finally {
         loading.value = false
       }
+    }
+
+    const triggerEmojiMenu = () => {
+      if (props.thread) return;
+      emojiMenu.value = !emojiMenu.value
+    }
+
+    const selectEmoji = (emoji) => {
+      console.log('Selected emoji:', emoji);
+      emojiMenu.value = false;
     }
 
     const triggerMessageMenu = () => {
@@ -279,18 +308,29 @@ export default defineComponent({
       if (res) return triggerMessageMenu()
     }
 
+    const onHoverMessage = () => {
+      if (!messageHover.value) messageHover.value = true
+    }
+
+    const onLeaveMessage = () => {
+      if (messageHover.value) messageHover.value = false
+    }
+
     return {
       moment,
       user,
       userId,
       showMedia,
       loading, 
+      emojiMenu, triggerEmojiMenu, 
+      emojis, selectEmoji,
       messageMenu, triggerMessageMenu,
       messageThread, triggerMessageThread,
       deleteMessage,
       downloadFile, deleteFile,
       getReadStatusIcon,
       startMessageReply,
+      messageHover, onHoverMessage, onLeaveMessage
     }
   }
 })
@@ -310,5 +350,11 @@ export default defineComponent({
  min-height:25px;
  padding:0 20px 0 0;
 }
+
+.emoji-style {
+  cursor: pointer;
+  font-size: 18px;
+}
+
 
 </style>
