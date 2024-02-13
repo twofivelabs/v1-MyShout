@@ -47,7 +47,9 @@ export default {
             console.log('STICKY: [gps] READY ', state, JSON.stringify(state))
             // YES -- .ready() has now resolved.
             await BackgroundGeolocation.start().then(async () => {
-                await this.gpsGetCurrentPosition()
+                const gps = await this.gpsGetCurrentPosition()
+                this.gpsWatchPosition()
+                await window.$nuxt.context.store.dispatch('user/updateGPS', gps)
             })
         }).catch(error => {
             console.log('STICKY: [gps] READY ERROR ', error, JSON.stringify(error))
@@ -103,5 +105,27 @@ export default {
             console.log('STICKY: [gps] error ', error, JSON.stringify(error))
             return error
         })
+    },
+
+    gpsWatchPosition() {
+        BackgroundGeolocation.onHeartbeat(heartbeatEvent => {
+            console.log("STICKY: [gps] [background] [heartbeat] ", heartbeatEvent)
+        })
+        BackgroundGeolocation.onLocation((location) => {
+            console.log("STICKY: [gps] [background] [onLocation] success: ", location);
+        }, (error) => {
+            console.log("STICKY: [gps] [background] [onLocation] ERROR: ", error);
+        });
+        BackgroundGeolocation.watchPosition((location) => {
+            console.log("STICKY: [gps] [background] [watchPosition] -", location);
+        }, (errorCode) => {
+            console.log("STICKY: [gps] [background] [watchPosition] ERROR -", errorCode);
+        }, {
+            interval: 1000,
+            desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+            persist: true,
+            extras: {foo: "bar"},
+            timeout: 60000
+        });
     }
 }
