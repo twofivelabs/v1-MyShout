@@ -89,11 +89,11 @@ export default defineComponent({
 
     // MOUNTED
     onMounted(async () => {
-      // NEW GPS
-      await $capacitor.gpsInit()
-
       // Check user if they have profile pieces
       setTimeout(() => {
+        // NEW GPS
+        $capacitor.gpsInit()
+
         try {
           Preferences.set({
             key: 'currentUserId',

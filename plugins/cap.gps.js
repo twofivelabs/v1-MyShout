@@ -1,10 +1,11 @@
 import BackgroundGeolocation from "@transistorsoft/capacitor-background-geolocation"
-// import {BackgroundFetch} from '@transistorsoft/capacitor-background-fetch'
+//import {BackgroundFetch} from '@transistorsoft/capacitor-background-fetch'
 import { Device } from '@capacitor/device'
 
 const geoLocationConfig = {
     // Activity Recognition
     stopTimeout: 5,
+    heartbeatInterval: 60,
     // Application config
     debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
     logLevel: BackgroundGeolocation.LOG_LEVEL_VERBOSE,
@@ -29,64 +30,45 @@ const currentPositionOptions = {
 let isGpsInit = false
 
 export default {
+    /**
+     * Init GPS and add watchers
+     * @returns {Promise<void>}
+     */
     async gpsInit() {
         if (isGpsInit) return
 
         console.log('STICKY: [gps] gpsInit')
         isGpsInit = true
 
-        const device = await Device.getInfo()
-
         // DESKTOP / WEBSITES
+        const device = await Device.getInfo()
         if (device.platform === 'web') {
-            console.log('STICKY: Background, not available on web')
+            console.log('STICKY: [gps] Background, not available on web')
             return
         }
 
         BackgroundGeolocation.ready(geoLocationConfig).then(async (state) => {
-            console.log('STICKY: [gps] READY ', state, JSON.stringify(state))
-            // YES -- .ready() has now resolved.
-            await BackgroundGeolocation.start().then(async () => {
-                const gps = await this.gpsGetCurrentPosition()
-                this.gpsWatchPosition()
-                await window.$nuxt.context.store.dispatch('user/updateGPS', gps)
-            })
+            console.log('STICKY: [gps] GEO STATE', state, JSON.stringify(state))
+            if (!state.enabled) {
+                // YES -- .ready() has now resolved.
+                await BackgroundGeolocation.start().then(async () => {
+                    // await window.$nuxt.context.store.dispatch('user/updateGPS', gps)
+                })
+            } else {
+                console.log('STICKY: [gps] READY BackgroundGeolocation')
+                setTimeout(() => {
+                    console.log('STICKY: [gps] INIT ITEMS')
+                    this.gpsGetCurrentPosition().then(gps => {
+                        window.$nuxt.context.store.dispatch('user/updateGPS', gps)
+                    })
+                    this.gpsHeartbeatPosition()
+                }, 10000)
+            }
+
         }).catch(error => {
             console.log('STICKY: [gps] READY ERROR ', error, JSON.stringify(error))
         })
     },
-    /* async initBackgroundFetch() {
-        const status = await BackgroundFetch.configure({
-            minimumFetchInterval: 3
-        }, async (taskId) => {
-            console.log('STICKY: [gps] [BackgroundFetch] EVENT:', taskId)
-            // Perform your work in an awaited Promise
-            const result = this.performBackgroundFetch()
-            console.log('STICKY: [gps] [BackgroundFetch] work complete:', result)
-            // [REQUIRED] Signal to the OS that your work is complete.
-            // await BackgroundFetch.finish(taskId)
-        }, async (taskId) => {
-            // The OS has signalled that your remaining background-time has expired.
-            // You must immediately complete your work and signal #finish.
-            console.log('STICKY: [gps] [BackgroundFetch] TIMEOUT:', taskId)
-            // [REQUIRED] Signal to the OS that your work is complete.
-            await BackgroundFetch.finish(taskId)
-        })
-
-        // Checking BackgroundFetch status:
-        if (status !== BackgroundFetch.STATUS_AVAILABLE) {
-            // Uh-oh:  we have a problem:
-            if (status === BackgroundFetch.STATUS_DENIED) {
-                console.log('STICKY: [gps] The user explicitly disabled background behavior for this app or for the whole system.');
-            } else if (status === BackgroundFetch.STATUS_RESTRICTED) {
-                console.log('STICKY: [gps] Background updates are unavailable and the user cannot enable them again.')
-            }
-        }
-    }, */
-    /* performBackgroundFetch() {
-        console.log('STICKY: [gps] performBackgroundFetch')
-        return true
-    }, */
 
     /**
      * RESPONSE: {"is_moving":false,"uuid":"21b3b4e4-ee0b-4e76-ae8a-d5509edb2e82","timestamp":"2024-02-12T20:39:10.732Z","age":82,"odometer":0,"coords":{"latitude":50.11398,"longitude":-119.39603,"accuracy":5,"speed":20.39,"speed_accuracy":0.5,"heading":209,"heading_accuracy":30,"altitude":0,"ellipsoidal_altitude":0,"altitude_accuracy":0.5,"age":88},"activity":{"type":"still","confidence":100},"battery":{"is_charging":false,"level":1},"extras":{}}
@@ -107,25 +89,60 @@ export default {
         })
     },
 
-    gpsWatchPosition() {
-        BackgroundGeolocation.onHeartbeat(heartbeatEvent => {
-            console.log("STICKY: [gps] [background] [heartbeat] ", heartbeatEvent)
+    gpsHeartbeatPosition() {
+        console.log('STICKY: [gps] [onHeartbeat] Try Watching GPS Position')
+        BackgroundGeolocation.onHeartbeat(async () => {
+
+            const taskId = await BackgroundGeolocation.startBackgroundTask()
+            try {
+                // Perform long-running tasks
+                const location = await BackgroundGeolocation.getCurrentPosition({
+                    samples: 3,
+                    timeout: 30,
+                    extras: {
+                        "event": "heartbeat"
+                    }
+                })
+                console.log("STICKY: [gps] [onHeartbeat] location:", location, JSON.stringify(location))
+            } catch(error) {
+                console.log("STICKY: [gps] [onHeartbeat] ERROR:", error, JSON.stringify(error))
+            }
+            // Be sure to signal completion of your background-task:
+            await BackgroundGeolocation.stopBackgroundTask(taskId)
+        });
+    },
+
+    /* async gpsInitBackgroundFetch() {
+        const status = await BackgroundFetch.configure({
+            minimumFetchInterval: 1
+        }, async (taskId) => {
+            console.log('STICKY: [gps] [BackgroundFetch] EVENT:', taskId)
+            // Perform your work in an awaited Promise
+            const result = this.gpsPerformBackgroundFetch()
+            console.log('STICKY: [gps] [BackgroundFetch] work complete:', result)
+            // [REQUIRED] Signal to the OS that your work is complete.
+            // await BackgroundFetch.finish(taskId)
+        }, async (taskId) => {
+            // The OS has signalled that your remaining background-time has expired.
+            // You must immediately complete your work and signal #finish.
+            console.log('STICKY: [gps] [BackgroundFetch] TIMEOUT:', taskId)
+            // [REQUIRED] Signal to the OS that your work is complete.
+            // await BackgroundFetch.finish(taskId)
         })
-        BackgroundGeolocation.onLocation((location) => {
-            console.log("STICKY: [gps] [background] [onLocation] success: ", location);
-        }, (error) => {
-            console.log("STICKY: [gps] [background] [onLocation] ERROR: ", error);
-        });
-        BackgroundGeolocation.watchPosition((location) => {
-            console.log("STICKY: [gps] [background] [watchPosition] -", location);
-        }, (errorCode) => {
-            console.log("STICKY: [gps] [background] [watchPosition] ERROR -", errorCode);
-        }, {
-            interval: 1000,
-            desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
-            persist: true,
-            extras: {foo: "bar"},
-            timeout: 60000
-        });
-    }
+
+        // Checking BackgroundFetch status:
+        if (status !== BackgroundFetch.STATUS_AVAILABLE) {
+            // Uh-oh:  we have a problem:
+            if (status === BackgroundFetch.STATUS_DENIED) {
+                console.log('STICKY: [gps] The user explicitly disabled background behavior for this app or for the whole system.');
+            } else if (status === BackgroundFetch.STATUS_RESTRICTED) {
+                console.log('STICKY: [gps] Background updates are unavailable and the user cannot enable them again.')
+            }
+        }
+    },
+    gpsPerformBackgroundFetch() {
+        console.log('STICKY: [gps] performBackgroundFetch')
+        return true
+    }, */
+
 }
