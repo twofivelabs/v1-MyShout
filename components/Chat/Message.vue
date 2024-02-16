@@ -1,6 +1,58 @@
 <template #activator="{ isActive, props }">
   <main class="mb-3 px-3">
-    <div v-if="!message.forward">
+    <div v-if="message.forward && forward">
+      <v-row
+        class="align-center py-3"
+        :class="message.owner === userId ? 'flex-row-reverse ' : ''"
+      >
+      </v-row>
+      <v-col 
+          cols="9" class="py-0"
+          v-if="!forward.hide || !forward.hide.includes(userId)"
+          
+        >
+          <div
+            style="width:100%" 
+            :class="!forward.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" 
+            class="break-words rounded-lg py-2 px-3"
+          >
+            <div v-if="forward.deleted">
+              {{ $t('chat.message_deleted') }}
+            </div>
+
+            <div v-else>
+              <div v-if="forward.message" class="mb-3">
+                {{ forward.message }}
+              </div>
+
+              <div v-if="forward.audioUrl">
+                <ChatPlayaudio v-if="!forward.audioExpired" :file="forward.audioUrl" />
+                <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
+              </div>
+
+              <div v-if="forward.image">
+                <v-bottom-sheet v-model="showMedia" style="box-shadow:none !important;" :hide-overlay="true" class="elevation-0" :scrollable="false" width="100%" max-width="700">
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-img :src="`${forward.image}`" v-bind="attrs" v-on="on" />
+                  </template>
+
+                  <div style="margin-bottom:45%;">
+                    <v-img :src="`${forward.image}`" class="elevation-12 rounded-lg mx-1" />
+                    <div class="text-center">
+                      <v-btn @click="showMedia = !showMedia" color="primary" class="mt-n7" fab>
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </div>
+                  </div>
+                </v-bottom-sheet>
+              </div>
+              
+            </div>
+          </div>
+        </v-col>
+    </div>
+
+    <div v-if="message.message">
       <v-row
         class="align-center py-3"
         :class="message.owner === userId ? 'flex-row-reverse ' : ''"
@@ -171,6 +223,7 @@ import {
   useStore,
   useContext,
   ref,
+  watch
 } from '@nuxtjs/composition-api'
 
 import { Touch } from 'vuetify/lib/directives'
@@ -225,7 +278,7 @@ export default defineComponent({
   directives: { Touch },
   setup(props, { emit }) {
     const { state, dispatch } = useStore()
-    const { $helper, $fire } = useContext()
+    const { $helper, $fire, $encryption } = useContext()
     const user = computed(() => state.user)
     const userId = computed(() => state.user.data.uid)
     const showMedia = ref(false)
@@ -234,7 +287,9 @@ export default defineComponent({
     const messageHover = ref(false)
     const messageMenu = ref(false)
     const messageThread = ref(false)
+
     const messageForward = ref(false)
+    const forward = ref(null)
  
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
@@ -313,6 +368,42 @@ export default defineComponent({
       if (messageHover.value) messageHover.value = false
     }
 
+    const loadforward = async (m) => {
+      loading.value = true;
+
+      if (!m.forward) return loading.value = false;
+
+      try {
+        const snapshot = await $fire.firestore
+          .doc(`Chats/${m.forward.chat}/Messages/${m.forward.message}`)
+          .get();
+
+        const data = snapshot.exists ? snapshot.data() : null;
+        console.log("KYLE DATA", data)
+
+        if (data.message) data.messge = $encryption.decrypt(data.messge);
+        forward.value = data;
+        console.log("KYLE:",forward)
+      } catch (error) {
+        console.error("Error loading forwarded message:", error);
+        forward.value = null;
+      } finally {
+        loading.value = false
+      }
+    };
+
+    watch(() => props.message, (m) => {
+      if (m && m.forward) {
+        console.log("KYLE:", m.forward)
+        loadforward(m);
+      } else {
+        forward.value = null;
+      }
+    }, {
+      immediate: true,
+      deep: true
+    });
+
     return {
       moment,
       user,
@@ -322,6 +413,7 @@ export default defineComponent({
       messageMenu, triggerMessageMenu,
       messageThread, triggerMessageThread,
       messageForward, triggerMessageForward,
+      forward,
       deleteMessage,
       downloadFile, deleteFile,
       getReadStatusIcon,

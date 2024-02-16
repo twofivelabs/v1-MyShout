@@ -153,7 +153,10 @@ import {
             owner: user.value.data.uid,
             seen: [user.value.data.uid],
             message: $encryption.encrypt(newMessage.value),
-            forward: props.message.id
+            forward: {
+              chat: props.chat.id,
+              message: props.message.id
+            }
           }
 
           for(const c of selectedChats.value) {
@@ -184,7 +187,6 @@ import {
 
       watch([() => props.chat, () => props.message], ([newChat, newMessage]) => {
         if (newChat && newMessage) {
-          console.log('Chat or message has changed. Fetching friends and recent chats...');
           getFriends();
           getRecentChats();
         }
