@@ -1,19 +1,15 @@
 <template #activator="{ isActive, props }">
   <main class="mb-3 px-3">
     <div v-if="message.forward && forward">
-      <v-row
-        class="align-center py-3"
-        :class="message.owner === userId ? 'flex-row-reverse ' : ''"
-      >
-      </v-row>
-      <v-col 
+      <v-row class="align-center py-1" :class="message.owner === userId ? 'flex-row-reverse ' : ''">
+        <v-col 
           cols="9" class="py-0"
           v-if="!forward.hide || !forward.hide.includes(userId)"
           
         >
           <div
             style="width:100%" 
-            :class="!forward.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" 
+            :class="!forward.deleted ? ((message.owner === userId) ? 'primary darken-1 rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" 
             class="break-words rounded-lg py-2 px-3"
           >
             <div v-if="forward.deleted">
@@ -22,7 +18,7 @@
 
             <div v-else>
               <div v-if="forward.message" class="mb-3">
-                {{ forward.message }}
+                Forward: {{ forward.message }}
               </div>
 
               <div v-if="forward.audioUrl">
@@ -50,6 +46,7 @@
             </div>
           </div>
         </v-col>
+      </v-row>
     </div>
 
     <div v-if="message.message">
@@ -371,7 +368,7 @@ export default defineComponent({
     const loadforward = async (m) => {
       loading.value = true;
 
-      if (!m.forward) return loading.value = false;
+      if (!m.forward) return;
 
       try {
         const snapshot = await $fire.firestore
@@ -379,11 +376,9 @@ export default defineComponent({
           .get();
 
         const data = snapshot.exists ? snapshot.data() : null;
-        console.log("KYLE DATA", data)
 
         if (data.message) data.messge = $encryption.decrypt(data.messge);
         forward.value = data;
-        console.log("KYLE:",forward)
       } catch (error) {
         console.error("Error loading forwarded message:", error);
         forward.value = null;
@@ -393,12 +388,7 @@ export default defineComponent({
     };
 
     watch(() => props.message, (m) => {
-      if (m && m.forward) {
-        console.log("KYLE:", m.forward)
-        loadforward(m);
-      } else {
-        forward.value = null;
-      }
+      if (m && m.forward) loadforward(m);
     }, {
       immediate: true,
       deep: true
