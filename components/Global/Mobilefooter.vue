@@ -8,14 +8,12 @@
       <v-btn class="pb-3" color="accent-4" style="height:inherit" text to="/">
         <v-icon>mdi-home</v-icon>
       </v-btn>
-      <NotificationsButton>
-        <v-btn class="pb-3" color="accent-4" style="height:100%" text>
-          <v-badge v-if="hasNotifications" dot overlap color="myshoutRed">
-            <v-icon>mdi-bell</v-icon>
-          </v-badge>
-          <v-icon v-else>mdi-bell</v-icon>
-        </v-btn>
-      </NotificationsButton>
+      <v-btn class="pb-3" color="accent-4" style="height:100%" text to="/notifications">
+        <v-badge v-if="hasNotifications" dot overlap color="myshoutRed">
+          <v-icon>mdi-bell</v-icon>
+        </v-badge>
+        <v-icon v-else>mdi-bell</v-icon>
+      </v-btn>
       <v-btn class="pb-3" color="accent-4" style="height:inherit" text to="/chats">
         <v-badge v-if="messages" overlap :content="messages" :bordered="false" color="myshoutRed">
           <v-icon>mdi-forum</v-icon>
@@ -69,13 +67,6 @@ export default defineComponent({
 })
 </script>
 <style scoped>
->>> .bottom-sheet {
-  align-self: flex-end;
-}
-
->>> .v-dialog {
-  margin: 0;
-}
 
 .footer-cart, .footer-orders {
   height: 75vh;
