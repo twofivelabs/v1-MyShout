@@ -25,8 +25,8 @@
         <template v-for="(chat, index) in chatList">
           <v-list-item v-if="chat" :key="index">
             <NuxtLink :to="`/chats/chat/${chat.id}`">
-              <v-badge v-if="chat.unseenMessages && chat.unseenMessages[user.data.uid] > 0" 
-                :content="chat.unseenMessages[user.data.uid]" 
+              <v-badge v-if="chat.unseen && chat.unseen[user.data.uid] > 0" 
+                :content="chat.unseen[user.data.uid]" 
                 color="myshoutRed" overlap offset-x="25"
               >
                 <ChatTopavatar :chat="chat" class="mr-3" />
@@ -42,7 +42,7 @@
                   <span class="caption">{{ moment(chat.created_at.toDate()).fromNow() }}</span>
                 </v-list-item-title>
                 <v-list-item-subtitle>
-                  <Span v-if="chat.lastMessageSender">{{ chat.lastMessageSender }}: </Span>{{ chat.lastMessage }}
+                  <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ chat.lastMessage }}
                 </v-list-item-subtitle>
               </v-list-item-content>
             </NuxtLink>
@@ -86,7 +86,7 @@ export default defineComponent({
         chatsListener.value = await $fire.firestore
           .collection('Chats')
           .where('participants', 'array-contains', user.value.data.uid)
-          .orderBy('lastMessageSent', 'desc')
+          .orderBy('message.created_at', 'desc')
           .onSnapshot(async (snapshot) => {
             let updatedChatList = [...chatList.value]; // Create a copy of the current chat list
 
@@ -94,9 +94,9 @@ export default defineComponent({
               const data = change.doc.data();
               data.id = change.doc.id;
 
-              if (data.lastMessageSender) {
-                const u = await dispatch('user/getOne', data.lastMessageSender);
-                data.lastMessageSender = u.first_name ?? u.username;
+              if (data.message.sent_by) {
+                const u = await dispatch('user/getOne', data.message.sent_by);
+                data.message.sent_by = u.first_name ?? u.username;
               }
 
               const existingIndex = updatedChatList.findIndex((chat) => chat.id === data.id);

@@ -24,11 +24,14 @@ class Chats extends FirestoreHelpers {
       participants: [],
       admins: [],
       seen: [],
+      unseen: [],
       typing: [],
       muted: [],
-      lastMessage: null,
-      lastMessageSent: null,
-      lastMessageSender: null
+      message: {
+        snippet: null,
+        created_at: null,
+        sent_by: null
+      }
     }
     return this
   }

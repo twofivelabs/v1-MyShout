@@ -104,8 +104,11 @@
           // Update chat's last message information.
           await dispatch('chats/updateField', {
             id: props.chat.id,
-            lastMessageSent: new Date(),
-            lastMessage: newMessage.value || null,
+            message: {
+              created_at: new Date(),
+              snippet: newMessage.value || null,
+              sent_by: user.value.data.uid
+            },
             seen: [user.value.data.uid]
           });
 
