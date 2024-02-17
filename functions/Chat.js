@@ -5,8 +5,6 @@ const serviceAccount = functions.config().env.production==="true" ? require("./s
 const cors = require('cors')({origin: true});
 
 const moment = require("moment");
-const fetch = require('node-fetch');
-const cheerio = require('cheerio');
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -41,10 +39,10 @@ exports.ChatMessageOnWrite = functions.firestore
         participantsToUpdate.forEach(userId => {
             const userRef = db.doc(`Users/${userId}`);
             batch.update(userRef, {
-                "notifications.unseen": admin.firestore.FieldValue.increment(1)
+                "notifications.messages": admin.firestore.FieldValue.increment(1)
             });
             
-            const unseenCountKey = `unseenMessages.${userId}`;
+            const unseenCountKey = `unseen.${userId}`;
             batch.update(chatDocRef, {
                 [unseenCountKey]: admin.firestore.FieldValue.increment(1)
             });
@@ -72,7 +70,7 @@ exports.ChatMessageOnWrite = functions.firestore
             }
 
             const chatDocRef = db.doc(`Chats/${ChatId}`);
-            const unseenCountKey = `unseenMessages.${userId}`;
+            const unseenCountKey = `unseen.${userId}`;
             const chatSnap = await chatDocRef.get();
             const chatData = chatSnap.data();
             
@@ -120,17 +118,7 @@ exports.fetchUrlMetadata = functions.https.onRequest((request, response) => {
     if (!url) return response.status(400).send('URL is required');
     
     try {
-      const htmlResponse = await fetch(url);
-      const html = await htmlResponse.text();
-      const $ = cheerio.load(html);
-    
-      const metadata = {
-         title: $('title').first().text(),
-         description: $('meta[name="description"]').attr('content'),
-        image: $('meta[property="og:image"]').attr('content') || $('meta[name="twitter:image"]').attr('content'),
-      };
-    
-      response.status(200).json(metadata);
+      response.status(200).json("Got it");
     } catch (error) {
       console.error('Error fetching URL metadata:', error);
       response.status(500).send('Failed to fetch URL metadata');

@@ -62,6 +62,9 @@ exports.AddUserRole = functions.auth.user().onCreate((authUser) => {
             notifications: {
               hasNotifications: false,
               hasMessages: false,
+              messages: 0,
+              alerts: 0,
+              requests: 0
             },
             gps: {
               lat: null,
