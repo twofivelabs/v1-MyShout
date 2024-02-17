@@ -1,6 +1,6 @@
 <template>
   <div class="message">
-    <p>{{ link.text }}</p>
+    <p>{{ url.text }}</p>
     <div v-if="metadata.title" class="link-preview">
       <img v-if="metadata.image" :src="metadata.image" alt="Preview" class="preview-image">
       <p class="title">{{ metadata.title }}</p>
@@ -10,39 +10,40 @@
 </template>
 
 <script>
-import { defineComponent, ref, watch } from '@nuxtjs/composition-api';
+import { 
+  defineComponent, 
+  ref, 
+  watch 
+} from '@nuxtjs/composition-api';
 
 export default defineComponent({
   name: 'ChatMessageLink',
   props: {
-    link: {
-      type: String,
-      default: "",
-    },
+    url: {
+      ttype: Object,
+      default: () => {
+        return {}
+      }
+    }
   },
   setup(props) {
     const metadata = ref({});
 
     async function fetchMetadata(url) {
-      try {
-        // Assuming 'fetchUrlMetadata' is your API endpoint that handles CORS and returns metadata
-        const response = await fetch(`https://your-backend.com/fetchUrlMetadata?url=${encodeURIComponent(url)}`);
-        if (response.ok) {
-          const data = await response.json();
-          metadata.value = {
-            title: data.title,
-            description: data.description,
-            image: data.image, // Assuming 'image' is part of the returned metadata
-          };
-        }
+      try {        
+        if (!url.href) return;
+        
+        console.log("KYLE:", url.href)
+        //const response = await fetch(`https://your-backend.com/fetchUrlMetadata?url=${encodeURIComponent(url)}`);
+
       } catch (error) {
         console.error("Failed to fetch URL metadata:", error);
       }
     }
 
-    watch(() => props.link, (newLink, oldLink) => {
-      if (newLink && newLink !== oldLink) {
-        fetchMetadata(newLink);
+    watch(() => props.url, (n, o) => {
+      if (n && n !== o) {
+        fetchMetadata(n);
       }
     }, { immediate: true });
     

@@ -67,7 +67,7 @@
           v-if="message.urls && message.urls.length > 0" 
           cols="12" :class="message.owner === userId ? ' text-right' : 'text-left'"
         >
-          {{ message.urls[0] }}
+          <!--<ChatMessageLink :url="message.urls[0]" />>-->
         </v-col>
 
         <v-col cols="1" v-if="owner && message.owner !== userId" class="avatar-align-top">
