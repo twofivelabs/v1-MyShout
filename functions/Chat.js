@@ -3,7 +3,10 @@ const admin = require("firebase-admin");
 const serviceAccount = functions.config().env.production==="true" ? require("./service-production.json") : require("./service-development.json");
 
 const cors = require('cors')({origin: true});
+
 const moment = require("moment");
+const fetch = require('node-fetch');
+const cheerio = require('cheerio');
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -106,3 +109,31 @@ exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 
         });
       });
     });
+
+
+// 
+// firebase deploy --only functions:Chat-fetchUrlMetadata
+exports.fetchUrlMetadata = functions.https.onRequest((request, response) => {
+  cors(request, response, async () => {
+    const { url } = request.query;
+    
+    if (!url) return response.status(400).send('URL is required');
+    
+    try {
+      const htmlResponse = await fetch(url);
+      const html = await htmlResponse.text();
+      const $ = cheerio.load(html);
+    
+      const metadata = {
+         title: $('title').first().text(),
+         description: $('meta[name="description"]').attr('content'),
+        image: $('meta[property="og:image"]').attr('content') || $('meta[name="twitter:image"]').attr('content'),
+      };
+    
+      response.status(200).json(metadata);
+    } catch (error) {
+      console.error('Error fetching URL metadata:', error);
+      response.status(500).send('Failed to fetch URL metadata');
+    }
+  });
+});

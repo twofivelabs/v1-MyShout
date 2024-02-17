@@ -44,6 +44,7 @@
   import 'firebase/functions';
 
   import debounce from 'lodash/debounce';
+  import * as linkify from 'linkifyjs';
   
   export default defineComponent({
     name: 'ChatInput',
@@ -65,58 +66,61 @@
   
       const sendMessage = async () => {
         try {
-        if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
+          if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
+            $notify.show({
+              text: i18n.t('notify.error_try_again'),
+              color: 'error'
+            });
+            return;
+          }
+
+          const urls = linkify.find(newMessage.value) || []
+
+          let encryptedMessage = null;
+
+          if (newMessage.value) {
+            encryptedMessage = $encryption.encrypt(newMessage.value);
+          }
+
+          // Dispatch action to add a new message.
+          const res = await dispatch('chats/messages/add', {
+            chatId: props.chat.id,
+            message: {
+              message: encryptedMessage,
+              urls: urls,
+              replyTo: props.reply ? props.reply.id : null,
+              image: imageMessageUrl.value || null,
+              owner: user.value.data.uid,
+              seen: [user.value.data.uid]
+            }
+          });
+
+          if (res && props.reply) {
+            await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(props.reply.id).update({
+              replies: firebase.firestore.FieldValue.arrayUnion(res.id)
+            })
+          } 
+
+          // Update chat's last message information.
+          await dispatch('chats/updateField', {
+            id: props.chat.id,
+            lastMessageSent: new Date(),
+            lastMessage: newMessage.value || null,
+            seen: [user.value.data.uid]
+          });
+
+          clearReply()
+          newMessage.value = null;
+          imageMessageUrl.value = null;
+
+          emit("messageSent")
+        } catch (e) {
           $notify.show({
             text: i18n.t('notify.error_try_again'),
             color: 'error'
           });
-          return;
+          console.log("STICKY: Cannot Send Message", e);
         }
-
-        let encryptedMessage = null;
-
-        if (newMessage.value) {
-          encryptedMessage = $encryption.encrypt(newMessage.value);
-        }
-
-        // Dispatch action to add a new message.
-        const res = await dispatch('chats/messages/add', {
-          chatId: props.chat.id,
-          message: {
-            message: encryptedMessage,
-            replyTo: props.reply ? props.reply.id : null,
-            image: imageMessageUrl.value || null,
-            owner: user.value.data.uid,
-            seen: [user.value.data.uid]
-          }
-        });
-
-        if (res && props.reply) {
-          await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(props.reply.id).update({
-            replies: firebase.firestore.FieldValue.arrayUnion(res.id)
-          })
-        } 
-
-        // Update chat's last message information.
-        await dispatch('chats/updateField', {
-          id: props.chat.id,
-          lastMessageSent: new Date(),
-          lastMessage: newMessage.value || null,
-          seen: [user.value.data.uid]
-        });
-
-        clearReply()
-        newMessage.value = null;
-        imageMessageUrl.value = null;
-
-        emit("messageSent")
-      } catch (e) {
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'error'
-        });
-        console.log("STICKY: Cannot Send Message", e);
-      }
       };
   
       const updateTyping = debounce((isTyping) => {

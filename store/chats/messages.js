@@ -17,6 +17,7 @@ class Messages extends FirestoreHelpers {
             hide: [],
             image: null,
             audioUrl: '',
+            urls: [],
             seen: []
         }
         return this

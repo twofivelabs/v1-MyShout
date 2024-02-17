@@ -62,6 +62,14 @@
         >
           <ChatMessageReply :chat="chat" :message="message" :participants="participants"/>
         </v-col>
+        
+        <v-col 
+          v-if="message.urls && message.urls.length > 0" 
+          cols="12" :class="message.owner === userId ? ' text-right' : 'text-left'"
+        >
+          {{ message.urls[0] }}
+        </v-col>
+
         <v-col cols="1" v-if="owner && message.owner !== userId" class="avatar-align-top">
           <ChatAvatar :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
         </v-col>
@@ -81,9 +89,10 @@
             </div>
 
             <div v-else>
-              <div v-if="message.message" class="mb-3">
-                {{ message.message }}
-              </div>
+              <div 
+                v-if="message.message"  class="mb-3" 
+                v-html="message.message"  
+              />
 
               <div v-if="message.audioUrl">
                 <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />
@@ -226,6 +235,7 @@ import {
 import { Touch } from 'vuetify/lib/directives'
 
 import moment from 'moment'
+
 import firebase from 'firebase';
 import 'firebase/functions';
 

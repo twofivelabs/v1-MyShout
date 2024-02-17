@@ -54,7 +54,7 @@ export default defineComponent({
   middleware: 'authenticated',
   directives: { Intersect },
   setup() {
-    const { $vuetify, $fire, $capacitor, $encryption } = useContext();
+    const { $vuetify, $fire, $helper, $capacitor, $encryption } = useContext();
     const { dispatch, state } = useStore();
     const route = useRoute();
     const user = computed(() => state.user);
@@ -120,7 +120,9 @@ export default defineComponent({
               const data = change.doc.data();
               data.id = change.doc.id;
               data.ownerData = participants.value[data.owner];
+
               if (data.message) data.message = $encryption.decrypt(data.message);
+              if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
 
               // Check if the message already exists before adding
               const messageExists = messages.value.some(message => message.id === data.id);
