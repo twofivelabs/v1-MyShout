@@ -2,6 +2,7 @@
   <v-btn
       :loading="isUploading"
       @click="beginUpload"
+      :disabled="fileUrl ? true : false"
       color="transparent"
       elevation="0"
       class="pa-0"
@@ -9,16 +10,9 @@
       fab
   >
     <input type="file" accept="*" ref="fileInput" style="display: none;" @change="handleUpload" /> 
-    <v-badge
-        :content="1"
-        :value="uploadComplete"
-        color="green"
-        overlap
-    >
-      <v-icon>
-        mdi-file
-      </v-icon>
-    </v-badge>
+    <v-icon>
+      mdi-file
+    </v-icon>
   </v-btn>
 </template>
 <script>
@@ -76,26 +70,23 @@ export default defineComponent({
     };
 
     const handleUpload = async (event) => {
+      console.log("KYLE: handleUpload", event)
       isUploading.value = true; // Show loading state
       try {
         const file = event.target.files[0]; 
+        console.log("KYLE: File", file)
 
         if (!file) return; // No file selected
 
-        // Optional - basic file type checks 
-        if (!file.type.startsWith('image/') && !['application/pdf'].includes(file.type)) {
-            // Show an error message for unsupported file types 
-            return;
-        }
 
-        const fileData = await readFileAsDataURL(file); // See Helper Function below
+        const fileData = await readFileAsDataURL(file);
+        console.log("KYLE: FileData", fileData)
 
         const path = `/CHATS/${props.chat.id}/${ new Date().getTime() }.${fileExtension(file.type)}`;
 
         const uploadResult = await $db.upload({ 
           path, 
           data: fileData, 
-          base64: true 
         });
 
         if (uploadResult) {
@@ -104,7 +95,7 @@ export default defineComponent({
           emit('url', uploadUrl.value)
         }
       } catch (error) {
-        // ... handle upload error
+        console.log("KYLE: Error Uploading File", error)
       } finally {
         isUploading.value = false; 
         fileInput.value.value = null; // Reset file input

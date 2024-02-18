@@ -275,7 +275,8 @@ export default {
         thread: 'Ver hilo',
         message_thread: 'Hilo de Mensajes',
         forward_to: 'Reenviar a',
-        recent_chats: 'Chats Recientes'
+        recent_chats: 'Chats Recientes',
+        download_file: 'Descargar Archivo'
     },
 
     no_results: 'No hay resultados',

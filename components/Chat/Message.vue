@@ -90,8 +90,14 @@
             <div v-else>
               <div 
                 v-if="message.message"  class="mb-3" 
-                v-html="message.message"  
-              />
+                v-html="message.message" ></div>
+
+              <div v-if="message.file">
+                <a :href="message.file" target="_blank" class="caption pa-2 rounded-lg" style="border: 1px solid #e3e3e3">
+                  <v-icon color="white" size="small">mdi-paperclip</v-icon>
+                  <span class="white--text">{{ $t('chat.download_file') }}</span>
+                </a>
+              </div>  
 
               <div v-if="message.audioUrl">
                 <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />

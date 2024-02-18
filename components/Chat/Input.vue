@@ -14,6 +14,28 @@
         hide-details
         solo
       >
+        <template v-slot:prepend-inner v-if="imageUrl || fileUrl">
+          <v-badge
+            icon="mdi-delete-outline"
+            color="red"
+            overlap :bordered="false"
+            size="small"
+          >
+            <v-img
+              v-if="imageUrl"
+              @click="imageUrl = null"
+              :src="imageUrl"
+              max-width="40"
+              max-height="40" 
+              contain
+            />
+            <v-icon
+              v-if="fileUrl"
+            >
+              mdi-paperclip
+            </v-icon>
+          </v-badge>
+        </template>
 
         <template v-slot:append-outer>
           <v-btn @click="sendMessage" fab>
@@ -22,7 +44,7 @@
         </template>
 
         <template v-slot:append>
-          <ChatUploadfile :chat="chat" :currentUrl="imageUrl" @url="fileCallback" />
+          <ChatUploadfile :chat="chat" :currentUrl="fileUrl" @url="fileCallback" />
           <ChatUploadimage :chat="chat" :currentUrl="imageUrl" @url="imageCallback" />
           <ChatRecordaudio :chat="chat" />
         </template>
@@ -79,20 +101,15 @@
             return;
           }
 
-          const urls = linkify.find(newMessage.value) || []
-
           let encryptedMessage = null;
-
-          if (newMessage.value) {
-            encryptedMessage = $encryption.encrypt(newMessage.value);
-          }
+          if (newMessage.value) encryptedMessage = $encryption.encrypt(newMessage.value);
 
           // Dispatch action to add a new message.
           const res = await dispatch('chats/messages/add', {
             chatId: props.chat.id,
             message: {
               message: encryptedMessage,
-              urls: urls,
+              urls: linkify.find(newMessage.value) || [],
               replyTo: props.reply ? props.reply.id : null,
               image: imageUrl.value || null,
               file: fileUrl.value || null,
@@ -139,7 +156,7 @@
       watch(newMessage, (newValue) => updateTyping(!!newValue), { immediate: true });
   
       return { 
-        newMessage, imageUrl, 
+        newMessage, imageUrl, fileUrl,
         sendMessage, clearReply, truncateMessage, 
         imageCallback, fileCallback
       };

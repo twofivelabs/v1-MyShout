@@ -12,7 +12,7 @@
   >
     <div>
       <div>You replied to {{ reply.owner ? reply.owner.username : '' }}</div>
-      <div class=" pa-2 rounded-lg message-border">
+      <div class=" pa-2 rounded-lg" style="border: 1px solid #e3e3e3">
         <v-icon small>mdi-reply</v-icon>        
         {{ reply.message ? reply.message : '' }}
       </div>        

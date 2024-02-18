@@ -279,7 +279,8 @@ export default {
         thread: 'View Thread',
         message_thread: 'Message Thread',
         forward_to: 'Forward To',
-        recent_chats: 'Recent Chats'
+        recent_chats: 'Recent Chats',
+        download_file: 'Download File'
     },
 
     no_results: 'No results',

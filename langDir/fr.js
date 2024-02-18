@@ -275,7 +275,8 @@ export default {
         info: 'Info',
         thread: 'Voir la discussion',
         message_thread: 'Fil de Messages',
-        forward_to: 'Transférer à'
+        forward_to: 'Transférer à',
+        download_file: 'élécharger le fichier'
     },
 
     no_results: 'Aucun résultat',
