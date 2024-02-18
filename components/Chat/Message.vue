@@ -131,6 +131,7 @@
         <v-col 
           cols="2" class="pa-0"
           :class="message.owner === userId ? ' text-right' : 'text-left'"
+          v-if="!message.hide || !message.hide.includes(userId)"
         >
           <v-btn v-if="messageHover"  icon @click="triggerMessageMenu">
             <v-icon small>mdi-dots-horizontal</v-icon>
@@ -190,6 +191,7 @@
         </v-col>
         <v-col
           cols="10" style="margin-top:-2px;" class="pa-0" 
+          v-if="!message.hide || !message.hide.includes(userId)"
         >
           <ChatMessageReactions :chat="chat" :message="message" :thread="thread" />
         </v-col>
