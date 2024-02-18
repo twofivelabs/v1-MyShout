@@ -42,7 +42,7 @@
                   <span class="caption">{{ moment(chat.created_at.toDate()).fromNow() }}</span>
                 </v-list-item-title>
                 <v-list-item-subtitle>
-                  <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ chat.lastMessage }}
+                  <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ chat.message.snippet }}
                 </v-list-item-subtitle>
               </v-list-item-content>
             </NuxtLink>
@@ -96,7 +96,7 @@ export default defineComponent({
 
               if (data.message.sent_by) {
                 const u = await dispatch('user/getOne', data.message.sent_by);
-                data.message.sent_by = u.first_name ?? u.username;
+                data.message.sent_by = u.username ?? u.first_name;
               }
 
               const existingIndex = updatedChatList.findIndex((chat) => chat.id === data.id);

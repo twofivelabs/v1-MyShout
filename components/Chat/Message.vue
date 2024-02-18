@@ -65,9 +65,9 @@
         
         <v-col 
           v-if="message.urls && message.urls.length > 0" 
-          cols="12" :class="message.owner === userId ? ' text-right' : 'text-left'"
+          cols="9" :class="message.owner === userId ? 'rounded-tr-0 text-right' : 'rounded-tl-0 text-left'"
         >
-          <!--<ChatMessageLink :url="message.urls[0]" />>-->
+          <ChatMessageLink :url="message.urls[0]" />
         </v-col>
 
         <v-col cols="1" v-if="owner && message.owner !== userId" class="avatar-align-top">
@@ -76,7 +76,6 @@
         <v-col 
           cols="9" class="py-0"
           v-if="!message.hide || !message.hide.includes(userId)"
-          
         >
           <div
             style="width:100%" 

@@ -5,6 +5,8 @@ const serviceAccount = functions.config().env.production==="true" ? require("./s
 const cors = require('cors')({origin: true});
 
 const moment = require("moment");
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -109,19 +111,38 @@ exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 
     });
 
 
-// 
+// https://us-central1-my-shout-staging.cloudfunctions.net/Chat-fetchUrlMetadata
 // firebase deploy --only functions:Chat-fetchUrlMetadata
 exports.fetchUrlMetadata = functions.https.onRequest((request, response) => {
-  cors(request, response, async () => {
+  return cors(request, response, async () => {
     const { url } = request.query;
-    
+
     if (!url) return response.status(400).send('URL is required');
-    
+
     try {
-      response.status(200).json("Got it");
+      const res = await axios.get(url);
+      const $ = cheerio.load(res.data);
+
+      const title = $('title').text().trim();
+      const image = $('meta[property="og:image"]').attr('content');
+      const description = $('meta[name="description"]').attr('content'); 
+
+      return response.status(200).json({ 
+        title,
+        image,
+        description
+      });
+
     } catch (error) {
-      console.error('Error fetching URL metadata:', error);
-      response.status(500).send('Failed to fetch URL metadata');
+      console.error('Error fetching URL metadata:', error); 
+
+      if (error.response) {
+        response.status(error.response.status).send(error.response.data); 
+      } else if (error.request) { 
+        response.status(503).send('Request failed. Check network'); 
+      } else { 
+        response.status(500).send('Something went wrong');
+      }
     }
   });
 });
