@@ -22,7 +22,8 @@
         </template>
 
         <template v-slot:append>
-          <ChatUploadimage :chat="chat" :currentUrl="imageMessageUrl" @url="imageMessageUrlCallback" />
+          <ChatUploadfile :chat="chat" :currentUrl="imageUrl" @url="fileCallback" />
+          <ChatUploadimage :chat="chat" :currentUrl="imageUrl" @url="imageCallback" />
           <ChatRecordaudio :chat="chat" />
         </template>
       </v-text-field>
@@ -56,17 +57,21 @@
       const { dispatch, state } = useStore();
       const { i18n, $notify, $fire, $encryption } = useContext();
       const user = computed(() => state.user);
+
       const newMessage = ref('');
-      const imageMessageUrl = ref(null);
+
+      const imageUrl = ref(null);
+      const fileUrl = ref(null);
   
       const clearReply = () => emit('updateReply', null);
-      const imageMessageUrlCallback = (url) => imageMessageUrl.value = url;
+      const imageCallback = (url) => imageUrl.value = url;
+      const fileCallback = (url) => fileUrl.value = url
   
       const truncateMessage = (message, length = 25) => message ? (message.length > length ? message.substring(0, length) + '...' : message) : '';
   
       const sendMessage = async () => {
         try {
-          if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
+          if((!newMessage.value && !imageUrl.value) || !user.value.data.uid) {
             $notify.show({
               text: i18n.t('notify.error_try_again'),
               color: 'error'
@@ -89,7 +94,8 @@
               message: encryptedMessage,
               urls: urls,
               replyTo: props.reply ? props.reply.id : null,
-              image: imageMessageUrl.value || null,
+              image: imageUrl.value || null,
+              file: fileUrl.value || null,
               owner: user.value.data.uid,
               seen: [user.value.data.uid]
             }
@@ -114,7 +120,7 @@
 
           clearReply()
           newMessage.value = null;
-          imageMessageUrl.value = null;
+          imageUrl.value = null;
 
           emit("messageSent")
         } catch (e) {
@@ -132,7 +138,11 @@
   
       watch(newMessage, (newValue) => updateTyping(!!newValue), { immediate: true });
   
-      return { newMessage, imageMessageUrl, sendMessage, clearReply, truncateMessage, imageMessageUrlCallback };
+      return { 
+        newMessage, imageUrl, 
+        sendMessage, clearReply, truncateMessage, 
+        imageCallback, fileCallback
+      };
     }
   });
 </script>
