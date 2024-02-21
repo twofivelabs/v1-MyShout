@@ -544,6 +544,7 @@ export const actions = {
       authUser,
       claims
     })
+    console.log("Setting user profile")
 
     await dispatch('setUserProfile', authUser.uid)
   },

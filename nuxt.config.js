@@ -225,10 +225,6 @@ const config = {
     runtime: true
   },
 
-  /*image: {
-    domains: ['https://firebasestorage.googleapis.com/v0/b/pint-app-dev.appspot.com']
-  },*/
-
   /*
   https://console.cloud.google.com/google/maps-apis/welcome?entry=devsite&step=api_key
   // No restrictions

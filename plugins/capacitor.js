@@ -5,7 +5,7 @@ import { FCM } from "@capacitor-community/fcm"
 import { PushNotifications } from '@capacitor/push-notifications'
 
 import { App } from '@capacitor/app'
-import { Camera, CameraResultType } from '@capacitor/camera'
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { VoiceRecorder } from 'capacitor-voice-recorder'
 
 import { Contacts } from '@capacitor-community/contacts'
@@ -596,8 +596,10 @@ export default function ({
             quality: 90,
             allowEditing: allowEditing,
             resultType: CameraResultType.Base64,
+            source: [CameraSource.Photos, CameraSource.Camera]
         }
-        const image = await Camera.getPhoto(cameraOptions)
+        console.log(cameraOptions)
+        const image = await Camera.getVideo() //Camera.getPhoto(cameraOptions)
         return image.base64String
     },
 

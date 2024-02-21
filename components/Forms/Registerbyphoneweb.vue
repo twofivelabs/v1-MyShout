@@ -85,16 +85,7 @@ export default defineComponent({
   components: {
     VuePhoneNumberInput
   },
-  emits: [
-    'response'
-  ],
-  props: {
-    goTo: {
-      type: String,
-      default: '/'
-    },
-  },
-  setup (props, { emit }) {
+  setup () {
     const { $fire, $fireModule, $helper, $notify, $system, $ttlStorage, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
@@ -138,23 +129,17 @@ export default defineComponent({
         form.value.showOtpInput = true
 
         try {
-          // Create firebase credentials
           window.confirmationResult = await $fire.auth.signInWithPhoneNumber(form.value.phone.trim().toLowerCase(), recaptchaContainer.value)
 
         } catch (e) {
-          // await initRecaptcha()
-
           if(e && e.message) {
             if (e.message === 'reCAPTCHA placeholder element must be an element or id') {
               // ...
             } else {
               $notify.show({ text: e.message, color: 'error' })
-
             }
-            // emit('response', { status: 'error', message: e.message })
           } else {
             $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-            // emit('response', { status: 'error', message: 'Error registering phone number 1' })
           }
 
           $system.log({
@@ -164,12 +149,7 @@ export default defineComponent({
           })
         }
       } else {
-        // await initRecaptcha()
-
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        // emit('response', { status: 'error', message: 'Error try again' })
-        console.log('STICKY: No phone number')
-
       }
     }
     const registerWithOTPCode = async () => {
@@ -190,7 +170,6 @@ export default defineComponent({
         else {
           form.value.showOtpInput = false
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
-          emit('response', { status: 'success', message: 'Successfully registered' })
 
           await dispatch('user/updateField', {
             phone: form.value.phone.trim().toLowerCase(),
@@ -200,10 +179,7 @@ export default defineComponent({
           return router.push('/auth/setup-profile')
         }
       } catch (e) {
-        // await initRecaptcha()
-
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        emit('response', { status: 'error', message: 'Error with phone code' })
 
         $system.log({
           comp: 'FormsRegisterbyphoneweb',

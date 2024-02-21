@@ -86,16 +86,7 @@ export default defineComponent({
   components: {
     VuePhoneNumberInput
   },
-  emits: [
-    'response'
-  ],
-  props: {
-    goTo: {
-      type: String,
-      default: '/'
-    },
-  },
-  setup (props, { emit }) {
+  setup () {
     const { $notify, $system, $ttlStorage, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
@@ -103,7 +94,6 @@ export default defineComponent({
 
     // DEFINE CONTENT
     const valid = ref(true)
-    //const appVerifier = ref(null)
     const agreeToTerms = ref(true)
     const rules = formRules
     const formEl = ref(null)
@@ -113,7 +103,6 @@ export default defineComponent({
       phoneNumberFormatted: null,
       showOtpInput: false,
       otpProvided: null,
-      verificationId: null
     })
 
     // METHODS
@@ -127,9 +116,7 @@ export default defineComponent({
 
       if (agreeToTerms.value) {
         valid.value = await formEl.value.validate()
-        if (valid.value) {
-          await registerPhoneNumber()
-        }
+        if (valid.value) await registerPhoneNumber()
       } else {
         $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
       }
@@ -167,32 +154,21 @@ export default defineComponent({
       loading.value = true
 
       try {
-        const code = form.value.otpProvided.toString()
-        console.log("Registerbyphonemobile: appyActionCode", code);
-
-        //const authRes = await FirebaseAuthentication.applyActionCode({ oobCode: code });
-        //onsole.log("Registerbyphonemobile: applyAcciontCode", authRes);
-
-        console.log("Registerbyphonemobile: Next")
         await FirebaseAuthentication.addListener('phoneCodeSent', async event => {
-          console.log("Registerbyphonemobile: event", event)
-          // Confirm the verification code
           const result = await FirebaseAuthentication.confirmVerificationCode({
             verificationId: event.verificationId,
             verificationCode: form.value.otpProvided,
-          }).catch((e) => {
-            console.log("Registerbyphonemobile confirmVerificationCode Error", e)
           });
 
-          console.log("Registerbyphonemobile", result)
+          console.log("Mobile Phone Authentication Result", result)
 
           $ttlStorage.set('onboardingComplete', true)
           $notify.show({ text: i18n.t('notify.success'), color: 'green' });         
 
-          if (!result.additionalUserInfo.isNewUser) {
-            console.log("registerbyphonemobile: Returning User")
+          if (result.additionalUserInfo.isNewUser == false) {
+            console.log("registerbyphonemobile: Returning User") /* I get to this but it's not actually logging the user in or storing the authenticated user */
             return router.push('/')
-          }  else {
+          } else {
             console.log("registerbyphonemobile: New User")
             
             dispatch('user/updateField', {
@@ -202,9 +178,7 @@ export default defineComponent({
 
             return router.push('/auth/setup-profile')
           }
-        }).catch((e) => {
-            console.log("Registerbyphonemobile addlistener Error", e)
-          });
+        });
       } catch (e) {
         $system.log({
           comp: 'FormsRegisterbyphonemobile',
