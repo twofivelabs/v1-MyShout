@@ -24,7 +24,7 @@
 
       <div class="text-center mt-5">
         <OnboardingPrivacypolicy class="mt-15" />
-        <div class="d-inline-flex justify-center agreeToTerms">
+        <div v-if="false" class="d-inline-flex justify-center agreeToTerms">
           <v-checkbox
             v-model="agreeToTerms"
             :label="$t('onboarding.agree_to_terms')"
@@ -102,7 +102,7 @@ export default defineComponent({
     // DEFINE CONTENT
     const valid = ref(true)
     const recaptchaContainer = ref(null)
-    const agreeToTerms = ref(false)
+    const agreeToTerms = ref(true)
     const rules = formRules
     const formEl = ref(null)
     const form = ref({
@@ -184,18 +184,7 @@ export default defineComponent({
         // If EXISTING user show logged in message
         if (!result.additionalUserInfo.isNewUser) {
           $notify.show({text: i18n.t('notify.success'), color: 'green'})
-          emit('response', {status: 'success', message: 'Successfully logged in'})
-
-          // Update Profile
-          await dispatch('user/updateField', {
-            phone: form.value.phone.trim().toLowerCase()
-          })
-
-          if (props.goTo) {
-            console.log('PUSH USER TO ', props.goTo)
-            router.push(props.goTo)
-          }
-          console.log('We are not taking the user anywhere')
+          return router.push('/')
         }
         // If NEW user
         else {
@@ -207,6 +196,8 @@ export default defineComponent({
             phone: form.value.phone.trim().toLowerCase(),
             created_at: new Date()
           })
+
+          return router.push('/auth/setup-profile')
         }
       } catch (e) {
         // await initRecaptcha()

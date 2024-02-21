@@ -20,7 +20,7 @@
         type="submit"
       >
         {{ $t('btn.send_code') }}
-      </v-btn>
+      </v-btn>     
 
       <div class="text-center mt-5">
         <OnboardingPrivacypolicy class="mt-15" />
@@ -112,7 +112,8 @@ export default defineComponent({
       phoneNumber: null,
       phoneNumberFormatted: null,
       showOtpInput: false,
-      otpProvided: null
+      otpProvided: null,
+      verificationId: null
     })
 
     // METHODS
@@ -120,6 +121,7 @@ export default defineComponent({
       form.value.phoneNumberFormatted = e.formattedNumber
       form.value.phone = e.formattedNumber
     }
+
     const validate = async () => {
       loading.value = true
 
@@ -134,6 +136,7 @@ export default defineComponent({
 
       loading.value = false
     }
+
     const registerPhoneNumber = async () => {
       loading.value = true
       
@@ -159,36 +162,49 @@ export default defineComponent({
         loading.value = false
       }
     }
+
     const registerWithOTPCode = async () => {
       loading.value = true
+
       try {
+        const code = form.value.otpProvided.toString()
+        console.log("Registerbyphonemobile: appyActionCode", code);
+
+        //const authRes = await FirebaseAuthentication.applyActionCode({ oobCode: code });
+        //onsole.log("Registerbyphonemobile: applyAcciontCode", authRes);
+
+        console.log("Registerbyphonemobile: Next")
         await FirebaseAuthentication.addListener('phoneCodeSent', async event => {
+          console.log("Registerbyphonemobile: event", event)
           // Confirm the verification code
           const result = await FirebaseAuthentication.confirmVerificationCode({
             verificationId: event.verificationId,
             verificationCode: form.value.otpProvided,
+          }).catch((e) => {
+            console.log("Registerbyphonemobile confirmVerificationCode Error", e)
           });
 
-          // Update Profile
-          dispatch('user/updateField', {
-            phone: form.value.phone.trim().toLowerCase()
-          })
+          console.log("Registerbyphonemobile", result)
 
           $ttlStorage.set('onboardingComplete', true)
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' });         
 
-          if (!result.additionalUserInfo.isNewUser)  emit('response', { status: 'success', message: 'Successfully signed in', 'goTo': '/' })
-          else {
-            emit('response', { status: 'success', message: 'Successfully registered', 'goTo': '/onboarding/2.1' })
+          if (!result.additionalUserInfo.isNewUser) {
+            console.log("registerbyphonemobile: Returning User")
+            return router.push('/')
+          }  else {
+            console.log("registerbyphonemobile: New User")
             
             dispatch('user/updateField', {
+              phone: form.value.phone.trim().toLowerCase(),
               created_at: new Date()
             })
-          }
-          
-          $notify.show({ text: i18n.t('notify.success'), color: 'green' })          
 
-          return router.push(props.goTo)
-        });
+            return router.push('/auth/setup-profile')
+          }
+        }).catch((e) => {
+            console.log("Registerbyphonemobile addlistener Error", e)
+          });
       } catch (e) {
         $system.log({
           comp: 'FormsRegisterbyphonemobile',
@@ -196,7 +212,6 @@ export default defineComponent({
           val: e
         })
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        emit('response', { status: 'error', message: 'Error with phone code' })
       } finally {
         loading.value = false
         form.value.showOtpInput = false

@@ -524,6 +524,7 @@ export const actions = {
    * @returns {Promise<void>}
    */
   async onAuthStateChanged ({ commit, dispatch }, { authUser, claims }) {
+    console.log("AUTH:", authUser)
     if (!authUser) {
       await dispatch('noUserCleanUp')
       return

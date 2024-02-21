@@ -37,13 +37,13 @@ export default async function ({ app, store, redirect }) {
     console.log('store.state.user.data', store.state.user.data)*/
 
     if (user) {
-        checkUserStatus()
-        await redirectToAdmin()
-        return true
+      checkUserStatus()
+      await redirectToAdmin()
+      return true
     }
     else {
-        console.log('Redirect to onboarding authenticated.js')
-        return redirect('/auth/')
+      console.log('Redirect to onboarding authenticated.js')
+      return redirect('/')
     }
 }
 
