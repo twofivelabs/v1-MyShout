@@ -11,6 +11,9 @@ let admobHasInit = false
 export default {
     async AdMob_init() {
         console.log('STICKY: ADMOB admobHasInit')
+        return false // TESTING REMOVE FOR LIVE
+
+        //eslint-disable-next-line no-unreachable
         if (admobHasInit) return
 
         //const { status } = await AdMob.trackingAuthorizationStatus()
@@ -38,18 +41,23 @@ export default {
             // Subscribe Banner Event Listener
             console.log('STICKY: ADMOB Event, Loaded', e, JSON.stringify(e))
         })
+        //eslint-disable-next-line no-unreachable
         AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (e) => {
             // Subscribe Banner Event Listener
             console.log('STICKY: ADMOB Event, FailedToLoad', e, JSON.stringify(e))
         })
+        //eslint-disable-next-line no-unreachable
         AdMob.addListener(BannerAdPluginEvents.SizeChanged, (AdMobBannerSize) => {
             // Subscribe Change Banner Size
             console.log('STICKY: ADMOB AdMobBannerSize', AdMobBannerSize, JSON.stringify(AdMobBannerSize))
         })
 
+        //eslint-disable-next-line no-unreachable
         admobHasInit = true
     },
     async AdMob_banner() {
+        if (!admobHasInit) return
+
         const device = await Device.getInfo()
         if(device.platform === 'ios') {
             bannerAdId = iosAdId
@@ -70,6 +78,8 @@ export default {
         }
     },
     async AdMob_hideBanner() {
+        if (!admobHasInit) return
+
         console.log('STICKY: ADMOB hideBanner')
         try {
             await AdMob.removeBanner()

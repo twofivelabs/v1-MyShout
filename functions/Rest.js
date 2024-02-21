@@ -22,16 +22,17 @@ if (!admin.apps.length) {
  */
 exports.updateGPS = functions.https.onCall((data) => {
   try {
+    console.log("STICKY: UpdateGPS");
     if (data) {
       const userId = data.userId;
       const gps = data.gps;
 
+      console.log("STICKY: UserId:", userId, gps);
       if (!userId || !gps) return;
 
       const hash = geohashForLocation([gps.lat, gps.lng]);
+      console.log("STICKY: Hash:", hash);
 
-      functions.logger.log("USER LOG2", userId);
-      functions.logger.log("GPS LOG2", gps);
       // data.data.gps.lat  data.data.gps.lng
       return admin.firestore()
           .doc(`Users/${userId}`)
@@ -45,13 +46,13 @@ exports.updateGPS = functions.https.onCall((data) => {
           }, {merge: true}).then(() => {
             return Promise.resolve(true);
           }).catch((e) => {
-            functions.logger.log("Error updating GPS data", e);
+            functions.logger.log("STICKY: Error updating GPS data", e);
             return Promise.resolve(false);
           });
     }
     return Promise.resolve(false);
   } catch (e) {
-    functions.logger.log("Error updating GPS data 2", e);
+    functions.logger.log("STICKY: Error updating GPS data 2", e);
     return Promise.resolve(false);
   }
 });
