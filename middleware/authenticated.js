@@ -1,6 +1,14 @@
-export default async function ({ app, store, redirect }) {    
-    const user = app.$fire.auth.currentUser
-    const userToken = user ? await user.getIdTokenResult() : false
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication'
+import { GetIdTokenResult } from '@capacitor-firebase/authentication/dist/esm/definitions'
+
+export default async function ({ app, store, redirect }) {
+    let user = app.$fire.auth.currentUser
+    let userToken = user ? await user.getIdTokenResult() : false
+
+    if (!user) {
+        user = await FirebaseAuthentication.getCurrentUser()
+        userToken = user ? await FirebaseAuthentication.getIdToken() : false
+    }
 
     function checkUserStatus () {
       if ((store.state.user.data.role && store.state.user.data.role.isActive) && !store.state.user.data.role.isActive) {
@@ -21,7 +29,8 @@ export default async function ({ app, store, redirect }) {
       return true
     }
 
-    console.log("authenticated.js $fire.auth.currentUser", app.$fire.auth.currentUser)
+    console.log("authenticated.js $fire.auth.currentUser", user, JSON.stringify(user))
+
     if (user) {
       checkUserStatus()
       await redirectToAdmin()
@@ -29,6 +38,6 @@ export default async function ({ app, store, redirect }) {
     } else {
       console.log('Redirect to login page')
       return redirect('/auth')
-    }  
+    }
 }
 

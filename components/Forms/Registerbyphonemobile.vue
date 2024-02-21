@@ -20,7 +20,7 @@
         type="submit"
       >
         {{ $t('btn.send_code') }}
-      </v-btn>     
+      </v-btn>
 
       <div class="text-center mt-5">
         <OnboardingPrivacypolicy class="mt-15" />
@@ -87,7 +87,7 @@ export default defineComponent({
     VuePhoneNumberInput
   },
   setup () {
-    const { $notify, $system, $ttlStorage, i18n } = useContext()
+    const { $notify, $system, $ttlStorage, i18n, $helper } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -126,7 +126,7 @@ export default defineComponent({
 
     const registerPhoneNumber = async () => {
       loading.value = true
-      
+
       const phone = form.value.phone.trim().toLowerCase();
 
       try {
@@ -134,7 +134,7 @@ export default defineComponent({
         await FirebaseAuthentication.signInWithPhoneNumber({
           phoneNumber: phone,
         });
-        
+
         form.value.showOtpInput = true
       } catch (e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
@@ -160,22 +160,24 @@ export default defineComponent({
             verificationCode: form.value.otpProvided,
           });
 
-          console.log("Mobile Phone Authentication Result", result)
+          console.log("Mobile Phone Authentication Result", result, JSON.stringify(result))
 
           $ttlStorage.set('onboardingComplete', true)
-          $notify.show({ text: i18n.t('notify.success'), color: 'green' });         
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' });
 
           if (result.additionalUserInfo.isNewUser == false) {
             console.log("registerbyphonemobile: Returning User") /* I get to this but it's not actually logging the user in or storing the authenticated user */
+            $helper.sleep(800)
             return router.push('/')
           } else {
             console.log("registerbyphonemobile: New User")
-            
+
             dispatch('user/updateField', {
               phone: form.value.phone.trim().toLowerCase(),
               created_at: new Date()
             })
 
+            await $helper.sleep(800)
             return router.push('/auth/setup-profile')
           }
         });

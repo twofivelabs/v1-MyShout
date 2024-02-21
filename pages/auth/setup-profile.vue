@@ -221,7 +221,7 @@ import formRules from '~/classes/formRules'
 import {Geolocation} from '@capacitor/geolocation'
 
 export default defineComponent({
-  name: 'AuthUsername',
+  name: 'AuthSetupProfile',
   layout: 'onboarding',
   middleware: 'authenticated',
   setup () {
@@ -277,7 +277,7 @@ export default defineComponent({
           await dispatch('user/updateField', {
             username: username
           })
-          step.value = user.value.email ? 3 : 2  
+          step.value = user.value.email ? 3 : 2
         }
       }
 
@@ -326,12 +326,13 @@ export default defineComponent({
       loading.value = true
 
       setTimeout(async () => {
-        Geolocation.checkPermissions()/*.then(async (permission) => {
+        // TODO: GPS UPDATE
+        /* Geolocation.checkPermissions()/!*.then(async (permission) => {
           if (permission.location === 'granted') {
-            
-          }
-        })*/
 
+          }
+        })*!/ */
+/*
         await $capacitor.positionPermissions()
         await $services.getSetUserGeneralLocation()
 
@@ -339,7 +340,7 @@ export default defineComponent({
           permissions: {
             location: true
           }
-        })
+        }) */
 
         step.value = 5
         loading.value = false
