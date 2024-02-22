@@ -46,32 +46,27 @@ export default {
         if (device.platform === 'web') return
 
         try {
-          BackgroundGeolocation.ready(geoLocationConfig).then(async () => {
-            console.log('STICKY: [gps] #1 BackgroundGeoLocation is Ready')
+            BackgroundGeolocation.ready(geoLocationConfig).then(async () => {
+                console.log('STICKY: [gps] #1 BackgroundGeoLocation is Ready')
 
-            if (!isGpsStarted) {
-                console.log('STICKY: [gps] #2 Starting Location Tracking')
-                // YES -- .ready() has now resolved.
-                BackgroundGeolocation.start().then(() => {
-                    console.log('STICKY: [gps] #3 Location tracking Has Started')
-                    isGpsStarted = true
-                    //this.gpsInitHeartbeat()
-                    //this.gpsGetCurrentPosition()
-
-                    BackgroundGeolocation.onHeartbeat((event) => {
-                        console.log('STICKY: [gps] #4 Setting onHeartbeat event', event)
-                        BackgroundGeolocation.getCurrentPosition({
-                          samples: 1,
-                          persist: true,
-                        }).then(location => {
-                            console.log('STICKY: [gps] #5 getCurrentPosition', location)
-                        });
-                      });
-                })
-            }
-          })
+                if (!isGpsStarted) {
+                    console.log('STICKY: [gps] #2 Starting Location Tracking')
+                    // YES -- .ready() has now resolved.
+                    BackgroundGeolocation.start().then(() => {
+                        console.log('STICKY: [gps] #3 Location tracking Has Started')
+                        isGpsStarted = true
+                        //this.gpsInitHeartbeat()
+                        //this.gpsGetCurrentPosition()
+                        console.log('STICKY: [gps] #4 onHeartbeat event')
+                        this.gpsInitHeartbeat()
+                    })
+                } else {
+                    console.log('STICKY: [gps] isGpsStarted TRUE')
+                    this.gpsInitHeartbeat()
+                }
+            })
         } catch (error) {
-          console.log('STICKY: [gps] ERROR Getting BackgroundGeoLocation Ready', error)
+            console.log('STICKY: [gps] ERROR Getting BackgroundGeoLocation Ready', error, JSON.stringify(error))
         }
     },
 
@@ -99,16 +94,28 @@ export default {
      * GPS coords in firebase
      */
     gpsInitHeartbeat() {
-        console.log('STICKY: [gps] 5 gpsInitHeartbeat, waiting a few seconds before loading')
+        console.log('STICKY: [gps] #4.1 init onHeartbeat event')
+       /*  BackgroundGeolocation.onHeartbeat((event) => {
+            console.log('STICKY: [gps] #4.1 Setting onHeartbeat event', event, JSON.stringify(event))
+            BackgroundGeolocation.getCurrentPosition({
+                samples: 1,
+                persist: true,
+                timeout: 30,
+                extras: {
+                    "event": "heartbeat"
+                }
+            }).then(location => {
+                console.log('STICKY: [gps] #5.1 getCurrentPosition', location, JSON.stringify(location))
 
-            try {
-              console.log('STICKY: [gps] 6 [gpsInitHeartbeat] addListener')
-              BackgroundGeolocation.addListener('heartbeat', () => {
-                console.log('STICKY: [gps] 7 [heartbeat] success')
-              })
-            } catch (error) {
-              console.log('STICKY: [gps] [gpsInitHeartbeat] addListener ERROR', error)
-            }
+                /!* this.httpUpdateUsersGPS({
+                    lat: location?.coords?.latitude || null,
+                    lng: location?.coords?.longitude || null,
+                    is_moving: location?.is_moving || null
+                }).catch(e => {
+                    console.log("STICKY: [gps] [httpUpdateUsersGPS] error:", e, JSON.stringify(e))
+                }); *!/
+            });
+        }); */
 
             /*console.log('STICKY: [gps] 8 [gpsInitHeartbeat] onHeartbeat')
 
@@ -117,7 +124,7 @@ export default {
                 BackgroundGeolocation.onHeartbeat(async () => {
                     console.log('STICKY: [gps] 10 [gpsInitHeartbeat] startBackgroundTask')
                     const taskId = await BackgroundGeolocation.startBackgroundTask()
-    
+
                     console.log('STICKY: [gps] 11 [onHeartbeat] Inside Try before getcurrentposition', taskId)
                     // Perform long-running tasks
                     const location = await BackgroundGeolocation.getCurrentPosition({
@@ -135,14 +142,14 @@ export default {
                     }).catch(e => {
                         console.log("STICKY: [gps] [httpUpdateUsersGPS] error:", e, JSON.stringify(e))
                     })
-    
+
                     // Be sure to signal completion of your background-task:
                     await BackgroundGeolocation.stopBackgroundTask(taskId)
-                })  
+                })
             } catch (error) {
                 console.log('STICKY: [gps] [gpsInitHeartbeat] onHeartbeat ERROR', error)
             }*/
-            
+
     },
 
 
