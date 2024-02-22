@@ -31,6 +31,8 @@ const currentPositionOptions = {
 let isGpsInit = false
 let isGpsStarted = false
 
+let gpsState = null
+
 export default {
     /**
      * Init GPS and add watchers
@@ -49,14 +51,26 @@ export default {
           BackgroundGeolocation.ready(geoLocationConfig).then(async () => {
             console.log('STICKY: [gps] #1 BackgroundGeoLocation is Ready')
 
-            if (!isGpsStarted) {
+            if (!gpsState) {
                 console.log('STICKY: [gps] #2 Starting Location Tracking')
                 // YES -- .ready() has now resolved.
-                BackgroundGeolocation.start().then(() => {
-                    console.log('STICKY: [gps] #3 Location tracking Has Started')
-                    isGpsStarted = true
-                    this.gpsInitHeartbeat()
+                BackgroundGeolocation.start.then((state) => {
+                  gpsState = state.enabled
+                  console.log('STICKY: [gps] #3 Location tracking Has Started', gpsState)
+                    //this.gpsInitHeartbeat()
                     //this.gpsGetCurrentPosition()
+
+                    console.log('STICKY: [gps] #4 Starting The Heart...')
+                    BackgroundGeolocation.onHeartbeat((event) => {
+                        console.log('STICKY: [gps] #4 Heart Is Pumping', event)
+                        BackgroundGeolocation.getCurrentPosition({
+                          samples: 1,
+                          persist: true,
+                        }).then(location => {
+                            console.log('STICKY: [gps] #5 getCurrentPosition', location)
+                        });
+                      });
+                    })
                 })
             }
           })
