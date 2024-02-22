@@ -69,11 +69,12 @@ export default {
                         }).then(location => {
                             console.log('STICKY: [gps] #5 getCurrentPosition', location)
                         });
-                      });
                     })
                 })
             }
-          })
+        })
+            
+          
         } catch (error) {
           console.log('STICKY: [gps] ERROR Getting BackgroundGeoLocation Ready', error)
         }
