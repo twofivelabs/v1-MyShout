@@ -55,8 +55,8 @@ export default {
                 BackgroundGeolocation.start().then(() => {
                     console.log('STICKY: [gps] #3 Location tracking Has Started')
                     isGpsStarted = true
-                    //this.gpsInitHeartbeat()
-                    //this.registerProviderListeners()
+                    this.gpsInitHeartbeat()
+                    //this.gpsGetCurrentPosition()
                 })
             }
           })
