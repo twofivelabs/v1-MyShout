@@ -41,5 +41,6 @@
       "providers": ["phone"]
     }
   },
-  "cordova": {}
+  "cordova": {},
+  "server": { "iosScheme": "ionic" }
 }
