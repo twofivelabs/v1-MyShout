@@ -57,8 +57,12 @@ export default {
                         isGpsStarted = true
                         //this.gpsInitHeartbeat()
                         //this.gpsGetCurrentPosition()
-                        console.log('STICKY: [gps] #4 onHeartbeat event')
-                        this.gpsInitHeartbeat()
+                        console.log('STICKY: [gps] #4 onHeartbeat BEFORE event')
+                    })
+
+                    this.gpsInitHeartbeat()
+                    BackgroundGeolocation.onHeartbeat((event) => {
+                        console.log('STICKY: [gps] #5 onHeartbeat event', event, JSON.stringify(event))
                     })
                 } else {
                     console.log('STICKY: [gps] isGpsStarted TRUE')
@@ -95,7 +99,7 @@ export default {
      */
     gpsInitHeartbeat() {
         console.log('STICKY: [gps] #4.1 init onHeartbeat event')
-       /*  BackgroundGeolocation.onHeartbeat((event) => {
+        BackgroundGeolocation.onHeartbeat((event) => {
             console.log('STICKY: [gps] #4.1 Setting onHeartbeat event', event, JSON.stringify(event))
             BackgroundGeolocation.getCurrentPosition({
                 samples: 1,
@@ -107,15 +111,15 @@ export default {
             }).then(location => {
                 console.log('STICKY: [gps] #5.1 getCurrentPosition', location, JSON.stringify(location))
 
-                /!* this.httpUpdateUsersGPS({
+                this.httpUpdateUsersGPS({
                     lat: location?.coords?.latitude || null,
                     lng: location?.coords?.longitude || null,
                     is_moving: location?.is_moving || null
                 }).catch(e => {
                     console.log("STICKY: [gps] [httpUpdateUsersGPS] error:", e, JSON.stringify(e))
-                }); *!/
+                });
             });
-        }); */
+        });
 
             /*console.log('STICKY: [gps] 8 [gpsInitHeartbeat] onHeartbeat')
 
