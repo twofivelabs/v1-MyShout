@@ -276,7 +276,7 @@ export default defineComponent({
           await dispatch('user/updateField', {
             username: username
           })
-          step.value = user.value.email ? 3 : 2  
+          step.value = user.value.email ? 3 : 2
         }
       }
 
@@ -325,14 +325,9 @@ export default defineComponent({
       loading.value = true
 
       setTimeout(async () => {
-        Geolocation.checkPermissions()/*.then(async (permission) => {
-          if (permission.location === 'granted') {
-            
-          }
-        })*/
-
-        await $capacitor.positionPermissions()
-        await $services.getSetUserGeneralLocation()
+        $capacitor.gpsInit()
+        // await $capacitor.positionPermissions()
+        // await $services.getSetUserGeneralLocation()
 
         await dispatch('user/updateField', {
           permissions: {

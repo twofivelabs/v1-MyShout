@@ -14,7 +14,7 @@ export default ({
   store
 }, inject) => {
   inject('services', {
-    getSetUserLocation () {
+    /* getSetUserLocation () {
       // Set GPS LAT/LNG through GPS
       app.$capacitor.watchPosition().then((coordinates) => {
         store.dispatch('user/updateGPS', {
@@ -31,7 +31,7 @@ export default ({
           val: e
         })
       })
-    },
+    }, */
     async getSetUserGeneralLocation () {
       // If we don't have a user postal/city for shipping calculations
       if (!app.$config.reverseGeocode) {

@@ -63,7 +63,7 @@ export default defineComponent({
           location: false
         }
       })
-      await $capacitor.clearWatchPosition()
+      // await $capacitor.clearWatchPosition()
     }
     const toggleLocation = async () => {
       if (locationPermissionGranted.value === true) {

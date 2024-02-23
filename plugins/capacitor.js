@@ -1,4 +1,4 @@
-import { Geolocation } from '@capacitor/geolocation'
+// import { Geolocation } from '@capacitor/geolocation'
 import { Device } from '@capacitor/device'
 import { Share } from '@capacitor/share'
 import { FCM } from "@capacitor-community/fcm"
@@ -16,7 +16,7 @@ import admob from './cap.admob'
 import gps from './cap.gps'
 
 // VARIABLES
-let watchCallbackId = null
+// let watchCallbackId = null
 // const isMobile = ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/))
 
 export default function ({
@@ -94,12 +94,12 @@ inject('capacitor', {
      longitude: -119.396922
      speed: null
      */
-    async gpsSetPosition_OLD (gps) {
+    /* async gpsSetPosition_OLD (gps) {
         // console.log('STICKY: GPS > SET', gps, JSON.stringify(gps))
         await store.dispatch('user/updateGPS', gps)
-    },
+    }, */
 
-    async gpsGetCurrentPosition_OLD () {
+    /* async gpsGetCurrentPosition_OLD () {
         const device = await Device.getInfo()
         let gps = null
 
@@ -148,8 +148,8 @@ inject('capacitor', {
         }
 
         return gps
-    },
-    async gpsCheckPermissions_OLD () {
+    }, */
+    /* async gpsCheckPermissions_OLD () {
         // DESKTOP / WEB, When requesting location will auto pop-up with location
 
         // 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'
@@ -187,10 +187,10 @@ inject('capacitor', {
             }
             return false
         }
-    },
+    }, */
 
     // Older GPS functions
-    async getSetCurrentPosition_OLD () {
+    /* async getSetCurrentPosition_OLD () {
       try {
         let retCoordinates = {
           lat: null,
@@ -237,8 +237,8 @@ inject('capacitor', {
         })
         return false
       }
-    },
-    async watchPosition_OLD () {
+    }, */
+    /* async watchPosition_OLD () {
       const info = await Device.getInfo()
       try {
         if (info && info.platform === 'web') {
@@ -268,8 +268,8 @@ inject('capacitor', {
           val: e
         })
       }
-    },
-    async clearWatchPosition_OLD () {
+    }, */
+    /* async clearWatchPosition_OLD () {
       try {
         await Geolocation.clearWatch({ id: watchCallbackId })
       } catch (e) {
@@ -279,8 +279,8 @@ inject('capacitor', {
           val: e
         })
       }
-    },
-    async positionPermissions_OLD () {
+    }, */
+    /* async positionPermissions_OLD () {
       let hasPermission = false
       try {
         // 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'
@@ -334,7 +334,7 @@ inject('capacitor', {
       }
       console.log('STICKY: positionPermissions, ', hasPermission)
       return hasPermission
-    },
+    }, */
 
     async share (data) {
       let payload = {

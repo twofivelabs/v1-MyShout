@@ -103,7 +103,8 @@ export default defineComponent({
           }
         })
 
-        await $capacitor.positionPermissions()
+        $capacitor.gpsInit()
+        // await $capacitor.positionPermissions()
         await $services.getSetUserGeneralLocation()
 
         await dispatch('user/updateField', {

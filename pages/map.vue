@@ -420,7 +420,9 @@ export default defineComponent({
       try {
         if (!gps.value || !gps.value.lat) {
           // We are going to watch position in case they are driving or moving
-          $capacitor.watchPosition()
+          // We are removing the watch position, but using the HEARTBEAT to update location every 5 minutes
+          // $capacitor.watchPosition()
+          $capacitor.gpsInit()
         }
       } catch(e) {
         $system.log({
@@ -433,7 +435,7 @@ export default defineComponent({
       }
     })
     onUnmounted(() => {
-      $capacitor.clearWatchPosition()
+      // $capacitor.clearWatchPosition()
     })
 
     // WATCH

@@ -75,7 +75,10 @@ export default {
      */
     gpsInitHeartbeat() {
         console.log('STICKY: [gps] #4.1 init onHeartbeat event')
-        BackgroundGeolocation.onHeartbeat((event) => {
+        BackgroundGeolocation.onHeartbeat(async (event) => {
+
+            const taskId = await BackgroundGeolocation.startBackgroundTask()
+
             console.log('STICKY: [gps] #4.2 Setting onHeartbeat event', event, JSON.stringify(event))
             BackgroundGeolocation.getCurrentPosition({
                 samples: 1,
@@ -87,51 +90,28 @@ export default {
             }).then(location => {
                 console.log('STICKY: [gps] #5.1 getCurrentPosition', location, JSON.stringify(location))
 
+                // Update Firebase
                 this.httpUpdateUsersGPS({
                     lat: location?.coords?.latitude || null,
                     lng: location?.coords?.longitude || null,
                     is_moving: location?.is_moving || null
+                }).then(() => {
+                    // Be sure to signal completion of your background-task:
+                    BackgroundGeolocation.stopBackgroundTask(taskId)
                 }).catch(e => {
                     console.log("STICKY: [gps] [httpUpdateUsersGPS] error:", e, JSON.stringify(e))
+                    BackgroundGeolocation.stopBackgroundTask(taskId)
                 });
+
+                // Update local user
+                // window.$nuxt.context.store.dispatch('user/updateGPS', gps)
             });
         });
-
-            /*console.log('STICKY: [gps] 8 [gpsInitHeartbeat] onHeartbeat')
-
-            try {
-              console.log('STICKY: [gps] 9 [gpsInitHeartbeat] Starting onHeartbeat')
-                BackgroundGeolocation.onHeartbeat(async () => {
-                    console.log('STICKY: [gps] 10 [gpsInitHeartbeat] startBackgroundTask')
-                    const taskId = await BackgroundGeolocation.startBackgroundTask()
-
-                    console.log('STICKY: [gps] 11 [onHeartbeat] Inside Try before getcurrentposition', taskId)
-                    // Perform long-running tasks
-                    const location = await BackgroundGeolocation.getCurrentPosition({
-                        samples: 3,
-                        timeout: 30,
-                        extras: {
-                            "event": "heartbeat"
-                        }
-                    })
-                    console.log("STICKY: [gps] 12 [onHeartbeat] location:", location, JSON.stringify(location))
-                    await this.httpUpdateUsersGPS({
-                        lat: location?.coords?.latitude || null,
-                        lng: location?.coords?.longitude || null,
-                        is_moving: location?.is_moving || null
-                    }).catch(e => {
-                        console.log("STICKY: [gps] [httpUpdateUsersGPS] error:", e, JSON.stringify(e))
-                    })
-
-                    // Be sure to signal completion of your background-task:
-                    await BackgroundGeolocation.stopBackgroundTask(taskId)
-                })
-            } catch (error) {
-                console.log('STICKY: [gps] [gpsInitHeartbeat] onHeartbeat ERROR', error)
-            }*/
-
     },
 
+    /**
+     * Initialize listeners for when the user changes location permissions
+     */
     gpsInitProviderListeners() {
         console.log('STICKY: [gps] [registerProviderListeners]')
 

@@ -84,8 +84,6 @@ export default defineComponent({
       // UPDATE CURRENT LOCATION
       const coords = await $capacitor.gpsGetCurrentPosition()
 
-      $capacitor.gpsInitHeartbeat()
-
       // ADD NOTIFICATION TO USER
       await dispatch('user/alerts/add', {
         type: 'accident',
