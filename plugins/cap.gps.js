@@ -38,7 +38,6 @@ export default {
      */
     async gpsInit() {
         if (isGpsInit) return
-
         isGpsInit = true
 
         // DESKTOP / WEBSITES
@@ -55,42 +54,19 @@ export default {
                     BackgroundGeolocation.start().then(() => {
                         console.log('STICKY: [gps] #3 Location tracking Has Started')
                         isGpsStarted = true
-                        //this.gpsInitHeartbeat()
-                        //this.gpsGetCurrentPosition()
-                        console.log('STICKY: [gps] #4 onHeartbeat BEFORE event')
                     })
 
                     this.gpsInitHeartbeat()
-                    BackgroundGeolocation.onHeartbeat((event) => {
-                        console.log('STICKY: [gps] #5 onHeartbeat event', event, JSON.stringify(event))
-                    })
+                    this.gpsInitProviderListeners()
                 } else {
-                    console.log('STICKY: [gps] isGpsStarted TRUE')
+                    console.log('STICKY: [gps] #2.1 isGpsStarted TRUE')
                     this.gpsInitHeartbeat()
+                    this.gpsInitProviderListeners()
                 }
             })
         } catch (error) {
             console.log('STICKY: [gps] ERROR Getting BackgroundGeoLocation Ready', error, JSON.stringify(error))
         }
-    },
-
-    /**
-     * RESPONSE: {"is_moving":false,"uuid":"21b3b4e4-ee0b-4e76-ae8a-d5509edb2e82","timestamp":"2024-02-12T20:39:10.732Z","age":82,"odometer":0,"coords":{"latitude":50.11398,"longitude":-119.39603,"accuracy":5,"speed":20.39,"speed_accuracy":0.5,"heading":209,"heading_accuracy":30,"altitude":0,"ellipsoidal_altitude":0,"altitude_accuracy":0.5,"age":88},"activity":{"type":"still","confidence":100},"battery":{"is_charging":false,"level":1},"extras":{}}
-     * @returns {Promise<{lng, lat, is_moving}>}
-     */
-    async gpsGetCurrentPosition() {
-        console.log('STICKY: [gps] gpsGetCurrentPosition')
-        return await BackgroundGeolocation.getCurrentPosition(currentPositionOptions).then(location => {
-            console.log('STICKY: [gps] success ', location, JSON.stringify(location))
-            return {
-                lat: location?.coords?.latitude || null,
-                lng: location?.coords?.longitude || null,
-                is_moving: location?.is_moving || false,
-            }
-        }).catch(error => {
-            console.log('STICKY: [gps] error ', error, JSON.stringify(error))
-            return error
-        })
     },
 
     /**
@@ -100,7 +76,7 @@ export default {
     gpsInitHeartbeat() {
         console.log('STICKY: [gps] #4.1 init onHeartbeat event')
         BackgroundGeolocation.onHeartbeat((event) => {
-            console.log('STICKY: [gps] #4.1 Setting onHeartbeat event', event, JSON.stringify(event))
+            console.log('STICKY: [gps] #4.2 Setting onHeartbeat event', event, JSON.stringify(event))
             BackgroundGeolocation.getCurrentPosition({
                 samples: 1,
                 persist: true,
@@ -156,7 +132,65 @@ export default {
 
     },
 
+    gpsInitProviderListeners() {
+        console.log('STICKY: [gps] [registerProviderListeners]')
 
+        BackgroundGeolocation.onProviderChange((event) => {
+            console.log('STICKY: [gps] [onProviderChange] event:', event, JSON.stringify(event))
+            switch(event.status) {
+                case BackgroundGeolocation.AUTHORIZATION_STATUS_ALWAYS:
+                    console.log('STICKY: [gps] [onProviderChange] AUTH ALWAYS')
+                    break;
+                case BackgroundGeolocation.AUTHORIZATION_STATUS_WHEN_IN_USE:
+                    console.log('STICKY: [gps] [onProviderChange] AUTH - WHEN IN USE' )
+                    BackgroundGeolocation.requestPermission().then(r => {
+                        console.log('STICKY: [gps] [requestPermission] Res:', r, JSON.stringify(r))
+                    })
+                    break;
+                case BackgroundGeolocation.AUTHORIZATION_STATUS_DENIED:
+                    console.log('STICKY: [gps] [onProviderChange] AUTH - DENIED' )
+                    BackgroundGeolocation.requestPermission().then(r => {
+                        console.log('STICKY: [gps] [requestPermission] Res:', r, JSON.stringify(r))
+                    })
+                    break;
+                case BackgroundGeolocation.AUTHORIZATION_STATUS_RESTRICTED:
+                    console.log('STICKY: [gps] [onProviderChange] AUTH - RESTRICTED' )
+                    BackgroundGeolocation.requestPermission().then(r => {
+                        console.log('STICKY: [gps] [requestPermission] Res:', r, JSON.stringify(r))
+                    })
+                    break;
+                default:
+                    BackgroundGeolocation.requestPermission().then(r => {
+                        console.log('STICKY: [gps] [requestPermission] Default:', r, JSON.stringify(r))
+                    })
+            }
+        })
+    },
+
+    /**
+     * RESPONSE: {"is_moving":false,"uuid":"21b3b4e4-ee0b-4e76-ae8a-d5509edb2e82","timestamp":"2024-02-12T20:39:10.732Z","age":82,"odometer":0,"coords":{"latitude":50.11398,"longitude":-119.39603,"accuracy":5,"speed":20.39,"speed_accuracy":0.5,"heading":209,"heading_accuracy":30,"altitude":0,"ellipsoidal_altitude":0,"altitude_accuracy":0.5,"age":88},"activity":{"type":"still","confidence":100},"battery":{"is_charging":false,"level":1},"extras":{}}
+     * @returns {Promise<{lng, lat, is_moving}>}
+     */
+    async gpsGetCurrentPosition() {
+        console.log('STICKY: [gps] gpsGetCurrentPosition')
+        return await BackgroundGeolocation.getCurrentPosition(currentPositionOptions).then(location => {
+            console.log('STICKY: [gps] success ', location, JSON.stringify(location))
+            return {
+                lat: location?.coords?.latitude || null,
+                lng: location?.coords?.longitude || null,
+                is_moving: location?.is_moving || false,
+            }
+        }).catch(error => {
+            console.log('STICKY: [gps] error ', error, JSON.stringify(error))
+            return error
+        })
+    },
+
+    /**
+     * Prep HTTP request to update the users GPS data in Firebase
+     * @param gps
+     * @returns {Promise<void>}
+     */
     async httpUpdateUsersGPS(gps) {
         if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: [gps] [http] no data')
 
@@ -213,6 +247,13 @@ export default {
         console.log('STICKY: [gps] [http] step 4 - FINISHED')
     },
 
+    /**
+     * Use basic HTTP request
+     * @param method
+     * @param url
+     * @param data
+     * @param callback
+     */
     sendHttpRequest(method, url, data, callback) {
         /* if (!data?.userToken) {
             console.log('STICKY: [gps] [http] No User Token')
