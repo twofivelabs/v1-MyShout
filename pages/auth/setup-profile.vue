@@ -218,7 +218,6 @@ import {
   watch
 } from '@nuxtjs/composition-api'
 import formRules from '~/classes/formRules'
-import {Geolocation} from '@capacitor/geolocation'
 
 export default defineComponent({
   name: 'AuthUsername',
@@ -229,7 +228,6 @@ export default defineComponent({
       $config,
       $helper,
       $notify,
-      $services,
       $capacitor,
       i18n
     } = useContext()
