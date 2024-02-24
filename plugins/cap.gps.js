@@ -2,8 +2,18 @@ import BackgroundGeolocation from "@transistorsoft/capacitor-background-geolocat
 //import {BackgroundFetch} from '@transistorsoft/capacitor-background-fetch'
 import { Device } from '@capacitor/device'
 import { Preferences } from '@capacitor/preferences'
+import { BackgroundFetch } from '@transistorsoft/capacitor-background-fetch'
 
 const geoLocationConfig = {
+    url: 'https://us-central1-my-shout-staging.cloudfunctions.net/Rest-updateGPS',
+    autoSync: false,
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    },
+    extras: {
+        userId: 'YfF3k6iNYHUSoy1In4dHmeBjbbC2'
+    },
     // Activity Recognition
     stopTimeout: 5,
     heartbeatInterval: 30,
@@ -44,6 +54,18 @@ export default {
         const device = await Device.getInfo()
         if (device.platform === 'web') return
 
+        // Set User Id URL Param
+        try {
+            const user = window.$nuxt.context.$fire.auth.currentUser
+            const userToken = user ? await user.getIdTokenResult() : false
+            const {value} = await Preferences.get({key: 'currentUserId'})
+            geoLocationConfig.params.userId = userToken.claims.user_id || value
+            console.log('STICKY: [gps] Setting User Id = ', geoLocationConfig.params.userId)
+        } catch (e) {
+            console.log('STICKY: [gps] Setting User Id Error: ', e, JSON.stringify(e))
+        }
+
+        // Ready the background geolocation
         try {
             BackgroundGeolocation.ready(geoLocationConfig).then(async () => {
                 console.log('STICKY: [gps] #1 BackgroundGeoLocation is Ready')
@@ -56,12 +78,21 @@ export default {
                         isGpsStarted = true
                     })
 
+                    // When HTTP sends a request
+                    /* BackgroundGeolocation.onHttp(response => {
+                        console.log('STICKY: [gps] [onHttp] response: ', response, JSON.stringify(response))
+                    }) */
+
                     this.gpsInitHeartbeat()
                     this.gpsInitProviderListeners()
+                    // await this.gpsInitOnLocation()
+                    await this.gpsInitBackgroundFetch()
                 } else {
                     console.log('STICKY: [gps] #2.1 isGpsStarted TRUE')
                     this.gpsInitHeartbeat()
                     this.gpsInitProviderListeners()
+                    // await this.gpsInitOnLocation()
+                    await this.gpsInitBackgroundFetch()
                 }
             })
         } catch (error) {
@@ -70,42 +101,35 @@ export default {
     },
 
     /**
+     * Fired whenever the location changes
+     * Caution: can be fired a lot when driving
+     * @returns {Promise<void>}
+     */
+    async gpsInitOnLocation() {
+        const taskId = await BackgroundGeolocation.startBackgroundTask()
+
+        console.log('STICKY: [gps] OnLocation Event #1')
+
+        BackgroundGeolocation.onLocation((location) => {
+            console.log('STICKY: [gps] OnLocation Event #2', location, JSON.stringify(location))
+        })
+
+        await BackgroundGeolocation.stopBackgroundTask(taskId);
+
+    },
+
+    /**
      * This will run based upon the timeframe set in the settings to try and update
      * GPS coords in firebase
      */
     gpsInitHeartbeat() {
         console.log('STICKY: [gps] #4.1 init onHeartbeat event')
-        BackgroundGeolocation.onHeartbeat(async (event) => {
-
+        BackgroundGeolocation.onHeartbeat(async () => {
             const taskId = await BackgroundGeolocation.startBackgroundTask()
 
-            console.log('STICKY: [gps] #4.2 Setting onHeartbeat event', event, JSON.stringify(event))
-            BackgroundGeolocation.getCurrentPosition({
-                samples: 1,
-                persist: true,
-                timeout: 30,
-                extras: {
-                    "event": "heartbeat"
-                }
-            }).then(location => {
-                console.log('STICKY: [gps] #5.1 getCurrentPosition', location, JSON.stringify(location))
+            await this.gpsGetPositionAndUpdateUser()
 
-                // Update Firebase
-                this.httpUpdateUsersGPS({
-                    lat: location?.coords?.latitude || null,
-                    lng: location?.coords?.longitude || null,
-                    is_moving: location?.is_moving || null
-                }).then(() => {
-                    // Be sure to signal completion of your background-task:
-                    BackgroundGeolocation.stopBackgroundTask(taskId)
-                }).catch(e => {
-                    console.log("STICKY: [gps] [httpUpdateUsersGPS] error:", e, JSON.stringify(e))
-                    BackgroundGeolocation.stopBackgroundTask(taskId)
-                });
-
-                // Update local user
-                // window.$nuxt.context.store.dispatch('user/updateGPS', gps)
-            });
+            await BackgroundGeolocation.stopBackgroundTask(taskId)
         });
     },
 
@@ -147,6 +171,76 @@ export default {
         })
     },
 
+    gpsGetPositionAndUpdateUser(eventType = 'heartbeat') {
+        const getCurrentPositionConfig = {
+            samples: 1,
+            persist: true,
+            timeout: 30,
+            extras: {
+                "event": eventType
+            }
+        }
+        return BackgroundGeolocation.getCurrentPosition(getCurrentPositionConfig).then(location => {
+            console.log('STICKY: [gps] #5.1 gpsGetPositionAndUpdateUser', location, JSON.stringify(location))
+
+            // Send Update Firebase
+            return this.httpUpdateUsersGPS({
+                lat: location?.coords?.latitude || null,
+                lng: location?.coords?.longitude || null,
+                is_moving: location?.is_moving || null
+            }).then(() => {
+                return true
+
+            }).catch(e => {
+                console.log("STICKY: [gps] [gpsGetPositionAndUpdateUser] error:", e, JSON.stringify(e))
+                return false
+            })
+
+            // Update local user
+            // window.$nuxt.context.store.dispatch('user/updateGPS', gps)
+        }).catch((e) => {
+            console.log("STICKY: [gps] [gpsGetPositionAndUpdateUser] error:", e, JSON.stringify(e))
+            return false
+        })
+    },
+
+    async gpsInitBackgroundFetch() {
+        await BackgroundGeolocation.startBackgroundTask((taskId) => {
+            console.log('STICKY: [gps] gpsInitOnLocation SUCCESS', taskId, JSON.stringify(taskId))
+            this.gpsGetPositionAndUpdateUser('backgroundTask')
+        }, (error) => {
+            console.log('STICKY: [gps] gpsInitOnLocation ERROR', error, JSON.stringify(error))
+        })
+
+        const backgroundFetchConfig = {
+            minimumFetchInterval: 1 // minutes
+        }
+        const status = await BackgroundFetch.configure(backgroundFetchConfig, async (taskId) => {
+            console.log('STICKY: [gps] [BackgroundFetch] EVENT:', taskId)
+            // Perform your work in an awaited Promise
+            const result = await this.gpsGetPositionAndUpdateUser()
+            console.log('STICKY: [gps] [BackgroundFetch] work complete:', result)
+            // [REQUIRED] Signal to the OS that your work is complete.
+            // await BackgroundFetch.finish(taskId)
+        }, async (taskId) => {
+            // The OS has signalled that your remaining background-time has expired.
+            // You must immediately complete your work and signal #finish.
+            console.log('STICKY: [gps] [BackgroundFetch] TIMEOUT:', taskId)
+            // [REQUIRED] Signal to the OS that your work is complete.
+            // await BackgroundFetch.finish(taskId)
+        })
+
+        // Checking BackgroundFetch status:
+        if (status !== BackgroundFetch.STATUS_AVAILABLE) {
+            // Uh-oh:  we have a problem:
+            if (status === BackgroundFetch.STATUS_DENIED) {
+                console.log('STICKY: [gps] The user explicitly disabled background behavior for this app or for the whole system.');
+            } else if (status === BackgroundFetch.STATUS_RESTRICTED) {
+                console.log('STICKY: [gps] Background updates are unavailable and the user cannot enable them again.')
+            }
+        }
+    },
+
     /**
      * RESPONSE: {"is_moving":false,"uuid":"21b3b4e4-ee0b-4e76-ae8a-d5509edb2e82","timestamp":"2024-02-12T20:39:10.732Z","age":82,"odometer":0,"coords":{"latitude":50.11398,"longitude":-119.39603,"accuracy":5,"speed":20.39,"speed_accuracy":0.5,"heading":209,"heading_accuracy":30,"altitude":0,"ellipsoidal_altitude":0,"altitude_accuracy":0.5,"age":88},"activity":{"type":"still","confidence":100},"battery":{"is_charging":false,"level":1},"extras":{}}
      * @returns {Promise<{lng, lat, is_moving}>}
@@ -177,8 +271,6 @@ export default {
         let currentUserId = false
         let userToken
 
-        console.log('STICKY: [gps] [http] step 1')
-
         const user = window.$nuxt.context.$fire.auth.currentUser
         userToken = user ? await user.getIdTokenResult() : false
 
@@ -189,8 +281,6 @@ export default {
             console.log('STICKY: [gps] [http] no user to send request')
             return
         }
-
-        console.log('STICKY: [gps] [http] step 2')
 
         const payload = {
             "userToken": userToken.token,
@@ -210,8 +300,6 @@ export default {
             }
         }
 
-        console.log('STICKY: [gps] [http] step 3')
-
         const postStagingUrl = 'https://us-central1-my-shout-staging.cloudfunctions.net/Rest-updateGPS'
         //eslint-disable-next-line no-unused-vars
         const postLiveUrl = 'https://us-central1-my-shout-app.cloudfunctions.net/Rest-updateGPS'
@@ -224,7 +312,6 @@ export default {
             }
         })
         // await this.sendHttpRequest2('POST', postStagingUrl, payload)
-        console.log('STICKY: [gps] [http] step 4 - FINISHED')
     },
 
     /**

@@ -42,5 +42,8 @@
     }
   },
   "cordova": {},
-  "server": { "iosScheme": "ionic" }
+  "server": { "iosScheme": "ionic" },
+  "android": {
+    "useLegacyBridge": true
+  }
 }
