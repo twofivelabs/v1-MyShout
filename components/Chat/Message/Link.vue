@@ -1,21 +1,22 @@
 <template>
   <v-card v-if="!noPreview">
     <v-card-text>
-      <v-container v-if="!generatingPreview" fluid>  
+      <v-container class="pa-0" v-if="!generatingPreview" fluid>  
         <v-row no-gutters>  
-          <v-col cols="3"> 
+          <v-col cols="12" md="3"> 
             <a :href="url.href" target="_blank">
               <v-img
                 v-if="metadata.image" 
                 :src="metadata.image"
                 max-height="100"
-                contain
+                width="100%"
+                cover
               ></v-img>
             </a>
           </v-col>
-          <v-col cols="9"> 
-            <a class="text-h6 font-weight-bold py-0" style="line-height:0.3em;" :href="url.href" target="_blank">{{ metadata.title }}</a>
-            <p class="py-0">{{ metadata.description }}</p>
+          <v-col cols="12" md="9" class="text-left gap-5 pa-0 mt-2" style="line-height:1.2em;">
+            <a class="text-h6 font-weight-bold py-0" :href="url.href" target="_blank">{{ metadata.title }}</a>
+            <p class="py-0 mb-0 mt-2">{{ metadata.description }}</p>
           </v-col>
         </v-row>
       </v-container>
