@@ -1,13 +1,14 @@
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication'
-import { GetIdTokenResult } from '@capacitor-firebase/authentication/dist/esm/definitions'
 
 export default async function ({ app, store, redirect }) {
-    let user = app.$fire.auth.currentUser
+    const device = await app.$capacitor.device() ;
+
+    let user = app.$fire.auth.currentUser;
     let userToken = user ? await user.getIdTokenResult() : false
 
-    if (!user) {
-        user = await FirebaseAuthentication.getCurrentUser()
-        userToken = user ? await FirebaseAuthentication.getIdToken() : false
+    if (!user && device.platform !== 'web') {
+      user = await FirebaseAuthentication.getCurrentUser();
+      userToken = user ? await FirebaseAuthentication.getIdToken() : false;
     }
 
     function checkUserStatus () {
@@ -22,14 +23,11 @@ export default async function ({ app, store, redirect }) {
           redirect('/admin/')
           return true
         }
-              // You are not allowed to use the website version of the app.
         redirect('/block/')
         return false
       }
       return true
     }
-
-    console.log("authenticated.js $fire.auth.currentUser", user, JSON.stringify(user))
 
     if (user) {
       checkUserStatus()
