@@ -598,8 +598,7 @@ export default function ({
             resultType: CameraResultType.Base64,
             source: [CameraSource.Photos, CameraSource.Camera]
         }
-        console.log(cameraOptions)
-        const image = await Camera.getVideo() //Camera.getPhoto(cameraOptions)
+        const image = await Camera.getPhoto(cameraOptions)
         return image.base64String
     },
 

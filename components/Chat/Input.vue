@@ -44,9 +44,39 @@
         </template>
 
         <template v-slot:append>
-          <ChatUploadfile :chat="chat" :currentUrl="fileUrl" @url="fileCallback" />
-          <ChatUploadimage :chat="chat" :currentUrl="imageUrl" @url="imageCallback" />
-          <ChatRecordaudio :chat="chat" />
+          <v-btn
+            color="transparent"
+            elevation="0"
+            class="pa-0 ma-0"
+            small fab
+            @click="addToMessage = true"
+          >
+            <v-icon>mdi-plus</v-icon>
+
+            <v-menu v-model="addToMessage" transition="slide-x-transition">
+              <template v-slot:activator="{ on }">
+                <div v-on="on" ref="menuActivator"></div>
+              </template>
+              <v-card>
+                <v-card-text class="pa-0">
+                  <v-list density="compact" nav>
+                    <v-list-item>
+                      <ChatUploadfile :chat="chat" :currentUrl="fileUrl" @url="fileCallback" />
+                    </v-list-item>
+                    <v-list-item>
+                      <ChatUploadimage :chat="chat" :currentUrl="imageUrl" @url="imageCallback" />
+                    </v-list-item>
+                    <v-list-item>
+                      <ChatUploadvideo :chat="chat" :currentUrl="imageUrl" @url="imageCallback" />
+                    </v-list-item>
+                    <v-list-item>
+                      <ChatRecordaudio :chat="chat" />
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-menu>
+          </v-btn>
         </template>
       </v-text-field>
     </v-row>
@@ -81,6 +111,7 @@
       const user = computed(() => state.user);
 
       const newMessage = ref('');
+      const addToMessage = ref(false)
 
       const imageUrl = ref(null);
       const fileUrl = ref(null);
@@ -157,6 +188,7 @@
   
       return { 
         newMessage, imageUrl, fileUrl,
+        addToMessage,
         sendMessage, clearReply, truncateMessage, 
         imageCallback, fileCallback
       };

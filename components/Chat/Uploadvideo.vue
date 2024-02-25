@@ -10,7 +10,7 @@
       fab
   >
     <v-icon>
-      mdi-image
+      mdi-video-vintage
     </v-icon>
   </v-btn>
 </template>
@@ -21,7 +21,7 @@ import {
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
-  name: 'ChatUploadimage',
+  name: 'ChatUploadvideo',
   props: {
     chat: {
       type: Object,

@@ -2,7 +2,7 @@
   <v-btn
       :loading="isUploading"
       @click="beginUpload"
-      :disabled="fileUrl ? true : false"
+      :disabled="currentUrl ? true : false"
       color="transparent"
       elevation="0"
       class="pa-0"
