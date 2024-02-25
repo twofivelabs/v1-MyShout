@@ -18,7 +18,7 @@ PODS:
     - Google-Mobile-Ads-SDK (= 10.12.0)
   - CapacitorCommunityContacts (5.0.4):
     - Capacitor
-  - CapacitorCommunityFcm (5.0.2):
+  - CapacitorCommunityFcm (5.0.3):
     - Capacitor
     - Firebase/Messaging
   - CapacitorCommunityHttp (1.4.1):
@@ -244,7 +244,7 @@ SPEC CHECKSUMS:
   CapacitorCamera: 4892c5c392f60039d853dde78bc50ba19fbd113e
   CapacitorCommunityAdmob: 1e377ccfb6236c38591f23759334fa12668fb2e0
   CapacitorCommunityContacts: 45de2477f7dc6265d267677939a2c75465d2ed87
-  CapacitorCommunityFcm: f7b5158169ea27d8a8444e0adeb17584d7997e91
+  CapacitorCommunityFcm: 3e42b0f0460c791aa5f2b142113db2e94dcbb797
   CapacitorCommunityHttp: 7be90668527ef14ee10d08135b0e00fac9cf8247
   CapacitorCordova: e825fce1a2e14e4b5730641c7e098dccf74397b7
   CapacitorDevice: fc91bdb484dc0e70755e9b621cd557afe642613a
@@ -278,6 +278,6 @@ SPEC CHECKSUMS:
   nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
 
-PODFILE CHECKSUM: 16051657216362666fd0d3fee561bc0a551eaeb5
+PODFILE CHECKSUM: f832026a124a4cc35990296d7523ef6785aee851
 
 COCOAPODS: 1.15.2
