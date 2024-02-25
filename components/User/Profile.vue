@@ -19,11 +19,11 @@
         </div>
       </div>
 
-<!--      <v-row>
+     <v-row>
         <v-col class="py-0 my-0" cols="12" sm="12">
           <v-text-field v-model="form.username" :rules="rules.username" @keyup.native="validateUsername" outlined background-color="#f8f9fa" class="py-0 my-0" :label="$t('form.username')"/>
         </v-col>
-      </v-row>-->
+      </v-row>
       <v-row>
         <v-col class="py-0 my-0" cols="12" sm="6">
           <v-text-field v-model="form.first_name" outlined background-color="#f8f9fa" class="py-0 my-0" :label="$t('form.first_name')"/>

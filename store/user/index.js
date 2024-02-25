@@ -278,6 +278,8 @@ export const mutations = {
 
     Vue.set(state, 'profile', combineUserProfile)
 
+    console.log("KYLE, userProfile", userProfile)
+
     if (userProfile?.first_name) {
       Vue.set(state.profile, 'initial', userProfile.first_name.charAt(0).toUpperCase())
     }
@@ -524,10 +526,8 @@ export const actions = {
    * @returns {Promise<void>}
    */
   async onAuthStateChanged ({ commit, dispatch }, { authUser, claims }) {
-    console.log("AUTH:", authUser)
     if (!authUser) {
-      await dispatch('noUserCleanUp')
-      return
+      return await dispatch('noUserCleanUp')
     }
 
     try {
@@ -544,11 +544,11 @@ export const actions = {
       authUser,
       claims
     })
-    console.log("Setting user profile")
 
     await dispatch('setUserProfile', authUser.uid)
   },
   async setUserProfile ({ dispatch }, authUserUid) {
+    console.log("KYLE:", authUserUid)
     if (authUserUid) {
       //if (this.$db) { // This was stopping things from working....
         // await dispatch('get', authUserUid)
