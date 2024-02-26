@@ -1,6 +1,6 @@
 <template>
-  <v-footer v-if="hasMounted" app height="75" class="pa-0 ma-0">
-    <v-bottom-navigation height="75">
+  <v-footer v-if="hasMounted" app class="pb-10">
+    <v-bottom-navigation absolute grow height="75">
       <div style="width:93%;height:100%;margin:0 auto;">
       <v-btn color="accent-4" class="navigation-button" text to="/">
         <v-icon>mdi-home</v-icon>
@@ -67,8 +67,10 @@ export default defineComponent({
 <style scoped>
 
 .navigation-button {
-  min-width:19% !important;
+  width:18.5% !important;
+  min-width:18.5% !important;
   height:100% !important;
+  padding: 0 0 3px 0;
 }
 .v-icon.v-icon {
   font-size:30px;
