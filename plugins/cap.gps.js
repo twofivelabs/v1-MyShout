@@ -171,39 +171,10 @@ export default {
         })
     },
 
-    gpsGetPositionAndUpdateUser(eventType = 'heartbeat') {
-        const getCurrentPositionConfig = {
-            samples: 1,
-            persist: true,
-            timeout: 30,
-            extras: {
-                "event": eventType
-            }
-        }
-        return BackgroundGeolocation.getCurrentPosition(getCurrentPositionConfig).then(location => {
-            console.log('STICKY: [gps] #5.1 gpsGetPositionAndUpdateUser', location, JSON.stringify(location))
-
-            // Send Update Firebase
-            return this.httpUpdateUsersGPS({
-                lat: location?.coords?.latitude || null,
-                lng: location?.coords?.longitude || null,
-                is_moving: location?.is_moving || null
-            }).then(() => {
-                return true
-
-            }).catch(e => {
-                console.log("STICKY: [gps] [gpsGetPositionAndUpdateUser] error:", e, JSON.stringify(e))
-                return false
-            })
-
-            // Update local user
-            // window.$nuxt.context.store.dispatch('user/updateGPS', gps)
-        }).catch((e) => {
-            console.log("STICKY: [gps] [gpsGetPositionAndUpdateUser] error:", e, JSON.stringify(e))
-            return false
-        })
-    },
-
+    /**
+     * TESTING: Using a background fetch instead of heartbeat
+     * @returns {Promise<void>}
+     */
     async gpsInitBackgroundFetch() {
         await BackgroundGeolocation.startBackgroundTask((taskId) => {
             console.log('STICKY: [gps] gpsInitOnLocation SUCCESS', taskId, JSON.stringify(taskId))
@@ -239,6 +210,44 @@ export default {
                 console.log('STICKY: [gps] Background updates are unavailable and the user cannot enable them again.')
             }
         }
+    },
+
+    /**
+     * Receive the GPS from the phone and submit a HTTP request to update user
+     * @param eventType
+     * @returns {Promise<boolean>}
+     */
+    gpsGetPositionAndUpdateUser(eventType = 'heartbeat') {
+        const getCurrentPositionConfig = {
+            samples: 1,
+            persist: true,
+            timeout: 30,
+            extras: {
+                "event": eventType
+            }
+        }
+        return BackgroundGeolocation.getCurrentPosition(getCurrentPositionConfig).then(location => {
+            console.log('STICKY: [gps] #5.1 gpsGetPositionAndUpdateUser', location, JSON.stringify(location))
+
+            // Send Update Firebase
+            return this.httpUpdateUsersGPS({
+                lat: location?.coords?.latitude || null,
+                lng: location?.coords?.longitude || null,
+                is_moving: location?.is_moving || null
+            }).then(() => {
+                return true
+
+            }).catch(e => {
+                console.log("STICKY: [gps] [gpsGetPositionAndUpdateUser] error:", e, JSON.stringify(e))
+                return false
+            })
+
+            // Update local user
+            // window.$nuxt.context.store.dispatch('user/updateGPS', gps)
+        }).catch((e) => {
+            console.log("STICKY: [gps] [gpsGetPositionAndUpdateUser] error:", e, JSON.stringify(e))
+            return false
+        })
     },
 
     /**
@@ -311,7 +320,6 @@ export default {
                 console.log('STICKY: [gps] [http2] post success: ', responseData, JSON.stringify(responseData))
             }
         })
-        // await this.sendHttpRequest2('POST', postStagingUrl, payload)
     },
 
     /**
