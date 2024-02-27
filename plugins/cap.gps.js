@@ -3,17 +3,16 @@ import BackgroundGeolocation from "@transistorsoft/capacitor-background-geolocat
 import { Device } from '@capacitor/device'
 import { Preferences } from '@capacitor/preferences'
 import { BackgroundFetch } from '@transistorsoft/capacitor-background-fetch'
+import { CapacitorHttp } from '@capacitor/core'
+
 
 const geoLocationConfig = {
-    url: 'https://us-central1-my-shout-staging.cloudfunctions.net/Rest-updateGPS',
-    autoSync: false,
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    },
-    extras: {
+    //url: 'https://us-central1-my-shout-staging.cloudfunctions.net/Rest-updateGPS',
+    //autoSync: true,
+    /* extras: {
         userId: 'YfF3k6iNYHUSoy1In4dHmeBjbbC2'
-    },
+    }, */
+    batchSync: false,
     // Activity Recognition
     stopTimeout: 5,
     heartbeatInterval: 30,
@@ -23,10 +22,12 @@ const geoLocationConfig = {
     stopOnTerminate: false,   // <-- Allow the background-service to continue tracking when user closes the app.
     startOnBoot: true,        // <-- Auto start tracking when device is powered-up.
     desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+    enableHeadless: true,
     distanceFilter: 5, // Meters,
     // stationaryRadius: 5, // iOS only, when stopped the min distance must move
     stopOnStationary: false,
     preventSuspend: true, // iOS enable continuous tracking in the background
+    locationAuthorizationRequest: 'Always',
     showsBackgroundLocationIndicator: true,
     backgroundPermissionRationale: {
         title: "Allow My Shout to access this device's location even when closed or not in use.",
@@ -83,17 +84,29 @@ export default {
                         console.log('STICKY: [gps] [onHttp] response: ', response, JSON.stringify(response))
                     }) */
 
-                    this.gpsInitHeartbeat()
+                    //this.gpsInitHeartbeat()
                     this.gpsInitProviderListeners()
                     // await this.gpsInitOnLocation()
                     await this.gpsInitBackgroundFetch()
                 } else {
                     console.log('STICKY: [gps] #2.1 isGpsStarted TRUE')
-                    this.gpsInitHeartbeat()
+                    //this.gpsInitHeartbeat()
                     this.gpsInitProviderListeners()
                     // await this.gpsInitOnLocation()
                     await this.gpsInitBackgroundFetch()
                 }
+
+                BackgroundGeolocation.onHeartbeat( () => {
+                    //const taskId = await BackgroundGeolocation.startBackgroundTask()
+                    console.log('STICKY: [gps] #4.2 init onHeartbeat event')
+                    this.gpsGetPositionAndUpdateUser().then((r) => {
+                        console.log('STICKY: [gps] #4.3 SUCCESS:', r, JSON.stringify(r))
+                    }).catch((e) => {
+                        console.log('STICKY: [gps] #4.3 ERROR:', e, JSON.stringify(e))
+                    })
+
+                    //await BackgroundGeolocation.stopBackgroundTask(taskId)
+                });
             })
         } catch (error) {
             console.log('STICKY: [gps] ERROR Getting BackgroundGeoLocation Ready', error, JSON.stringify(error))
@@ -124,12 +137,14 @@ export default {
      */
     gpsInitHeartbeat() {
         console.log('STICKY: [gps] #4.1 init onHeartbeat event')
-        BackgroundGeolocation.onHeartbeat(async () => {
-            const taskId = await BackgroundGeolocation.startBackgroundTask()
+        BackgroundGeolocation.onHeartbeat( () => {
+            //const taskId = await BackgroundGeolocation.startBackgroundTask()
+            console.log('STICKY: [gps] #4.2 init onHeartbeat event')
+            this.gpsGetPositionAndUpdateUser().catch((e) => {
+                console.log('STICKY: [gps] #4.3 ERROR:', e, JSON.stringify(e))
+            })
 
-            await this.gpsGetPositionAndUpdateUser()
-
-            await BackgroundGeolocation.stopBackgroundTask(taskId)
+            //await BackgroundGeolocation.stopBackgroundTask(taskId)
         });
     },
 
@@ -329,12 +344,25 @@ export default {
      * @param data
      * @param callback
      */
-    sendHttpRequest(method, url, data, callback) {
+    async sendHttpRequest(method, url, data, callback) {
+        const options = {
+            method: method,
+            url: url,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: data
+        };
+
+        const response = await CapacitorHttp.request(options);
+        console.log('STICKY: [gps] [httpCapacitor] Response:', response, JSON.stringify(response))
+        console.log('Callback', callback)
         /* if (!data?.userToken) {
             console.log('STICKY: [gps] [http] No User Token')
             return false
         } */
-        const xhr = new XMLHttpRequest()
+        /* const xhr = new XMLHttpRequest()
         xhr.open(method, url)
         // xhr.setRequestHeader('Authorization', `Bearer ${data.userToken}`)
         xhr.setRequestHeader('Accept', 'application/json')
@@ -356,6 +384,6 @@ export default {
             xhr.send(JSON.stringify(data))
         } else {
             xhr.send()
-        }
+        } */
     },
 }

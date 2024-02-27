@@ -41,6 +41,9 @@
 			"providers": [
 				"phone"
 			]
+		},
+		"CapacitorHttp": {
+			"enabled": false
 		}
 	},
 	"cordova": {},

@@ -36,10 +36,6 @@
 		"classpath": "com.capacitorjs.plugins.device.DevicePlugin"
 	},
 	{
-		"pkg": "@capacitor/geolocation",
-		"classpath": "com.capacitorjs.plugins.geolocation.GeolocationPlugin"
-	},
-	{
 		"pkg": "@capacitor/local-notifications",
 		"classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin"
 	},
@@ -66,10 +62,6 @@
 	{
 		"pkg": "@transistorsoft/capacitor-background-geolocation",
 		"classpath": "com.transistorsoft.bggeo.capacitor.BackgroundGeolocationPlugin"
-	},
-	{
-		"pkg": "capacitor-firebase-auth",
-		"classpath": "com.baumblatt.capacitor.firebase.auth.CapacitorFirebaseAuth"
 	},
 	{
 		"pkg": "capacitor-voice-recorder",

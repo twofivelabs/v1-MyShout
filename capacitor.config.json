@@ -39,6 +39,9 @@
     "FirebaseAuthentication": {
       "skipNativeAuth": false,
       "providers": ["phone"]
+    },
+    "CapacitorHttp": {
+      "enabled": false
     }
   },
   "cordova": {},

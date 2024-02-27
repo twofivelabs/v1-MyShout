@@ -301,7 +301,9 @@ const config = {
       firestore: {
         memoryOnly: false,
         enablePersistence: true,
-        emulatorPort: isDev && useEmulators ? 8080 : undefined
+        emulatorPort: isDev && useEmulators ? 8080 : undefined,
+        experimentalForceLongPolling: true,
+        useFetchStreams: false
       },
       functions: {
         emulatorPort: isDev && useEmulators ? 12345 : undefined
