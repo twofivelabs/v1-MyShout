@@ -12,7 +12,7 @@ const geoLocationConfig = {
     /* extras: {
         userId: 'YfF3k6iNYHUSoy1In4dHmeBjbbC2'
     }, */
-    batchSync: false,
+    batchSync: true,
     // Activity Recognition
     stopTimeout: 5,
     heartbeatInterval: 30,
