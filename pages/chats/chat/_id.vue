@@ -16,8 +16,6 @@
       <ChatActionsbtn v-if="chat && participants" :chat="chat" :participants="participants" :admins="admins" />
     </v-app-bar>
 
-    
-
     <v-container v-if="messages && messages.length > 0" style=" z-index: 0; width: 100%; padding-bottom: 100px !important;">
       <div v-for="(message) in messages" :key="message.id">
         <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" v-intersect="onMessageInterest(message)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
@@ -97,7 +95,7 @@ export default defineComponent({
         const participantProfiles = await Promise.all(
           chat.value.participants.map(participantUid => dispatch('user/getOne', participantUid))
         );
-        
+
         participantProfiles.forEach(profile => {
           if (profile) participants.value[profile.uid] = profile;
         });

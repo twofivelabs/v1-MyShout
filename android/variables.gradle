@@ -15,4 +15,5 @@ ext {
     cordovaAndroidVersion = '10.1.1'
     coreSplashScreenVersion = '1.0.0'
     androidxWebkitVersion = '1.6.1'
+    androidxExifInterfaceVersion = '1.3.6'
 }

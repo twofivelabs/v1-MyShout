@@ -1,7 +1,7 @@
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication'
 
 export default async function ({ app, store, redirect }) {
-    const device = await app.$capacitor.device() ;
+    const device = await app.$capacitor.device();
 
     let user = app.$fire.auth.currentUser;
     let userToken = user ? await user.getIdTokenResult() : false
