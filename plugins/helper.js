@@ -238,6 +238,13 @@ export default ({
         // Return formatted contacts
         return formattedContacts
       }
+    },
+    linkifyText(text) {
+      const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|]|www\.[\S]+|\b[\w.-]+\.[a-zA-Z]{2,}\b)/gi;
+      return text.replace(urlRegex, function(url) {
+        const httpUrl = url.match(/^https?:\/\//) ? url : `http://${url}`;
+        return `<a href="${httpUrl}" style="color:#fff !important;text-decoration:underline;" target="_blank">${url}</a>`;
+      });
     }
   })
 }

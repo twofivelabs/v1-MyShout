@@ -1,23 +1,17 @@
 <template>
   <v-btn
-      :loading="imageButtonLoading"
+      :loading="imageLoading"
       @click="loadImageHandler"
+      :disabled="imageUrl ? true : false"
       color="transparent"
       elevation="0"
-      class="pa-0"
+      class="pa-0 ma-0"
       small
       fab
   >
-    <v-badge
-        :content="1"
-        :value="imageAddedToMessage"
-        color="green"
-        overlap
-    >
-      <v-icon>
-        mdi-image
-      </v-icon>
-    </v-badge>
+    <v-icon>
+      mdi-image
+    </v-icon>
   </v-btn>
 </template>
 <script>
@@ -47,14 +41,14 @@ export default defineComponent({
   ],
   setup (props, { emit }) {
     const { $capacitor, $db } = useContext()
-    const imageButtonLoading = ref(false)
-    const imageAddedToMessage = ref(false)
-    const imageMessageUrl = ref()
+    const imageLoading = ref(false)
+    const uploadComplete = ref(false)
+    const imageUrl = ref()
 
     // METHODS
     const loadImageHandler = async () => {
-      imageButtonLoading.value = true
-      imageAddedToMessage.value = false
+      imageLoading.value = true
+      uploadComplete.value = false
 
       try {
         const photoBase64 = await $capacitor.cameraTakePicture(false)
@@ -66,27 +60,27 @@ export default defineComponent({
         // console.log('photoUrl', photoUrl)
 
         if (photoUrl) {
-          imageAddedToMessage.value = true
-          imageMessageUrl.value = photoUrl
-          emit('url', imageMessageUrl.value)
+          uploadComplete.value = true
+          imageUrl.value = photoUrl
+          emit('url', imageUrl.value)
         }
       } catch {
         // ...
       } finally {
-        imageButtonLoading.value = false
+        imageLoading.value = false
       }
     }
 
     watchEffect(() => {
-      imageAddedToMessage.value = !!props.currentUrl;
+      uploadComplete.value = !!props.currentUrl;
     })
 
 
     return {
       loadImageHandler,
-      imageButtonLoading,
-      imageAddedToMessage,
-      imageMessageUrl
+      imageLoading,
+      uploadComplete,
+      imageUrl
     }
   }
 })

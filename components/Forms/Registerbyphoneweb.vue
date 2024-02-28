@@ -24,7 +24,7 @@
 
       <div class="text-center mt-5">
         <OnboardingPrivacypolicy class="mt-15" />
-        <div class="d-inline-flex justify-center agreeToTerms">
+        <div v-if="false" class="d-inline-flex justify-center agreeToTerms">
           <v-checkbox
             v-model="agreeToTerms"
             :label="$t('onboarding.agree_to_terms')"
@@ -85,16 +85,7 @@ export default defineComponent({
   components: {
     VuePhoneNumberInput
   },
-  emits: [
-    'response'
-  ],
-  props: {
-    goTo: {
-      type: String,
-      default: '/'
-    },
-  },
-  setup (props, { emit }) {
+  setup () {
     const { $fire, $fireModule, $helper, $notify, $system, $ttlStorage, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
@@ -102,7 +93,7 @@ export default defineComponent({
     // DEFINE CONTENT
     const valid = ref(true)
     const recaptchaContainer = ref(null)
-    const agreeToTerms = ref(false)
+    const agreeToTerms = ref(true)
     const rules = formRules
     const formEl = ref(null)
     const form = ref({
@@ -138,23 +129,17 @@ export default defineComponent({
         form.value.showOtpInput = true
 
         try {
-          // Create firebase credentials
           window.confirmationResult = await $fire.auth.signInWithPhoneNumber(form.value.phone.trim().toLowerCase(), recaptchaContainer.value)
 
         } catch (e) {
-          // await initRecaptcha()
-
           if(e && e.message) {
             if (e.message === 'reCAPTCHA placeholder element must be an element or id') {
               // ...
             } else {
               $notify.show({ text: e.message, color: 'error' })
-
             }
-            // emit('response', { status: 'error', message: e.message })
           } else {
             $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-            // emit('response', { status: 'error', message: 'Error registering phone number 1' })
           }
 
           $system.log({
@@ -164,12 +149,7 @@ export default defineComponent({
           })
         }
       } else {
-        // await initRecaptcha()
-
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        // emit('response', { status: 'error', message: 'Error try again' })
-        console.log('STICKY: No phone number')
-
       }
     }
     const registerWithOTPCode = async () => {
@@ -184,35 +164,22 @@ export default defineComponent({
         // If EXISTING user show logged in message
         if (!result.additionalUserInfo.isNewUser) {
           $notify.show({text: i18n.t('notify.success'), color: 'green'})
-          emit('response', {status: 'success', message: 'Successfully logged in'})
-
-          // Update Profile
-          await dispatch('user/updateField', {
-            phone: form.value.phone.trim().toLowerCase()
-          })
-
-          if (props.goTo) {
-            console.log('PUSH USER TO ', props.goTo)
-            router.push(props.goTo)
-          }
-          console.log('We are not taking the user anywhere')
+          return router.push('/')
         }
         // If NEW user
         else {
           form.value.showOtpInput = false
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
-          emit('response', { status: 'success', message: 'Successfully registered' })
 
           await dispatch('user/updateField', {
             phone: form.value.phone.trim().toLowerCase(),
             created_at: new Date()
           })
+
+          return router.push('/auth/setup-profile')
         }
       } catch (e) {
-        // await initRecaptcha()
-
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        emit('response', { status: 'error', message: 'Error with phone code' })
 
         $system.log({
           comp: 'FormsRegisterbyphoneweb',

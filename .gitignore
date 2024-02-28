@@ -4,5 +4,5 @@ node_modules
 /.nuxt/
 /.idea/
 /package-lock.json
-/dist/
 /android/.idea/
+/dist/

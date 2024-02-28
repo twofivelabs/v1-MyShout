@@ -1,33 +1,29 @@
 <template>
   <v-footer v-if="hasMounted" app class="pb-10">
-    <v-bottom-navigation
-      :height="75"
-      absolute
-      grow
-    >
-      <v-btn class="pb-3" color="accent-4" style="height:inherit" text to="/">
+    <v-bottom-navigation absolute grow height="75">
+      <div style="width:93%;height:100%;margin:0 auto;">
+      <v-btn color="accent-4" class="navigation-button" text to="/">
         <v-icon>mdi-home</v-icon>
       </v-btn>
-      <NotificationsButton>
-        <v-btn class="pb-3" color="accent-4" style="height:100%" text>
-          <v-badge v-if="hasNotifications" dot overlap color="myshoutRed">
-            <v-icon>mdi-bell</v-icon>
-          </v-badge>
-          <v-icon v-else>mdi-bell</v-icon>
-        </v-btn>
-      </NotificationsButton>
-      <v-btn class="pb-3" color="accent-4" style="height:inherit" text to="/chats">
-        <v-badge v-if="hasMessages" dot overlap color="myshoutRed">
+      <v-btn color="accent-4" class="navigation-button" text to="/notifications">
+        <v-badge v-if="hasNotifications" dot overlap color="myshoutRed">
+          <v-icon>mdi-bell</v-icon>
+        </v-badge>
+        <v-icon v-else>mdi-bell</v-icon>
+      </v-btn>
+      <v-btn color="accent-4" class="navigation-button" text to="/chats">
+        <v-badge v-if="messages" overlap :content="messages" :bordered="false" color="myshoutRed">
           <v-icon>mdi-forum</v-icon>
         </v-badge>
         <v-icon v-else>mdi-forum</v-icon>
       </v-btn>
-      <v-btn class="pb-3" color="accent-4" style="height:inherit" text to="/map">
+      <v-btn color="accent-4" class="navigation-button" text to="/map">
         <v-icon>mdi-google-maps</v-icon>
       </v-btn>
-      <v-btn class="pb-3" color="accent-4" style="height:inherit" text to="/profile">
+      <v-btn color="accent-4" class="navigation-button" text to="/profile">
         <v-icon>mdi-account</v-icon>
       </v-btn>
+    </div>
     </v-bottom-navigation>
   </v-footer>
 </template>
@@ -39,7 +35,6 @@ import {
   onMounted,
   ref,
   useStore,
-    watchEffect
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -49,7 +44,7 @@ export default defineComponent({
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const hasNotifications = computed(() => state.user.profile.has.notifications || false)
-    const hasMessages = computed(() => state.user.profile.has.messages || false)
+    const messages = computed(() => state.user.profile.notifications?.unseen || 0)
 
     // DEFINE CONTENT
     const hasMounted = ref(false)
@@ -59,34 +54,23 @@ export default defineComponent({
       hasMounted.value = true
     })
 
-    watchEffect(() => {
-      //console.log('WATCH > hasNotifications', hasNotifications.value)
-      //console.log('WATCH > hasMessages', hasMessages.value)
-    })
-
     return {
       user,
       profile,
       hasMounted,
       hasNotifications,
-      hasMessages
+      messages
     }
   }
 })
 </script>
 <style scoped>
->>> .bottom-sheet {
-  align-self: flex-end;
-}
 
->>> .v-dialog {
-  margin: 0;
-}
-
-.footer-cart, .footer-orders {
-  height: 75vh;
-  bottom: 0;
-  position: absolute
+.navigation-button {
+  width:18.5% !important;
+  min-width:18.5% !important;
+  height:100% !important;
+  padding: 0 0 3px 0;
 }
 .v-icon.v-icon {
   font-size:30px;

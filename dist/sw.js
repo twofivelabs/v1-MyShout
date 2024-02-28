@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 const options = {"workboxURL":"https://cdn.jsdelivr.net/npm/workbox-cdn@5.1.4/workbox/workbox-sw.js","importScripts":["/firebase-auth-sw.js"],"config":{"debug":true},"cacheOptions":{"cacheId":"myshout-prod","directoryIndex":"/","revision":"yHSz7O3kI8yJ"},"clientsClaim":true,"skipWaiting":true,"cleanupOutdatedCaches":true,"offlineAnalytics":false,"preCaching":[{"revision":"yHSz7O3kI8yJ","url":"/?standalone=true"}],"runtimeCaching":[{"urlPattern":"/nuxt/","handler":"CacheFirst","method":"GET","strategyPlugins":[]},{"urlPattern":"/","handler":"NetworkFirst","method":"GET","strategyPlugins":[]}],"offlinePage":null,"pagesURLPattern":"/","offlineStrategy":"NetworkFirst"}
+=======
+const options = {"workboxURL":"https://cdn.jsdelivr.net/npm/workbox-cdn@5.1.4/workbox/workbox-sw.js","importScripts":["/firebase-auth-sw.js"],"config":{"debug":true},"cacheOptions":{"cacheId":"myshout-prod","directoryIndex":"/","revision":"D9FrJO6c14QF"},"clientsClaim":true,"skipWaiting":true,"cleanupOutdatedCaches":true,"offlineAnalytics":false,"preCaching":[{"revision":"D9FrJO6c14QF","url":"/?standalone=true"}],"runtimeCaching":[{"urlPattern":"/nuxt/","handler":"CacheFirst","method":"GET","strategyPlugins":[]},{"urlPattern":"/","handler":"NetworkFirst","method":"GET","strategyPlugins":[]}],"offlinePage":null,"pagesURLPattern":"/","offlineStrategy":"NetworkFirst"}
+>>>>>>> origin/2.1--Chat-Development
 
 importScripts(...[options.workboxURL, ...options.importScripts])
 

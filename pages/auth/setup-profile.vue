@@ -220,7 +220,7 @@ import {
 import formRules from '~/classes/formRules'
 
 export default defineComponent({
-  name: 'AuthUsername',
+  name: 'AuthSetupProfile',
   layout: 'onboarding',
   middleware: 'authenticated',
   setup () {
@@ -249,6 +249,7 @@ export default defineComponent({
     // Watch for changes in user state to update the step
     watch(user.value, (profile) => {
       if (profile) {
+        console.log("KYLE", profile)
         if (!profile.username) {
           // Force user to set a username
           step.value = 1;
@@ -323,15 +324,27 @@ export default defineComponent({
       loading.value = true
 
       setTimeout(async () => {
+<<<<<<< HEAD
         $capacitor.gpsInit()
         // await $capacitor.positionPermissions()
         // await $services.getSetUserGeneralLocation()
+=======
+        // TODO: GPS UPDATE
+        /* Geolocation.checkPermissions()/!*.then(async (permission) => {
+          if (permission.location === 'granted') {
+
+          }
+        })*!/ */
+/*
+        await $capacitor.positionPermissions()
+        await $services.getSetUserGeneralLocation()
+>>>>>>> origin/2.1--Chat-Development
 
         await dispatch('user/updateField', {
           permissions: {
             location: true
           }
-        })
+        }) */
 
         step.value = 5
         loading.value = false

@@ -19,10 +19,19 @@ class Chats extends FirestoreHelpers {
     this.fields = {
       owner: null,
       title: null,
+      description: null,
+      photoUrl: null,
       participants: [],
-      last_created: null,
+      admins: [],
       seen: [],
-      lastMessage: null
+      unseen: [],
+      typing: [],
+      muted: [],
+      message: {
+        snippet: null,
+        created_at: null,
+        sent_by: null
+      }
     }
     return this
   }
@@ -180,7 +189,7 @@ export const actions = {
     if (this.$db) {
         const response = await this.$db.update(`${dbRootPath}/${data.id}`, null, data)
         if (response) {
-            await commit('SET_FIELD', data)
+          await commit('SET_FIELD', data)
         }
         return response
     }

@@ -130,19 +130,22 @@ export default defineComponent({
       }
     }
     const registerWithOTPCode = async () => {
+      console.log("FormsLoginbyphone: Starting OPT Code Confirmation")
       // Now enter in OTP code
       loading.value = true
       window.confirmationResult.confirm(form.value.otpProvided).then(result => {
+        console.log("FormsLoginbyphone: OTP Code Login Success", result)
+        
         if (!result.additionalUserInfo.isNewUser) {
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           router.push('/')
           return
         }
+
         $notify.show({ text: i18n.t('notify.success'), color: 'green' })
-        if (props.goTo) {
-          router.push(props.goTo)
-          // router.push('/profile')
-        }
+        if (props.goTo) return router.push(props.goTo)
+        
+        router.push('/profile')
       }).catch((e) => {
         initRecaptcha()
 

@@ -1,16 +1,15 @@
 <template>
-    <span class="">
-      <span v-if="titleN">{{ titleN }}</span>
-      <span v-else>{{ title }}</span>
-    </span>
+  <v-skeleton-loader v-if="!chat" type="heading" />
+  <span v-else>{{ chat.title ? truncateString(chat.title) : truncateString(users) }}</span>
 </template>
 <script>
 
 import {
   defineComponent,
-  ref, onMounted, useStore, computed,
+  ref, computed,
+  useStore,
+  watch
 } from '@nuxtjs/composition-api'
-import lodash from 'lodash'
 
 export default defineComponent({
   name: 'ChatUsername',
@@ -21,60 +20,38 @@ export default defineComponent({
         return {}
       }
     },
-    loggedInUser: {
-      type: Object,
-      default: () => {
-        return {}
-      }
-    },
   },
   setup(props) {
     const { state, dispatch } = useStore()
-    const title = ref(props.chat.title)
-    const titleN = computed(() => {
-      const newTitle = lodash.find(state.chats.all, { id: props.chat.id })
-      if ( newTitle ) {
-        return newTitle.title
-      } else {
-        return props.chat.title
-      }
-    })
+    const user = computed(() => state.user)
+    
+    const users = ref('')
 
-    // METHODS
-    const loggedInUserId = () => {
-      if (props.loggedInUser.uid) {
-        return props.loggedInUser.uid
-      } else if (props.loggedInUser.data.uid) {
-        return props.loggedInUser.data.uid
+    const truncateString = (str, num = 20) => {
+      if (str.length > num) {
+        return str.slice(0, num) + '...';
+      } else {
+        return str;
       }
-    }
-    const getChatTitle = async (chat) => {
-      if (chat.title) {
-        title.value = chat.title
-        return
-      }
-      title.value = ''
-      for (const chatParticipantId of chat.participants) {
-        if (chatParticipantId !== props.loggedInUser.uid) {
-          // const joinedUser = await joinUser(chatParticipantId)
-          const joinedUser = await dispatch('user/getOne', chatParticipantId)
-            if (joinedUser && (loggedInUserId() !== joinedUser.id)) {
-              title.value = title.value + `@${joinedUser.username} `
-            }
+    }    
+
+    watch(() => props.chat, async (chat) => {
+      if(chat && chat.participants) {
+        users.value = ''
+        for (const participant of chat.participants) {
+          if (participant !== user.value.data.uid) {
+            const joinedUser = await dispatch('user/getOne', participant)
+              if (joinedUser && (user.value.data.uid !== joinedUser.id)) {
+                users.value = users.value + `@${joinedUser.username} `
+              }
+          }
         }
       }
-    }
-
-    // MOUNT
-    onMounted(async () => {
-      if (!title.value) {
-        await getChatTitle(props.chat)
-      }
-    })
+    }, { immediate: true });
 
     return {
-      title,
-      titleN
+      users,
+      truncateString
     }
   }
 })

@@ -1,23 +1,32 @@
 <template>
   <div>
-    <v-icon class="pa-3 rounded-lg" color="myshoutDarkGrey" @click="showChatActions()">
+    <v-icon class="pa-3 rounded-lg" color="myshoutDarkGrey" @click="showBottomSheet = true">
       mdi-dots-vertical
     </v-icon>
-    <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
-      <v-sheet height="50vh" class="rounded-t-xl">
+    <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700" fullscreen>
+      <v-sheet>
         <div class="ma-3" style="padding-bottom:180px;">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <div class="text-right">
+            <v-icon class="pa-3 rounded-lg" color="myshoutLightGrey" @click="showBottomSheet = false">
+              mdi-close-thick
+            </v-icon>
+          </div>
 
-          <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
-          <ElementH3 align="center" :text="$t('actions')" />
+          <v-row no-gutters class="text-center mb-10">
+            <v-col cols="12">
+              <ChatTopavatar v-if="chat" :chat="chat" :size="80"/>
+            </v-col>
+            <v-col cols="12" class="text-h2 pt-5 pb-2">
+              <ChatActionsEditchat :type="`title`" :chat="chat" />
+            </v-col>
+            <v-col cols="12" class="caption">
+              <ChatActionsEditchat :type="`description`" :chat="chat" />
+            </v-col>
+          </v-row>
+            
 
-          <v-list-item-group>
-            <ChatActionsRenamebtn :chatId="chatId" />
-            <ChatActionsViewmembersbtn :chatId="chatId" />
-            <ChatActionsRemovechatbtn :chatId="chatId" />
-          </v-list-item-group>
+          <ChatActionsMemberslist :chat="chat" :participants="participants" :admins="admins" />
+          <ChatActionsSettingslist :chat="chat" :participants="participants" :admins="admins" />         
 
         </div>
       </v-sheet>
@@ -27,60 +36,42 @@
 <script>
 import {
   defineComponent,
-  ref, useContext, useStore,
+  ref,
+  useStore,
+  computed,
 } from '@nuxtjs/composition-api'
+
 import { Touch } from 'vuetify/lib/directives'
 
 export default defineComponent({
   name: 'ChatActionsbtn',
   directives: { Touch },
   props: {
-    chatId: {
-      type: String,
+    chat: {
+      type: Object,
       default: () => {
-        return null
+        return {}
+      }
+    },
+    participants: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    admins: {
+      type: Object,
+      default: () => {
+        return {}
       }
     }
   },
-  setup(props) {
-    const { $system } = useContext()
-    const { dispatch } = useStore()
-    const loading = ref(false)
+  setup() {
+    const { state } = useStore()
+    const user = computed(() => state.user);
+    
     const showBottomSheet = ref(false)
-    const chat = ref()
 
-    // METHODS
-    const showChatActions = async () => {
-      try {
-        loading.value = true
-
-        try {
-          loading.value = true
-          await dispatch('chats/getOne', props.chatId).then((res) => {
-            if (res !== false) {
-              chat.value = res
-              showBottomSheet.value = true
-            }
-          })
-        } catch(e) {
-          $system.log({
-            comp: 'ChatActions',
-            msg: 'useFetch',
-            val: e
-          })
-        } finally {
-          loading.value = false
-        }
-      } catch(e) {
-        $system.log({
-          comp: 'ChatsIndex',
-          msg: 'showChatActions',
-          val: e
-        })
-      } finally {
-        loading.value = false
-      }
-    }
     const swipe = (direction) => {
       if (direction === 'Down') {
         showBottomSheet.value = false
@@ -88,10 +79,8 @@ export default defineComponent({
     }
 
     return {
-      loading,
-      chat,
+      user,
       showBottomSheet,
-      showChatActions,
       swipe,
     }
   }

@@ -11,8 +11,13 @@ class Messages extends FirestoreHelpers {
         this.fields = {
             owner: '',
             message: '',
+            replies: [],
+            replyTo: null,
+            deleted: false,
+            hide: [],
             image: null,
             audioUrl: '',
+            urls: [],
             seen: []
         }
         return this
@@ -130,8 +135,8 @@ export const actions = {
     async getOne ({ state, commit }, id) {
         try {
             if (state.loaded && state.loaded[id]) {
-                await commit('SET_ONE', state.loaded[id])
-                return state.loaded[id]
+              await commit('SET_ONE', state.loaded[id])
+              return state.loaded[id]
             }
             const one = await this.$db.get_one(`Chats/${id}/${dbRootPath}`, dataConverter)
             if (one) {
@@ -168,8 +173,7 @@ export const actions = {
     },
     async updateField ({ commit }, data) {
         if (this.$db) {
-            console.log('updateField', `Chats/${data.chatId}/${dbRootPath}/${data.id}`)
-            const response = await this.$db.update(`Chats/${data.chatId}/${dbRootPath}/${data.id}`, dataConverter, data.message)
+            const response = await this.$db.update(`Chats/${data.chatId}/${dbRootPath}/${data.id}`, null, data.data)
             if (response) {
                 await commit('SET_STATE_FIELD', data)
             }

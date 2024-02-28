@@ -3,360 +3,231 @@
     <v-app-bar color="white" class="mobileNotch pb-1" app fixed top>
       <v-app-bar-nav-icon>
         <v-btn to="/chats" text color="transparent">
-          <v-icon class="pr-2 py-3 pl-2" color="myshoutDarkGrey">
-            mdi-arrow-left
-          </v-icon>
+          <v-icon class="pr-2 py-3 pl-2" color="myshoutDarkGrey">mdi-arrow-left</v-icon>
         </v-btn>
       </v-app-bar-nav-icon>
-      <v-toolbar-title class="pl-0">
+      <v-toolbar-title class="pl-0" v-if="chat">
         <div class="d-flex align-center">
-          <ChatTopavatar v-if="chat" :chat="chat" class="mr-2" />
-          <ChatUsername v-if="chat" :chat="chat" :loggedInUser="user" />
+          <ChatTopavatar :chat="chat" class="mr-2" />
+          <ChatUsername :chat="chat" />
         </div>
       </v-toolbar-title>
-
       <v-spacer />
-
-      <ChatActionsbtn v-if="chat && chat.id" :chatId="chat.id" />
+      <ChatActionsbtn v-if="chat && participants" :chat="chat" :participants="participants" :admins="admins" />
     </v-app-bar>
-    <v-container class="pa-0 fill-height align-end">
-      <v-row class="pa-6 mt-5" v-if="loading">
-        <v-col>
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-          <v-skeleton-loader width="100%" max-height="50" type="text" class="mb-6" />
-        </v-col>
-      </v-row>
 
-      <v-card color="transparent" class="chatBox elevation-0 pt-14 mt-5 mb-14">
-          <template v-for="(message, index) in messages">
-            <ChatMessage :message="message" :chat="chat" :key="index" v-intersect="onIntersect" class="chat-message" :id="`message-${message.id}`" />
-          </template>
-          <div id="bottomOfChat"></div>
-      </v-card>
+    
 
-      <v-app-bar color="transparent" class="align-center formMessageInput" flat bottom fixed style="top:calc(100% - 180px)">
-        <v-text-field
-            v-model="newMessage"
-            @keydown.enter="sendMessage"
-            :label="$t('form.message')"
-            type="text"
-            hide-details
-            solo
-        >
-          <template v-slot:append-outer>
-            <v-btn @click="sendMessage" fab>
-              <v-icon>mdi-send</v-icon>
-            </v-btn>
-          </template>
-          <template v-slot:append>
-            <ChatUploadimage :chat="chat" :currentUrl="imageMessageUrl" @url="imageMessageUrlCallback" />
-            <ChatRecordaudio :chat="chat" />
+    <v-container v-if="messages && messages.length > 0" style=" z-index: 0; width: 100%; padding-bottom: 100px !important;">
+      <div v-for="(message) in messages" :key="message.id">
+        <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" v-intersect="onMessageInterest(message)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
+      </div>
+      <ChatTyping :chat="chat" :participants="participants" />
+    </v-container>
+    <v-container v-else class="pa-6 mt-5">
+      <v-skeleton-loader v-for="x of 4" :key="x" width="100%" max-height="50" type="text" class="mb-6" />
+    </v-container>
+    <div id="bottomOfChat" />
 
-          </template>
-        </v-text-field>
-      </v-app-bar>
-  </v-container>
+    <ChatInput :chat="chat" :reply="isReply" @updateReply="handleReply" @updateTyping="updateTypingStatus" />
   </div>
 </template>
+
 <script>
-
-// https://fireship.io/courses/vue/
-// https://github.com/berksaribas/vuetify-chat/blob/master/src/components/Chat/Chat.vue
-// https://github.com/prateekgurnani10/walkie-talkie-chatapp
-import lodash from 'lodash'
-import firebase from 'firebase'
-import { Intersect } from 'vuetify/lib/directives'
-
 import {
   defineComponent,
+  nextTick,
   ref,
   useContext,
   useRoute,
-  useFetch,
   useStore,
   computed,
-  watch
-} from '@nuxtjs/composition-api'
+  watch,
+  onMounted, onUnmounted
+} from '@nuxtjs/composition-api';
+
+import { Intersect } from 'vuetify/lib/directives';
+
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 
 export default defineComponent({
   name: 'ChatsChatId',
   middleware: 'authenticated',
   directives: { Intersect },
-  setup () {
-    const {
-      $notify,
-      $fire,
-      $vuetify,
-      $capacitor,
-      $encryption,
-      $system, i18n,
-      error
-    } = useContext()
-    const {
-      dispatch,
-      state
-    } = useStore()
-    const loading = ref(true)
-    const chatLoading = ref(true)
-    const route = useRoute()
-    const user = computed(() => state.user)
+  setup() {
+    const { $vuetify, $fire, $helper, $capacitor, $encryption } = useContext();
+    const { dispatch, state } = useStore();
+    const route = useRoute();
+    const user = computed(() => state.user);
 
-    // DEFINE CONTENT
-    const newMessage = ref()
-    const messages = ref([])
-    const chat = ref()
-    const chatId = ref()
-    const users = ref({})
-    const messageListener = ref()
-    const imageMessageUrl = ref()
+    const chatLoading = ref(true);
+    const chatListener = ref(null);
+    const chatId = ref('');
+    const chat = ref(null);
+    const admins = ref({});
+    const participants = ref({});
+    const messagesLoading = ref(true);
+    const messages = ref([]);
+    const messageListener = ref(null);
+    const isReply = ref(null);
 
-    $capacitor.AdMob_hideBanner()
+    $capacitor.AdMob_hideBanner();
 
-    // GET CONTENT
-    useFetch(async () => {
-      chatLoading.value = true
+    const loadChat = async () => {
       try {
-        await dispatch('chats/getOne', route.value.params.id).then(async (res) => {
-          if (res !== false) {
-            chat.value = res
-
-            // LOAD USERS
-            for(const id in res.participants) {
-              const u = await dispatch('user/getOne', res.participants[id])
-              if (u) {
-                users.value[res.participants[id]] = {...u}
-              }
+        chatLoading.value = true;
+        if (chatId.value) {
+          chatListener.value = $fire.firestore.doc(`Chats/${chatId.value}`).onSnapshot(doc => {
+            if (doc.exists) {
+              chat.value = doc.data();
+              loadParticipants();
+              loadMessages();
             }
-          }
-        })
-      } catch(e) {
-        $system.log({
-          comp: 'ChatsChatId',
-          msg: 'getOne',
-          val: e
-        })
-        error({ statusCode: 404 })
-      } finally {
-        chatLoading.value = false
-      }
-    })
-
-    // METHODS
-    const loadMessages = () => {
-      messages.value = []
-      loading.value = true
-      try {
-        messageListener.value = $fire.firestore
-            .collection(`Chats/${chatId.value}/Messages`)
-            .orderBy('created_at', 'asc')
-            .limitToLast(100)
-            .onSnapshot((snapshot) => {
-              snapshot.docChanges().forEach((change) => {
-                // TODO: Add 'modified' / 'removed' as options here too
-                // console.log('MESSAGE LISTENER', change, change.type, $encryption.decrypt(change.doc.data().message))
-                if (change.type === 'added') {
-                  const data = change.doc.data()
-                  data.id = change.doc.id
-                  // MERGE user data with the message
-                  data.ownerData = users.value[data.owner]
-
-                  if (data.message) {
-                    data.message = $encryption.decrypt(data.message)
-                  }
-                  messages.value.push(data)
-                  goToBottom()
-                }
-              })
-            })
-      } catch (e) {
-        console.log('ERROR LOADING MESSAGES', e)
-      } finally {
-        loading.value = false
-      }
-    }
-    const sendMessage = async () => {
-      try {
-        if((!newMessage.value && !imageMessageUrl.value) || !user.value.data.uid) {
-          console.log("STICKY: No Message To Send....")
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'error'
-          })
-          return
+          }, error => console.error("Error listening to chat updates:", error));
+          chatLoading.value = false;
         }
-
-        let encryptedMessage = null
-
-        // Encrypt message
-        if (newMessage.value) {
-          encryptedMessage = $encryption.encrypt(newMessage.value)
-        }
-
-        // Save message
-        /*console.log({
-          chatId: chatId.value,
-          message: {
-            message: encryptedMessage,
-            image: imageMessageUrl.value || null,
-            owner: user.value.data.uid,
-            seen: [
-              user.value.data.uid
-            ]
-          }
-        })*/
-        await dispatch('chats/messages/add', {
-          chatId: chatId.value,
-          message: {
-            message: encryptedMessage,
-            image: imageMessageUrl.value || null,
-            owner: user.value.data.uid,
-            seen: [
-              user.value.data.uid
-            ]
-          }
-        })
-        // Update chat last message
-        await dispatch('chats/updateField', {
-          id: chatId.value,
-          last_created: new Date(),
-          lastMessage: newMessage.value || null,
-          seen: [
-            user.value.data.uid
-          ]
-        })
-
-        // Reset
-        newMessage.value = null
-        imageMessageUrl.value = null
-        await goToBottom(0)
       } catch (e) {
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'error'
-        })
-        console.log("STICKY: Cannot Send Message", e)
-
+        console.log("Error Loading Chat", e)
       }
-    }
-    const goToBottom = async (delay = 1000) => {
-      setTimeout(() => {
-        $vuetify.goTo('#bottomOfChat').then(() => {
+    };
 
-          // Update Chat of seen messages
-          try {
-            if (!chat.value?.seen?.includes(user.value.data.uid)) {
-              $fire.firestore.doc(`Chats/${chatId.value}`).update({
-                "seen": firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
-              })
+    const loadParticipants = async () => {
+      try {
+        const participantProfiles = await Promise.all(
+          chat.value.participants.map(participantUid => dispatch('user/getOne', participantUid))
+        );
+        
+        participantProfiles.forEach(profile => {
+          if (profile) participants.value[profile.uid] = profile;
+        });
+
+        chat.value.admins.forEach(adminUid => {
+          if (participants.value[adminUid]) admins.value[adminUid] = participants.value[adminUid];
+        });
+      } catch (e) {
+        console.error("Error Loading Participants", e);
+      }
+    };
+
+    const loadMessages = async () => {
+      messagesLoading.value = true;
+      messageListener.value = await $fire.firestore
+        .collection(`Chats/${chatId.value}/Messages`)
+        .orderBy('created_at', 'asc')
+        .limitToLast(100)
+        .onSnapshot((snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added') {
+              const data = change.doc.data();
+              data.id = change.doc.id;
+              data.ownerData = participants.value[data.owner];
+
+              if (data.message) data.message = $encryption.decrypt(data.message);
+              if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
+
+              // Check if the message already exists before adding
+              const messageExists = messages.value.some(message => message.id === data.id);
+              if (!messageExists) messages.value.push(data);
+            } else if (change.type === 'modified') {
+              const data = change.doc.data();
+              const index = messages.value.findIndex(m => m.id === change.doc.id);
+
+              if (index !== -1) messages.value[index] = { ...messages.value[index], ...data };
             }
-            // update notification bubble
-            $fire.firestore.doc(`Users/${user.value.data.uid}`).update({
-              "notifications.hasMessages": false,
-              "has.messages": false,
-            })
-            // Clear the app bubble
-            $capacitor.pushNotificationsClearBadge()
+          });
+          messagesLoading.value = false;
+        }, error => {
+          console.error('ERROR LOADING MESSAGES', error);
+          messagesLoading.value = false;
+        });
+    };
 
-          } catch {
-            // ...
+    const updateTypingStatus = (typing) => {
+      const value = typing ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid);
+      dispatch('chats/updateField', { id: chatId.value, typing: value });
+    };
+
+    const scrollToUnseenMessage = () => {
+      nextTick(() => {
+        const unseenMessage = messages.value.find(message => !message.seen.includes(user.value.data.uid));
+
+        if (unseenMessage) {
+          const messageElement = document.getElementById(`message-${unseenMessage.id}`);
+          if (messageElement) {
+            messageElement.scrollIntoView({ behavior: "smooth" });
+          }
+        } else {
+          $vuetify.goTo('#bottomOfChat', { behavior: "smooth" });
+        }
+      });
+    };
+
+    const onMessageInterest = (message) => {
+      if (!message.seen.includes(user.value.data.uid)) {
+        dispatch('chats/messages/updateField', {
+          chatId: chatId.value,
+          id: message.id,
+          data: {
+            seen: firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
           }
         })
-      }, delay)
-    }
-    const goTo = (messageId) => {
-      $vuetify.goTo(`#message-${messageId}`)
-    }
-    const onIntersect = (entries) => {
-      const messageId = entries[0].target.id.substring(8)
-      const message = lodash.find(messages.value, { id:messageId })
-
-      // Add update chat message
-      try {
-        if (!message.seen.includes(user.value.data.uid)) {
-          $fire.firestore.doc(`Chats/${chatId.value}/Messages/${messageId}`).update({
-            "seen": firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
-          })
-        }
-      } catch (e) {
-        // ...
       }
     }
-    const imageMessageUrlCallback = (url) => {
-      imageMessageUrl.value = url
-    }
 
-    // WATCH
-    // Wait for chat to finish loading then messages
-    watch(chatLoading, () => {
-      if (chatLoading.value === false) {
-        if (route.value.params.id) {
-          $capacitor.AdMob_hideBanner()
+    const handleReply = message => isReply.value = message;
 
-          chatId.value = route.value.params.id
-          loadMessages()
-          goToBottom(2500)
-        }
-      }
-    })
-    // This will load with moving back and forth
-    watch(route, (r) => {
-      // console.log('r/route', r)
-      if (r.name.includes('chats-chat-id')) {
-        $capacitor.AdMob_hideBanner()
+    watch(route, (to, from) => {
+      chatId.value = to.params.id;
+      if (to.params.id && !from || (to.params.id !== from.params.id)) loadChat();
+    }, { immediate: true });
 
-        chatId.value = route.value.params.id
-        loadMessages()
-        goToBottom()
+    watch(() => messages.value, () => {
+      scrollToUnseenMessage();
+    }, { deep: true });
 
-      } else {
-        // Need to stop listening to the changes made to the chat
-        try {
-          console.log('STICKY: REMOVE CHAT MESSAGE LISTENER')
-          messageListener.value()
+    onMounted(() => {
+      $capacitor.AdMob_hideBanner();
+    });
 
-          $capacitor.AdMob_init()
-          $capacitor.AdMob_banner()
-        } catch {
-          // ...
-        }
-      }
-    })
+    onUnmounted(() => {
+      $capacitor.AdMob_init();
+      $capacitor.AdMob_banner();
+      messageListener.value && messageListener.value();
+      chatListener.value && chatListener.value();
+    });
 
     return {
-      loading,
+      messagesLoading,
       chat,
-      newMessage,
+      isReply,
       messages,
-      users,
+      participants,
+      admins,
       user,
-      imageMessageUrl,
-      sendMessage,
-      onIntersect,
-      goTo,
-      imageMessageUrlCallback
-    }
+      onMessageInterest,
+      handleReply, updateTypingStatus
+    };
   }
-})
-
+});
 </script>
-<style>
 
-.chatBox { z-index:0; width: 100%; padding-bottom:120px !important; }
+<style scope>
 
-#bottomOfChat {
-  overflow-anchor: auto;
-  height: 1px;
-}
-.formMessageInput {
-  z-index: 999999999;
-}
-.v-text-field .v-input__control {
-  margin-top:5px !important;
-}
-.v-text-field .v-input__append-outer {
-  margin-top:0 !important;
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  padding: 0 0 100px;
 }
 
+.messages-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  overflow-y: hidden;
+  padding: 0 16px;
+}
 </style>

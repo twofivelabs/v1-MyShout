@@ -40,7 +40,7 @@
         <v-text-field
             :label="$t('form.code')"
             :placeholder="$t('form.code')"
-            class="mt-5 mx-8"
+            class="mt-5 mx-8 pl-2"
             outlined background-color="#f8f9fa"
             max=6
             type="number"
@@ -86,24 +86,14 @@ export default defineComponent({
   components: {
     VuePhoneNumberInput
   },
-  emits: [
-    'response'
-  ],
-  props: {
-    goTo: {
-      type: String,
-      default: '/'
-    },
-  },
-  setup (props, { emit }) {
-    const { $notify, $system, $ttlStorage, i18n } = useContext()
+  setup () {
+    const { $notify, $system, $ttlStorage, i18n, $helper } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
 
     // DEFINE CONTENT
     const valid = ref(true)
-    //const appVerifier = ref(null)
     const agreeToTerms = ref(true)
     const rules = formRules
     const formEl = ref(null)
@@ -112,7 +102,7 @@ export default defineComponent({
       phoneNumber: null,
       phoneNumberFormatted: null,
       showOtpInput: false,
-      otpProvided: null
+      otpProvided: null,
     })
 
     // METHODS
@@ -120,23 +110,23 @@ export default defineComponent({
       form.value.phoneNumberFormatted = e.formattedNumber
       form.value.phone = e.formattedNumber
     }
+
     const validate = async () => {
       loading.value = true
 
       if (agreeToTerms.value) {
         valid.value = await formEl.value.validate()
-        if (valid.value) {
-          await registerPhoneNumber()
-        }
+        if (valid.value) await registerPhoneNumber()
       } else {
         $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
       }
 
       loading.value = false
     }
+
     const registerPhoneNumber = async () => {
       loading.value = true
-      
+
       const phone = form.value.phone.trim().toLowerCase();
 
       try {
@@ -144,7 +134,7 @@ export default defineComponent({
         await FirebaseAuthentication.signInWithPhoneNumber({
           phoneNumber: phone,
         });
-        
+
         form.value.showOtpInput = true
       } catch (e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
@@ -159,35 +149,37 @@ export default defineComponent({
         loading.value = false
       }
     }
+
     const registerWithOTPCode = async () => {
       loading.value = true
+
       try {
         await FirebaseAuthentication.addListener('phoneCodeSent', async event => {
-          // Confirm the verification code
           const result = await FirebaseAuthentication.confirmVerificationCode({
             verificationId: event.verificationId,
             verificationCode: form.value.otpProvided,
           });
 
-          // Update Profile
-          dispatch('user/updateField', {
-            phone: form.value.phone.trim().toLowerCase()
-          })
+          console.log("Mobile Phone Authentication Result", result, JSON.stringify(result))
 
           $ttlStorage.set('onboardingComplete', true)
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' });
 
-          if (!result.additionalUserInfo.isNewUser)  emit('response', { status: 'success', message: 'Successfully signed in', 'goTo': '/' })
-          else {
-            emit('response', { status: 'success', message: 'Successfully registered', 'goTo': '/onboarding/2.1' })
-            
+          if (result.additionalUserInfo.isNewUser == false) {
+            console.log("registerbyphonemobile: Returning User") /* I get to this but it's not actually logging the user in or storing the authenticated user */
+            $helper.sleep(800)
+            return router.push('/')
+          } else {
+            console.log("registerbyphonemobile: New User")
+
             dispatch('user/updateField', {
+              phone: form.value.phone.trim().toLowerCase(),
               created_at: new Date()
             })
-          }
-          
-          $notify.show({ text: i18n.t('notify.success'), color: 'green' })          
 
-          return router.push(props.goTo)
+            await $helper.sleep(800)
+            return router.push('/auth/setup-profile')
+          }
         });
       } catch (e) {
         $system.log({
@@ -196,7 +188,6 @@ export default defineComponent({
           val: e
         })
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        emit('response', { status: 'error', message: 'Error with phone code' })
       } finally {
         loading.value = false
         form.value.showOtpInput = false

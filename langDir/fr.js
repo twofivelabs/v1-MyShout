@@ -51,7 +51,8 @@ export default {
         send_password_reset: 'Envoyer la réinitialisation du mot de passe',
         deactivate: 'Désactiver',
         reactivate: 'Réactiver',
-        confirm_request: 'Confirmer la requête'
+        confirm_request: 'Confirmer la requête',
+        recent_chats: 'Chats Récents'
     },
     notify: {
         no_audio: 'Pas de son',
@@ -65,6 +66,8 @@ export default {
         already_linked: 'Votre compte est déjà lié',
         agree_to_terms: 'Vous devez accepter les conditions avant de continuer',
         validate_your_phone: 'Vous devez valider votre numéro de téléphone avant de continuer',
+
+        not_enough_admins: 'Le chat doit avoir au moins un administrateur.',
 
         gps_permission_denied: 'Emplacement d\'autorisation refusé',
         gps_permission_prompt: 'Invite d\'emplacement d\'autorisation',
@@ -169,7 +172,7 @@ export default {
         add_member: 'Ajouter membre',
         view_members: 'Voir les membres',
         remove_chat: 'Supprimer le chat',
-        audio_expired: 'Le clip audio a expiré'
+        audio_expired: 'Le clip audio a expiré',
     },
     notifications: {
         heading: 'Avis',
@@ -252,6 +255,28 @@ export default {
         no_status: 'Vous ne pouvez pas y accéder, votre statut n\'est pas actif.',
         no_user_profile: 'Vous n\'êtes pas autorisé à voir leur profil.',
         no_view_location: 'Vous ne pouvez pas voir leur emplacement.'
+    },
+    chat: {
+        admins: 'Admins',
+        members: 'Membres',
+        mute_notifications: 'Désactiver les notifications',
+        unmute_notifications: 'Activer les notifications',
+        add_member: 'Ajouter un membre',
+        view_profile: 'Voir le profil',  
+        leave_group: 'Quitter le groupe',
+        remove_from_group: 'Retirer du groupe',
+        leave_chat: 'Quitter le chat',
+        add_title: 'ajouter un titre',
+        add_group_description: 'ajouter une description de groupe',
+        error_updating: 'Il y a eu un problème lors de la mise à jour...',
+        message_deleted: 'This message was deleted',
+        delete_for_me: 'Supprimer pour moi',
+        delete_for_everyone: 'Supprimer pour tout le monde',
+        info: 'Info',
+        thread: 'Voir la discussion',
+        message_thread: 'Fil de Messages',
+        forward_to: 'Transférer à',
+        download_file: 'élécharger le fichier'
     },
 
     no_results: 'Aucun résultat',

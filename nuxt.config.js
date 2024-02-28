@@ -96,7 +96,7 @@ const config = {
       mapsApiKey: 'AIzaSyCdk1YDkjNrxjmojCyJhBB-6cEedG0nTt4'
     },
     firebase: {
-        fcmPublicVapidKey: 'BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco'
+        fcmPublicVapidKey: isDev ? 'BAJjXZ0Yn1FI1sJexv41IjHTJCYXNUK_KGjct3N5bVvxGE3m6olax8OlenN4MZfhwMOLn6Ei1L7h-EFnaG0owrU' : 'BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco'
     }
   },
 
@@ -146,6 +146,7 @@ const config = {
     '~/plugins/services',
     '~/plugins/encryption',
     '~/plugins/language',
+    '~/plugins/longpress',
      {
        src: '~/plugins/animation',
        mode: 'client'
@@ -205,9 +206,9 @@ const config = {
         langDir: 'langDir',
         skipSettingLocaleOnNavigate: true,
         locales: [
-            { code: 'en', iso: 'en-US', file: 'en.js', dir: 'ltr', name: 'English', local: 'English' }
-            //{ code: 'es', iso: 'es-ES', file: 'es.js', name: 'Spanish', local: 'Español' },
-            //{ code: 'fr', iso: 'fr', file: 'fr.js', name: 'French', local: 'Français' }
+            { code: 'en', iso: 'en-US', file: 'en.js', dir: 'ltr', name: 'English', local: 'English' },
+            { code: 'es', iso: 'es-ES', file: 'es.js', name: 'Spanish', local: 'Español' },
+            { code: 'fr', iso: 'fr', file: 'fr.js', name: 'French', local: 'Français' }
         ],
         defaultLocale: 'en',
         detectBrowserLanguage: {
@@ -223,10 +224,6 @@ const config = {
   markdownit: {
     runtime: true
   },
-
-  /*image: {
-    domains: ['https://firebasestorage.googleapis.com/v0/b/pint-app-dev.appspot.com']
-  },*/
 
   /*
   https://console.cloud.google.com/google/maps-apis/welcome?entry=devsite&step=api_key
@@ -459,7 +456,7 @@ const config = {
             url: '/profile'
           }
         ],
-        fcmPublicVapidKey: isDev? "BAJjXZ0Yn1FI1sJexv41IjHTJCYXNUK_KGjct3N5bVvxGE3m6olax8OlenN4MZfhwMOLn6Ei1L7h-EFnaG0owrU" : "BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco"
+        fcmPublicVapidKey: isDev ? "BAJjXZ0Yn1FI1sJexv41IjHTJCYXNUK_KGjct3N5bVvxGE3m6olax8OlenN4MZfhwMOLn6Ei1L7h-EFnaG0owrU" : "BKsrBHZNIq3MJyV6edKDaagk-ugKt9ZVhwOty3EtP0gR_sX_6hgvk9WIa3jaFiGtYVo6NanxH01GsBmi4jbBIco"
       }
     }
   },
