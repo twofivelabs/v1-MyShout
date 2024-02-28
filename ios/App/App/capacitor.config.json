@@ -41,10 +41,16 @@
 			"providers": [
 				"phone"
 			]
+		},
+		"CapacitorHttp": {
+			"enabled": false
 		}
 	},
 	"cordova": {},
 	"server": {
 		"iosScheme": "ionic"
+	},
+	"android": {
+		"useLegacyBridge": true
 	}
 }

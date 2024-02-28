@@ -7,7 +7,7 @@ import webpack from 'webpack'
 // const baseHref = process.env.BASE_HREF || '/'
 const baseHref = '/'
 // const isDev = process.env.NODE_ENV === 'development'
-const isDev = true
+const isDev = false
 const useSSL = false
 const useEmulators = false // manually change if emulators needed
 const testMessaging = false

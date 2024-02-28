@@ -58,6 +58,7 @@ export default {
         // Set User Id URL Param
         try {
             const user = window.$nuxt.context.$fire.auth.currentUser
+            console.log('STICKY: [gps] User Is ', user)
             const userToken = user ? await user.getIdTokenResult() : false
             const {value} = await Preferences.get({key: 'currentUserId'})
             geoLocationConfig.params.userId = userToken.claims.user_id || value
