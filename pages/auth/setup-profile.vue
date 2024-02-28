@@ -324,27 +324,15 @@ export default defineComponent({
       loading.value = true
 
       setTimeout(async () => {
-<<<<<<< HEAD
         $capacitor.gpsInit()
         // await $capacitor.positionPermissions()
         // await $services.getSetUserGeneralLocation()
-=======
-        // TODO: GPS UPDATE
-        /* Geolocation.checkPermissions()/!*.then(async (permission) => {
-          if (permission.location === 'granted') {
-
-          }
-        })*!/ */
-/*
-        await $capacitor.positionPermissions()
-        await $services.getSetUserGeneralLocation()
->>>>>>> origin/2.1--Chat-Development
 
         await dispatch('user/updateField', {
           permissions: {
             location: true
           }
-        }) */
+        })
 
         step.value = 5
         loading.value = false
