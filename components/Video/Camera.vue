@@ -51,82 +51,97 @@ export default defineComponent({
       const device = await $capacitor.device()
       return device.platform === 'web'
     }
-    const startCamera = () => {
-      console.log('[camera] Start')
-      CameraPreview.start(cameraOptions.value).catch((e) => {
-        console.log('[camera] start Error: ', e, JSON.stringify(e))
-      })
-    }
-    const stopCamera = () => {
-      console.log('[camera] Stop')
-      CameraPreview.stop().catch((e) => {
-        console.log('[camera] stop Error: ', e, JSON.stringify(e))
-      })
-    }
+
+    const startCamera = async () => {
+      console.log('[camera] Start');
+      try {
+        await CameraPreview.start(cameraOptions.value);
+      } catch (error) {
+        console.error('[camera] start Error: ', error);
+      }
+    };
+
+    const stopCamera = async () => {
+      console.log('[camera] Stop');
+      try {
+        await CameraPreview.stop();
+      } catch (error) {
+        console.error('[camera] stop Error: ', error);
+      }
+    };
+
     const flipCamera = async () => {
-      console.log('[camera] Flip')
+      console.log('[camera] Flip');
       if (await isWeb()) {
-        console.log('[camera] Flip > N/A')
-        return
+        console.log('[camera] Flip > N/A');
+        return;
       }
-      await CameraPreview.flip().catch((e) => {
-        console.log('[camera] flip Error: ', e, JSON.stringify(e))
-      })
-    }
+      try {
+        await CameraPreview.flip();
+      } catch (error) {
+        console.error('[camera] flip Error: ', error);
+      }
+    };
+
     const startCameraRecord = async () => {
-      console.log('[camera] Start Record')
+      console.log('[camera] Start Record');
       if (await isWeb()) {
-        console.log('[camera] Record > N/A')
-        return
+        console.log('[camera] Record > N/A');
+        return;
       }
-      cameraRecordingStatus.value = true
-      await CameraPreview.startRecordVideo(cameraOptions.value).catch((e) => {
-        console.log('[camera] startRecordVideo Error: ', e, JSON.stringify(e))
-      })
-    }
+      cameraRecordingStatus.value = true;
+      try {
+        await CameraPreview.startRecordVideo(cameraOptions.value);
+      } catch (error) {
+        console.error('[camera] startRecordVideo Error: ', error);
+      }
+    };
+
     const stopCameraRecord = async () => {
-      console.log('[camera] Stop Record')
+      console.log('[camera] Stop Record');
       if (await isWeb()) {
-        console.log('[camera] Record > N/A')
-        return
+        console.log('[camera] Record > N/A');
+        return;
       }
-      cameraRecordingStatus.value = false
-      // Returns filepath if success,
-      // {"videoFilePath":"/data/user/0/org.myshout.app/cache/videoTmp_2.mp4"}
-      const result = await CameraPreview.stopRecordVideo().catch((e) => {
-        console.log('[camera] stopRecordVideo Error: ', e, JSON.stringify(e))
-        return false
-      })
-      // const fileName = result.value.substring(result.value.lastIndexOf("/") + 1)
-      console.log('[camera] Result: ', result, JSON.stringify(result))
-
-      if (!result) {
-        return false
+      cameraRecordingStatus.value = false;
+      try {
+        const result = await CameraPreview.stopRecordVideo();
+        console.log('[camera] Result: ', result, JSON.stringify(result));
+        return result?.videoFilePath || false;
+      } catch (error) {
+        console.error('[camera] stopRecordVideo Error: ', error);
+        return false;
       }
+    };
 
-      return result?.videoFilePath || false
-    }
     const uploadVideo = async (filePath) => {
-      const url = await $db.upload({
-        path: `/CHATS/${props.chat.id}/${ new Date().getTime() }.mp4`,
-        data: filePath,
-        base64: false
-      })
-      console.log('[camera] videoUrl:', url, JSON.stringify(url))
-      return url
-    }
+      try {
+        const url = await $db.upload({
+          path: `/CHATS/${props.chat.id}/${new Date().getTime()}.mp4`,
+          data: filePath,
+          base64: false,
+        });
+        console.log('[camera] videoUrl:', url, JSON.stringify(url));
+        return url;
+      } catch (error) {
+        console.error('[camera] uploadVideo Error: ', error);
+        return null;
+      }
+    };
+
     const toggleCameraRecord = async () => {
       if (!cameraRecordingStatus.value) {
-        await startCameraRecord()
-        return
+        await startCameraRecord();
+        return;
       }
-      const filePath = await stopCameraRecord()
+      const filePath = await stopCameraRecord();
       if (filePath) {
-        const videoUrl = await uploadVideo(filePath)
+        const videoUrl = await uploadVideo(filePath);
         // Add message
-        emit('url', videoUrl)
+        emit('url', videoUrl);
       }
-    }
+    };
+
 
     onMounted(async () => {
       await startCamera()

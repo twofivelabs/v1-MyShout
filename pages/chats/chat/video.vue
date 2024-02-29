@@ -1,19 +1,7 @@
 <template>
   <v-container class="mobileNotch" style="height:calc(100vh - 75px);">
-    <v-row class="pa-6" v-if="loading">
-      <v-col>
-        <v-skeleton-loader width="100%" max-height="90" type="image" class="mb-6" />
-        <v-skeleton-loader width="100%" max-height="90" type="image" class="mb-6" />
-        <v-skeleton-loader width="100%" max-height="90" type="image" class="mb-6" />
-        <v-skeleton-loader width="100%" max-height="90" type="image" class="mb-6" />
-      </v-col>
-    </v-row>
-    <div v-else class="">
-      <div class="d-flex flex-column justify-space-between" style="height:75vh;">
-        <div>
-          <VideoCamera :chatId="chatId" @url="urlCallback" />
-        </div>
-      </div>
+    <div class="d-flex flex-column justify-space-between" style="height:75vh;">
+      <VideoCamera :chatId="chatId" @url="urlCallback" />
     </div>
   </v-container>
 </template>
@@ -46,7 +34,6 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      console.log('ROUTE:', route)
       chatId.value = route.value?.query?.chatId
     })
 

@@ -110,68 +110,84 @@ export default defineComponent({
 
     const loadMessages = async () => {
       messagesLoading.value = true;
-      messageListener.value = await $fire.firestore
-        .collection(`Chats/${chatId.value}/Messages`)
-        .orderBy('created_at', 'asc')
-        .limitToLast(100)
-        .onSnapshot((snapshot) => {
-          snapshot.docChanges().forEach((change) => {
-            if (change.type === 'added') {
-              const data = change.doc.data();
-              data.id = change.doc.id;
-              data.ownerData = participants.value[data.owner];
+      try {
+        messageListener.value = await $fire.firestore
+          .collection(`Chats/${chatId.value}/Messages`)
+          .orderBy('created_at', 'asc')
+          .limitToLast(100)
+          .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+              if (change.type === 'added') {
+                const data = change.doc.data();
+                data.id = change.doc.id;
+                data.ownerData = participants.value[data.owner];
 
-              if (data.message) data.message = $encryption.decrypt(data.message);
-              if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
+                if (data.message) data.message = $encryption.decrypt(data.message);
+                if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
 
-              // Check if the message already exists before adding
-              const messageExists = messages.value.some(message => message.id === data.id);
-              if (!messageExists) messages.value.push(data);
-            } else if (change.type === 'modified') {
-              const data = change.doc.data();
-              const index = messages.value.findIndex(m => m.id === change.doc.id);
+                // Check if the message already exists before adding
+                const messageExists = messages.value.some(message => message.id === data.id);
+                if (!messageExists) messages.value.push(data);
+              } else if (change.type === 'modified') {
+                const data = change.doc.data();
+                const index = messages.value.findIndex(m => m.id === change.doc.id);
 
-              if (index !== -1) messages.value[index] = { ...messages.value[index], ...data };
-            }
+                if (index !== -1) messages.value[index] = { ...messages.value[index], ...data };
+              }
+            });
+            messagesLoading.value = false;
           });
-          messagesLoading.value = false;
-        }, error => {
-          console.error('ERROR LOADING MESSAGES', error);
-          messagesLoading.value = false;
-        });
+      } catch (error) {
+        console.error('ERROR LOADING MESSAGES', error);
+        messagesLoading.value = false;
+      }
     };
 
-    const updateTypingStatus = (typing) => {
-      const value = typing ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid);
-      dispatch('chats/updateField', { id: chatId.value, typing: value });
+    const updateTypingStatus = async (typing) => {
+      try {
+        const value = typing ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid);
+        await dispatch('chats/updateField', { id: chatId.value, typing: value });
+      } catch (error) {
+        console.error('ERROR UPDATING TYPING STATUS', error);
+      }
     };
+
 
     const scrollToUnseenMessage = () => {
-      nextTick(() => {
-        const unseenMessage = messages.value.find(message => !message.seen.includes(user.value.data.uid));
+      try {
+        nextTick(() => {
+          const unseenMessage = messages.value.find(message => !message.seen.includes(user.value.data.uid));
 
-        if (unseenMessage) {
-          const messageElement = document.getElementById(`message-${unseenMessage.id}`);
-          if (messageElement) {
-            messageElement.scrollIntoView({ behavior: "smooth" });
+          if (unseenMessage) {
+            const messageElement = document.getElementById(`message-${unseenMessage.id}`);
+            if (messageElement) {
+              messageElement.scrollIntoView({ behavior: "smooth" });
+            }
+          } else {
+            $vuetify.goTo('#bottomOfChat', { behavior: "smooth" });
           }
-        } else {
-          $vuetify.goTo('#bottomOfChat', { behavior: "smooth" });
-        }
-      });
+        });
+      } catch (error) {
+        console.error('ERROR SCROLLING TO UNSEEN MESSAGE', error);
+      }
     };
 
-    const onMessageInterest = (message) => {
-      if (!message.seen.includes(user.value.data.uid)) {
-        dispatch('chats/messages/updateField', {
-          chatId: chatId.value,
-          id: message.id,
-          data: {
-            seen: firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
-          }
-        })
+    const onMessageInterest = async (message) => {
+      try {
+        if (!message.seen.includes(user.value.data.uid)) {
+          await dispatch('chats/messages/updateField', {
+            chatId: chatId.value,
+            id: message.id,
+            data: {
+              seen: firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
+            }
+          });
+        }
+      } catch (error) {
+        console.error('ERROR UPDATING MESSAGE INTEREST', error);
       }
-    }
+    };
+
 
     const handleReply = message => isReply.value = message;
 

@@ -43,7 +43,7 @@
           </v-btn>
         </template>
 
-        <template v-slot:append>
+        <template v-slot:append v-if="chat && chat.id">
           <v-btn
             color="transparent"
             elevation="0"
@@ -68,12 +68,12 @@
                     </v-list-item>
                     <v-list-item>
                       <v-btn
-                          :to="`/chats/chat/video?chatId=${chat.id}`"
-                          color="transparent"
-                          elevation="0"
-                          class="pa-0 ma-0"
-                          small
-                          fab
+                        :to="`/chats/chat/video?chatId=${chat.id}`"
+                        color="transparent"
+                        elevation="0"
+                        class="pa-0 ma-0"
+                        small
+                        fab
                       >
                         <v-icon>
                           mdi-video-vintage
