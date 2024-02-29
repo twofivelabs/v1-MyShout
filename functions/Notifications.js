@@ -10,148 +10,136 @@ const db = admin.firestore();
 const UsersCollection = admin.firestore().collection("Users");
 const Messaging = admin.messaging();
 
+// firebase deploy --only functions:Notifications
 // firebase deploy --only functions:Notifications-UserNotificationWrite
 exports.UserNotificationWrite = functions.firestore
-    .document("Users/{UserId}/Notifications/{NotificationId}")
-    .onCreate((notification, context) => {
-      const {
-        params: {
-          NotificationId,
-          UserId,
+  .document("Users/{UserId}/Notifications/{NotificationId}")
+  .onCreate(async (notification, context) => {
+    const { params: { NotificationId, UserId } } = context;
+    const data = notification.data();
+
+    if (!data) {
+      functions.logger.log("No data to send notification");
+      return false;
+    }
+
+    try {
+      const snapshot = await UsersCollection.doc(UserId).get();
+      const user = snapshot.data();
+
+      const updateNotification = {};
+      updateNotification[`notifications.${data.type}`] = admin.firestore.FieldValue.increment(1);
+      await UsersCollection.doc(UserId).update(updateNotification);
+
+      if (!user) {
+        throw new Error("User data not found");
+      }
+
+      // User does NOT allow notifications
+      if (user.permissions?.notifications === false) {
+        functions.logger.log("User has disabled notifications for ID: ", NotificationId);
+        await updateNotificationResponse(UserId, NotificationId, {
+          id: NotificationId,
+          status: "failed",
+          message: "Notifications disabled by user",
+        });
+        return false;
+      }
+
+      const messagePayload = {
+        name: "UserNotification",
+        fcmOptions: {},
+        token: user.notificationDeviceToken,
+        data: {
+          id: NotificationId,
         },
-      } = context;
-      const data = notification.data();
-      functions.logger.log(data, NotificationId);
-
-      if (data) {
-        let user;
-
-        // Get User Data
-        return UsersCollection.doc(UserId).get().then((snapshot) => {
-          user = snapshot.data();
-
-          // User does NOT allow notifications
-          if (user.permissions.notifications === false) {
-            functions.logger.log("User has disabled notifications for ID: ", NotificationId);
-            return updateNotificationResponse(UserId, NotificationId, {
-              id: NotificationId,
-              status: "failed",
-              message: "Notifications disabled by user",
-            }).then(() => {
-              return Promise.resolve(true);
-            }).catch(() => {
-              functions.logger.log("Not able to update notification: ", NotificationId);
-              return Promise.resolve(false);
-            });
-          }
-
-          const messagePayload = {
-            name: "UserNotification",
-            fcmOptions: {},
-            token: user.notificationDeviceToken,
-            data: {
-              id: NotificationId,
+        notification: {
+          title: data.title,
+          body: data.body,
+        },
+        apns: {
+          payload: {
+            aps: {
+              "mutable-content": 1,
             },
-            notification: {
-              title: data.title,
-              body: data.body,
-            },
-            apns: {
-              payload: {
-                aps: {
-                  "mutable-content": 1,
-                },
-              },
-            },
-            webpush: {
-              notification: {
-                // Adds actions to the push notification
-                actions: [],
-              },
-              fcmOptions: {
-                // Adds a link to be opened when clicked on the push notification
-                link: "",
-              },
-            },
-          };
-          if (data.goTo) {
-            messagePayload.data.goTo = data.goTo;
-          }
-          functions.logger.log("Notify User ", user.username, " With Token 2: ", messagePayload.token);
+          },
+        },
+        webpush: {
+          notification: {
+            actions: [],
+          },
+          fcmOptions: {
+            link: "",
+          },
+        },
+      };
 
-          // Device notification
-          if (user.notificationDeviceToken && user.notificationDeviceToken.length > 2) {
-            // Send message to device
-            messagePayload.token = user.notificationDeviceToken;
-            functions.logger.log("Notification > Device Payload Token 3:", messagePayload.token);
-            return Messaging.send(messagePayload)
-                .then((response) => {
-                  // Response is a message ID string.
-                  return updateNotificationResponse(UserId, NotificationId, {
-                    id: NotificationId,
-                    deviceResponse: {
-                      messageId: response.split(/[/]+/).pop(),
-                      status: "success",
-                    },
-                  }).then(() => {
-                    // Update user profile with "HAS NOTIFICATIONS"
-                    UsersCollection.doc(UserId).update({
-                      //"notifications.hasMessages": true,
-                      "has.notifications": true,
-                    }).catch((e) => console.log("UPDATING USER WITH HAS MESSAGES", e) );
+      if (data.goTo) {
+        messagePayload.data.goTo = data.goTo;
+      }
 
-                    return Promise.resolve(true);
-                  }).catch((e) => {
-                    functions.logger.log("updateNotificationResponse: error", e);
-                    return Promise.resolve(false);
-                  });
-                })
-                .catch((e) => {
-                  functions.logger.log("Error sending notification: ", e);
-                  return Promise.resolve(false);
-                });
-          }
-
-          // Browser notification
-          if (user.notificationWebToken && user.notificationWebToken.length > 2) {
-            messagePayload.token = user.notificationWebToken;
-            functions.logger.log("Notification > Browser Payload:", messagePayload);
-            return Messaging.send(messagePayload)
-                .then((response) => {
-                  updateNotificationResponse(UserId, NotificationId, {
-                    id: NotificationId,
-                    webResponse: {
-                      messageId: response.split(/[/]+/).pop(),
-                      status: "success",
-                    },
-                  }).then(() => {
-                    // Update user profile with "HAS NOTIFICATIONS"
-                    UsersCollection.doc(UserId).update({
-                      notifications: {
-                        hasNotifications: true,
-                      },
-                      has: {
-                        notifications: true,
-                      },
-                    }).catch((e) => console.log("UPDATING USER WITH HAS MESSAGES", e) );
-
-                    return Promise.resolve(true);
-                  }).catch((e) => {
-                    functions.logger.log("updateNotificationResponse: error", e);
-                    return Promise.resolve(false);
-                  });
-                })
-                .catch((e) => {
-                  functions.logger.log("Error sending notification: ", e);
-                  return Promise.resolve(false);
-                });
-          }
+      let response;
+      if (user.notificationDeviceToken && user.notificationDeviceToken.length > 2) {
+        messagePayload.token = user.notificationDeviceToken;
+        response = await Messaging.send(messagePayload);
+      } else if (user.notificationWebToken && user.notificationWebToken.length > 2) {
+        messagePayload.token = user.notificationWebToken;
+        response = await Messaging.send(messagePayload);
+        await UsersCollection.doc(UserId).update({
+          notifications: { hasNotifications: true },
+          has: { notifications: true },
         });
       }
 
-      functions.logger.log("No data to send notification");
-      return Promise.resolve(false);
-    });
+      if (response) {
+        const messageId = response.split(/[/]+/).pop();
+        await updateNotificationResponse(UserId, NotificationId, {
+          id: NotificationId,
+          deviceResponse: { messageId, status: "success" },
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      functions.logger.error("Error sending notification: ", error);
+      return false;
+    }
+  });
+
+
+// firebase deploy --only functions:Notifications-UserNotificationOnWrite 
+exports.UserNotificationOnWrite = functions.firestore
+  .document("Users/{UserId}/Notifications/{NotificationId}")
+  .onWrite(async (change, context) => {
+    const { UserId } = context.params;
+
+    const before = change.before.exists ? change.before.data() : null;
+    const after = change.after.exists ? change.after.data() : null;
+
+    //if (!before && after) return;
+
+    try {
+      if (after.seen !== before.seen) {
+        const userRef = db.doc(`Users/${UserId}`);
+        const userDoc = await userRef.get()
+        const userData = userDoc.data();
+
+        const updateNotification = {};
+        updateNotification[`notifications.${after.type}`] = admin.firestore.FieldValue.increment(
+          after.seen ? (userData.notifications[after.type] > 0 ? -1 : 0) : 1
+        );
+
+        await userRef.update(updateNotification);
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error in UserNotificationOnWrite function:", error);
+      return null;
+    }
+  });
+ 
 
 // Update the notification
 /**
@@ -160,9 +148,9 @@ exports.UserNotificationWrite = functions.firestore
  * @param {FirebaseFirestore.UpdateData|string} payload
  * @return {Promise}
  */
-function updateNotificationResponse(UserId, NotificationId, payload) {
+async function updateNotificationResponse(UserId, NotificationId, payload) {
   payload.created_at = new Date();
-  return db.doc(`Users/${UserId}/Notifications/${NotificationId}`)
+  return await db.doc(`Users/${UserId}/Notifications/${NotificationId}`)
       .update(payload)
       .then(() => {
         return Promise.resolve(true);

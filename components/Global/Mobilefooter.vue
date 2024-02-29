@@ -43,8 +43,8 @@ export default defineComponent({
     const { state } = useStore()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
-    const notifications = computed(() => state.user.profile.notifications?.alerts || 0 + state.user.profile.notifications?.requests || 0)
-    const messages = computed(() => state.user.profile.notifications?.messages || 0)
+    const notifications = computed(() => state.user.profile.notifications?.alert || 0 + state.user.profile.notifications?.friendRequest || 0)
+    const messages = computed(() => state.user.profile.notifications?.message || 0)
 
     // DEFINE CONTENT
     const hasMounted = ref(false)

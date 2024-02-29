@@ -1,31 +1,13 @@
 <template>
-  <div>
-    <div v-if="loading">
-      <v-skeleton-loader
-          type="list-item-avatar-three-line"
-      />
-      <v-skeleton-loader
-          type="list-item-avatar-three-line"
-      />
-      <v-skeleton-loader
-          type="list-item-avatar-three-line"
-      />
-    </div>
-    <div v-else>
-      <div v-if="notificationsLoaded && Object.keys(notificationsLoaded).length > 0">
-        <div class="text-center mb-3">
-          <v-btn @click="deleteAllNotifications" x-small text>{{ $t('btn.delete_all') }}</v-btn>
-        </div>
-        <div v-for="(notification, id) in notificationsLoaded" :key="id">
-          <v-row
-              v-if="notification.title || notification.body"
-              :id="notification.id"
-              v-intersect="onIntersect"
-              class="align-center mt-3"
-              style="border-bottom:1px solid #dedede;"
-          >
-            <v-col>
-              <div v-if="notification.title" class="body-1">
+  <v-row
+    v-if="notification.title || notification.body"
+    :id="notification.id"
+    v-intersect="onIntersect"
+    class="align-center mt-3"
+    style="border-bottom:1px solid #dedede;"
+  >
+    <v-col>
+              <div v-if="notification.title" class="body-1" :style="!notification.seen ? 'font-weight:600' : ''">
                 <span v-if="notification.type === 'friendRequest'">
                   <v-icon color="myshoutOrange">mdi-account-check</v-icon>
                 </span>
@@ -80,7 +62,7 @@
                   {{ notification.title }}
                 </span>
               </div>
-              <div class="body-2">
+              <div class="body-2" :style="!notification.seen ? 'font-weight:600' : ''">
                 <span v-if="notification.body && notification.body.includes('requested to be your friend.')">
                   {{ notification.body.replace('requested to be your friend.', $t('notifications.requested_to_be_your_friend')) }}
                 </span>
@@ -104,109 +86,62 @@
               <div class="caption grey--text mt-2">
                 {{ notification.created_at }}
               </div>
-            </v-col>
-            <v-col class="text-right" cols="3">
-              <v-badge
-                  v-if="!notification.seen"
-                  bottom
-                  dot
-                  left
-                  overlap
-              />
-              <v-btn text color="green" v-if="notification.type === 'friendRequest'" @click="approveFriendRequest(notification)">
-                <span v-if="!notification.completed"><v-icon>mdi-check</v-icon></span>
-              </v-btn>
-              <v-btn text color="red" v-if="notification.type === 'friendRequest'" @click="declineFriendRequest(notification)">
-                <span v-if="!notification.completed"><v-icon>mdi-delete</v-icon></span>
-              </v-btn>
-<!--              <v-btn text color="green" v-else-if="notification.type === 'checkIn'" @click="checkInResponse(notification)">
-                <span v-if="!notification.completed"><v-icon>mdi-check</v-icon></span>
-              </v-btn>-->
-              <v-btn text v-else-if="notification.goTo" @click="goTo(notification.goTo)">
-                <v-icon>mdi-arrow-right</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </div>
-      </div>
-      <div v-else>
-        <div style="text-align:center;">
-          <ElementH4 align="center" :text="$t('notifications.caught_up')"/>
-        </div>
-      </div>
-    </div>
-  </div>
+    </v-col>
+    <v-col class="text-right" cols="3">
+      <v-badge
+        v-if="!notification.seen"
+        bottom
+        dot
+        left
+        overlap
+      />
+        <v-btn text color="green" v-if="notification.type === 'friendRequest'" @click="approveFriendRequest(notification)">
+          <span v-if="!notification.completed"><v-icon>mdi-check</v-icon></span>
+        </v-btn>
+        <v-btn text color="red" v-if="notification.type === 'friendRequest'" @click="declineFriendRequest(notification)">
+          <span v-if="!notification.completed"><v-icon>mdi-delete</v-icon></span>
+        </v-btn>
+        <v-btn text v-else-if="notification.goTo" @click="goTo(notification.goTo)">
+          <v-icon>mdi-arrow-right</v-icon>
+        </v-btn>
+    </v-col>
+  </v-row>
 </template>
 <script>
 
 import {
   computed,
   defineComponent,
-  ref,
   useContext,
-  useFetch,
   useRouter,
   useStore,
+  ref,
 } from '@nuxtjs/composition-api'
 import {Intersect} from 'vuetify/lib/directives'
-import {orderBy, filter} from 'lodash'
 
 export default defineComponent({
   name: 'UserNotifications',
   middleware: 'authenticated',
   directives: { Intersect },
-  emits: [
-    'action'
-  ],
-  setup (_, { emit }) {
+  props: {
+    notification: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+  },
+  setup () {
     const {
       state,
       dispatch,
     } = useStore()
-    const { $system, $fire, $capacitor, $notify, i18n } = useContext()
+    const { $system, $capacitor, $notify, i18n } = useContext()
     const router = useRouter()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
 
-    // DEFINE CONTENT
     const loading = ref(false)
-    const notifications = computed(() => {
-      const loaded = state.user.notifications.all
-      return orderBy(loaded, ['seconds'], ['desc'])
-    })
-    const notificationsLoaded = computed(() => {
-      const loaded = state.user.notifications.loaded
-      const filtered = filter(loaded, ['seen', false])
-      if (filtered?.length === 0) {
-        dispatch('user/setHas', {
-          type: 'notifications',
-          value: false
-        })
-      } else {
-        dispatch('user/setHas', {
-          type: 'notifications',
-          value: true
-        })
-        $capacitor.pushNotificationsSetBadge(filtered?.length)
-      }
-      return orderBy(loaded, ['seconds'], ['desc'])
-    })
-
-    // GET CONTENT
-    useFetch(async () => {
-      loading.value = true
-      try {
-        // await dispatch('user/notifications/listen')
-      } catch(e) {
-        $system.log({
-          comp: 'UserNotifications',
-          msg: 'Not able to get notifications',
-          val: e
-        })
-      } finally {
-        loading.value = false
-      }
-    })
 
     // METHODS
     const approveFriendRequest = async (notification) => {
@@ -246,7 +181,8 @@ export default defineComponent({
         // TODO: hide approve button
         await dispatch('user/notifications/update', {
           id: notification.id,
-          completed: true
+          completed: true,
+          seen: true
         })
         loading.value = false
       }
@@ -257,7 +193,11 @@ export default defineComponent({
         return
       }
       try {
-        await dispatch('user/notifications/remove', notification.id)
+        await dispatch('user/notifications/update', {
+          id: notification.id,
+          completed: true,
+          seen: true
+        })
       } catch(e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
         $system.log({
@@ -320,10 +260,7 @@ export default defineComponent({
       }
     }
     const goTo = (to) => {
-      if (to === location.pathname) {
-        console.log('SAME, close')
-        emit('action', 'close')
-      } else {
+      if (to !== location.pathname) {
         router.push(to)
       }
     }
@@ -332,14 +269,12 @@ export default defineComponent({
       const payload = { ...state.user.notifications.loaded[notificationId] }
 
       // Bug fix in case the object doesn't have 'seen' in it.
-      if (payload['seen'] === undefined) payload.seen = false
+      if (payload['seen'] === undefined) payload.seen = true
 
       if (payload.seen === false) {
         payload.seen = true
         dispatch('user/notifications/update', payload)
       }
-
-      // commit('user/notifications/SET_HAS_NOTIFICATIONS', false)
     }
     const emergencyBodyNotification = (body) => {
       let newBody = body.replace('This is an emergency alarm from', i18n.t('notifications.this_is_emergency_alarm_from'))
@@ -362,14 +297,9 @@ export default defineComponent({
     const deleteAllNotifications = () => {
       const loaded = state.user.notifications.loaded
       for (const i in loaded) {
-        dispatch('user/notifications/remove', loaded[i])
+        dispatch('user/notifications/update', loaded[i], {seen: true})
       }
-      // update notification bubble
-      $fire.firestore.doc(`Users/${user.value.uid}`).update({
-        "notifications.hasMessages": false,
-        "has.messages": false
-      })
-      // Clear the app bubble
+      
       $capacitor.pushNotificationsClearBadge()
     }
 
@@ -377,8 +307,6 @@ export default defineComponent({
       loading,
       user,
       profile,
-      notifications,
-      notificationsLoaded,
       deleteAllNotifications,
       goTo,
       emergencyBodyNotification,

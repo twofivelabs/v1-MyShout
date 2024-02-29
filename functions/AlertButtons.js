@@ -40,22 +40,6 @@ exports.sendAlert = functions.https.onCall((data) => {
               u.id = doc.id;
               functions.logger.log("USER LOG 2", u);
 
-              // ADD SMS TO USER DOC
-              /* admin.firestore()
-                  .collection(`Users/${u.id}/SMS`)
-                  .add({
-                    uid: u.id,
-                    title: `**${data.type} alert**.`,
-                    body: `This is an emergency alarm from ${data.data.user.username} **${data.type} alert**.`,
-                    // title: `${data.type} alert from @${data.data.user.username}`,
-                    // body: "Please check-in with them!",
-                    goTo: `/users/user/${data.data.user.id}`,
-                    created_at: new Date(),
-                  })
-                  .then(() => {
-                    functions.logger.log("Added Notification to user");
-                  }); */
-
               // ADD NOTIFICATION TO USER DOC
               admin.firestore()
                   .collection(`Users/${u.id}/Notifications`)
@@ -87,220 +71,66 @@ exports.sendAlert = functions.https.onCall((data) => {
 // firebase deploy --only functions:AlertButtons
 // firebase deploy --only functions:AlertButtons-NewAlertWrite
 exports.NewAlertWrite = functions.firestore
-    .document("Users/{UserId}/Alerts/{AlertId}")
-    .onCreate((alert, context) => {
-      const {
-        params: {
-          AlertId,
-          UserId,
-        },
-      } = context;
-      const data = alert.data();
-      const dataAlert = alert.data();
-      functions.logger.log(data, alert);
+  .document("Users/{UserId}/Alerts/{AlertId}")
+  .onCreate(async (alert, context) => {
+    const { params: { AlertId, UserId } } = context;
+    const dataAlert = alert.data();
 
-      if (data) {
-        let user;
-
-        // UPDATE ALERT WITH LOCATION
-        admin.firestore()
-            .doc(`Users/${UserId}`)
-            .get()
-            .then((response) => {
-              user = response.data();
-              functions.logger.log("NewAlertWrite > USER > ", user);
-              if (!user || !user.gps) {
-                functions.logger.log("NewAlertWrite > ERROR > no GPS");
-                return Promise.resolve(false);
-              }
-
-              reverseGeolocation(user.gps).then((response) => {
-                return db.doc(`Users/${UserId}/Alerts/${AlertId}`)
-                    .update({
-                      location: response,
-                    })
-                    .then(() => {
-                      return Promise.resolve(true);
-                    })
-                    .catch((e) => {
-                      functions.logger.log("UPDATE ALERT DOC ERROR", e);
-                      return Promise.resolve(false);
-                    });
-              }).catch((e) => {
-                functions.logger.log("NewAlertWrite > ERROR > reverseGeolocation", e);
-                return Promise.resolve(false);
-              });
-            });
-
-        // GET USER FRIENDS AND SEND NOTIFICATION
-        admin.firestore()
-            .collection(`Users/${UserId}/Friends`)
-            .where("isEmergency", "==", true)
-            .get()
-            .then((docs) => {
-              docs.forEach((doc) => {
-                const u = doc.data();
-                u.id = doc.id;
-                functions.logger.log("NewAlertWrite > Friend > ", u);
-                functions.logger.log(`NewAlertWrite > ALERT FRIEND OF > ${dataAlert.type} alert`);
-
-                // ADD NOTIFICATION TO USER DOC
-                admin.firestore()
-                    .collection(`Users/${u.id}/Notifications`)
-                    .add({
-                      uid: u.id,
-                      title: `${dataAlert.type} alert`,
-                      body: `This is an emergency alarm from ${user.username} **${dataAlert.type} alert**.`,
-                      goTo: `/users/user/${UserId}`,
-                      type: "alert",
-                      created_at: new Date(),
-                      seen: false,
-                    }).then(() => {
-                      return Promise.resolve(true);
-                    }).catch((e) => {
-                      functions.logger.log("NewAlertWrite > AddNotification > ERROR > ", e);
-                      return Promise.resolve(false);
-                    });
-              });
-            });
-
-        return Promise.resolve(true);
-      }
-
+    if (!dataAlert) {
       functions.logger.log("No data to send alert");
-      return Promise.resolve(false);
-    });
+      return false;
+    }
 
+    try {
+      // UPDATE ALERT WITH LOCATION
+      const userResponse = await admin.firestore().doc(`Users/${UserId}`).get();
+      const user = userResponse.data();
 
-// firebase deploy --only functions:AlertButtons
-// firebase deploy --only functions:AlertButtons-UserNotificationWrite
-/*
-exports.UserNotificationWrite = functions.firestore
-    .document("Users/{UserId}/Notifications/{NotificationId}")
-    .onCreate((notification, context) => {
-      const {
-        params: {
-          NotificationId,
-          UserId,
-        },
-      } = context;
-      const data = notification.data();
-      functions.logger.log(data, NotificationId);
-
-      if (data) {
-        let user;
-
-        // Get User Data
-        UsersCollection.doc(UserId).get().then((snapshot) => {
-          user = snapshot.data();
-
-          // User does NOT allow notifications
-          if (user.permissions.notifications === false) {
-            functions.logger.log("User has disabled notifications for ID: ", NotificationId);
-            return updateNotificationResponse(UserId, NotificationId, {
-              id: NotificationId,
-              status: "failed",
-              message: "Notifications disabled by user",
-            }).then(() => {
-              return Promise.resolve(true);
-            }).catch(() => {
-              return Promise.resolve(false);
-            });
-          }
-
-          const messagePayload = {
-            name: "UserNotification",
-            data: {
-              id: NotificationId,
-            },
-            notification: {
-              title: data.title,
-              body: data.body,
-            },
-            android: {
-              notification: {
-                imageUrl: null,
-              },
-            },
-            apns: {
-              payload: {
-                aps: {
-                  "mutable-content": 1,
-                },
-              },
-              fcmOptions: {
-                image: null,
-              },
-            },
-            webpush: {
-              headers: {
-                image: null,
-              },
-              notification: {
-              // Adds actions to the push notification
-                actions: [],
-              },
-              fcmOptions: {
-              // Adds a link to be opened when clicked on the push notification
-                link: null,
-              },
-            },
-            fcmOptions: {},
-            token: user.notificationDeviceToken,
-          };
-          if (data.goTo) {
-            messagePayload.data.goTo = data.goTo;
-          }
-
-          // Device notification
-          if (user.notificationDeviceToken && user.notificationDeviceToken.length > 2) {
-          // Send message to device
-            messagePayload.token = user.notificationDeviceToken;
-            return Messaging.send(messagePayload)
-                .then((response) => {
-                  // Response is a message ID string.
-                  return updateNotificationResponse(UserId, NotificationId, {
-                    id: NotificationId,
-                    deviceResponse: {
-                      messageId: response.split(/[/]+/).pop(),
-                      status: "success",
-                    },
-                  }).then(() => {
-                    return Promise.resolve(true);
-                  }).catch(() => {
-                    return Promise.resolve(false);
-                  });
-                })
-                .catch(() => {
-                  return Promise.resolve(false);
-                });
-          }
-
-          // Browser notification
-          if (user.notificationWebToken && user.notificationWebToken.length > 2) {
-            messagePayload.token = user.notificationWebToken;
-            return Messaging.send(messagePayload)
-                .then((response) => {
-                  updateNotificationResponse(UserId, NotificationId, {
-                    id: NotificationId,
-                    webResponse: {
-                      messageId: response.split(/[/]+/).pop(),
-                      status: "success",
-                    },
-                  }).then(() => {
-                    return Promise.resolve(true);
-                  }).catch(() => {
-                    return Promise.resolve(false);
-                  });
-                })
-                .catch(() => {
-                  return Promise.resolve(false);
-                });
-          }
-        });
+      if (!user || !user.gps) {
+        functions.logger.log("NewAlertWrite > ERROR > no GPS");
+        return false;
       }
-    });
-*/
+
+      const locationResponse = await reverseGeolocation(user.gps);
+      await db.doc(`Users/${UserId}/Alerts/${AlertId}`).update({
+        location: locationResponse,
+      });
+
+      functions.logger.log("Alert location updated:", locationResponse);
+
+      // GET USER FRIENDS AND SEND NOTIFICATION
+      const friendDocs = await admin.firestore().collection(`Users/${UserId}/Friends`).where("isEmergency", "==", true).get();
+
+      await Promise.all(friendDocs.docs.map(async (doc) => {
+        const u = doc.data();
+        u.id = doc.id;
+        functions.logger.log("NewAlertWrite > Friend > ", u);
+        functions.logger.log(`NewAlertWrite > ALERT FRIEND OF > ${dataAlert.type} alert`);
+
+        // ADD NOTIFICATION TO USER DOC
+        try {
+          await admin.firestore().collection(`Users/${u.id}/Notifications`).add({
+            uid: u.id,
+            title: `${dataAlert.type} alert`,
+            body: `This is an emergency alarm from ${user.username} **${dataAlert.type} alert**.`,
+            goTo: `/users/user/${UserId}`,
+            type: "alert",
+            created_at: new Date(),
+            seen: false,
+          });
+          functions.logger.log("Notification added successfully");
+        } catch (error) {
+          functions.logger.error("NewAlertWrite > AddNotification > ERROR > ", error);
+        }
+      }));
+
+      return true;
+    } catch (error) {
+      functions.logger.error("Error processing alert:", error);
+      return false;
+    }
+  });
+
 
 
 // eslint-disable-next-line require-jsdoc

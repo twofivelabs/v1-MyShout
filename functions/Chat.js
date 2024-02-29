@@ -47,7 +47,7 @@ exports.ChatMessageOnCreate = functions.firestore
         const userRef = db.doc(`Users/${userId}`);
         // Increment "notifications.messages" count
         batch.update(userRef, {
-          "notifications.messages": admin.firestore.FieldValue.increment(1)
+          "notifications.message": admin.firestore.FieldValue.increment(1)
         });
         // Construct unseen count key
         const unseenCountKey = `unseen.${userId}`;
@@ -106,9 +106,6 @@ exports.ChatMessageOnWrite = functions.firestore
     if (!before && after) return;
 
     try {
-      console.log("Before Seen: ", before.seen.length);
-      console.log("After Seen: ", after.seen.length);
-
       // Handle case where the 'seen' array is updated
       if (before && after && after.seen.length > before.seen.length) {
         // Identify new users who have seen the message
@@ -126,7 +123,7 @@ exports.ChatMessageOnWrite = functions.firestore
           // Decrement "notifications.unseen" count if greater than 0
           if (userData.notifications.messages > 0) {
             await userRef.update({
-              "notifications.messages": admin.firestore.FieldValue.increment(-1)
+              "notifications.message": admin.firestore.FieldValue.increment(-1)
             });
           }
 

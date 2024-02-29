@@ -47,9 +47,9 @@ class User extends FirestoreHelpers {
         messages: false
       },
       notifications: {
-        messages: 0,
-        alerts: 0,
-        requests: 0
+        message: 0,
+        alert: 0,
+        friendRequest: 0
       },
       gps: {
         lat: null,
@@ -215,14 +215,10 @@ export const mutations = {
     state.profile = Object.assign(state.profile, value)
     const key = Object.keys(value)[0]
     const v = value[key]
-    // console.log('VALUE', key)
-    // console.log('SET PROFILE FIELD', key, v, JSON.stringify(value) )
-    // Vue.set(state, `profile.${key}`, value)
+
     Vue.set(state, `profile.${key}`, v)
-    // console.log('PROFILE', state.profile)
-    // state.profile = Object.assign(state.profile, value)
   },
-  SET_HAS_NOTIFICATIONS: (state, value) => {
+  SET_HAS_NOTIFICATIONS: (_, value) => {
     if( typeof value === 'undefined' ) return false
 
     if( typeof value === 'object' ) {
@@ -232,9 +228,8 @@ export const mutations = {
     if( typeof value === 'boolean' ) {
         console.log('SET_HAS_NOTIFICATIONS', value)
         // state.has.notifications = value
-        lodash.set(state.profile.has, 'notifications', value)
-        Vue.set(state.profile.has, 'notifications', value)
-        //console.log('USER STATE', state)
+        //lodash.set(state.profile.has, 'notifications', value)
+        //Vue.set(state.profile.has, 'notifications', value)
 
         if (value === true) {
             const count = 1
@@ -266,19 +261,17 @@ export const mutations = {
   SET_USER_PROFILE_INIT: async (state, userProfile) => {
     const combineUserProfile = Object.assign(state.profile, userProfile)
 
-    if (!lodash.has(state.profile, 'has.messages')) {
+    /*if (!lodash.has(state.profile, 'has.messages')) {
         console.log('STICKY: USER > no hasMessages')
-        //lodash.set(state.profile, 'has.messages', false)
-        //Vue.set(state.profile, 'has.messages', false)
+        lodash.set(state.profile, 'has.messages', false)
+        Vue.set(state.profile, 'has.messages', false)
     }
     if (!lodash.has(state.profile, 'has.notifications')) {
         lodash.set(state.profile, 'has.notifications', false)
         Vue.set(state.profile, 'has.notifications', false)
-    }
+    }*/
 
     Vue.set(state, 'profile', combineUserProfile)
-
-    console.log("KYLE, userProfile", userProfile)
 
     if (userProfile?.first_name) {
       Vue.set(state.profile, 'initial', userProfile.first_name.charAt(0).toUpperCase())
