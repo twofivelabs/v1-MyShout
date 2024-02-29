@@ -95,7 +95,7 @@ export default defineComponent({
         const participantProfiles = await Promise.all(
           chat.value.participants.map(participantUid => dispatch('user/getOne', participantUid))
         );
-        
+
         participantProfiles.forEach(profile => {
           if (profile) participants.value[profile.uid] = profile;
         });

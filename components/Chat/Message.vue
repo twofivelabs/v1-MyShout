@@ -2,14 +2,13 @@
   <main class="mb-3 px-3">
     <div v-if="message.forward && forward">
       <v-row class="align-center py-1" :class="message.owner === userId ? 'flex-row-reverse ' : ''">
-        <v-col 
+        <v-col
           cols="9" class="py-0"
           v-if="!forward.hide || !forward.hide.includes(userId)"
-          
         >
           <div
-            style="width:100%" 
-            :class="!forward.deleted ? ((message.owner === userId) ? 'primary darken-1 rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" 
+            style="width:100%"
+            :class="!forward.deleted ? ((message.owner === userId) ? 'primary darken-1 rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'"
             class="break-words rounded-lg py-2 px-3"
           >
             <div v-if="forward.deleted">
@@ -42,7 +41,7 @@
                   </div>
                 </v-bottom-sheet>
               </div>
-              
+
             </div>
           </div>
         </v-col>
@@ -56,15 +55,15 @@
         @mouseover="onHoverMessage"
         @mouseleave="onLeaveMessage"
       >
-        <v-col 
+        <v-col
           cols="12" class="pa-0"
           v-if="!thread && message.replyTo"
         >
           <ChatMessageReply :chat="chat" :message="message" :participants="participants"/>
         </v-col>
-        
-        <v-col 
-          v-if="message.urls && message.urls.length > 0" 
+
+        <v-col
+          v-if="message.urls && message.urls.length > 0"
           cols="9" :class="message.owner === userId ? 'rounded-tr-0 text-right' : 'rounded-tl-0 text-left'"
         >
           <ChatMessageLink :url="message.urls[0]" />
@@ -73,13 +72,13 @@
         <v-col cols="1" v-if="owner && message.owner !== userId" class="avatar-align-top">
           <ChatAvatar :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
         </v-col>
-        <v-col 
+        <v-col
           cols="9" class="py-0"
           v-if="!message.hide || !message.hide.includes(userId)"
         >
           <div
-            style="width:100%" 
-            :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'" 
+            style="width:100%"
+            :class="!message.deleted ? ((message.owner === userId) ? 'primary rounded-tr-0 white--text ml-2' : 'rounded-tl-0 gray white--text mr-2') : 'message-border caption'"
             class="break-words rounded-lg py-2 px-3"
             @click="messageHover = !messageHover"
           >
@@ -88,8 +87,8 @@
             </div>
 
             <div v-else>
-              <div 
-                v-if="message.message"  class="mb-3" 
+              <div
+                v-if="message.message"  class="mb-3"
                 v-html="message.message" ></div>
 
               <div v-if="message.file">
@@ -97,11 +96,27 @@
                   <v-icon color="white" size="small">mdi-paperclip</v-icon>
                   <span class="white--text">{{ $t('chat.download_file') }}</span>
                 </a>
-              </div>  
+              </div>
 
               <div v-if="message.audioUrl">
                 <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />
                 <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
+              </div>
+
+              <div v-if="message.videoUrl">
+                Show Video For: {{ message.videoUrl }}
+                <!--      <video
+                    autoPlay
+                    loop
+                    src={`data:video/mp4;base64,${file.data}`}
+                    style={{
+                    width: "100%",
+                    height: "100%",
+                    position: "absolute",
+                    top: 0,
+                    opacity: videoBase64 ? 1 : 0,
+                    }}
+                />-->
               </div>
 
               <div v-if="message.image">
@@ -120,7 +135,7 @@
                   </div>
                 </v-bottom-sheet>
               </div>
-              
+
             </div>
 
             <div class="caption text-right">
@@ -134,7 +149,7 @@
             </div>
           </div>
         </v-col>
-        <v-col 
+        <v-col
           cols="2" class="pa-0"
           :class="message.owner === userId ? ' text-right' : 'text-left'"
           v-if="!message.hide || !message.hide.includes(userId)"
@@ -196,7 +211,7 @@
           </v-menu>
         </v-col>
         <v-col
-          cols="10" style="margin-top:-2px;" class="pa-0" 
+          cols="10" style="margin-top:-2px;" class="pa-0"
           v-if="!message.hide || !message.hide.includes(userId)"
         >
           <ChatMessageReactions :chat="chat" :message="message" :thread="thread" />
@@ -219,13 +234,13 @@
             </v-btn>
           </v-app-bar-nav-icon>
           <v-toolbar-title class="pl-0 d-flex align-center">
-            {{ $t('chat.messagE_thread' )}}
+            {{ $t('chat.message_thread' )}}
           </v-toolbar-title>
         </v-app-bar>
         <ChatMessageThread :chat="chat" :message="message" :participants="participants" :owner="participants[message.owner]"  />
       </v-sheet>
     </v-bottom-sheet>
-          
+
    </main>
 </template>
 <script>
@@ -304,7 +319,7 @@ export default defineComponent({
 
     const messageForward = ref(false)
     const forward = ref(null)
- 
+
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
     }
@@ -416,7 +431,7 @@ export default defineComponent({
       user,
       userId,
       showMedia,
-      loading, 
+      loading,
       messageMenu, triggerMessageMenu,
       messageThread, triggerMessageThread,
       messageForward, triggerMessageForward,

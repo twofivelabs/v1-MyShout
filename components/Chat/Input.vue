@@ -26,7 +26,7 @@
               @click="imageUrl = null"
               :src="imageUrl"
               max-width="40"
-              max-height="40" 
+              max-height="40"
               contain
             />
             <v-icon
@@ -67,7 +67,19 @@
                       <ChatUploadimage :chat="chat" :currentUrl="imageUrl" @url="imageCallback" />
                     </v-list-item>
                     <v-list-item>
-                      <ChatUploadvideo :chat="chat" :currentUrl="imageUrl" @url="imageCallback" />
+                      <v-btn
+                          :to="`/chats/chat/video?chatId=${chat.id}`"
+                          color="transparent"
+                          elevation="0"
+                          class="pa-0 ma-0"
+                          small
+                          fab
+                      >
+                        <v-icon>
+                          mdi-video-vintage
+                        </v-icon>
+                      </v-btn>
+<!--                      <ChatUploadvideo :chat="chat" :currentUrl="imageUrl" @url="imageCallback" />-->
                     </v-list-item>
                     <v-list-item>
                       <ChatRecordaudio :chat="chat" />
@@ -82,9 +94,9 @@
     </v-row>
   </v-app-bar>
 </template>
-  
+
 <script>
-  import { 
+  import {
     defineComponent,
     ref,
     watch,
@@ -98,7 +110,7 @@
 
   import debounce from 'lodash/debounce';
   import * as linkify from 'linkifyjs';
-  
+
   export default defineComponent({
     name: 'ChatInput',
     props: {
@@ -106,22 +118,22 @@
       reply: { type: Object, default: () => (null) }
     },
     setup(props, { emit }) {
-      const { dispatch, state } = useStore();
-      const { i18n, $notify, $fire, $encryption } = useContext();
-      const user = computed(() => state.user);
+      const { dispatch, state } = useStore()
+      const { i18n, $notify, $fire, $encryption } = useContext()
+      const user = computed(() => state.user)
 
-      const newMessage = ref('');
+      const newMessage = ref('')
       const addToMessage = ref(false)
 
-      const imageUrl = ref(null);
-      const fileUrl = ref(null);
-  
-      const clearReply = () => emit('updateReply', null);
-      const imageCallback = (url) => imageUrl.value = url;
+      const imageUrl = ref(null)
+      const fileUrl = ref(null)
+
+      const clearReply = () => emit('updateReply', null)
+      const imageCallback = (url) => imageUrl.value = url
       const fileCallback = (url) => fileUrl.value = url
-  
+
       const truncateMessage = (message, length = 25) => message ? (message.length > length ? message.substring(0, length) + '...' : message) : '';
-  
+
       const sendMessage = async () => {
         try {
           if((!newMessage.value && !imageUrl.value) || !user.value.data.uid) {
@@ -153,7 +165,7 @@
             await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(props.reply.id).update({
               replies: firebase.firestore.FieldValue.arrayUnion(res.id)
             })
-          } 
+          }
 
           // Update chat's last message information.
           await dispatch('chats/updateField', {
@@ -178,23 +190,23 @@
           console.log("STICKY: Cannot Send Message", e);
         }
       };
-  
+
       const updateTyping = debounce((isTyping) => {
         emit('updateTyping', isTyping);
       }, 500);
-  
+
       watch(newMessage, (newValue) => updateTyping(!!newValue), { immediate: true });
-  
-      return { 
+
+      return {
         newMessage, imageUrl, fileUrl,
         addToMessage,
-        sendMessage, clearReply, truncateMessage, 
+        sendMessage, clearReply, truncateMessage,
         imageCallback, fileCallback
       };
     }
   });
 </script>
-  
+
 <style>
   .reply-preview {
     display: flex;
