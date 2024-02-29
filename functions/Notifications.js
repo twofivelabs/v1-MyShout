@@ -117,17 +117,17 @@ exports.UserNotificationOnWrite = functions.firestore
     const before = change.before.exists ? change.before.data() : null;
     const after = change.after.exists ? change.after.data() : null;
 
-    //if (!before && after) return;
+    if (!before && after) return;
 
     try {
-      if (after.seen !== before.seen) {
+      if ((before && !after) || (after.seen !== before.seen)) {
         const userRef = db.doc(`Users/${UserId}`);
         const userDoc = await userRef.get()
         const userData = userDoc.data();
 
         const updateNotification = {};
-        updateNotification[`notifications.${after.type}`] = admin.firestore.FieldValue.increment(
-          after.seen ? (userData.notifications[after.type] > 0 ? -1 : 0) : 1
+        updateNotification[`notifications.${after.type ? after.type : before.type}`] = admin.firestore.FieldValue.increment(
+          (after.seen ? after.seen : true) ? (userData.notifications[after.type] > 0 ? -1 : 0) : 1
         );
 
         await userRef.update(updateNotification);
