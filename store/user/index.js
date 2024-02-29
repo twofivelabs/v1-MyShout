@@ -46,10 +46,10 @@ class User extends FirestoreHelpers {
         notifications: false,
         messages: false
       },
-      notifcations: {
+      notifications: {
         messages: 0,
         alerts: 0,
-        request: 0
+        requests: 0
       },
       gps: {
         lat: null,

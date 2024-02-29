@@ -162,8 +162,7 @@
               created_at: new Date(),
               snippet: newMessage.value || null,
               sent_by: user.value.data.uid
-            },
-            seen: [user.value.data.uid]
+            }
           });
 
           clearReply()

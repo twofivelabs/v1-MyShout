@@ -19,77 +19,144 @@ const db = admin.firestore();
 const bucket = admin.storage().bucket("gs://my-shout-app.appspot.com");
 
 // firebase deploy --only functions:Chat
+// firebase deploy --only functions:Chat-ChatMessageOnCreate
+exports.ChatMessageOnCreate = functions.firestore
+  .document("Chats/{ChatId}/Messages/{MessageId}")
+  .onCreate(async (snapshot, context) => {
+    const { ChatId } = context.params;
+    const data = snapshot.data();
+      
+    // Retrieve chat document reference
+    const chatRef = db.doc(`Chats/${ChatId}`);
+    // Retrieve chat document snapshot
+    const chatSnapshot = await chatRef.get();
+    // Extract chat data
+    const chat = chatSnapshot.data();
+    // Return if chat document does not exist
+    if (!chat) return null;
+
+    // Filter participants who have not seen the message
+    const participantsToUpdate = chat.participants.filter(participant => !data.seen.includes(participant));
+    // Initialize batched write
+    let batch = db.batch();
+
+    // Update notification counts for each participant and send push notifications
+    participantsToUpdate.forEach(async userId => {
+      try {
+        // Retrieve user document reference
+        const userRef = db.doc(`Users/${userId}`);
+        // Increment "notifications.messages" count
+        batch.update(userRef, {
+          "notifications.messages": admin.firestore.FieldValue.increment(1)
+        });
+        // Construct unseen count key
+        const unseenCountKey = `unseen.${userId}`;
+        // Increment unseen count for chat document
+        batch.update(chatRef, {
+          [unseenCountKey]: admin.firestore.FieldValue.increment(1)
+        });
+
+        // Retrieve user document snapshot
+        const userSnap = await userRef.get();
+        // Extract user data
+        const userData = userSnap.data();
+
+        // Send push notification if user allows notifications and has a device token
+        if (userData.permissions.notifications !== false && userData.notificationDeviceToken) {
+          // Fetch sender's profile to get the username
+          const senderProfileSnapshot = await db.doc(`Users/${data.owner}`).get();
+          const senderProfileData = senderProfileSnapshot.data();
+          const senderUsername = senderProfileData?.username || 'You received a new message'; 
+
+          const messageBody = data.message.substring(0, 75); // Limit message body to 75 characters
+
+          const messagePayload = {
+            token: userData.notificationDeviceToken,
+            notification: {
+              title: senderUsername,
+              body: messageBody,
+            },
+            data: {
+              chatId: ChatId,
+              messageId: snapshot.id,
+            },
+          };
+          await admin.messaging().send(messagePayload);
+        }
+      } catch (error) {
+        console.error("Error sending push notification:", error);
+      }
+    });
+
+    // Commit batched writes
+    await batch.commit();
+    return null;
+  });
+
+// firebase deploy --only functions:Chat
 // firebase deploy --only functions:Chat-ChatMessageOnWrite
 exports.ChatMessageOnWrite = functions.firestore
   .document("Chats/{ChatId}/Messages/{MessageId}")
   .onWrite(async (change, context) => {
-      const { ChatId } = context.params;
-      const before = change.before.exists ? change.before.data() : null;
-      const after = change.after.exists ? change.after.data() : null;
-      const db = admin.firestore();
+    const { ChatId } = context.params;
 
-      if (!before && after) {
-        // Handling new message creation
-        const chatDocRef = db.doc(`Chats/${ChatId}`);
-        const chatSnapshot = await chatDocRef.get();
-        const chat = chatSnapshot.data();
-        if (!chat) return null;
+    const before = change.before.exists ? change.before.data() : null;
+    const after = change.after.exists ? change.after.data() : null;
 
-        const participantsToUpdate = chat.participants.filter(participant => !after.seen.includes(participant));
-        let batch = db.batch();
+    if (!before && after) return;
 
-        participantsToUpdate.forEach(userId => {
-            const userRef = db.doc(`Users/${userId}`);
-            batch.update(userRef, {
-                "notifications.messages": admin.firestore.FieldValue.increment(1)
-            });
-            
-            const unseenCountKey = `unseen.${userId}`;
-            batch.update(chatDocRef, {
-                [unseenCountKey]: admin.firestore.FieldValue.increment(1)
-            });
-        });
+    try {
+      console.log("Before Seen: ", before.seen.length);
+      console.log("After Seen: ", after.seen.length);
 
-        await batch.commit();
-        console.log(`Unseen count incremented for new message in chat ${ChatId}`);
-        return null;
-      }
-
-      if (before && after && JSON.stringify(before.seen) !== JSON.stringify(after.seen)) {
-        // Handling 'seen' array update
+      // Handle case where the 'seen' array is updated
+      if (before && after && after.seen.length > before.seen.length) {
+        // Identify new users who have seen the message
         const newSeenUsers = after.seen.filter(userId => !before.seen.includes(userId));
 
+        // Perform operations for each new seen user
         await Promise.all(newSeenUsers.map(async userId => {
-            const userRef = db.doc(`Users/${userId}`);
-            const userSnap = await userRef.get();
-            const userData = userSnap.data();
+          // Retrieve user document reference
+          const userRef = db.doc(`Users/${userId}`);
+          // Retrieve user document snapshot
+          const userSnap = await userRef.get();
+          // Extract user data
+          const userData = userSnap.data();
 
-            if (userData.notifications.unseen > 0) {
-                // Ensure unseen count never goes below zero
-                await userRef.update({
-                    "notifications.unseen": admin.firestore.FieldValue.increment(-1)
-                });
-            }
+          // Decrement "notifications.unseen" count if greater than 0
+          if (userData.notifications.messages > 0) {
+            await userRef.update({
+              "notifications.messages": admin.firestore.FieldValue.increment(-1)
+            });
+          }
 
-            const chatDocRef = db.doc(`Chats/${ChatId}`);
-            const unseenCountKey = `unseen.${userId}`;
-            const chatSnap = await chatDocRef.get();
-            const chatData = chatSnap.data();
+          // Construct unseen count key
+          const unseenCountKey = `unseen.${userId}`;
+          // Retrieve chat document reference
+          const chatDocRef = db.doc(`Chats/${ChatId}`);
+          // Retrieve chat document snapshot
+          const chatSnap = await chatDocRef.get();
+          // Extract chat data
+          const chatData = chatSnap.data();
             
-            if (chatData.unseenMessages && chatData.unseenMessages[userId] > 0) {
-                // Ensure unseen message count per chat never goes below zero
-                await chatDocRef.update({
-                    [unseenCountKey]: admin.firestore.FieldValue.increment(-1)
-                });
-            }
-            
-            console.log(`Unseen count decremented for user: ${userId} in chat ${ChatId}`);
+          // Decrement unseen count for chat document if greater than 0
+          if (chatData.unseen && chatData.unseen[userId] > 0) {
+            await chatDocRef.update({
+              [unseenCountKey]: admin.firestore.FieldValue.increment(-1)
+            });
+          }
         }));
 
         return null;
       }
 
+      // Return null if no action is required
       return null;
+    } catch (error) {
+      console.error("Error in ChatMessageOnWrite function:", error);
+      // Handle the error appropriately, such as logging or returning a response
+      return null;
+    }
   });
 
 // firebase deploy --only functions:Chat-scheduledFunctionExpireAudioMessages

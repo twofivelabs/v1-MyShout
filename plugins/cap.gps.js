@@ -17,7 +17,7 @@ const geoLocationConfig = {
     stopTimeout: 5,
     heartbeatInterval: 30,
     // Application config
-    debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
+    debug: false, // <-- enable this hear sounds for background-geolocation life-cycle.
     logLevel: BackgroundGeolocation.LOG_LEVEL_VERBOSE,
     stopOnTerminate: false,   // <-- Allow the background-service to continue tracking when user closes the app.
     startOnBoot: true,        // <-- Auto start tracking when device is powered-up.

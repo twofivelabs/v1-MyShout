@@ -6,7 +6,7 @@
         <v-icon>mdi-home</v-icon>
       </v-btn>
       <v-btn color="accent-4" class="navigation-button" text to="/notifications">
-        <v-badge v-if="hasNotifications" dot overlap color="myshoutRed">
+        <v-badge v-if="notifications" overlap :content="notifications" :bordered="false" color="myshoutRed">
           <v-icon>mdi-bell</v-icon>
         </v-badge>
         <v-icon v-else>mdi-bell</v-icon>
@@ -43,8 +43,8 @@ export default defineComponent({
     const { state } = useStore()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
-    const hasNotifications = computed(() => state.user.profile.has.notifications || false)
-    const messages = computed(() => state.user.profile.notifications?.unseen || 0)
+    const notifications = computed(() => state.user.profile.notifications?.alerts || 0 + state.user.profile.notifications?.requests || 0)
+    const messages = computed(() => state.user.profile.notifications?.messages || 0)
 
     // DEFINE CONTENT
     const hasMounted = ref(false)
@@ -58,7 +58,7 @@ export default defineComponent({
       user,
       profile,
       hasMounted,
-      hasNotifications,
+      notifications,
       messages
     }
   }

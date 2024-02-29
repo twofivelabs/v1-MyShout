@@ -88,29 +88,23 @@ export default defineComponent({
           .where('participants', 'array-contains', user.value.data.uid)
           .orderBy('message.created_at', 'desc')
           .onSnapshot(async (snapshot) => {
-            let updatedChatList = [...chatList.value]; // Create a copy of the current chat list
+            const updatedChatList = [];
 
-            snapshot.docChanges().forEach(async (change) => {
-              const data = change.doc.data();
-              data.id = change.doc.id;
+            for (const doc of snapshot.docs) {
+              const data = doc.data();
+              data.id = doc.id;
 
               if (data.message.sent_by) {
+                // Assuming dispatch is reactive and updates user data in the store
                 const u = await dispatch('user/getOne', data.message.sent_by);
                 data.message.sent_by = u.username ?? u.first_name;
               }
 
-              const existingIndex = updatedChatList.findIndex((chat) => chat.id === data.id);
+              updatedChatList.push(data);
+            }
 
-              if (existingIndex > -1) {
-                // If the chat already exists, update it
-                updatedChatList[existingIndex] = data;
-              } else {
-                // If the chat does not exist, add it
-                updatedChatList.push(data);
-              }
-            });
-
-            chatList.value = updatedChatList; // Update the chat list with the new data
+            // Update chatList using Vue's reactivity
+            chatList.value = updatedChatList;
           });
       } catch (error) {
         console.error('Error fetching chats:', error.message);
