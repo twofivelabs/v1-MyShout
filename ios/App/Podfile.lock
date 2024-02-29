@@ -16,6 +16,8 @@ PODS:
   - CapacitorCommunityAdmob (5.3.1):
     - Capacitor
     - Google-Mobile-Ads-SDK (= 10.12.0)
+  - CapacitorCommunityCameraPreview (2.0.0):
+    - Capacitor
   - CapacitorCommunityContacts (5.0.4):
     - Capacitor
   - CapacitorCommunityFcm (5.0.3):
@@ -161,6 +163,7 @@ DEPENDENCIES:
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
   - "CapacitorCommunityAdmob (from `../../node_modules/@capacitor-community/admob`)"
+  - "CapacitorCommunityCameraPreview (from `../../node_modules/@capacitor-community/camera-preview`)"
   - "CapacitorCommunityContacts (from `../../node_modules/@capacitor-community/contacts`)"
   - "CapacitorCommunityFcm (from `../../node_modules/@capacitor-community/fcm`)"
   - "CapacitorCommunityHttp (from `../../node_modules/@capacitor-community/http`)"
@@ -217,6 +220,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/camera"
   CapacitorCommunityAdmob:
     :path: "../../node_modules/@capacitor-community/admob"
+  CapacitorCommunityCameraPreview:
+    :path: "../../node_modules/@capacitor-community/camera-preview"
   CapacitorCommunityContacts:
     :path: "../../node_modules/@capacitor-community/contacts"
   CapacitorCommunityFcm:
@@ -253,6 +258,7 @@ SPEC CHECKSUMS:
   CapacitorApp: 17fecd0e6cb23feafac7eb0939417389038b0979
   CapacitorCamera: 4892c5c392f60039d853dde78bc50ba19fbd113e
   CapacitorCommunityAdmob: 1e377ccfb6236c38591f23759334fa12668fb2e0
+  CapacitorCommunityCameraPreview: 47070b2c66a79a424afe7c73bd951dfabfbc0f76
   CapacitorCommunityContacts: 45de2477f7dc6265d267677939a2c75465d2ed87
   CapacitorCommunityFcm: 3e42b0f0460c791aa5f2b142113db2e94dcbb797
   CapacitorCommunityHttp: 7be90668527ef14ee10d08135b0e00fac9cf8247
@@ -290,6 +296,6 @@ SPEC CHECKSUMS:
   TransistorsoftCapacitorBackgroundFetch: ce4b3e01b898cef516e68485d2160a078016ee97
   TransistorsoftCapacitorBackgroundGeolocation: dd137185cd3980d8c813785ba2319f97e067d575
 
-PODFILE CHECKSUM: 44c7acdd3c27f620dcf6679a9a5357068d226e62
+PODFILE CHECKSUM: a8eb04f00cbe2ae7ff31f493dee346008dd9bf2f
 
 COCOAPODS: 1.15.2
