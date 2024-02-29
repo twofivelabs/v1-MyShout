@@ -96,16 +96,12 @@ exports.NewAlertWrite = functions.firestore
         location: locationResponse,
       });
 
-      functions.logger.log("Alert location updated:", locationResponse);
-
       // GET USER FRIENDS AND SEND NOTIFICATION
       const friendDocs = await admin.firestore().collection(`Users/${UserId}/Friends`).where("isEmergency", "==", true).get();
 
       await Promise.all(friendDocs.docs.map(async (doc) => {
         const u = doc.data();
         u.id = doc.id;
-        functions.logger.log("NewAlertWrite > Friend > ", u);
-        functions.logger.log(`NewAlertWrite > ALERT FRIEND OF > ${dataAlert.type} alert`);
 
         // ADD NOTIFICATION TO USER DOC
         try {
@@ -118,7 +114,6 @@ exports.NewAlertWrite = functions.firestore
             created_at: new Date(),
             seen: false,
           });
-          functions.logger.log("Notification added successfully");
         } catch (error) {
           functions.logger.error("NewAlertWrite > AddNotification > ERROR > ", error);
         }

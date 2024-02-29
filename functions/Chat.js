@@ -121,11 +121,11 @@ exports.ChatMessageOnWrite = functions.firestore
           const userData = userSnap.data();
 
           // Decrement "notifications.unseen" count if greater than 0
-          if (userData.notifications.messages > 0) {
-            await userRef.update({
-              "notifications.message": admin.firestore.FieldValue.increment(-1)
-            });
-          }
+          await userRef.update({
+            "notifications.message": admin.firestore.FieldValue.increment(
+              userData.notifications.message > 0 ? -1 : 0
+            )
+          });
 
           // Construct unseen count key
           const unseenCountKey = `unseen.${userId}`;
