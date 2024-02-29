@@ -1,7 +1,7 @@
 <template>
   <v-container class="mobileNotch" style="height:calc(100vh - 75px);">
     <div class="d-flex flex-column justify-space-between" style="height:75vh;">
-      <VideoCamera :chatId="chatId" @url="urlCallback" />
+      <VideoCamera :chatId="chatId" @url="urlCallback" @close="closeCamera" />
     </div>
   </v-container>
 </template>
@@ -33,6 +33,10 @@ export default defineComponent({
       }, 1500)
     }
 
+    const closeCamera = () => {
+      return router.push(`/chats/chat/${chatId.value}`)
+    }
+
     onMounted(() => {
       chatId.value = route.value?.query?.chatId
     })
@@ -49,7 +53,7 @@ export default defineComponent({
 
     return {
       chatId,
-      urlCallback
+      urlCallback, closeCamera
     }
   },
   head: {}

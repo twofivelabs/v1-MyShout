@@ -1,5 +1,10 @@
 <template>
   <div class="camera-wrapper">
+    <v-app-bar color="transparent" class="justify-end camera-controls d-flex" flat top fixed>
+      <v-btn @click="closeCamera" :disabled="cameraRecordingStatus" icon>
+        <v-icon color="primary">mdi-close</v-icon>
+      </v-btn>
+    </v-app-bar>
     <div id="cameraContent" class="content-camera-preview"></div>
     <v-app-bar color="transparent" class="align-center justify-center text-center camera-controls d-flex" flat bottom fixed style="top:calc(100% - 145px)">
       <v-btn @click="flipCamera" icon x-large class="ma-2">
@@ -142,6 +147,10 @@ export default defineComponent({
       }
     };
 
+    const closeCamera = async () => {
+      return emit('close')
+    }
+
 
     onMounted(async () => {
       await startCamera()
@@ -153,6 +162,7 @@ export default defineComponent({
     return {
       startCamera, stopCamera, flipCamera,
       startCameraRecord, stopCameraRecord, toggleCameraRecord,
+      closeCamera,
       cameraRecordingStatus
     }
   }

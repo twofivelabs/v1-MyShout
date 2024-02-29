@@ -188,7 +188,6 @@ export default defineComponent({
       }
     };
 
-
     const handleReply = message => isReply.value = message;
 
     watch(route, (to, from) => {
