@@ -16,6 +16,7 @@
   "dependencies": {
     "@byteowls/capacitor-sms": "^5.0.0",
     "@capacitor-community/admob": "^5.3.1",
+    "@capacitor-community/camera-preview": "^5.0.0",
     "@capacitor-community/contacts": "^5.0.4",
     "@capacitor-community/fcm": "^5.0.2",
     "@capacitor-community/http": "^1.4.1",
