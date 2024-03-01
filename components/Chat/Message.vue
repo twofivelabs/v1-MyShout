@@ -17,7 +17,7 @@
 
             <div v-else>
               <div v-if="forward.message" class="mb-3">
-                Forward: {{ forward.message }}
+                {{$t('chats.forward')}}: {{ forward.message }}
               </div>
 
               <div v-if="forward.audioUrl">

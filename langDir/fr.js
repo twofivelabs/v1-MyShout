@@ -173,6 +173,9 @@ export default {
         view_members: 'Voir les membres',
         remove_chat: 'Supprimer le chat',
         audio_expired: 'Le clip audio a expiré',
+        you_replied_to: 'Vous avez répondu à',
+        replying_to: 'Répondre à',
+        forward: 'Avant'
     },
     notifications: {
         heading: 'Avis',
@@ -262,7 +265,7 @@ export default {
         mute_notifications: 'Désactiver les notifications',
         unmute_notifications: 'Activer les notifications',
         add_member: 'Ajouter un membre',
-        view_profile: 'Voir le profil',  
+        view_profile: 'Voir le profil',
         leave_group: 'Quitter le groupe',
         remove_from_group: 'Retirer du groupe',
         leave_chat: 'Quitter le chat',

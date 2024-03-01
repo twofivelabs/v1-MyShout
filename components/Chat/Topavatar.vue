@@ -5,7 +5,7 @@
       <span v-else class="white--text headline">{{ `+${chat.participants.length}` }}</span>
     </v-avatar>
     <v-avatar v-else-if="participant" class="white--text rounded-lg" :size="size" color="primary" rounded>
-      <v-img v-if="participant.photoUrl" :src="articipant.photoUrl" />
+      <v-img v-if="participant.photoUrl" :src="participant.photoUrl" />
       <span v-else class="white--text headline">{{ participant.initial ? participant.initial : (participant.username ? participant.username.charAt(0) : ':)') }}</span>
     </v-avatar>
     <v-skeleton-loader v-else type="avatar" :size="size" />

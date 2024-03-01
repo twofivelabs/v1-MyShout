@@ -2,7 +2,7 @@
   <v-app-bar color="transparent" class="align-center formMessageInput" flat bottom fixed :style="`${!reply ? 'top:calc(100% - 145px)' : 'top:calc(100% - 165px)'}`">
     <v-row class="px-2">
       <v-col cols="12" v-if="reply" class="reply-preview">
-        Replying to: {{ truncateMessage(reply.message) }}
+        {{$t('chats.replying_to')}}: {{ truncateMessage(reply.message) }}
         <v-icon @click="clearReply">mdi-close</v-icon>
       </v-col>
 

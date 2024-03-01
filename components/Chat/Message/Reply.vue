@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="message && reply" 
+    v-if="message && reply"
     :class="[
       'caption pb-2',
       !details
@@ -11,11 +11,11 @@
     ]"
   >
     <div>
-      <div>You replied to {{ reply.owner ? reply.owner.username : '' }}</div>
+      <div>{{$t('chats.you_replied_to')}} {{ reply.owner ? reply.owner.username : '' }}</div>
       <div class=" pa-2 rounded-lg" style="border: 1px solid #e3e3e3">
-        <v-icon small>mdi-reply</v-icon>        
+        <v-icon small>mdi-reply</v-icon>
         {{ reply.message ? reply.message : '' }}
-      </div>        
+      </div>
     </div>
   </div>
 </template>
@@ -64,22 +64,22 @@ export default defineComponent({
     const userId = computed(() => state.user.data.uid)
 
     const reply = ref([])
-   
+
     watch(() => props.message, async (m) => {
       if (m && m.replyTo) {
         const snapshot = await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(m.replyTo).get()
         reply.value = snapshot.data()
       }
-    }, { immediate: true });  
+    }, { immediate: true });
 
     watch(reply, async (r) => {
       if (r && r.message && r.owner) {
         reply.value.message = $encryption.decrypt(reply.value.message)
         reply.value.owner = props.participants[reply.value.owner];
       }
-    }, { immediate: true });  
-    
-    return { 
+    }, { immediate: true });
+
+    return {
       userId,
       reply
     }

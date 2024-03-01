@@ -171,7 +171,10 @@ export default {
         add_member: 'Add Member',
         view_members: 'View Members',
         remove_chat: 'Remove Chat',
-        audio_expired: 'Audio Clip Has Expired'
+        audio_expired: 'Audio Clip Has Expired',
+        you_replied_to: 'You replied to',
+        replying_to: 'Replying to',
+        forward: 'Forward'
     },
     notifications: {
         heading: 'Notifications',
@@ -262,7 +265,7 @@ export default {
         add_member: "Add Member",
         mute_notifications: 'Mute Notifications',
         unmute_notifications: 'Unmute Notifications',
-        view_profile: 'View Profile',  
+        view_profile: 'View Profile',
         leave_group: 'Leave Group',
         remove_from_group: 'Remove From Group',
         leave_chat: 'Leave Chat',

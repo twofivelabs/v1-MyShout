@@ -171,7 +171,10 @@ export default {
         add_member: 'Añadir miembro',
         view_members: 'Ver miembros',
         remove_chat: 'Eliminar chat',
-        audio_expired: 'El clip de audio ha caducado'
+        audio_expired: 'El clip de audio ha caducado',
+        you_replied_to: 'tu respondiste a',
+        replying_to: 'Respondiendo a',
+        forward: 'Adelante'
     },
     notifications: {
         heading: 'Notificaciones',
@@ -261,7 +264,7 @@ export default {
         add_member: 'Añadir miembro',
         mute_notifications: 'Silenciar notificaciones',
         unmute_notifications: 'Activar notificaciones',
-        view_profile: 'Ver Perfil',  
+        view_profile: 'Ver Perfil',
         leave_group: 'Salir del Grupo',
         remove_from_group: 'Eliminar del Grupo',
         leave_chat: 'Salir del Chat',
