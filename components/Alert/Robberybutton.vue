@@ -82,6 +82,10 @@ export default defineComponent({
 
       // UPDATE CURRENT LOCATION
       const coords = await $capacitor.gpsGetCurrentPosition()
+      if (coords === "UNIMPLEMENTED") {
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+        return
+      }
 
       // ADD NOTIFICATION TO USER
       await dispatch('user/alerts/add', {

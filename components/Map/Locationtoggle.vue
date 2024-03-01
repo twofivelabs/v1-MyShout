@@ -67,7 +67,7 @@ export default defineComponent({
     }
     const toggleLocation = async () => {
       if (locationPermissionGranted.value === true) {
-        await $capacitor.positionPermissions()
+        await $capacitor.gpsInit()
       } else {
         await removePermissions()
       }
