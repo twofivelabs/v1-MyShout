@@ -52,7 +52,7 @@ export default defineComponent({
     const user = computed(() => state.user.data)
 
 
-    const isLoading = ref(false)
+    const loading = ref(false)
     const allNotifications = computed(() => {
       const loaded = state.user.notifications.all
       return orderBy(loaded, ['seconds'], ['desc'])
@@ -81,7 +81,7 @@ export default defineComponent({
 
     return {
       user,
-      isLoading,
+      loading,
       filteredNotifications,
       updateFilters
     }
