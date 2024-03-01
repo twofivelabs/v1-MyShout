@@ -24,7 +24,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, onMounted, onUnmounted, ref, useContext } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, onUnmounted, ref, useContext, useRoute, useRouter } from '@nuxtjs/composition-api'
 import { CameraPreview } from '@capacitor-community/camera-preview'
 
 export default defineComponent({
@@ -42,7 +42,8 @@ export default defineComponent({
     const {
       $capacitor, $db
     } = useContext()
-
+    const router = useRouter()
+    const route = useRoute()
     const cameraOptions = ref({
       parent: 'cameraContent',
       toBack: true,
@@ -51,6 +52,7 @@ export default defineComponent({
       position: 'front' //front/rear
     })
     const cameraRecordingStatus = ref(false)
+    const chatId = ref(route?.value?.query?.chatId)
 
     const isWeb = async () => {
       const device = await $capacitor.device()
@@ -59,6 +61,7 @@ export default defineComponent({
 
     const startCamera = async () => {
       console.log('[camera] Start');
+      console.log('route', chatId.value)
       try {
         await CameraPreview.start(cameraOptions.value);
       } catch (error) {
@@ -89,10 +92,13 @@ export default defineComponent({
     };
 
     const startCameraRecord = async () => {
-      console.log('[camera] Start Record');
+      console.log('[camera] Start Record')
       if (await isWeb()) {
-        console.log('[camera] Record > N/A');
-        return;
+        console.log('[camera] Record > N/A')
+        // TESTING PURPOSE
+        console.log('chatid', chatId.value)
+        await router.push(`/chats/chat/${chatId.value}?videoUrl=${encodeURIComponent('/this/is/a/fake/url.mp4')}`)
+        return
       }
       cameraRecordingStatus.value = true;
       try {
@@ -106,13 +112,14 @@ export default defineComponent({
       console.log('[camera] Stop Record');
       if (await isWeb()) {
         console.log('[camera] Record > N/A');
-        return;
+        return
       }
       cameraRecordingStatus.value = false;
       try {
         const result = await CameraPreview.stopRecordVideo();
         console.log('[camera] Result: ', result, JSON.stringify(result));
-        return result?.videoFilePath || false;
+        await router.push(`/chats/chat/${chatId.value}?videoUrl=${encodeURIComponent('/this/is/a/fake/url.mp4')}`)
+        return
       } catch (error) {
         console.error('[camera] stopRecordVideo Error: ', error);
         return false;
@@ -150,7 +157,6 @@ export default defineComponent({
     const closeCamera = async () => {
       return emit('close')
     }
-
 
     onMounted(async () => {
       await startCamera()

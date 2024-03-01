@@ -14,12 +14,13 @@
         hide-details
         solo
       >
-        <template v-slot:prepend-inner v-if="imageUrl || fileUrl">
+        <template v-slot:prepend-inner v-if="imageUrl || videoUrl || fileUrl">
           <v-badge
+            :bordered="false"
             icon="mdi-delete-outline"
             color="red"
-            overlap :bordered="false"
             size="small"
+            overlap
           >
             <v-img
               v-if="imageUrl"
@@ -29,9 +30,10 @@
               max-height="40"
               contain
             />
-            <v-icon
-              v-if="fileUrl"
-            >
+            <v-icon v-if="videoUrl" @click="videoUrl = null">
+              mdi-video-vintage
+            </v-icon>
+            <v-icon v-if="fileUrl" @click="fileUrl = null">
               mdi-paperclip
             </v-icon>
           </v-badge>
@@ -102,7 +104,8 @@
     watch,
     useContext ,
     useStore,
-    computed
+    computed,
+    useRoute
   } from '@nuxtjs/composition-api';
 
   import firebase from 'firebase';
@@ -120,20 +123,20 @@
     setup(props, { emit }) {
       const { dispatch, state } = useStore()
       const { i18n, $notify, $fire, $encryption } = useContext()
+      const route = useRoute()
       const user = computed(() => state.user)
 
       const newMessage = ref('')
       const addToMessage = ref(false)
 
       const imageUrl = ref(null)
+      const videoUrl = ref(null)
       const fileUrl = ref(null)
 
       const clearReply = () => emit('updateReply', null)
       const imageCallback = (url) => imageUrl.value = url
       const fileCallback = (url) => fileUrl.value = url
-
       const truncateMessage = (message, length = 25) => message ? (message.length > length ? message.substring(0, length) + '...' : message) : '';
-
       const sendMessage = async () => {
         try {
           if((!newMessage.value && !imageUrl.value) || !user.value.data.uid) {
@@ -156,6 +159,7 @@
               replyTo: props.reply ? props.reply.id : null,
               image: imageUrl.value || null,
               file: fileUrl.value || null,
+              video: videoUrl.value || null,
               owner: user.value.data.uid,
               seen: [user.value.data.uid]
             }
@@ -190,15 +194,20 @@
           console.log("STICKY: Cannot Send Message", e);
         }
       };
-
       const updateTyping = debounce((isTyping) => {
         emit('updateTyping', isTyping);
       }, 500);
 
       watch(newMessage, (newValue) => updateTyping(!!newValue), { immediate: true });
+      watch(route, (to) => {
+        // Watch URL Params for VIDEO
+        if (to.query?.videoUrl) {
+          videoUrl.value = decodeURIComponent(to.query.videoUrl)
+        }
+      }, { immediate: true });
 
       return {
-        newMessage, imageUrl, fileUrl,
+        newMessage, imageUrl, fileUrl, videoUrl,
         addToMessage,
         sendMessage, clearReply, truncateMessage,
         imageCallback, fileCallback

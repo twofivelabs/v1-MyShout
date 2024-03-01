@@ -152,7 +152,6 @@ export default defineComponent({
       }
     };
 
-
     const scrollToUnseenMessage = () => {
       try {
         nextTick(() => {
