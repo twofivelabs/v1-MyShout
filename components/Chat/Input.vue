@@ -77,7 +77,7 @@
                         small
                         fab
                       >
-                        <v-icon>
+                        <v-icon color="black">
                           mdi-video-vintage
                         </v-icon>
                       </v-btn>
