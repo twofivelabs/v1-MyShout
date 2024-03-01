@@ -1,10 +1,8 @@
 import BackgroundGeolocation from "@transistorsoft/capacitor-background-geolocation"
-//import {BackgroundFetch} from '@transistorsoft/capacitor-background-fetch'
+import { BackgroundFetch } from '@transistorsoft/capacitor-background-fetch'
 import { Device } from '@capacitor/device'
 import { Preferences } from '@capacitor/preferences'
-import { BackgroundFetch } from '@transistorsoft/capacitor-background-fetch'
 import { CapacitorHttp } from '@capacitor/core'
-
 
 const geoLocationConfig = {
     //url: 'https://us-central1-my-shout-staging.cloudfunctions.net/Rest-updateGPS',
@@ -53,7 +51,10 @@ export default {
 
         // DESKTOP / WEBSITES
         const device = await Device.getInfo()
-        if (device.platform === 'web') return
+        if (device.platform === 'web') {
+            this.gpsGetPositionAndUpdateUser('init')
+            return
+        }
 
         // Set User Id URL Param
         try {
@@ -244,6 +245,16 @@ export default {
         }
         return BackgroundGeolocation.getCurrentPosition(getCurrentPositionConfig).then(location => {
             console.log('STICKY: [gps] #5.1 gpsGetPositionAndUpdateUser', location, JSON.stringify(location))
+
+            // Try and update the user store
+            window.$nuxt.context.store.dispatch('user/updateGPS', {
+                lat: location?.coords?.latitude || null,
+                lng: location?.coords?.longitude || null,
+            }).then(() => {
+                console.log('STICKY: [gps] #5.1.1 update local user')
+            }).catch((e) => {
+                console.log('STICKY: [gps] #5.1.1 update local user ERROR: ', e, JSON.stringify(e))
+            })
 
             // Send Update Firebase
             return this.httpUpdateUsersGPS({

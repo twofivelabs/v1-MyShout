@@ -75,7 +75,7 @@ export default defineComponent({
     // const userCenter = ref('')
     const markers = ref({})
 
-    $capacitor.positionPermissions()
+    // $capacitor.positionPermissions()
 
     // GET CONTENT
     useFetch(async () => {
@@ -194,6 +194,13 @@ export default defineComponent({
       window.currentMap = currentMap.value
 
       // Center on me
+      console.log('USER GPS', user.value.gps)
+      if (!user.value.gps.lat) {
+
+        user.value.gps.lat = 49.8995757
+        user.value.gps.lng = -119.6195832
+      }
+
       if (user.value.gps.lat) {
         console.log('Init map with a center of', user.value.gps.lat)
         centerOn({
