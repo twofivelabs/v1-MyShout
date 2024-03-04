@@ -48,6 +48,12 @@
       </v-row>
     </div>
 
+    <div v-if="message.videoUrl">
+      <video width="100%" controls>
+        <source :src="`${message.videoUrl}`" type="video/mp4">
+        Videos not supported.
+      </video>
+    </div>
     <div v-if="message.message">
       <v-row
         class="align-center py-3"
@@ -101,22 +107,6 @@
               <div v-if="message.audioUrl">
                 <ChatPlayaudio v-if="!message.audioExpired" :file="message.audioUrl" />
                 <div v-else class="text-center caption font-italic py-4">{{ $t('chat.audio_expired') }}</div>
-              </div>
-
-              <div v-if="message.videoUrl">
-                Show Video For: {{ message.videoUrl }}
-                <!--      <video
-                    autoPlay
-                    loop
-                    src={`data:video/mp4;base64,${file.data}`}
-                    style={{
-                    width: "100%",
-                    height: "100%",
-                    position: "absolute",
-                    top: 0,
-                    opacity: videoBase64 ? 1 : 0,
-                    }}
-                />-->
               </div>
 
               <div v-if="message.image">
@@ -319,6 +309,8 @@ export default defineComponent({
 
     const messageForward = ref(false)
     const forward = ref(null)
+
+    console.log('MESSAGE ', props.message)
 
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')

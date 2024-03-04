@@ -159,7 +159,7 @@
               replyTo: props.reply ? props.reply.id : null,
               image: imageUrl.value || null,
               file: fileUrl.value || null,
-              video: videoUrl.value || null,
+              videoUrl: videoUrl.value || null,
               owner: user.value.data.uid,
               seen: [user.value.data.uid]
             }
@@ -184,6 +184,11 @@
           clearReply()
           newMessage.value = null;
           imageUrl.value = null;
+          videoUrl.value = null;
+          fileUrl.value = null;
+
+          // This will remove any url params (ie: video Url)
+          window.history.replaceState(null, '', window.location.pathname);
 
           emit("messageSent")
         } catch (e) {
