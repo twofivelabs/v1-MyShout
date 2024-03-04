@@ -327,16 +327,31 @@ export default ({ app }, inject) => {
     async upload({
         path = null,
         data = null,
-        base64 = false
+        base64 = false,
+        metaData = {}
     }) {
         if (!path) {
             return false
         }
+
         let uploadResponse
         if (base64) {
-            uploadResponse = await app.$fire.storage.ref(path).putString(data, 'base64')
+            uploadResponse = await app.$fire.storage.ref(path).putString(data, 'base64', metaData)
         } else if (data) {
-            uploadResponse = await app.$fire.storage.ref(path).put(data)
+            uploadResponse = await app.$fire.storage.ref(path).put(data, metaData)
+        }
+
+        if ('canceled' === uploadResponse.state) {
+            console.log('STICKY: [upload]: Canceled...')
+        }
+        if ('error' === uploadResponse.state) {
+            console.log('STICKY: [upload]: Error...')
+        }
+        if ('paused' === uploadResponse.state) {
+            console.log('STICKY: [upload]: Paused...')
+        }
+        if ('running' === uploadResponse.state) {
+            console.log('STICKY: [upload]: Uploading...')
         }
         if ('success' === uploadResponse.state) {
             return await uploadResponse.ref.getDownloadURL()

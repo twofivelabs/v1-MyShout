@@ -27,10 +27,10 @@ export default defineComponent({
     const chatId = ref(null)
 
     const urlCallback = (url) => {
-      console.log('urlCallback: ', url)
-      setTimeout(() => {
+      console.log('cameraStepper: ', url)
+      /*setTimeout(() => {
         router.push(`/chats/chat/${chatId.value}?videoUrl=${url}`)
-      }, 1500)
+      }, 1500)*/
     }
 
     const closeCamera = () => {

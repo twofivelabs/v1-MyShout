@@ -40,6 +40,10 @@
 		"classpath": "com.capacitorjs.plugins.device.DevicePlugin"
 	},
 	{
+		"pkg": "@capacitor/filesystem",
+		"classpath": "com.capacitorjs.plugins.filesystem.FilesystemPlugin"
+	},
+	{
 		"pkg": "@capacitor/local-notifications",
 		"classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin"
 	},
@@ -60,7 +64,6 @@
 		"classpath": "io.capawesome.capacitorjs.plugins.badge.BadgePlugin"
 	},
 	{
-<<<<<<< HEAD
 		"pkg": "@transistorsoft/capacitor-background-fetch",
 		"classpath": "com.transistorsoft.bgfetch.capacitor.BackgroundFetchPlugin"
 	},
@@ -69,8 +72,6 @@
 		"classpath": "com.transistorsoft.bggeo.capacitor.BackgroundGeolocationPlugin"
 	},
 	{
-=======
->>>>>>> origin/2.1--Chat-Development
 		"pkg": "capacitor-voice-recorder",
 		"classpath": "com.tchvu3.capacitorvoicerecorder.VoiceRecorder"
 	}

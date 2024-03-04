@@ -310,7 +310,10 @@ export default defineComponent({
     const messageForward = ref(false)
     const forward = ref(null)
 
-    console.log('MESSAGE ', props.message)
+    const decodeUri = (url) => {
+      if (!url) return
+      return decodeURIComponent(url)
+    }
 
     const downloadFile = (file) => {
       return $helper.downloadFile(file, 'recording.wav')
@@ -432,7 +435,7 @@ export default defineComponent({
       downloadFile, deleteFile,
       getReadStatusIcon,
       startMessageReply,
-      messageHover, onHoverMessage, onLeaveMessage
+      messageHover, onHoverMessage, onLeaveMessage, decodeUri
     }
   }
 })

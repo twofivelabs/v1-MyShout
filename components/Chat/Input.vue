@@ -207,7 +207,10 @@
       watch(route, (to) => {
         // Watch URL Params for VIDEO
         if (to.query?.videoUrl) {
-          videoUrl.value = decodeURIComponent(to.query.videoUrl)
+          //console.log('[input] to: ', to, JSON.stringify(to))
+          //console.log('[input] VideoURL: ', to.query.videoUrl)
+          // console.log('[cameraStepper] input ', to.query.videoUrl)
+          videoUrl.value = to.query.videoUrl
         }
       }, { immediate: true });
 

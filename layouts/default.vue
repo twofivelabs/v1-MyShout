@@ -1,7 +1,7 @@
 <template>
-  <v-app 
+  <v-app
     :style="`${$vuetify.breakpoint.smAndDown ? 'overflow-x:hidden' : '' }`"
-    class="grey lighten-5"
+    :class="`grey lighten-5`"
     dark
   >
     <v-main>
@@ -22,7 +22,6 @@ import {
   onMounted,
   ref,
   useContext,
-  //useRoute,
   //useRouter,
   useStore
 } from '@nuxtjs/composition-api'
@@ -45,6 +44,7 @@ export default defineComponent({
       $capacitor
     } = useContext()
     const loading = ref(false)
+    const extraClassNames = ref(null)
 
     onBeforeMount(async () => {
       try {
@@ -126,6 +126,7 @@ export default defineComponent({
 
     return {
       loading,
+      extraClassNames
     }
   }
 })

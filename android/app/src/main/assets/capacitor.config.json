@@ -49,11 +49,8 @@
 	"cordova": {},
 	"server": {
 		"iosScheme": "ionic"
-<<<<<<< HEAD
 	},
 	"android": {
 		"useLegacyBridge": true
-=======
->>>>>>> origin/2.1--Chat-Development
 	}
 }
