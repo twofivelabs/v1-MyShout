@@ -30,7 +30,7 @@
       <v-row v-for="(u, index) in friends" :key="u.uid || index" class="d-flex">
         <v-col cols="10" class="py-0 d-flex align-center">
           <ChatAvatar :user="u" class="mr-2" />
-          <span class="username myshoutDarkGrey--text">{{ u.username ? `@${u.username}` : u.fire_name }}</span>
+          <span class="username myshoutDarkGrey--text">{{ u.username ? `@${u.username}` : u.first_name }}</span>
         </v-col>
         <v-col cols="2" class="py-0 d-flex align-center justify-end">
           <v-checkbox
@@ -40,7 +40,7 @@
           ></v-checkbox>
         </v-col>
       </v-row>
-      
+
     </v-col>
     <v-col cols="12" v-if="selectedChats.length > 0">
       <v-text-field
@@ -70,7 +70,7 @@ import {
   ref, watch
 } from '@nuxtjs/composition-api'
 
-  
+
   export default defineComponent({
     name: 'ChatMessageForward',
     props: {
@@ -100,7 +100,7 @@ import {
 
       const recentChats = ref([])
       const selectedChats = ref([])
-      
+
       const friends = ref([])
       const selectedFriends = ref([])
 
@@ -108,7 +108,7 @@ import {
 
       const searchFriends = () => {
         console.log("Search")
-      }    
+      }
 
       const getFriends = async () => {
         const result = await $fire.firestore
@@ -122,7 +122,7 @@ import {
             .collection('Users').doc(doc.id)
             .get()
 
-          friends.value.push({selected: false, ...user.data()})  
+          friends.value.push({selected: false, ...user.data()})
         }
       };
 
@@ -181,8 +181,8 @@ import {
          } catch(e) {
           console.log("Error Forwarding Message", e)
          }
-        
-        
+
+
       }
 
       watch([() => props.chat, () => props.message], ([newChat, newMessage]) => {
@@ -205,7 +205,6 @@ import {
   })
   </script>
   <style>
-     
-  
+
+
   </style>
-  
