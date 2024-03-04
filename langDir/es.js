@@ -174,7 +174,8 @@ export default {
         audio_expired: 'El clip de audio ha caducado',
         you_replied_to: 'tu respondiste a',
         replying_to: 'Respondiendo a',
-        forward: 'Adelante'
+        forward: 'Adelante',
+        video_not_supported: 'Vídeos no compatibles'
     },
     notifications: {
         heading: 'Notificaciones',

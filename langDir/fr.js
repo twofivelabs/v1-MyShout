@@ -175,7 +175,8 @@ export default {
         audio_expired: 'Le clip audio a expiré',
         you_replied_to: 'Vous avez répondu à',
         replying_to: 'Répondre à',
-        forward: 'Avant'
+        forward: 'Avant',
+        video_not_supported: 'Vidéos non prises en charge'
     },
     notifications: {
         heading: 'Avis',

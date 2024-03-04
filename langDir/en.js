@@ -174,7 +174,8 @@ export default {
         audio_expired: 'Audio Clip Has Expired',
         you_replied_to: 'You replied to',
         replying_to: 'Replying to',
-        forward: 'Forward'
+        forward: 'Forward',
+        video_not_supported: 'Videos not supported'
     },
     notifications: {
         heading: 'Notifications',
