@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!chat && !participants"> 
+  <div v-if="!chat && !participants">
     <v-skeleton-loader v-for="x in 3" :key="x" type="list-item	" />
   </div>
   <v-list-item-group class="mt-10" v-else>
@@ -23,7 +23,7 @@
   </v-list-item-group>
 </template>
 
-<script> 
+<script>
   import {
     defineComponent,
     useStore,
@@ -33,7 +33,7 @@
 
   import firebase from 'firebase';
   import 'firebase/functions';
-  
+
   export default defineComponent({
     name: 'SettingsList',
     props: {
@@ -59,23 +59,23 @@
     setup(props) {
       const { state, dispatch } = useStore()
       const router = useRouter()
-      const user = computed(() => state.user); 
-         
+      const user = computed(() => state.user);
+
       const setChatMuteState = async () => {
         return await dispatch('chats/updateField', {
             id: props.chat.id,
             muted: !props.chat.muted.includes(user.value.data.uid) ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
         })
       }
-      
+
       const leaveChat = async () => {
         const res = await dispatch('chats/updateField', {
           id: props.chat.id,
           participants: firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
         })
-        if (res) return router.push('/chsts')
+        if (res) return router.push('/chats')
       }
-      
+
       return {
         user,
         setChatMuteState,
@@ -84,4 +84,3 @@
     }
   })
   </script>
-  
