@@ -196,7 +196,11 @@ export default {
     },
     gps: {
         gps: 'GPS',
-        user_no_location: 'User has not updated their location yet.'
+        user_no_location: 'User has not updated their location yet.',
+        rationale_title: 'Allow My Shout to access this device\'s location even when closed or not in use.',
+        rationale_message: 'This app collects location data to notify your family and emergency contacts in case of emergency.',
+        rationale_positive_action: 'Change to Always Allow',
+        rationale_negative_action: 'Cancel'
     },
     contacts: {
         invite_friends: 'Invite Friends',

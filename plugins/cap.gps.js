@@ -28,10 +28,10 @@ const geoLocationConfig = {
     locationAuthorizationRequest: 'Always',
     showsBackgroundLocationIndicator: true,
     backgroundPermissionRationale: {
-        title: "Allow My Shout to access this device's location even when closed or not in use.",
-        message: "This app collects location data to notify your family and emergency contacts in case of emergency.",
-        positiveAction: 'Change to Always Allow',
-        negativeAction: 'Cancel'
+        title: window.$nuxt.$t('gps.rationale_title'),
+        message: window.$nuxt.$t('gps.rationale_message'),
+        positiveAction: window.$nuxt.$t('gps.rationale_positive_action'),
+        negativeAction: window.$nuxt.$t('gps.rationale_negative_action')
     },
 }
 const currentPositionOptions = {

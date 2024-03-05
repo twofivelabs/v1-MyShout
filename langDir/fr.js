@@ -198,7 +198,11 @@ export default {
     },
     gps: {
         gps: 'GPS',
-        user_no_location: 'L\'utilisateur n\'a pas encore mis à jour sa position.'
+        user_no_location: 'L\'utilisateur n\'a pas encore mis à jour sa position.',
+        rationale_title: 'Autorisez My Shout à accéder à l\'emplacement de cet appareil même lorsqu\'il est fermé ou non utilisé.',
+        rationale_message: 'Cette application collecte des données de localisation pour informer votre famille et vos contacts d\'urgence en cas d\'urgence.',
+        rationale_positive_action: 'Changer pour Toujours autoriser',
+        rationale_negative_action: 'Annuler'
     },
     contacts: {
         invite_friends: 'Inviter des amis',
