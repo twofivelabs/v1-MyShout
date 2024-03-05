@@ -7,7 +7,7 @@ PODS:
     - AppAuth/Core
   - ByteowlsCapacitorSms (5.0.0):
     - Capacitor
-  - Capacitor (5.7.0):
+  - Capacitor (5.7.1):
     - CapacitorCordova
   - CapacitorApp (5.0.7):
     - Capacitor
@@ -25,8 +25,10 @@ PODS:
     - Firebase/Messaging
   - CapacitorCommunityHttp (1.4.1):
     - Capacitor
-  - CapacitorCordova (5.7.0)
+  - CapacitorCordova (5.7.1)
   - CapacitorDevice (5.0.7):
+    - Capacitor
+  - CapacitorFilesystem (5.2.1):
     - Capacitor
   - CapacitorFirebaseAuthentication (5.4.1):
     - Capacitor
@@ -169,6 +171,7 @@ DEPENDENCIES:
   - "CapacitorCommunityHttp (from `../../node_modules/@capacitor-community/http`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
   - "CapacitorFirebaseAuthentication (from `../../node_modules/@capacitor-firebase/authentication`)"
   - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
@@ -232,6 +235,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
     :path: "../../node_modules/@capacitor/device"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
   CapacitorFirebaseAuthentication:
     :path: "../../node_modules/@capacitor-firebase/authentication"
   CapacitorLocalNotifications:
@@ -254,7 +259,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: 3bb1d1cd9340bd09f5ed189fb00b1cc28e1e8570
   ByteowlsCapacitorSms: 1a2442b5cd9d118cfb521d2a9516ff65d506f5ab
-  Capacitor: fc155ee2ee45a2093d716f13cf5aa5a865e2d85a
+  Capacitor: 6bd16626bc7a4a382eff16f6aed0072fe9776951
   CapacitorApp: 17fecd0e6cb23feafac7eb0939417389038b0979
   CapacitorCamera: 4892c5c392f60039d853dde78bc50ba19fbd113e
   CapacitorCommunityAdmob: 1e377ccfb6236c38591f23759334fa12668fb2e0
@@ -262,8 +267,9 @@ SPEC CHECKSUMS:
   CapacitorCommunityContacts: 45de2477f7dc6265d267677939a2c75465d2ed87
   CapacitorCommunityFcm: 3e42b0f0460c791aa5f2b142113db2e94dcbb797
   CapacitorCommunityHttp: 7be90668527ef14ee10d08135b0e00fac9cf8247
-  CapacitorCordova: e825fce1a2e14e4b5730641c7e098dccf74397b7
+  CapacitorCordova: b49f3372270c88fd9c633a4fc8c7ef00e47dd2d6
   CapacitorDevice: fc91bdb484dc0e70755e9b621cd557afe642613a
+  CapacitorFilesystem: 9f3e3c7fea2fff12f46dd5b07a2914f2103e4cfc
   CapacitorFirebaseAuthentication: 4b5146252052345d7c0cd8147dd4f1372a65e99b
   CapacitorLocalNotifications: c58afadd159f6bc540ef9b3cbdbc82510a2bf112
   CapacitorPreferences: 77ac427e98db83bace772455f8ba447430382c4c
@@ -296,6 +302,6 @@ SPEC CHECKSUMS:
   TransistorsoftCapacitorBackgroundFetch: ce4b3e01b898cef516e68485d2160a078016ee97
   TransistorsoftCapacitorBackgroundGeolocation: dd137185cd3980d8c813785ba2319f97e067d575
 
-PODFILE CHECKSUM: a8eb04f00cbe2ae7ff31f493dee346008dd9bf2f
+PODFILE CHECKSUM: a638ed89b82173049e35aabd389a9049b26421e9
 
 COCOAPODS: 1.15.2

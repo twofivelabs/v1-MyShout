@@ -5,19 +5,19 @@
 	<key>CLIENT_ID</key>
 	<string>137661141174-239vfjlneuf8u8nemqkph0jbrmkp04v0.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.137661141174-239vfjlneuf8u8nemqkph0jbrmkp04v0</string>
+	<string>com.googleusercontent.apps.777569508563-239vfjlneuf8u8nemqkph0jbrmkp04v0</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBhncjbmbHvnu9AJrfi3ci9-OvUd9bFHaE</string>
+	<string>AIzaSyDCnSyvuNCRVH4nVookQSf-filmH-lhQVk</string>
 	<key>GCM_SENDER_ID</key>
-	<string>137661141174</string>
+	<string>777569508563</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>org.myshout.app</string>
 	<key>PROJECT_ID</key>
-	<string>my-shout-app</string>
+	<string>my-shout-staging</string>
 	<key>STORAGE_BUCKET</key>
-	<string>my-shout-app.appspot.com</string>
+	<string>my-shout-staging.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:137661141174:ios:00218b8f50d7ff60449617</string>
+	<string>1:777569508563:ios:9c7fd20de1022731230826</string>
 </dict>
 </plist>
