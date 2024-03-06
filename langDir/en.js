@@ -289,7 +289,8 @@ export default {
         message_thread: 'Message Thread',
         forward_to: 'Forward To',
         recent_chats: 'Recent Chats',
-        download_file: 'Download File'
+        download_file: 'Download File',
+        refresh_chat: 'Refresh Chat'
     },
 
     no_results: 'No results',

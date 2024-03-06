@@ -285,7 +285,8 @@ export default {
         thread: 'Voir la discussion',
         message_thread: 'Fil de Messages',
         forward_to: 'Transférer à',
-        download_file: 'élécharger le fichier'
+        download_file: 'élécharger le fichier',
+        refresh_chat: 'Actualiser la discussion'
     },
 
     no_results: 'Aucun résultat',

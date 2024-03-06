@@ -3,6 +3,14 @@
     <v-skeleton-loader v-for="x in 3" :key="x" type="list-item	" />
   </div>
   <v-list-item-group class="mt-10" v-else>
+    <v-list-item key="refresh-chat" @click="refreshChat()">
+      <v-list-item-avatar>
+        <v-icon small>mdi-refresh</v-icon>
+      </v-list-item-avatar>
+      <v-list-item-title>
+        {{ $t('chat.refresh_chat') }}
+      </v-list-item-title>
+    </v-list-item>
     <v-list-item key="mute-chat" @click="setChatMuteState()">
       <v-list-item-avatar>
         <v-icon small>mdi-volume-off</v-icon>
@@ -61,6 +69,10 @@
       const router = useRouter()
       const user = computed(() => state.user);
 
+      const refreshChat = () => {
+        return window.location.reload();
+      }
+
       const setChatMuteState = async () => {
         return await dispatch('chats/updateField', {
             id: props.chat.id,
@@ -79,7 +91,8 @@
       return {
         user,
         setChatMuteState,
-        leaveChat
+        leaveChat,
+        refreshChat
       }
     }
   })
