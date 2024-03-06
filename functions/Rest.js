@@ -21,12 +21,12 @@ if (!admin.apps.length) {
  * @type {HttpsFunction & Runnable<any>}
  */
 exports.updateGPS = functions.https.onCall((data) => {
-    console.log('STICKY: HTTP DATA:', data)
+  //console.log('STICKY: HTTP DATA:', data)
   try {
     console.log("STICKY: UpdateGPS");
     if (data) {
       const userId = data.userId;
-      console.log('STICKY: UserId:', userId)
+      //console.log('STICKY: UserId:', userId)
       let gps = data.gps;
       // Adjustments to the HTTP POST method from the phone plugin
       if (data?.coords) {
@@ -46,7 +46,7 @@ exports.updateGPS = functions.https.onCall((data) => {
       if (!userId || !gps) return;
 
       const hash = geohashForLocation([gps.lat, gps.lng]);
-      console.log("STICKY: Hash:", hash);
+      //console.log("STICKY: Hash:", hash);
 
       // data.data.gps.lat  data.data.gps.lng
       return admin.firestore()
@@ -66,6 +66,7 @@ exports.updateGPS = functions.https.onCall((data) => {
           });
     }
     return Promise.resolve(false);
+
   } catch (e) {
     functions.logger.log("STICKY: Error updating GPS data 2", e);
     return Promise.resolve(false);
@@ -74,7 +75,6 @@ exports.updateGPS = functions.https.onCall((data) => {
 
 // firebase deploy --only functions:Rest-updateGPSRequest
 exports.updateGPSRequest = functions.https.onRequest((req, res) => {
-
     let userId
     let gps
 
@@ -84,7 +84,7 @@ exports.updateGPSRequest = functions.https.onRequest((req, res) => {
 
     // Get the body data
     let bodyJson = req.body;
-    console.log('STICKY: HTTP DATA:', bodyJson);
+    //console.log('STICKY: HTTP DATA:', bodyJson);
 
     if (bodyJson) {
         // Some data is formatted differently
