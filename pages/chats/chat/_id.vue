@@ -15,7 +15,7 @@
       <v-spacer />
       <ChatActionsbtn v-if="chat && participants" :chat="chat" :participants="participants" :admins="admins" />
     </v-app-bar>
-    
+
 
     <v-container v-if="messages && messages.length > 0" style=" z-index: 0; width: 100%; padding-bottom: 100px !important;">
       <div v-for="(message) in messages" :key="message.id">
@@ -119,21 +119,34 @@ export default defineComponent({
           .onSnapshot((snapshot) => {
             snapshot.docChanges().forEach((change) => {
               if (change.type === 'added') {
-                const data = change.doc.data();
-                data.id = change.doc.id;
-                data.ownerData = participants.value[data.owner];
+                const data = change.doc.data()
+                data.id = change.doc.id
+                data.ownerData = participants.value[data.owner]
 
-                if (data.message) data.message = $encryption.decrypt(data.message);
+                if (data.message) data.message = $encryption.decrypt(data.message)
                 if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
 
                 // Check if the message already exists before adding
-                const messageExists = messages.value.some(message => message.id === data.id);
-                if (!messageExists) messages.value.push(data);
+                const messageExists = messages.value.some(message => message.id === data.id)
+                if (!messageExists) messages.value.push(data)
+
               } else if (change.type === 'modified') {
+                console.log('STICKY: MESSAGE WAS MODIFIED')
                 const data = change.doc.data();
                 const index = messages.value.findIndex(m => m.id === change.doc.id);
 
-                if (index !== -1) messages.value[index] = { ...messages.value[index], ...data };
+                // For some reason, even though a new message was coming through, it still
+                // made it a 'modified message', not new.
+                /* if (index !== -1) messages.value[index] = {
+                  ...messages.value[index], ...data
+                }; */
+                //console.log('DATA BEFORE', data)
+                if (data.message) data.message = $encryption.decrypt(data.message)
+                if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
+                //console.log('DATA AFTER', data)
+                if (index !== -1) messages.value[index] = {
+                  ...messages.value[index], ...data
+                };
               }
             });
             messagesLoading.value = false;

@@ -3,7 +3,7 @@
     <v-col cols="12" v-for="(reply,index) in thread" :key="`reply-${index}`">
       <ChatMessage :thread="true" :message="reply" :chat="chat" :owner="participants[reply.owner]" :participants="participants" class="chat-message" :id="`message-${reply.id}`" />
     </v-col>
-  </v-row>  
+  </v-row>
 </template>
 
 <script>
@@ -82,13 +82,11 @@ export default defineComponent({
           return;
         }
 
-
-
         thread.value.push({
           id: replyTo.id,
           ownerData: props.participants[replyTo.data().owner],
-          message: replyTo.data().message ? $encryption.decrypt(replyTo.data().message) : '',
-          ...replyTo.data()
+          ...replyTo.data(),
+          message: replyTo.data().message ? $encryption.decrypt(replyTo.data().message) : ''
         });
 
         console.log("Thread", thread.value)
@@ -99,12 +97,12 @@ export default defineComponent({
 
         repliesDocs.forEach(response => {
           if (!response.exists) return; // Skip if the document doesn't exist
-          
+
           thread.value.push({
             id: response.id,
             ownerData: props.participants[response.data().owner],
-            message: response.data().message ? $encryption.decrypt(response.data().message) : '',
-            ...response.data()
+            ...response.data(), // having this afterwards was overriding the encryption
+            message: response.data().message ? $encryption.decrypt(response.data().message) : ''
           });
         });
 
@@ -115,12 +113,12 @@ export default defineComponent({
       }
     };
 
-    
+
     watch([() => props.message, () => props.chat], ([newMessage], [oldMessage]) => {
       if (newMessage !== oldMessage) {
         loadReplies()
       }
-    }, { immediate: true }) 
+    }, { immediate: true })
 
     return {
       moment,
