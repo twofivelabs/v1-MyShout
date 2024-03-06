@@ -1,8 +1,10 @@
 <template>
   <div>
     <v-row class="pa-4 mobileNotch">
+      <v-col class="text-left">
+        <UserFriendsbtn />
+      </v-col>
       <v-col class="text-right">
-        <UserFriendsbtn class="mr-2" />
         <ChatNewchatbtn />
       </v-col>
     </v-row>
