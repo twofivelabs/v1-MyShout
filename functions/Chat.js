@@ -156,6 +156,60 @@ exports.ChatMessageOnWrite = functions.firestore
     }
   });
 
+// firebase deploy --only functions:Chat
+// firebase deploy --only functions:Chat-ChatOnWrite
+exports.ChatOnWrite = functions.firestore
+  .document("Chats/{ChatId}")
+  .onWrite(async (change, context) => {
+    const { ChatId } = context.params;
+
+    const before = change.before.exists ? change.before.data() : null;
+    const after = change.after.exists ? change.after.data() : null;
+
+    if (!before && after) return;
+
+    try {
+      // Handle case where a participant is removed from the chat
+      console.log("Before Participants", before.participants.length)
+      console.log("After Participants", after.participants.length)
+
+      if ((before && after) && (before.participants.length > after.participants.length)) {
+        console.log("Trigger")
+        // Identify users who have been removed from the chat
+        const removedUsers = before.participants.filter(userId => !after.participants.includes(userId));
+        console.log("RemovedUsers", removedUsers)
+
+        // Decrement "notifications.message" count for each removed user
+        await Promise.all(removedUsers.map(async userId => {
+          console.log("Removing User From Chat", userId)
+          const unseenCount = before.unseen[userId];
+          console.log("User's unseen messges in chat", before.unseen[userId])
+
+          const userRef = db.doc(`Users/${userId}`);
+          const userSnap = await userRef.get();
+          const userData = userSnap.data()
+
+          // Decrement "notifications.message" count by the number of unseen messages
+          await userRef.update({
+            "notifications.message": admin.firestore.FieldValue.increment(
+              userData.notifications.message >= unseenCount ? -unseenCount : 0
+            )
+          });
+          console.log("Message Notification Count Updated")
+        }));
+
+        return null;
+      }
+
+      // Return null if no action is required
+      return null;
+    } catch (error) {
+      console.error("Error in ChatMessageOnWrite function:", error);
+      // Handle the error appropriately, such as logging or returning a response
+      return null;
+    }
+  });  
+
 // firebase deploy --only functions:Chat-scheduledFunctionExpireAudioMessages
 exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 * * *")
     .timeZone("America/New_York")

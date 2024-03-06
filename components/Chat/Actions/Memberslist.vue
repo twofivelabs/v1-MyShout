@@ -4,14 +4,7 @@
   </div>
   <v-list-item-group v-else>
     {{ $t('chat.members') }}
-    <v-list-item key="add-member">
-      <v-list-item-avatar>
-        <v-icon small>mdi-account-plus</v-icon>
-      </v-list-item-avatar>
-      <v-list-item-title>
-        {{ $t('chat.add_member' )}}
-      </v-list-item-title>
-    </v-list-item>
+    <ChatActionsAddmembersheet :chat="chat" :participants="participants" />
     <ChatActionsParticipantsheet :chat="chat" :participants="participants" />
   </v-list-item-group>
 </template>

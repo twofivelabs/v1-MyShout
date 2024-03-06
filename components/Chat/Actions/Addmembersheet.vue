@@ -1,24 +1,32 @@
 <template>
   <div>
-    <v-icon class="grey lighten-2 pa-3 rounded-lg" color="myshoutDarkGrey" @click="newChat">
-      mdi-message-outline
-    </v-icon>
+    <v-list-item key="add-member" @click="showBottomSheet = true">
+      <v-list-item-avatar>
+        <v-icon small>mdi-account-plus</v-icon>
+      </v-list-item-avatar>
+      <v-list-item-title>
+        {{ $t('chat.add_member' )}}
+      </v-list-item-title>
+    </v-list-item>
+
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="80vh" class="rounded-t-xl pb-14">
-        <div class="ma-3  mb-12" style="padding-bottom:180px;">
+        <div class="ma-3" style="padding-bottom:180px;">
           <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
                           @click.native="swipe('Down')"
           />
 
           <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
-          <ElementH1 align="center" :text="$t('chats.new_chat')" />
+          <ElementH1 align="center" :text="$t('chats.add_member')" />
           <ElementP :text="$t('chats.select_friends')" />
 
           <ChatViewsearchmembers @friendsSelected="friendsSelected"  />
 
           <v-app-bar color="rgba(0,0,0,0)" class="mb-16" flat bottom fixed style="top:90%; margin-bottom:20px">
             <div class="text-center" style="width: 100%">
-              <v-btn class="primary elevation-0" rounded large @click="startChat">{{ $t('chats.start_chat') }}</v-btn>
+              <v-btn class="primary elevation-0" rounded large @click="updateChat">
+                {{ $t('btn.add') }}
+              </v-btn>
             </div>
           </v-app-bar>
         </div>
@@ -29,21 +37,39 @@
 <script>
 import {
   defineComponent,
-  ref, useContext,
+  ref,
+  useContext,
   useStore,
-  computed, 
-  //useRouter,
+  // computed,
+  useRouter,
 } from '@nuxtjs/composition-api'
+
+import lodash from 'lodash'
 import { Touch } from 'vuetify/lib/directives'
+
 export default defineComponent({
-  name: 'ChatNewchatbtn',
+  name: 'ChatActionsAddmembersheet',
   directives: { Touch },
-  setup() {
+  props: {
+    chat: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    participants: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    }
+  },
+  setup(props) {
     const { $system, $notify, i18n } = useContext()
-    const { dispatch, state } = useStore()
-    //const router = useRouter()
+    const { dispatch } = useStore()
+    const router = useRouter()
     const loading = ref(false)
-    const user = computed(() => state.user.data)
+    // const user = computed(() => state.user.data)
 
     // DEFINE
     const showBottomSheet = ref(false)
@@ -53,46 +79,24 @@ export default defineComponent({
     const friendsSelected = (fs) => {
       newChatFriends.value = fs
     }
-    const newChat = async () => {
-      try {
-        loading.value = true
-        showBottomSheet.value = true
-      } catch(e) {
-        $system.log({
-          comp: 'ChatNewchatbtn',
-          msg: 'getChats',
-          val: e
-        })
-      } finally {
-        loading.value = false
-      }
-    }
-    const startChat = async () => {
+
+    const updateChat = async () => {
       if (newChatFriends.value.length === 0) {
         $notify.show({ text: i18n.t('chats.select_friend_first'), color: 'error' })
         return
       }
       try {
         loading.value = true
-        newChatFriends.value.push(user.value.uid)
-        const admins = []
-        admins.push(user.value.uid)
-        console.log("Admins", admins)
+        
+        const updatedChat = lodash.cloneDeep(props.chat) // Needed for VUEX mutation
+        updatedChat.participants = [...updatedChat.participants, ...newChatFriends.value]
 
-        await dispatch('chats/add', {
-          admins: admins,
-          owner: user.value.uid,
-          participants: newChatFriends.value
-        }).then(async (room) => {
-          console.log("ROOM", room)
-          if (room !== false) {
-            newChatFriends.value = []
-            //await router.push(`/chats/chat/${room.id}`)
-          }
-        })
+        await dispatch('chats/update', updatedChat)
+        await router.push(`/chats`)
+        
       } catch(e) {
         $system.log({
-          comp: 'ChatNewchatbtn',
+          comp: 'ChatAddmemberstochatbtn',
           msg: 'startChat',
           val: e
         })
@@ -100,6 +104,7 @@ export default defineComponent({
         loading.value = false
       }
     }
+
     const swipe = (direction) => {
       if (direction === 'Down') {
         showBottomSheet.value = false
@@ -109,8 +114,7 @@ export default defineComponent({
     return {
       loading,
       showBottomSheet,
-      newChat,
-      startChat,
+      updateChat,
       swipe,
       friendsSelected
     }

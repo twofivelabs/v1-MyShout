@@ -273,6 +273,7 @@ export default {
         view_profile: 'View Profile',
         leave_group: 'Leave Group',
         remove_from_group: 'Remove From Group',
+        remove_from_chat: 'Remove From Chat',
         leave_chat: 'Leave Chat',
         add_title: 'Add title',
         add_group_description: 'Add group description',

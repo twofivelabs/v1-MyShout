@@ -38,7 +38,7 @@
           </v-list-item-group>
 
           <v-list-item-group class="mt-5">
-            <v-list-item key="mute-chat"  v-if="chat.admins.includes(user.data.uid)" @click="setParticipantAsAdmin(participant)">
+            <v-list-item key="make-admin"  v-if="chat.admins.includes(user.data.uid)" @click="setParticipantAsAdmin(participant)">
               <v-list-item-avatar>
                 <v-icon small :color="chat.admins.includes(participant.id) ? 'red' : ''">mdi-account-lock</v-icon>
               </v-list-item-avatar>
@@ -51,7 +51,10 @@
                 <v-icon small color="red">mdi-exit-to-app</v-icon>
               </v-list-item-avatar>
               <v-list-item-title class="red--text">
-                {{ participants.size > 1 ? (participant.id === user.data.id ? $t('chat.leave_group') : $t('chat.remove_from_group')) : $t('chat.leave_chat') }}
+                {{ participants.size > 1 ?
+                  (participant.id === user.data.uid ? $t('chat.leave_group') : $t('chat.remove_from_group')) :
+                  (participant.id === user.data.uid ? $t('chat.leave_chat') : $t('chat.remove_from_chat'))
+                }}
               </v-list-item-title>
             </v-list-item>
           </v-list-item-group>
@@ -138,9 +141,13 @@ export default defineComponent({
     const removeParticipant = async (p) => {
       const res = await dispatch('chats/updateField', {
         id: props.chat.id,
-        participants: firebase.firestore.FieldValue.arrayRemove(p.id)
+        admins: firebase.firestore.FieldValue.arrayRemove(p.id),
+        participants: firebase.firestore.FieldValue.arrayRemove(p.id),
+        seen: firebase.firestore.FieldValue.arrayRemove(p.id),
+        unseen: firebase.firestore.FieldValue.arrayRemove(p.id)
       })
-      if (res && p.id === user.value.data.uid) return router.push('/chsts')
+      if (res && p.id === user.value.data.uid) return router.push('/chats')
+      showBottomSheet.value = false
     }
 
     return {

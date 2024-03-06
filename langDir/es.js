@@ -272,6 +272,7 @@ export default {
         view_profile: 'Ver Perfil',
         leave_group: 'Salir del Grupo',
         remove_from_group: 'Eliminar del Grupo',
+        remove_from_chat: 'eliminar del Chat',
         leave_chat: 'Salir del Chat',
         add_title: 'ajouter un titre',
         add_group_description: 'ajouter une description de groupe',

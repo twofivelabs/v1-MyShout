@@ -10,46 +10,45 @@
       <UserFriendsbtn class="mr-2" />
       <ChatNewchatbtn />
     </v-app-bar>
-    <v-container class="pt-4 pb-12">
-      <v-row class="pa-6" v-if="isLoading">
-        <v-col>
-          <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
-        </v-col>
-      </v-row>
-      <template v-if="chatList && chatList.length === 0">
-        <div class="text-center pa-10 grey--text">
-          {{ $t('chats.no_chats') }}
+
+    <v-row class="pt-10 px-5">
+      <v-col cols="12" v-if="isLoading">
+        <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
+      </v-col>
+      <v-col cols="12" v-else>
+        <v-list two-line class="pb-9" v-if="chatList.length > 0">
+          <template v-for="(chat, index) in chatList">
+            <v-list-item v-if="chat" :key="index">
+              <NuxtLink :to="`/chats/chat/${chat.id}`">
+                <v-badge v-if="chat.unseen && chat.unseen[user.data.uid] > 0" 
+                  :content="chat.unseen[user.data.uid]" 
+                  color="myshoutRed" overlap offset-x="25"
+                >
+                  <ChatTopavatar :chat="chat" class="mr-3" />
+                </v-badge>
+                <ChatTopavatar v-else :chat="chat" class="mr-3" />
+              </NuxtLink>
+                
+              <NuxtLink :to="`/chats/chat/${chat.id}`" style="width:100%;" color="myshoutDarkGrey">
+                <v-list-item-content>
+                  <v-list-item-title class="d-flex justify-start align-center myshoutDarkGrey--text">
+                    <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
+                    <v-spacer />
+                    <span class="caption">{{ moment(chat.created_at.toDate()).fromNow() }}</span>
+                  </v-list-item-title>
+                  <v-list-item-subtitle>
+                    <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ chat.message.snippet }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </NuxtLink>
+            </v-list-item>
+          </template>
+        </v-list>
+        <div v-else>
+          <ElementH4 align="center" :text="$t('chats.no_chats')"/>
         </div>
-      </template>
-      <v-list two-line class="pb-9">
-        <template v-for="(chat, index) in chatList">
-          <v-list-item v-if="chat" :key="index">
-            <NuxtLink :to="`/chats/chat/${chat.id}`">
-              <v-badge v-if="chat.unseen && chat.unseen[user.data.uid] > 0" 
-                :content="chat.unseen[user.data.uid]" 
-                color="myshoutRed" overlap offset-x="25"
-              >
-                <ChatTopavatar :chat="chat" class="mr-3" />
-              </v-badge>
-              <ChatTopavatar v-else :chat="chat" class="mr-3" />
-            </NuxtLink>
-              
-            <NuxtLink :to="`/chats/chat/${chat.id}`" style="width:100%;" color="myshoutDarkGrey">
-              <v-list-item-content>
-                <v-list-item-title class="d-flex justify-start align-center myshoutDarkGrey--text">
-                  <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
-                  <v-spacer />
-                  <span class="caption">{{ moment(chat.created_at.toDate()).fromNow() }}</span>
-                </v-list-item-title>
-                <v-list-item-subtitle>
-                  <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ chat.message.snippet }}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </NuxtLink>
-          </v-list-item>
-        </template>
-      </v-list>
-    </v-container>
+      </v-col>
+    </v-row>
   </div>
 </template>
 <script>

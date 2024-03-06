@@ -28,10 +28,10 @@ const geoLocationConfig = {
     locationAuthorizationRequest: 'Always',
     showsBackgroundLocationIndicator: true,
     backgroundPermissionRationale: {
-        title: window.$nuxt.$t('gps.rationale_title'),
-        message: window.$nuxt.$t('gps.rationale_message'),
-        positiveAction: window.$nuxt.$t('gps.rationale_positive_action'),
-        negativeAction: window.$nuxt.$t('gps.rationale_negative_action')
+        title: 'gps.rationale_title',
+        message: 'gps.rationale_message',
+        positiveAction: 'gps.rationale_positive_action',
+        negativeAction: 'gps.rationale_negative_action'
     },
 }
 const currentPositionOptions = {
