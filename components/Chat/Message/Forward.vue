@@ -173,7 +173,7 @@ import {
               await dispatch('chats/updateField', {
                 id: c,
                 message: {
-                  created_at:new Date()
+                  created_at:new Date(),
                   sent_by: user.value.data.uid
                   snippet: newMessage.value || 'Forwarded a message'
                 },
