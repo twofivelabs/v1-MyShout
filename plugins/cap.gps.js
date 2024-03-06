@@ -5,22 +5,31 @@ import { Preferences } from '@capacitor/preferences'
 import { CapacitorHttp } from '@capacitor/core'
 
 const geoLocationConfig = {
-    //url: 'https://us-central1-my-shout-staging.cloudfunctions.net/Rest-updateGPS',
-    //autoSync: true,
+    url: 'https://us-central1-my-shout-staging.cloudfunctions.net/Rest-updateGPSRequest',
+    params: {},
+    httpRootProperty: '.',
+    headers: {
+        'content-type': 'application/json'
+    },
     /* extras: {
         userId: 'YfF3k6iNYHUSoy1In4dHmeBjbbC2'
     }, */
-    batchSync: true,
+    batchSync: false,
+    maxBatchSize: 1,
+    autoSync: true,
+    autoSyncThreshold: 5,
     // Activity Recognition
     stopTimeout: 5,
     heartbeatInterval: 30,
+    foregroundService: true,
+    maxRecordsToPersist: 100,
     // Application config
     debug: false, // <-- enable this hear sounds for background-geolocation life-cycle.
     logLevel: BackgroundGeolocation.LOG_LEVEL_VERBOSE,
     stopOnTerminate: false,   // <-- Allow the background-service to continue tracking when user closes the app.
     startOnBoot: true,        // <-- Auto start tracking when device is powered-up.
     desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
-    enableHeadless: true,
+    enableHeadless: false,
     distanceFilter: 5, // Meters,
     // stationaryRadius: 5, // iOS only, when stopped the min distance must move
     stopOnStationary: false,
@@ -28,10 +37,10 @@ const geoLocationConfig = {
     locationAuthorizationRequest: 'Always',
     showsBackgroundLocationIndicator: true,
     backgroundPermissionRationale: {
-        title: 'gps.rationale_title',
-        message: 'gps.rationale_message',
-        positiveAction: 'gps.rationale_positive_action',
-        negativeAction: 'gps.rationale_negative_action'
+        title: 'Allow My Shout to access this device\'s location even when closed or not in use.',
+        message: 'This app collects location data to notify your family and emergency contacts in case of emergency.',
+        positiveAction: 'Change to Always Allow',
+        negativeAction: 'Cancel'
     },
 }
 const currentPositionOptions = {
@@ -48,6 +57,18 @@ export default {
     async gpsInit() {
         if (isGpsInit) return
         isGpsInit = true
+
+        // Try setting multi-lingual
+        try {
+            geoLocationConfig.backgroundPermissionRationale = {
+                title: window?.$nuxt?.$t('gps.rationale_title'),
+                message: window?.$nuxt?.$t('gps.rationale_message'),
+                positiveAction: window?.$nuxt?.$t('gps.rationale_positive_action'),
+                negativeAction: window?.$nuxt?.$t('gps.rationale_negative_action')
+            }
+        } catch {
+            console.log('Not able to update multi-lingual pop-up notification')
+        }
 
         // DESKTOP / WEBSITES
         const device = await Device.getInfo()
@@ -110,6 +131,10 @@ export default {
                     //await BackgroundGeolocation.stopBackgroundTask(taskId)
                 });
             })
+
+            BackgroundGeolocation.onHttp(response => {
+                console.log("STICKY: [http] response: ", response.success, response.status, response.responseText);
+            });
         } catch (error) {
             console.log('STICKY: [gps] ERROR Getting BackgroundGeoLocation Ready', error, JSON.stringify(error))
         }
