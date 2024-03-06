@@ -174,7 +174,7 @@ import {
                 id: c,
                 message: {
                   created_at:new Date(),
-                  sent_by: user.value.data.uid
+                  sent_by: user.value.data.uid,
                   snippet: newMessage.value || 'Forwarded a message'
                 },
                 seen: [user.value.data.uid]
