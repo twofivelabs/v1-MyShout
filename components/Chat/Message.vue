@@ -49,7 +49,7 @@
     </div>
 
     <div v-if="message.videoUrl">
-      <video width="100%" controls>
+      <video width="100%" height="270px" style="width:100%; height:270px;" controls>
         <source :src="`${message.videoUrl}`" type="video/mp4">
         {{$t('chats.video_not_supported')}}
       </video>
