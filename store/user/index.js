@@ -432,7 +432,7 @@ export const actions = {
                   const data = doc.data()
                   data.id = doc.id
                   await commit('SET_USER_PROFILE_INIT', {...data})
-                  console.log('STICKY: BEFORE CHECKING USER DATA')
+                  // console.log('STICKY: BEFORE CHECKING USER DATA')
                   setTimeout(async () => {
                     await dispatch("checkUserData")
                   }, 1500)
