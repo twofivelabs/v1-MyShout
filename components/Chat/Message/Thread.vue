@@ -17,7 +17,7 @@ import {
 } from '@nuxtjs/composition-api'
 
 import moment from 'moment'
-
+import { Touch } from 'vuetify/lib/directives'
 export default defineComponent({
   name: 'MessageThread',
   directives: { Touch },

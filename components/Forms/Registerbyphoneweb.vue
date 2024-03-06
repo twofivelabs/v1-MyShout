@@ -161,6 +161,7 @@ export default defineComponent({
         // Technically they have an account now, so we can bypass onboarding IF they are already a user
         $ttlStorage.set('onboardingComplete', true)
 
+        console.log('CONFIRM RESULT', result)
         // If EXISTING user show logged in message
         if (!result.additionalUserInfo.isNewUser) {
           $notify.show({text: i18n.t('notify.success'), color: 'green'})

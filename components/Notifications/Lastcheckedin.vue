@@ -8,6 +8,7 @@ import {
   defineComponent,
   ref, useContext, useStore, onMounted,
 } from '@nuxtjs/composition-api'
+import { Touch } from 'vuetify/lib/directives'
 
 export default defineComponent({
   name: 'NotificationsLastcheckedin',

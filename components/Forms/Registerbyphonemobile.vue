@@ -165,19 +165,22 @@ export default defineComponent({
           $ttlStorage.set('onboardingComplete', true)
           $notify.show({ text: i18n.t('notify.success'), color: 'green' });
 
-          if (result.additionalUserInfo.isNewUser == false) {
+          if (!result.additionalUserInfo.isNewUser) {
             console.log("registerbyphonemobile: Returning User") /* I get to this but it's not actually logging the user in or storing the authenticated user */
-            $helper.sleep(800)
+            $notify.show({text: i18n.t('notify.success'), color: 'green'})
+            $helper.sleep(500)
             return router.push('/')
           } else {
             console.log("registerbyphonemobile: New User")
 
-            dispatch('user/updateField', {
+            form.value.showOtpInput = false
+            $notify.show({ text: i18n.t('notify.success'), color: 'green' })
+
+            await dispatch('user/updateField', {
               phone: form.value.phone.trim().toLowerCase(),
               created_at: new Date()
             })
 
-            await $helper.sleep(800)
             return router.push('/auth/setup-profile')
           }
         });

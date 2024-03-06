@@ -432,8 +432,10 @@ export const actions = {
                   const data = doc.data()
                   data.id = doc.id
                   await commit('SET_USER_PROFILE_INIT', {...data})
-                  await dispatch("checkUserData")
-
+                  console.log('STICKY: BEFORE CHECKING USER DATA')
+                  setTimeout(async () => {
+                    await dispatch("checkUserData")
+                  }, 1500)
                 }
               })
         }
@@ -442,16 +444,26 @@ export const actions = {
       }
   },
   async checkUserData ({ state }) {
-    if (window.location.pathname !== '/auth' && (state.profile && state.profile.role.isActive)) {
-      // CHECK IS USERNAME IS AVAILABLE
-      if (state.profile.username===null || state.profile.username===undefined || state.profile.username.length === 0) {
-        // Make sure were not on the page we are redirecting to [could cause loop]
-        return this.$router.push('/auth/setup-profile')
-      } else if (state.profile.email===null || state.profile.email===undefined || state.profile.email.length === 0) {
-        // Make sure were not on the page we are redirecting to [could cause loop]
-        return this.$router.push('/auth/setup-profile')
-      }
+    if (window.location.pathname === '/auth' ||
+        window.location.pathname === '/auth/setup-profile') {
+      // Don't check user data on these pages
+      return
     }
+
+    // User is active, no need to check username
+    if (!state?.profile?.role?.isActive) {
+      return
+    }
+
+    if (state.profile.username===null || state.profile.username===undefined || state.profile.username.length === 0) {
+      console.log('STICKY: Redirect to setup profile because no username: ', state.profile.username)
+      //return this.$router.push('/auth/setup-profile')
+    } else if (state.profile.email===null || state.profile.email===undefined || state.profile.email.length === 0) {
+      // Make sure were not on the page we are redirecting to [could cause loop]
+      console.log('STICKY: Redirect to setup profile because no email: ', state.profile.email)
+      // return this.$router.push('/auth/setup-profile')
+    }
+
   },
   async getAll ({ commit, rootState }, { where = {}, limit = 20, order = {}, uid = null }) {
     uid = uid || rootState.user.data.uid

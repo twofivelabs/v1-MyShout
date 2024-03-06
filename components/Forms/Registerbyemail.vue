@@ -107,8 +107,10 @@ export default defineComponent({
         showBottomSheet.value = false
       }
     }
-    const validate = async (bypassPhoneAuth=false) => {
+    const validate = async () => {
+      const bypassPhoneAuth=false
       loading.value = true
+      console.log('bypassPhoneAuth:', bypassPhoneAuth, 'preAuthWithPhone', props.preAuthWithPhone)
       if(bypassPhoneAuth === false) {
         if(props.preAuthWithPhone) {
           showBottomSheet.value = true

@@ -367,11 +367,12 @@ export default defineComponent({
         term: form.username,
         limit: 3
       })
+      console.log('hasUsers', hasUsers)
       if (hasUsers.length > 0) {
         $notify.show({ text: i18n.t('notify.username_in_use'), color: 'error' })
         return false
       }
-      return hasUsers.length > 0;
+      return true;
     }
     /*const validatePhone = async () => {
       if (!form.phone) {
