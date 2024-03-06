@@ -1,8 +1,8 @@
 <template #activator="{ isActive, props }">
 <div class="reactions-display pa-0 align-center justify-end" style="margin-top:-5px;">
   <div v-if="!message.deleted && reactions.length">
-     <template v-for="reaction in reactions">
-      <div class="reaction-item" :key="reaction.emoji">
+     <template>
+      <div v-for="reaction in reactions" :key="reaction.emoji" class="reaction-item">
         <span>{{ reaction.emoji }}</span>
         <span>{{ reaction.count }}</span>
       </div>
@@ -34,7 +34,9 @@
 import {
   defineComponent,
   useStore,
-  ref, watch
+  useContext,
+  computed,
+  ref, watch,
 } from '@nuxtjs/composition-api'
    
   import firebase from 'firebase';
@@ -63,7 +65,9 @@ import {
       }
     },
     setup(props) {
-      const { dispatch } = useStore()
+      const { $fire } = useContext()
+      const { state, dispatch } = useStore()
+      const userId = computed(() => state.user.data.uid)
   
       const reactions = ref([])
       const emojiMenu = ref(false)
@@ -81,17 +85,45 @@ import {
       }
   
       const selectEmoji = async (emoji) => {
+        if (!userId && userId.value) return;
+
+        const index = reactions.value.findIndex(reaction => reaction.emoji === emoji.value);  
+        const messageRef = $fire.firestore.collection('Chats').doc(props.chat.id)
+          .collection("Messages").doc(props.message.id)
+        
+        const reactionDoc = await messageRef.collection("Reactions").doc(userId.value).get()
+
+        if (reactionDoc.exists) {
+          if (reactionDoc.data().reaction === emoji.name) {
+            await dispatch('chats/messages/updateField', {
+              chatId: props.chat.id,
+              id: props.message.id,
+              data: {
+                reactions: { [emoji.name]: firebase.firestore.FieldValue.increment(-1) }
+              }
+            })
+
+            await messageRef.collection("Reactions").doc(userId.value).delete()
+
+            if (index !== -1) {
+              reactions.value[index].count -= 1;
+              if (reactions.value[index].count === 0) reactions.value.splice(index, 1)
+            }
+          }
+
+          return;
+        }
+
         await dispatch('chats/messages/updateField', {
           chatId: props.chat.id,
           id: props.message.id,
           data: {
             reactions: { [emoji.name]: firebase.firestore.FieldValue.increment(1) }
           }
-        }).catch((error) => {
-          console.error('Error incrementing reaction:', error);
-        });
+        })
+        
+        await messageRef.collection("Reactions").doc(userId.value).set({reaction: emoji.name, created_at: new Date()})
   
-        const index = reactions.value.findIndex(reaction => reaction.emoji === emoji.value);
         if (index !== -1) reactions.value[index].count += 1;
         else reactions.value.push({ emoji: emoji.value, count: 1 });
         
