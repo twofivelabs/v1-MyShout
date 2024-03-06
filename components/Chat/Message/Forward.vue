@@ -127,11 +127,15 @@ import {
       };
 
       const getRecentChats = async () => {
+        console.log("Looking For Chats With User", user.value.data.uid)
+        
         const result = await $fire.firestore
           .collection('Chats')
           .where('participants', 'array-contains', user.value.data.uid)
-          .orderBy('lastMessageSent', 'desc')
+          .orderBy('message.created_at', 'desc')
           .get();
+
+          console.log("Recent Chats", result)
 
         result.forEach(doc => {
           if (doc.id === props.chat.id) return;
@@ -168,8 +172,11 @@ import {
             if (res) {
               await dispatch('chats/updateField', {
                 id: c,
-                lastMessageSent: new Date(),
-                lastMessage: newMessage.value || null,
+                message: {
+                  created_at:new Date()
+                  sent_by: user.value.data.uid
+                  snippet: newMessage.value || 'Forwarded a message'
+                },
                 seen: [user.value.data.uid]
               });
             }

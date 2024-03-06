@@ -34,7 +34,7 @@
                   <v-list-item-title class="d-flex justify-start align-center myshoutDarkGrey--text">
                     <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
                     <v-spacer />
-                    <span class="caption">{{ moment(chat.created_at.toDate()).fromNow() }}</span>
+                    <span class="caption">{{ moment(chat.message.created_at.toDate()).fromNow() }}</span>
                   </v-list-item-title>
                   <v-list-item-subtitle>
                     <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ chat.message.snippet }}
