@@ -1,12 +1,12 @@
 <template>
   <div>
-    <v-app-bar color="white" class="mobileNotch pb-1" app fixed top>
+    <v-app-bar color="white" class="mobileNotch elevation-0 appBarHeight" app fixed top>
       <v-app-bar-nav-icon>
         <v-btn to="/chats" text color="transparent">
           <v-icon class="pr-2 py-3 pl-2" color="myshoutDarkGrey">mdi-arrow-left</v-icon>
         </v-btn>
       </v-app-bar-nav-icon>
-      <v-toolbar-title class="pl-0" v-if="chat">
+      <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
           <ChatTopavatar :chat="chat" class="mr-2" />
           <ChatUsername :chat="chat" />
@@ -15,6 +15,7 @@
       <v-spacer />
       <ChatActionsbtn v-if="chat && participants" :chat="chat" :participants="participants" :admins="admins" />
     </v-app-bar>
+    
 
     <v-container v-if="messages && messages.length > 0" style=" z-index: 0; width: 100%; padding-bottom: 100px !important;">
       <div v-for="(message) in messages" :key="message.id">
