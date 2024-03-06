@@ -7,11 +7,11 @@ PODS:
     - AppAuth/Core
   - ByteowlsCapacitorSms (5.0.0):
     - Capacitor
-  - Capacitor (5.7.1):
+  - Capacitor (5.5.1):
     - CapacitorCordova
-  - CapacitorApp (5.0.7):
+  - CapacitorApp (5.0.6):
     - Capacitor
-  - CapacitorCamera (5.0.9):
+  - CapacitorCamera (5.0.7):
     - Capacitor
   - CapacitorCommunityAdmob (5.3.1):
     - Capacitor
@@ -20,13 +20,13 @@ PODS:
     - Capacitor
   - CapacitorCommunityContacts (5.0.4):
     - Capacitor
-  - CapacitorCommunityFcm (5.0.3):
+  - CapacitorCommunityFcm (5.0.2):
     - Capacitor
     - Firebase/Messaging
   - CapacitorCommunityHttp (1.4.1):
     - Capacitor
-  - CapacitorCordova (5.7.1)
-  - CapacitorDevice (5.0.7):
+  - CapacitorCordova (5.5.1)
+  - CapacitorDevice (5.0.6):
     - Capacitor
   - CapacitorFilesystem (5.2.1):
     - Capacitor
@@ -37,13 +37,13 @@ PODS:
   - CapacitorFirebaseAuthentication/Lite (5.4.1):
     - Capacitor
     - FirebaseAuth (~> 10.8)
-  - CapacitorLocalNotifications (5.0.7):
+  - CapacitorLocalNotifications (5.0.6):
     - Capacitor
-  - CapacitorPreferences (5.0.7):
+  - CapacitorPreferences (5.0.6):
     - Capacitor
-  - CapacitorPushNotifications (5.1.1):
+  - CapacitorPushNotifications (5.1.0):
     - Capacitor
-  - CapacitorShare (5.0.7):
+  - CapacitorShare (5.0.6):
     - Capacitor
   - CapacitorVoiceRecorder (5.0.0):
     - Capacitor
@@ -259,22 +259,22 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: 3bb1d1cd9340bd09f5ed189fb00b1cc28e1e8570
   ByteowlsCapacitorSms: 1a2442b5cd9d118cfb521d2a9516ff65d506f5ab
-  Capacitor: 6bd16626bc7a4a382eff16f6aed0072fe9776951
-  CapacitorApp: 17fecd0e6cb23feafac7eb0939417389038b0979
-  CapacitorCamera: 4892c5c392f60039d853dde78bc50ba19fbd113e
+  Capacitor: 9da0a2415e3b6098511f8b5ffdb578d91ee79f8f
+  CapacitorApp: 024e1b1bea5f883d79f6330d309bc441c88ad04a
+  CapacitorCamera: 084b0b228bba7d00587910337b1c89e93b1d32ab
   CapacitorCommunityAdmob: 1e377ccfb6236c38591f23759334fa12668fb2e0
   CapacitorCommunityCameraPreview: 47070b2c66a79a424afe7c73bd951dfabfbc0f76
   CapacitorCommunityContacts: 45de2477f7dc6265d267677939a2c75465d2ed87
-  CapacitorCommunityFcm: 3e42b0f0460c791aa5f2b142113db2e94dcbb797
+  CapacitorCommunityFcm: f7b5158169ea27d8a8444e0adeb17584d7997e91
   CapacitorCommunityHttp: 7be90668527ef14ee10d08135b0e00fac9cf8247
-  CapacitorCordova: b49f3372270c88fd9c633a4fc8c7ef00e47dd2d6
-  CapacitorDevice: fc91bdb484dc0e70755e9b621cd557afe642613a
+  CapacitorCordova: e128cc7688c070ca0bfa439898a5f609da8dbcfe
+  CapacitorDevice: 2c968f98a1ec4d22357418c1521e7ddc46c675e6
   CapacitorFilesystem: 9f3e3c7fea2fff12f46dd5b07a2914f2103e4cfc
   CapacitorFirebaseAuthentication: 4b5146252052345d7c0cd8147dd4f1372a65e99b
-  CapacitorLocalNotifications: c58afadd159f6bc540ef9b3cbdbc82510a2bf112
-  CapacitorPreferences: 77ac427e98db83bace772455f8ba447430382c4c
-  CapacitorPushNotifications: 2327900bc002f5ff49ee6d2231796d0635b4a1b0
-  CapacitorShare: c6a1ebbf0114ff9e863b966cd6052678fa25d480
+  CapacitorLocalNotifications: c2d8b14794064fd4814b1d6c4ddbac8029afa295
+  CapacitorPreferences: f03954bcb0ff09c792909e46bff88e3183c16b10
+  CapacitorPushNotifications: b31e326c6e4eb216a622041d6ca21a973f34943f
+  CapacitorShare: cd41743331cb71d217c029de54b681cbd91e0fcc
   CapacitorVoiceRecorder: 872ea857b497ce2c71afe3e4eb5de0a74290c0db
   CapawesomeCapacitorBadge: 2b9919ea79b85bdc5455143cf6607c9e25bec9ae
   CocoaLumberjack: 543c79c114dadc3b1aba95641d8738b06b05b646

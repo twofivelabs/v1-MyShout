@@ -8,7 +8,9 @@ export default async function ({ app, store, redirect }) {
 
     if (!user && device.platform !== 'web') {
       user = await FirebaseAuthentication.getCurrentUser();
-      userToken = user ? await FirebaseAuthentication.getIdToken() : false;
+      userToken = await FirebaseAuthentication.getIdToken().catch(e=> {
+          console.log('STICKY: not able to getIdToken', e, JSON.stringify(e))
+      })
     }
 
     function checkUserStatus () {
