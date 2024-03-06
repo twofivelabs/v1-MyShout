@@ -132,13 +132,15 @@ import {
     
       watch(() => props.message.reactions, (newReactions) => {
         if (newReactions) {
-          reactions.value = Object.entries(newReactions).map(([name, count]) => {
-            const emojiObj = emojis.value.find(emoji => emoji.name === name);
-            return {
-              emoji: emojiObj ? emojiObj.value : '',
-              count: count
-            };
-          });
+          reactions.value = Object.entries(newReactions)
+            .filter(([, count]) => count > 0)
+            .map(([name, count]) => {
+              const emojiObj = emojis.value.find(emoji => emoji.name === name);
+              return {
+                emoji: emojiObj ? emojiObj.value : '',
+                count: count
+              };
+            });
         } else {
           reactions.value = [];
         }
