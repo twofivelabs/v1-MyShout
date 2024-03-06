@@ -98,7 +98,7 @@ export default defineComponent({
         );
 
         participantProfiles.forEach(profile => {
-          if (profile) participants.value[profile.uid] = profile;
+          if (profile) participants.value[profile.id] = profile;
         });
 
         chat.value.admins.forEach(adminUid => {
