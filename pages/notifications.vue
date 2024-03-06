@@ -1,14 +1,11 @@
 <template>
   <div>
-    <v-app-bar color="transparent" class="mobileNotch elevation-0 appBarHeight" app fixed top>
-      <v-toolbar-title class="pl-0">
-        <div class="d-flex align-center">
-          <ElementH2 align="left" :text="$t('notifications.heading')" />
-        </div>
-      </v-toolbar-title>
-      <v-spacer />
-      <NotificationsClearbtn @filtersChanged="updateFilters"/>
-    </v-app-bar>
+    <v-row class="pa-4 mobileNotch">
+      <v-col class="text-right">
+        <NotificationsClearbtn @filtersChanged="updateFilters"/>
+
+      </v-col>
+    </v-row>
 
     <v-row class="pt-10 px-5">
       <v-col cols="12" v-if="loading">

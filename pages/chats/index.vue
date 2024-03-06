@@ -1,15 +1,11 @@
 <template>
   <div>
-    <v-app-bar color="transparent" class="mobileNotch elevation-0 appBarHeight" app fixed top>
-      <v-toolbar-title class="pl-0">
-        <div class="d-flex align-center">
-          <ElementH2 align="left" :text="$t('chats.page_h1')" />
-        </div>
-      </v-toolbar-title>
-      <v-spacer />
-      <UserFriendsbtn class="mr-2" />
-      <ChatNewchatbtn />
-    </v-app-bar>
+    <v-row class="pa-4 mobileNotch">
+      <v-col class="text-right">
+        <UserFriendsbtn class="mr-2" />
+        <ChatNewchatbtn />
+      </v-col>
+    </v-row>
 
     <v-row class="pt-10 px-5">
       <v-col cols="12" v-if="isLoading">
