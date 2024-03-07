@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key></key>
+	<string></string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -62,7 +64,7 @@
 	<key>NSMotionUsageDescription</key>
 	<string>We require your location to send emergency alerts to your friends or family</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string></string>
+	<string>Share photos with friends and family</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Required to share photos with friends and family.</string>
 	<key>Privacy - Contacts Usage Description</key>
