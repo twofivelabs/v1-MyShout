@@ -594,14 +594,36 @@ inject('capacitor', {
     // Camera
     // Will return a URL of the path we can use to upload
     async cameraTakePicture (allowEditing = true) {
-        const cameraOptions = {
-            quality: 90,
-            allowEditing: allowEditing,
-            resultType: CameraResultType.Base64,
-            source: [CameraSource.Photos, CameraSource.Camera]
+        app.$system.log({
+            comp: 'cameraTakePicture',
+            msg: 'Starting To take photo',
+            val: null
+          })
+
+        try {
+            const cameraOptions = {
+                quality: 90,
+                allowEditing: allowEditing,
+                resultType: CameraResultType.Base64,
+                source: [CameraSource.Photos, CameraSource.Camera]
+            }
+
+            app.$system.log({
+                comp: 'cameraTakePicture',
+                msg: 'cameraOptions',
+                val: cameraOptions
+              })
+
+            const image = await Camera.getPhoto(cameraOptions)
+            return image.base64String  
+        } catch (e) {
+            app.$system.log({
+              comp: 'cameraTakePicture',
+              msg: 'Error',
+              val: e  
+            })
         }
-        const image = await Camera.getPhoto(cameraOptions)
-        return image.base64String
+        
     },
 
     // Microphone

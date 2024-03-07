@@ -40,32 +40,59 @@ export default defineComponent({
     'url'
   ],
   setup (props, { emit }) {
-    const { $capacitor, $db } = useContext()
+    const { $system, $capacitor, $db } = useContext()
     const imageLoading = ref(false)
     const uploadComplete = ref(false)
     const imageUrl = ref()
 
     // METHODS
     const loadImageHandler = async () => {
+      $system.log({
+          comp: 'ChatUploadimage',
+          msg: 'loadImageHandler',
+          val: null
+        })
+
       imageLoading.value = true
       uploadComplete.value = false
 
       try {
         const photoBase64 = await $capacitor.cameraTakePicture(false)
+
+        $system.log({
+          comp: 'ChatUploadimage',
+          msg: 'photoBase64',
+          val: photoBase64
+        })
+
         const photoUrl = await $db.upload({
           path: `/CHATS/${props.chat.id}/${ new Date().getTime() }.jpg`,
           data: photoBase64,
           base64: true
         })
-        // console.log('photoUrl', photoUrl)
+        $system.log({
+          comp: 'ChatUploadimage',
+          msg: 'photoUrl',
+          val: photoUrl
+        })
 
         if (photoUrl) {
           uploadComplete.value = true
           imageUrl.value = photoUrl
+
+          $system.log({
+          comp: 'ChatUploadimage',
+          msg: 'imageUrl',
+          val: imageUrl.value
+        })
           emit('url', imageUrl.value)
         }
-      } catch {
-        // ...
+      } catch (e) {
+        $system.log({
+          comp: 'ChatUploadimage',
+          msg: 'Error',
+          val: e
+        })
       } finally {
         imageLoading.value = false
       }
