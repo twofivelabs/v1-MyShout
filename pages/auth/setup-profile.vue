@@ -200,7 +200,9 @@
           </v-btn>
         </div>
 
-        <div v-else>{{ step }}</div>
+        <div v-else>
+          <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
+        </div>
       </div>
     </div>
   </v-container>
@@ -214,7 +216,7 @@ import {
   useContext,
   useMeta,
   useStore,
-  // useRouter,
+  onMounted,
   watch
 } from '@nuxtjs/composition-api'
 import formRules from '~/classes/formRules'
@@ -238,7 +240,7 @@ export default defineComponent({
 
     const loading = ref(false)
     const rules = formRules
-    const step = ref(6)
+    const step = ref(7)
     const formUsername = ref()
     const formEmail = ref()
     const form = ref({
@@ -246,10 +248,24 @@ export default defineComponent({
       email: '',
     })
 
+    onMounted(async () => {
+      try {
+        loading.value = true
+        if (!user.value.username) {
+          step.value = 1;
+        } else if (!user.value.email) {
+          step.value = 2;
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error)
+      } finally {
+        loading.value = false
+      }
+    })
+
     // Watch for changes in user state to update the step
     watch(user.value, (profile) => {
       if (profile) {
-        console.log("KYLE", profile)
         if (!profile.username) {
           // Force user to set a username
           step.value = 1;
@@ -257,6 +273,8 @@ export default defineComponent({
           // If user authenticated via Phone, force to set a email address
           step.value = 2;
         }
+      } else {
+        step.value = 1
       }
     })
 
