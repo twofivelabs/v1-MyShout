@@ -209,7 +209,7 @@ export const mutations = {
   },
   SET_GPS: (state, gps) => {
     state.gps = gps
-    // Vue.set(state, 'gps', gps)
+    Vue.set(state, 'gps', gps)
   },
   SET_PROFILE_FIELD: (state, value) => {
     state.profile = Object.assign(state.profile, value)

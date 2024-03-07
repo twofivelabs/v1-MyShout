@@ -15,20 +15,20 @@
       <v-col cols="12" v-if="isLoading">
         <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
       </v-col>
-      <v-col cols="12" v-else>
+      <v-col cols="12" class="pr-12" v-else>
         <v-list two-line class="pb-9" v-if="chatList.length > 0">
           <template v-for="(chat, index) in chatList">
             <v-list-item v-if="chat" :key="index">
               <NuxtLink :to="`/chats/chat/${chat.id}`">
-                <v-badge v-if="chat.unseen && chat.unseen[user.data.uid] > 0" 
-                  :content="chat.unseen[user.data.uid]" 
+                <v-badge v-if="chat.unseen && chat.unseen[user.data.uid] > 0"
+                  :content="chat.unseen[user.data.uid]"
                   color="myshoutRed" overlap offset-x="25"
                 >
                   <ChatTopavatar :chat="chat" class="mr-3" />
                 </v-badge>
                 <ChatTopavatar v-else :chat="chat" class="mr-3" />
               </NuxtLink>
-                
+
               <NuxtLink :to="`/chats/chat/${chat.id}`" style="width:100%;" color="myshoutDarkGrey">
                 <v-list-item-content>
                   <v-list-item-title class="d-flex justify-start align-center myshoutDarkGrey--text">
@@ -57,8 +57,8 @@ import {
   computed,
   defineComponent,
   useStore,
-  ref, 
-  useContext, 
+  ref,
+  useContext,
   watch,
   onUnmounted
 } from '@nuxtjs/composition-api'
@@ -117,7 +117,7 @@ export default defineComponent({
       if (userData && userData.data.uid) {
         // User data is available, load all chats the user participates in
         fetchChats()
-        
+
         // Do not display AdMob if user is an Admin
         if (!userData.profile.isAdmin) {
           $capacitor.AdMob_init();

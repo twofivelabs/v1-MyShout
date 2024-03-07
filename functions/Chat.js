@@ -8,6 +8,12 @@ const moment = require("moment");
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+const SimpleCrypto = require("simple-crypto-js").default
+
+// Don't change this, or else everything will be un-readable
+const secretKey = "47d4n7wV5j6pO#^^ww*bTcc0B"
+const simpleCrypto = new SimpleCrypto(secretKey)
+
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -25,7 +31,7 @@ exports.ChatMessageOnCreate = functions.firestore
   .onCreate(async (snapshot, context) => {
     const { ChatId } = context.params;
     const data = snapshot.data();
-      
+
     // Retrieve chat document reference
     const chatRef = db.doc(`Chats/${ChatId}`);
     // Retrieve chat document snapshot
@@ -66,9 +72,10 @@ exports.ChatMessageOnCreate = functions.firestore
           // Fetch sender's profile to get the username
           const senderProfileSnapshot = await db.doc(`Users/${data.owner}`).get();
           const senderProfileData = senderProfileSnapshot.data();
-          const senderUsername = senderProfileData?.username || 'You received a new message'; 
+          const senderUsername = senderProfileData?.username || 'You received a new message';
 
-          const messageBody = data.message.substring(0, 75); // Limit message body to 75 characters
+          const intermMessage = simpleCrypto.decrypt(data.message);
+          const messageBody = intermMessage.substring(0, 75); // Limit message body to 75 characters
 
           const messagePayload = {
             token: userData.notificationDeviceToken,
@@ -135,7 +142,7 @@ exports.ChatMessageOnWrite = functions.firestore
           const chatSnap = await chatDocRef.get();
           // Extract chat data
           const chatData = chatSnap.data();
-            
+
           // Decrement unseen count for chat document if greater than 0
           if (chatData.unseen && chatData.unseen[userId] > 0) {
             await chatDocRef.update({
@@ -208,7 +215,7 @@ exports.ChatOnWrite = functions.firestore
       // Handle the error appropriately, such as logging or returning a response
       return null;
     }
-  });  
+  });
 
 // firebase deploy --only functions:Chat-scheduledFunctionExpireAudioMessages
 exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 * * *")
@@ -243,22 +250,22 @@ exports.fetchUrlMetadata = functions.https.onRequest((request, response) => {
 
       const title = $('title').text().trim();
       const image = $('meta[property="og:image"]').attr('content');
-      const description = $('meta[name="description"]').attr('content'); 
+      const description = $('meta[name="description"]').attr('content');
 
-      return response.status(200).json({ 
+      return response.status(200).json({
         title,
         image,
         description
       });
 
     } catch (error) {
-      console.error('Error fetching URL metadata:', error); 
+      console.error('Error fetching URL metadata:', error);
 
       if (error.response) {
-        response.status(error.response.status).send(error.response.data); 
-      } else if (error.request) { 
-        response.status(503).send('Request failed. Check network'); 
-      } else { 
+        response.status(error.response.status).send(error.response.data);
+      } else if (error.request) {
+        response.status(503).send('Request failed. Check network');
+      } else {
         response.status(500).send('Something went wrong');
       }
     }

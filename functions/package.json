@@ -26,6 +26,7 @@
     "mailerlite-api-v2-node": "^1.2.0",
     "mailersend": "^1.1.1",
     "moment": "^2.29.4",
+    "simple-crypto-js": "^3.0.1",
     "stripe": "^8.186.1",
     "twilio": "^3.77.2"
   },

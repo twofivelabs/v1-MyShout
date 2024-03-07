@@ -40,7 +40,7 @@
         </template>
 
         <template v-slot:append-outer>
-          <v-btn @click="sendMessage" fab>
+          <v-btn @click="sendMessage" :loading="isSendingMessage" fab>
             <v-icon>mdi-send</v-icon>
           </v-btn>
         </template>
@@ -113,6 +113,7 @@
 
   import debounce from 'lodash/debounce';
   import * as linkify from 'linkifyjs';
+  import { Filesystem } from '@capacitor/filesystem'
 
   export default defineComponent({
     name: 'ChatInput',
@@ -122,24 +123,29 @@
     },
     setup(props, { emit }) {
       const { dispatch, state } = useStore()
-      const { i18n, $notify, $fire, $encryption } = useContext()
+      const { i18n, $notify, $fire, $encryption, $db } = useContext()
       const route = useRoute()
       const user = computed(() => state.user)
 
       const newMessage = ref('')
       const addToMessage = ref(false)
-
       const imageUrl = ref(null)
       const videoUrl = ref(null)
+      const uploadedVideoUrl = ref(null)
+      const videoThumbnailUrl = ref(null)
       const fileUrl = ref(null)
+      const isSendingMessage = ref(false)
 
-      const clearReply = () => emit('updateReply', null)
-      const imageCallback = (url) => imageUrl.value = url
-      const fileCallback = (url) => fileUrl.value = url
+      const clearReply = () => emit('updateReply', null);
+      const imageCallback = (url) => imageUrl.value = url;
+      const fileCallback = (url) => fileUrl.value = url;
       const truncateMessage = (message, length = 25) => message ? (message.length > length ? message.substring(0, length) + '...' : message) : '';
       const sendMessage = async () => {
+        isSendingMessage.value = true
+
         try {
-          if((!newMessage.value && !imageUrl.value) || !user.value.data.uid) {
+          // If no user, OR no message, but it should be ok to just send a video/image/file etc.
+          if(!user.value.data.uid || (!imageUrl.value || !uploadedVideoUrl.value || !fileUrl.value) && !newMessage.value) {
             $notify.show({
               text: i18n.t('notify.error_try_again'),
               color: 'error'
@@ -147,6 +153,13 @@
             return;
           }
 
+          // Upload video if there is one
+          if (videoUrl.value) {
+            uploadedVideoUrl.value = await uploadVideo(videoUrl.value)
+            // Could add thumbnail here too
+          }
+
+          // Encrypt message
           let encryptedMessage = null;
           if (newMessage.value) encryptedMessage = $encryption.encrypt(newMessage.value);
 
@@ -159,7 +172,8 @@
               replyTo: props.reply ? props.reply.id : null,
               image: imageUrl.value || null,
               file: fileUrl.value || null,
-              videoUrl: videoUrl.value || null,
+              videoUrl: uploadedVideoUrl.value || null,
+              videoThumbnailUrl: videoThumbnailUrl.value || null,
               owner: user.value.data.uid,
               seen: [user.value.data.uid]
             }
@@ -181,27 +195,71 @@
             }
           });
 
+          // Reset message
           clearReply()
           newMessage.value = null;
           imageUrl.value = null;
           videoUrl.value = null;
+          videoThumbnailUrl.value = null;
           fileUrl.value = null;
 
           // This will remove any url params (ie: video Url)
           window.history.replaceState(null, '', window.location.pathname);
 
           emit("messageSent")
+
         } catch (e) {
           $notify.show({
             text: i18n.t('notify.error_try_again'),
             color: 'error'
           });
           console.log("STICKY: Cannot Send Message", e);
+
+        } finally {
+          isSendingMessage.value = false
         }
       };
       const updateTyping = debounce((isTyping) => {
         emit('updateTyping', isTyping);
       }, 500);
+
+      const uploadVideo = async (filePath) => {
+        console.log('[camera] Start video upload')
+        try {
+          const fileConverted = await convertFileUrlToBase64(filePath)
+          if (!fileConverted) return
+
+          const url = await $db.upload({
+            path: `/CHATS/${props.chat.id}/${new Date().getTime()}.mp4`,
+            data: fileConverted,
+            base64: true,
+            metaData: {
+              contentType: 'video/mp4'
+            }
+          });
+          console.log('[camera] videoUrl:', url);
+          return url;
+        } catch (error) {
+          console.error('[camera] uploadVideo Error: ', error);
+          $notify.show({
+            text: i18n.t('notify.error_try_again'),
+            color: 'error'
+          });
+          return null;
+        }
+      };
+      const convertFileUrlToBase64 = async (fileUrl) => {
+        console.log('[camera] Read and convert file: ', fileUrl)
+        if (!fileUrl) return
+
+        return await Filesystem.readFile({
+          path: `file://${fileUrl}`,
+        }).then((r) => {
+          return r.data
+        }).catch((e) => {
+          console.log('[camera] Read File Error: ', e, JSON.stringify(e))
+        });
+      };
 
       watch(newMessage, (newValue) => updateTyping(!!newValue), { immediate: true });
       watch(route, (to) => {
@@ -211,12 +269,13 @@
           //console.log('[input] VideoURL: ', to.query.videoUrl)
           // console.log('[cameraStepper] input ', to.query.videoUrl)
           videoUrl.value = to.query.videoUrl
+          videoThumbnailUrl.value = to.query.videoThumbnailUrl
         }
       }, { immediate: true });
 
       return {
         newMessage, imageUrl, fileUrl, videoUrl,
-        addToMessage,
+        addToMessage, isSendingMessage,
         sendMessage, clearReply, truncateMessage,
         imageCallback, fileCallback
       };

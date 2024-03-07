@@ -26,7 +26,7 @@
 <script>
 import { defineComponent, onMounted, onUnmounted, ref, useContext, useRoute, useRouter } from '@nuxtjs/composition-api'
 import { CameraPreview } from '@capacitor-community/camera-preview'
-import { Filesystem } from '@capacitor/filesystem'
+// import { Filesystem } from '@capacitor/filesystem'
 
 export default defineComponent({
   name: 'VideoCamera',
@@ -59,9 +59,13 @@ export default defineComponent({
       height: window.screen.height,
       position: 'front' //front/rear
     })
+    const cameraSampleOptions = {
+      quality: 50
+    }
     const bodyClass = ref('transparentBg')
     const cameraRecordingStatus = ref(false)
     const chatId = ref(route?.value?.query?.chatId)
+    const videoThumbnailUrl = ref(null)
 
     const isWeb = async () => {
       const device = await $capacitor.device()
@@ -135,7 +139,7 @@ export default defineComponent({
       }
     };
 
-    const convertFileUrlToBase64 = async (fileUrl) => {
+    /* const convertFileUrlToBase64 = async (fileUrl) => {
       console.log('[camera] Read and convert file: ', fileUrl)
       if (!fileUrl) return
 
@@ -147,9 +151,9 @@ export default defineComponent({
       }).catch((e) => {
         console.log('[camera] Read File Error: ', e, JSON.stringify(e))
       });
-    };
+    }; */
 
-    const uploadVideo = async (filePath) => {
+    /* const uploadVideo = async (filePath) => {
       console.log('[camera] Start video upload')
       try {
         const fileConverted = await convertFileUrlToBase64(filePath)
@@ -169,24 +173,42 @@ export default defineComponent({
         console.error('[camera] uploadVideo Error: ', error);
         return null;
       }
-    };
+    }; */
 
     const toggleCameraRecord = async () => {
       if (!cameraRecordingStatus.value) {
         await startCameraRecord()
+
+        // Used for thumbnail
+        try {
+          const sampleBase64 = await CameraPreview.captureSample(cameraSampleOptions);
+          if (sampleBase64) {
+            const sampleUrl = await $db.upload({
+              path: `/CHATS/${chatId.value}/${new Date().getTime()}.jpg`,
+              data: sampleBase64?.value,
+              base64: true,
+              metaData: {
+                contentType: 'image/jpeg'
+              }
+            });
+            if (sampleUrl) emit('videoThumbnailUrl', sampleUrl)
+            console.log('[camera], SAMPLE URL:', sampleUrl, JSON.stringify(sampleUrl));
+          }
+        } catch (e) {
+          console.log('[camera] SAMPLE: ', e, JSON.stringify(e))
+        }
+
         return
       }
       const filePath = await stopCameraRecord()
       if (filePath) {
         //console.log('[camera] toggleCameraRecord filePath:', filePath, JSON.stringify(filePath))
-        const videoUrl = await uploadVideo(filePath)
+        // const videoUrl = await uploadVideo(filePath)
         //console.log('[camera] URL === ', videoUrl)
         //console.log('[cameraStepper] URL Encode === ', encodeURIComponent(videoUrl))
-        if (videoUrl) {
-          await router.push(`/chats/chat/${chatId.value}?videoUrl=${encodeURIComponent(videoUrl)}`)
-        }
-        // Add message
-        emit('url', videoUrl);
+        await router.push(`/chats/chat/${chatId.value}?videoUrl=${encodeURIComponent(filePath)}&videoThumbnailUrl=${encodeURIComponent(videoThumbnailUrl)}`)
+
+        emit('url', filePath);
       }
     };
 

@@ -478,6 +478,7 @@ export default defineComponent({
       console.log('STICKY: WATCH GPS', gps.value, after)
       if (parseFloat(before.lat) !== after.lat) {
         if (gps.value && mapInit.value === true) {
+          console.log('STICKY: [map] move marker: ', user.value.data.uid, gps.value.lat, gps.value.lng)
           moveMarker(markers[user.value.data.uid], gps.value.lat, gps.value.lng)
         }
       }

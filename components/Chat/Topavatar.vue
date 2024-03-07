@@ -40,7 +40,7 @@ export default defineComponent({
   setup(props) {
     const { state, dispatch } = useStore()
     const user = computed(() => state.user.data)
-
+    const url = ref(null)
     const participant = ref(null)
 
     watch(() => props.chat, async (chat) => {
@@ -51,6 +51,7 @@ export default defineComponent({
     }, { immediate: true });
 
     return {
+      url,
       user,
       participant
     }

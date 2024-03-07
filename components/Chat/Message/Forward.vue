@@ -1,6 +1,6 @@
 <template>
 
-  <v-row class="pa-0 ma-0 align-center" style="width:100;">
+  <v-row class="pa-0 ma-0 align-center" style="width:100%;">
     <v-col cols="11" style="font-weight:bold;">
       {{ $t('chat.forward_to' )}}
     </v-col>

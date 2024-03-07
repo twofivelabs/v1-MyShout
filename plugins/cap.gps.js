@@ -20,7 +20,7 @@ const geoLocationConfig = {
     autoSyncThreshold: 5,
     // Activity Recognition
     stopTimeout: 5,
-    heartbeatInterval: 30,
+    heartbeatInterval: 60 * 5,
     foregroundService: true,
     maxRecordsToPersist: 100,
     // Application config
@@ -282,7 +282,8 @@ export default {
             })
 
             // Send Update Firebase
-            return this.httpUpdateUsersGPS({
+            // Using the built in HTTP REQUEST.
+            /* return this.httpUpdateUsersGPS({
                 lat: location?.coords?.latitude || null,
                 lng: location?.coords?.longitude || null,
                 is_moving: location?.is_moving || null
@@ -292,7 +293,7 @@ export default {
             }).catch(e => {
                 console.log("STICKY: [gps] [gpsGetPositionAndUpdateUser] error:", e, JSON.stringify(e))
                 return false
-            })
+            }) */
 
             // Update local user
             // window.$nuxt.context.store.dispatch('user/updateGPS', gps)
