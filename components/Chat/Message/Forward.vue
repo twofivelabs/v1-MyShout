@@ -25,7 +25,7 @@
         </v-col>
       </v-row>
     </v-col>
-    <v-col cols="12">
+    <v-col cols="12" v-if="false">
       <div class="pb-3">{{ $t('friends')}}</div>
       <v-row v-for="(u, index) in friends" :key="u.uid || index" class="d-flex">
         <v-col cols="10" class="py-0 d-flex align-center">
@@ -67,7 +67,8 @@ import {
   defineComponent,
   useStore, useContext,
   computed,
-  ref, watch
+  ref, watch,
+  useRouter
 } from '@nuxtjs/composition-api'
 
 
@@ -97,6 +98,7 @@ import {
       const { $fire, $notify, $encryption, i18n } = useContext();
       const { state, dispatch } = useStore();
       const user = computed(() => state.user);
+      const router = useRouter()
 
       const recentChats = ref([])
       const selectedChats = ref([])
@@ -126,11 +128,11 @@ import {
         }
       };
 
-      const getRecentChats = async () => {
+      const getRecentChats = async () => {        
         const result = await $fire.firestore
           .collection('Chats')
           .where('participants', 'array-contains', user.value.data.uid)
-          .orderBy('lastMessageSent', 'desc')
+          .orderBy('message.created_at', 'desc')
           .get();
 
         result.forEach(doc => {
@@ -168,16 +170,22 @@ import {
             if (res) {
               await dispatch('chats/updateField', {
                 id: c,
-                lastMessageSent: new Date(),
-                lastMessage: newMessage.value || null,
+                message: {
+                  created_at:new Date(),
+                  sent_by: user.value.data.uid,
+                  snippet: newMessage.value || 'Forwarded a message'
+                },
                 seen: [user.value.data.uid]
               });
+
             }
           }
 
           selectedFriends.value.forEach(f => {
             console.log("Friend tto receive message", f)
           })
+
+          return router.push(`/chats/`)
          } catch(e) {
           console.log("Error Forwarding Message", e)
          }

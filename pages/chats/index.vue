@@ -34,10 +34,10 @@
                   <v-list-item-title class="d-flex justify-start align-center myshoutDarkGrey--text">
                     <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
                     <v-spacer />
-                    <span class="caption">{{ moment(chat.created_at.toDate()).fromNow() }}</span>
+                    <span class="caption">{{ moment(chat.message.created_at.toDate()).fromNow() }}</span>
                   </v-list-item-title>
                   <v-list-item-subtitle>
-                    <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ chat.message.snippet }}
+                    <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ truncateMessage(chat.message.snippet) }}
                   </v-list-item-subtitle>
                 </v-list-item-content>
               </NuxtLink>
@@ -77,6 +77,8 @@ export default defineComponent({
     const isLoading = ref(true)
     const chatsListener = ref();
     const chatList = ref([])
+
+    const truncateMessage = (message, length = 25) => message ? (message.length > length ? message.substring(0, length) + '...' : message) : '';
 
     const fetchChats = async () => {
       isLoading.value = true;
@@ -136,6 +138,7 @@ export default defineComponent({
       user,
       chatList,
       state,
+      truncateMessage
     }
   }
 })

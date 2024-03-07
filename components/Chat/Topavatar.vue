@@ -1,7 +1,7 @@
 <template>
   <div v-if="chat && chat.participants">
     <v-avatar v-if="chat.participants.length > 1" :class="`white--text rounded-lg ${(chat.photoUrl) ? 'mt-2' : '' }`" :size="size" color="primary" rounded>
-      <v-img v-if="url" :src="chat.photoUrl" />
+      <v-img v-if="chat.photoUrl" :src="chat.photoUrl" />
       <span v-else class="white--text headline">{{ `+${chat.participants.length}` }}</span>
     </v-avatar>
     <v-avatar v-else-if="participant" class="white--text rounded-lg" :size="size" color="primary" rounded>
