@@ -169,6 +169,9 @@ export default defineComponent({
       if (lat && lng) {
         mapPoint = new window.google.maps.LatLng(lat, lng)
         currentMap.value.panTo(mapPoint)
+
+        moveMarker(markers[user.value.data.uid], gps.value.lat, gps.value.lng)
+
       }
     }
     const onDrag = async () => {
