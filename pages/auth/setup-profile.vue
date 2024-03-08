@@ -216,7 +216,6 @@ import {
   useContext,
   useMeta,
   useStore,
-  onMounted,
   watch
 } from '@nuxtjs/composition-api'
 import formRules from '~/classes/formRules'
@@ -248,23 +247,9 @@ export default defineComponent({
       email: '',
     })
 
-    onMounted(async () => {
-      try {
-        loading.value = true
-        if (!user.value.username) {
-          step.value = 1;
-        } else if (!user.value.email) {
-          step.value = 2;
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error)
-      } finally {
-        loading.value = false
-      }
-    })
 
     // Watch for changes in user state to update the step
-    watch(user.value, (profile) => {
+    watch(user, (profile) => { // Remove .value here
       if (profile) {
         if (!profile.username) {
           // Force user to set a username
@@ -272,11 +257,14 @@ export default defineComponent({
         } else if (!profile.email) {
           // If user authenticated via Phone, force to set a email address
           step.value = 2;
+        } else {
+          step.value = 6;
         }
       } else {
-        step.value = 1
+        step.value = 1;
       }
-    })
+    }, { immediate: true, deep: true }); // Correct syntax for options object
+
 
     // METHODS
     const validateUsername = async () => {

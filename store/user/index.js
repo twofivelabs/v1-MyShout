@@ -447,15 +447,12 @@ export const actions = {
     if (window.location.pathname === '/auth' ||
         window.location.pathname === '/auth/setup-profile') {
       // Don't check user data on these pages
-      return
+      return;
     }
 
     if (state.profile.username===null || state.profile.username===undefined || state.profile.username.length === 0) {
-      console.log('STICKY: Redirect to setup profile because no username: ', state.profile.username)
       return this.$router.push('/auth/setup-profile')
     } else if (state.profile.email===null || state.profile.email===undefined || state.profile.email.length === 0) {
-      // Make sure were not on the page we are redirecting to [could cause loop]
-      console.log('STICKY: Redirect to setup profile because no email: ', state.profile.email)
       return this.$router.push('/auth/setup-profile')
     }
 
