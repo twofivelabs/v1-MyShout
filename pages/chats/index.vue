@@ -12,7 +12,7 @@
     </v-app-bar>
 
     <v-row class="pt-10 px-5">
-      <v-col cols="12" v-if="isLoading">
+      <v-col cols="12" class="mt-10" v-if="isLoading">
         <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
       </v-col>
       <v-col cols="12" class="pr-12" v-else>

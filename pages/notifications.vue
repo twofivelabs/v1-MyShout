@@ -20,7 +20,7 @@
             <UserNotifications :notification="notification" />
           </div>
         </div>
-        <div v-else>
+        <div v-else class="mt-10">
           <ElementH4 align="center" :text="$t('notifications.caught_up')"/>
         </div>
       </v-col>
