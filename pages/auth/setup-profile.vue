@@ -443,7 +443,12 @@ export default defineComponent({
       
       await dispatch('user/updateField', {
         onboarded: true,
-        device: device
+        device: {
+          model: device.model,
+          operatingSystem: device.operatingSystem,
+          osVersion: device.osVersion,
+          platform: device.platform
+        }
       })
 
       return router.push('/')
