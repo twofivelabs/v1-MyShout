@@ -35,10 +35,8 @@ export default defineComponent({
     } = useStore()
 
     const {
-      $config,
       $remoteConfig,
       $ttlStorage,
-      $fire,
       $system,
       i18n,
       $capacitor
@@ -57,29 +55,7 @@ export default defineComponent({
         }
 
         // Signing up anonymously, will provide them with an ID with firebase
-        if (!uid) {
-          if ($config.useAnonymousSignUp) {
-            try {
-              $fire.auth.signInAnonymously()
-                  .then(() => {
-                    // ... SUCCESS
-                  }).catch((e) => {
-                    $system.log({
-                      comp: 'DefaultLayout',
-                      msg: 'Error trying to sign in anonymously',
-                      val: e
-                    })
-                  })
-            } catch(e) {
-              $system.log({
-                comp: 'DefaultLayout',
-                msg: 'Error trying to sign in anonymously 2',
-                val: e
-              })
-            }
-          }
-        }
-        else {
+        if (uid) {
           await dispatch('user/setUserProfile', uid)
         }
       } catch {

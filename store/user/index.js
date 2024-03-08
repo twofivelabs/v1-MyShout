@@ -450,11 +450,6 @@ export const actions = {
       return
     }
 
-    // User is active, no need to check username
-    if (!state?.profile?.role?.isActive) {
-      return
-    }
-
     if (state.profile.username===null || state.profile.username===undefined || state.profile.username.length === 0) {
       console.log('STICKY: Redirect to setup profile because no username: ', state.profile.username)
       return this.$router.push('/auth/setup-profile')
