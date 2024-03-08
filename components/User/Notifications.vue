@@ -279,9 +279,10 @@ export default defineComponent({
       const payload = { ...state.user.notifications.loaded[notificationId] }
 
       // Bug fix in case the object doesn't have 'seen' in it.
-      if (payload['seen'] === undefined) payload.seen = true
+      if (payload['seen'] === undefined) payload.seen = false
 
       if (payload.seen === false) {
+        // console.log('UPDATE NOTIFICATION WITH, ', payload)
         payload.seen = true
         dispatch('user/notifications/update', payload)
       }
