@@ -95,7 +95,8 @@ export default defineComponent({
       filteredNotifications.value.map(async (notification) => {
         await dispatch('user/notifications/update', {
           id: notification.id,
-          archived: true
+          archived: true,
+          seen: true
         })
       })
     }
