@@ -101,6 +101,9 @@
         <v-btn text color="red" v-if="notification.type === 'friendRequest' && notification.title !== 'Friend Request Approved'" @click="declineFriendRequest(notification)">
           <span v-if="!notification.completed"><v-icon>mdi-delete</v-icon></span>
         </v-btn>
+        <v-btn text color="green" v-if="notification.type === 'checkIn'" @click="checkInResponse(notification)">
+          <span v-if="!notification.completed"><v-icon>mdi-check</v-icon></span>
+        </v-btn>
         <v-btn text v-else-if="notification.goTo" @click="goTo(notification.goTo)">
           <v-icon>mdi-arrow-right</v-icon>
         </v-btn>
@@ -222,15 +225,16 @@ export default defineComponent({
           id: notification.meta.checkInId,
           responded: true,
         }).then((res) => {
+          console.log('CHECKIN RES', res)
           if (res !== false) {
             // Respond to user with notification
             // Get username from BODY
-            let username = ''
+            /*let username = ''
             try {
               username = '@'+notification.body.split('@')[1]
             } catch {
               // ..
-            }
+            }*/
             // Send response to requester
             dispatch('user/notifications/add', {
               uid: notification.meta.requestedBy,
@@ -239,10 +243,12 @@ export default defineComponent({
               created_at: new Date(),
               seen: false,
               archived: false,
-              body: `${username} has checked-in.`,
+              body: `${profile.value.username || 'Your friend' } has checked-in.`,
             })
 
             $notify.show({ text: i18n.t('notify.success'), color: 'green' })
+          } else {
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
           }
         })
       } catch(e) {
