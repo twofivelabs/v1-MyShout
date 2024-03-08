@@ -16,7 +16,7 @@
         <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
       </v-col>
       <v-col cols="12" class="pt-6 pr-2" v-else>
-        <v-list two-line class="pb-9" v-if="chatList.length > 0">
+        <v-list two-line class="pb-9" v-if="chatList && chatList.length > 0">
           <template v-for="(chat, index) in chatList">
             <v-list-item v-if="chat && chat.message" :key="index">
               <NuxtLink :to="`/chats/chat/${chat.id}`">
@@ -34,7 +34,7 @@
                   <v-list-item-title class="d-flex justify-start align-center myshoutDarkGrey--text">
                     <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
                     <v-spacer />
-                    <span class="caption">{{ moment(chat.message.created_at.toDate()).fromNow() }}</span>
+                    <span class="caption" v-if="chat.message.created_at">{{ moment(chat.message.created_at.toDate()).fromNow() }}</span>
                   </v-list-item-title>
                   <v-list-item-subtitle>
                     <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ truncateMessage(chat.message.snippet) }}
@@ -76,7 +76,7 @@ export default defineComponent({
     // DEFINE
     const isLoading = ref(true)
     const chatsListener = ref();
-    const chatList = ref([])
+    const chatList = ref(null)
 
     const truncateMessage = (message, length = 25) => message ? (message.length > length ? message.substring(0, length) + '...' : message) : '';
 
@@ -92,6 +92,8 @@ export default defineComponent({
             const updatedChatList = [];
 
             for (const doc of snapshot.docs) {
+              if (!doc) continue;
+
               const data = doc.data();
               data.id = doc.id;
 
