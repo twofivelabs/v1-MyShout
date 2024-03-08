@@ -594,11 +594,9 @@ inject('capacitor', {
     // Camera
     // Will return a URL of the path we can use to upload
     async cameraTakePicture (allowEditing = true) {
-        app.$system.log({
-            comp: 'cameraTakePicture',
-            msg: 'Starting To take photo',
-            val: null
-          })
+        const permission = Camera.checkPermissions()
+        console.log("CAMERA Permissions", permission)
+        if (!permission) Camera.requestPermissions()
 
         try {
             const cameraOptions = {
@@ -607,12 +605,6 @@ inject('capacitor', {
                 resultType: CameraResultType.Base64,
                 source: [CameraSource.Photos, CameraSource.Camera]
             }
-
-            app.$system.log({
-                comp: 'cameraTakePicture',
-                msg: 'cameraOptions',
-                val: cameraOptions
-              })
 
             const image = await Camera.getPhoto(cameraOptions)
             return image.base64String  
