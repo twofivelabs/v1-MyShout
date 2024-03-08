@@ -182,7 +182,6 @@ export default {
         heading: 'Avis',
         sub_heading: 'Tiens-toi à jour',
         caught_up: 'Vous êtes tous rattrapés !',
-
         chat_notification: 'Notification de chat',
         new_friend_request: 'Nouvelle demande d\'ami',
         friend_request_approved: 'Demande d\'ami approuvée',
@@ -194,7 +193,9 @@ export default {
         checked_in_title: 'Enregistrée',
         has_checked_in: ' s\'est enregistré.',
         welcome_title: 'Bienvenue',
-        welcome_body: 'Bienvenue sur MyShout'
+        welcome_body: 'Bienvenue sur MyShout',
+        archive: 'Archive',
+        archive_all: 'Archiver toutes les notifications'
     },
     gps: {
         gps: 'GPS',

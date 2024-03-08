@@ -8,8 +8,8 @@
       <v-card>
         <v-card-title>Select Notification Filters</v-card-title>
         <v-card-text>
-          <v-checkbox v-model="filters.alerts" label="Alerts"></v-checkbox>
-          <v-checkbox v-model="filters.friendRequest" label="Friend Requests"></v-checkbox>
+          <v-checkbox v-model="localFilters.alert" label="Alerts"></v-checkbox>
+          <v-checkbox v-model="localFilters.friendRequest" label="Friend Requests"></v-checkbox>
         </v-card-text>
         <v-card-actions>
           <v-btn color="primary" @click="applyFilters">Apply</v-btn>
@@ -21,29 +21,38 @@
 </template>
 
 <script>
-import { defineComponent, ref } from '@nuxtjs/composition-api'
+import { defineComponent, ref, watch } from '@nuxtjs/composition-api'
 
 export default defineComponent({
   name: 'ChatNewchatbtn',
-  setup(_, { emit }) {
+  props: {
+    filters: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    }
+  },
+  setup(props, { emit }) {
     const dialog = ref(false);
-    const filters = ref({
-      alert: true,
-      friendRequest: true
-    });
+    const localFilters = ref({});
 
     const openDialog = () => dialog.value = true;
 
     const applyFilters = () => {
-      emit('filtersChanged', filters.value);
+      emit('filtersChanged', localFilters.value);
       dialog.value = false;
     };
 
     const cancel = () => dialog.value = false;
 
+    watch(() => props.filters, (newFilters) => {
+      localFilters.value = { ...newFilters };
+    }, { immediate: true, deep: true });
+
     return {
       dialog,
-      filters,
+      localFilters,
       openDialog,
       applyFilters,
       cancel,

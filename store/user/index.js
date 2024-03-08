@@ -544,7 +544,13 @@ export const actions = {
         //await dispatch('user/favourites/getAll', authUserUid, { root: true })
         //await dispatch('user/tagging/getAll', authUserUid, { root: true })
         //await dispatch('user/notifications/getAll', {}, { root: true })
-        await dispatch('user/notifications/listen', null, { root:true })
+        await dispatch('user/notifications/listen', {
+          where: [{
+            field: 'archived',
+            op: '==',
+            value: false
+          }]
+        }, { root:true })
       //}
     }
   },

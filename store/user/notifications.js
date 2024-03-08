@@ -19,6 +19,7 @@ class Notification extends FirestoreHelpers {
       type: null,
       meta: {},
       completed: false,
+      archived: false,
     }
     return this
   }
