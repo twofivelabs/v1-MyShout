@@ -41,7 +41,7 @@ export default defineComponent({
   },
   setup() {
     const loading = ref(false)
-    const { $capacitor, $system } = useContext()
+    const { $capacitor, $system, $notify, i18n } = useContext()
 
     // DEFINE
     const url = ref()
@@ -60,6 +60,9 @@ export default defineComponent({
           await SmsManager.send({
             numbers: [phoneClean],
             text: body,
+          }).catch(() => {
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+
           })
           // success
           buttonText.value = 'Invited'
