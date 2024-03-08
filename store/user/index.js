@@ -16,7 +16,7 @@ class User extends FirestoreHelpers {
       password: null,
       created_at: null,
       device: null,
-      onboarded: true,
+      onboarded: 8,
       initial: null,
       first_name: null,
       last_name: null,
@@ -445,7 +445,7 @@ export const actions = {
     if (window.location.pathname === '/auth' ||
         window.location.pathname === '/auth/setup-profile') return;
 
-    if (state.profile.onboarded===null || state.profile.onboarded===undefined || state.profile.onboarded === false) return this.$router.push('/auth/setup-profile')
+    if (state.profile.onboarded===null || state.profile.onboarded===undefined || state.profile.onboarded < 8 ) return this.$router.push('/auth/setup-profile')
   },
   async getAll ({ commit, rootState }, { where = {}, limit = 20, order = {}, uid = null }) {
     uid = uid || rootState.user.data.uid
