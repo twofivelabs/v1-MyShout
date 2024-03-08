@@ -90,9 +90,13 @@ export default defineComponent({
     // MOUNTED
     onMounted(async () => {
       // Check user if they have profile pieces
-      setTimeout(() => {
+      setTimeout(async() => {
         // NEW GPS
         $capacitor.gpsInit()
+
+        const d = await $capacitor.device()
+
+        console.log(d)
 
         try {
           Preferences.set({

@@ -14,6 +14,9 @@ class User extends FirestoreHelpers {
     this.fields = {
       email: null,
       password: null,
+      created_at: null,
+      device: null,
+      onboarded: true,
       initial: null,
       first_name: null,
       last_name: null,
@@ -42,10 +45,6 @@ class User extends FirestoreHelpers {
         location: false,
         shareLocationWithFriends: true
       },
-      has: {
-        notifications: false,
-        messages: false
-      },
       notifications: {
         message: 0,
         alert: 0,
@@ -61,7 +60,6 @@ class User extends FirestoreHelpers {
       isOnline: {
           status: 'offline'
       },
-      stripeCustomerId: null,
       securityPin: null
     }
     return this
@@ -445,17 +443,9 @@ export const actions = {
   },
   async checkUserData ({ state }) {
     if (window.location.pathname === '/auth' ||
-        window.location.pathname === '/auth/setup-profile') {
-      // Don't check user data on these pages
-      return;
-    }
+        window.location.pathname === '/auth/setup-profile') return;
 
-    if (state.profile.username===null || state.profile.username===undefined || state.profile.username.length === 0) {
-      return this.$router.push('/auth/setup-profile')
-    } else if (state.profile.email===null || state.profile.email===undefined || state.profile.email.length === 0) {
-      return this.$router.push('/auth/setup-profile')
-    }
-
+    if (state.profile.onboarded===null || state.profile.onboarded===undefined || state.profile.onboarded === false) return this.$router.push('/auth/setup-profile')
   },
   async getAll ({ commit, rootState }, { where = {}, limit = 20, order = {}, uid = null }) {
     uid = uid || rootState.user.data.uid

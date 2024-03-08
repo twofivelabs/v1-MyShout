@@ -70,6 +70,32 @@
         </div>
 
         <div v-else-if="step===3" class="text-center">
+          <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.country_sub') }}</h5>
+          <v-form ref="formCountry" @submit.prevent="validateCountry">
+            <v-text-field v-model="form.country"
+              :rules="rules.country"
+              :label="$t('form.country')"
+              required
+              outlined
+              background-color="#f8f9fa"
+            />
+            <div class="text-center mt-15">
+              <v-btn
+                :loading="loading"
+                color="primary"
+                fab
+                dark
+                x-large
+                type="submit"
+                class="white--text"
+              >
+                <v-icon>mdi-arrow-right</v-icon>
+              </v-btn>
+            </div>
+          </v-form>
+        </div>
+
+        <div v-else-if="step===4" class="text-center">
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.add_photo_sub') }}</h5>
 
           <UserProfileavatar :user="user" :size="120" class="mt-5 mx-auto" />
@@ -81,16 +107,15 @@
               fab
               dark
               x-large
-              type="submit"
               class="white--text"
-              @click="step=4"
+              @click="step=5"
             >
               <v-icon>mdi-arrow-right</v-icon>
             </v-btn>
           </div>
         </div>
 
-        <div v-else-if="step===4" class="text-center">
+        <div v-else-if="step===5" class="text-center">
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.enable_location_permissions_heading') }}</h5>
 
           <h5 class="text-h5 text-center mb-6">
@@ -134,7 +159,7 @@
           </div>
         </div>
 
-        <div v-else-if="step===5" class="text-center">
+        <div v-else-if="step===6" class="text-center">
           <h5 class="text-h5 text-center mb-6">
             {{ $t('onboarding.enable_notification_permissions') }}
           </h5>
@@ -183,7 +208,28 @@
           </div>
         </div>
 
-        <div v-else-if="step===6" class="text-center">
+        <div v-else-if="step===7" class="text-center">
+          <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.how_did_you_hear') }}</h5>
+          <v-text-field v-model="form.hear"
+            outlined
+            background-color="#f8f9fa"
+          />
+          <div class="text-center mt-15">
+            <v-btn
+              :loading="loading"
+              color="primary"
+              fab
+              dark
+              x-large
+              @click="setHowDidYouHear"
+              class="white--text"
+            >
+              <v-icon>mdi-arrow-right</v-icon>
+            </v-btn>
+          </div>
+        </div>
+
+        <div v-else-if="step===8" class="text-center">
           <div>
             <h5 class="text-h5 text-center">{{ $t('onboarding.thank_you_sub') }}</h5>
           </div>
@@ -194,7 +240,7 @@
               dark
               x-large
               class="white--text mt-15"
-              to="/"
+              @click="completeProfile"
           >
             <v-icon>mdi-arrow-right</v-icon>
           </v-btn>
@@ -216,6 +262,7 @@ import {
   useContext,
   useMeta,
   useStore,
+  useRouter,
   watch
 } from '@nuxtjs/composition-api'
 import formRules from '~/classes/formRules'
@@ -233,33 +280,31 @@ export default defineComponent({
       i18n
     } = useContext()
     const { state, dispatch } = useStore()
-    // const router = useRouter()
+    const router = useRouter()
 
     const user = computed(() => state.user.profile)
 
     const loading = ref(false)
     const rules = formRules
-    const step = ref(7)
+    const step = ref(0)
     const formUsername = ref()
     const formEmail = ref()
+    const formCountry = ref()
     const form = ref({
       username: '',
       email: '',
+      country: '',
+      hear: ''
     })
 
 
     // Watch for changes in user state to update the step
-    watch(user, (profile) => { // Remove .value here
+    watch(user, async (profile) => { // Remove .value here
       if (profile) {
-        if (!profile.username) {
-          // Force user to set a username
-          step.value = 1;
-        } else if (!profile.email) {
-          // If user authenticated via Phone, force to set a email address
-          step.value = 2;
-        } else {
-          step.value = 6;
-        }
+        if (!profile.username) step.value = 1;
+        else if (!profile.email) step.value = 2;
+        else if (!profile.country) step.value = 3;
+        else step.value = 8;
       } else {
         step.value = 1;
       }
@@ -326,13 +371,28 @@ export default defineComponent({
       return hasUsers.length > 0;
     }
 
+    const validateCountry = async () => {
+      loading.value = true
+      const isValid = await formCountry.value.validate()
+
+      if (isValid) {
+        const country = form.value.country
+
+        await dispatch('user/updateField', {
+          country: country
+        })
+
+        step.value = 4
+      }
+
+      loading.value = false
+    }
+
     const setLocationPermissions = async () => {
       loading.value = true
 
       setTimeout(async () => {
         $capacitor.gpsInit()
-        // await $capacitor.positionPermissions()
-        // await $services.getSetUserGeneralLocation()
 
         await dispatch('user/updateField', {
           permissions: {
@@ -340,7 +400,7 @@ export default defineComponent({
           }
         })
 
-        step.value = 5
+        step.value = 6
         loading.value = false
       },1000)
     }
@@ -363,9 +423,30 @@ export default defineComponent({
         await $capacitor.microphonePermissions()
 
         loading.value = false
-        step.value = 6
+        step.value = 7
 
       },1500)
+    }
+
+    const setHowDidYouHear = async () => {
+      if (form.hear || form.hear.length > 0) {
+        await dispatch('user/updateField', {
+          how_did_you_hear: form.hear
+        })
+      } 
+      
+      return step.value = 8
+    }
+
+    const completeProfile = async () => {
+      const device = await $capacitor.device()
+      
+      await dispatch('user/updateField', {
+        onboarded: true,
+        device: device
+      })
+
+      return router.push('/')
     }
 
     // PAGE META
@@ -383,9 +464,10 @@ export default defineComponent({
       user, step,
       rules,
       form,
-      formUsername, formEmail,
-      validateUsername, validateEmail,
-      setLocationPermissions, setNotificationPermissions
+      formUsername, formEmail, formCountry,
+      validateUsername, validateEmail, validateCountry,
+      setLocationPermissions, setNotificationPermissions,
+      setHowDidYouHear, completeProfile
     }
   },
   head: {}

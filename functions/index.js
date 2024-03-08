@@ -35,6 +35,7 @@ exports.AddUserRole = functions.auth.user().onCreate((authUser) => {
         .then(() => {
           db.collection("Users").doc(authUser.uid).set({
             phone: authUser.phoneNumber,
+            created_at: new Date(),
             email: authUser.email,
             role: customClaims,
             initial: null,
@@ -55,13 +56,7 @@ exports.AddUserRole = functions.auth.user().onCreate((authUser) => {
               location: true,
               shareLocationWithFriends: true,
             },
-            has: {
-              notifications: false,
-              messages: false,
-            },
             notifications: {
-              hasNotifications: false,
-              hasMessages: false,
               messages: 0,
               alerts: 0,
               requests: 0
@@ -76,8 +71,9 @@ exports.AddUserRole = functions.auth.user().onCreate((authUser) => {
             isOnline: {
               status: "offline",
             },
-            stripeCustomerId: null,
             securityPin: null,
+            device: {},
+            onboarded: false
           }).then(() => {
             return Promise.resolve(true);
           }).catch(() => {

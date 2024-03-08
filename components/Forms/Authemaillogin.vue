@@ -87,7 +87,6 @@ export default defineComponent({
         try {
           if ($fire.auth.currentUser === null) {
             const authentication = await $fire.auth.signInWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
-            console.log("Authentication results", authentication)
             if (authentication.user) {
               $fire.analytics.logEvent('login')
               $notify.show({ text: 'Successfully logged in', color: 'green' })
@@ -99,14 +98,15 @@ export default defineComponent({
             await router.push('/')
           }
         } catch (e) {
-          console.log("Error", e)
-
           switch (e.code) {
             case "auth/wrong-password":
               $notify.show({ text: i18n.t('onboarding.error_wrong_password'), color: 'error' })
               break;
             case "auth/user-not-found":
               $notify.show({ text: i18n.t('onboarding.error_user_not_found'), color: 'error' })
+              break;
+            default  :
+              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
               break;
           }
         }
