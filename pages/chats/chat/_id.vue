@@ -46,7 +46,7 @@ import {
 } from '@nuxtjs/composition-api';
 
 import { Intersect } from 'vuetify/lib/directives';
-import Vue from 'vue'
+//import Vue from 'vue'
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
@@ -94,7 +94,7 @@ export default defineComponent({
     const loadParticipants = async () => {
       try {
         const participantProfiles = await Promise.all(
-          chat.value.participants.map(participantUid => dispatch('user/getOne', participantUid))
+          chat.value?.participants?.map(participantUid => dispatch('user/getOne', participantUid))
         );
 
         participantProfiles.forEach(profile => {
@@ -134,8 +134,7 @@ export default defineComponent({
                 console.log('STICKY: MESSAGE WAS MODIFIED')
                 const data = change.doc.data();
                 const index = messages.value.findIndex(m => m.id === change.doc.id);
-console.log('DELETED?', data?.deleted)
-                console.log('INDEX:', index)
+
                 // For some reason, even though a new message was coming through, it still
                 // made it a 'modified message', not new.
                 /* if (index !== -1) messages.value[index] = {
@@ -145,10 +144,12 @@ console.log('DELETED?', data?.deleted)
                 if (data.message) data.message = $encryption.decrypt(data.message)
                 if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
                 //console.log('DATA AFTER', data)
-                /*if (index !== -1) messages.value[index] = {
-                  //...messages.value[index], ...data
-                };*/
-                Vue.set(messages.value, index, data)
+                if (index !== -1) messages.value[index] = {
+                  ...messages.value[index], ...data
+                };
+                /*if (index !== -1) {
+                  Vue.set(messages.value, index, data)
+                }*/
 
               }
             });
