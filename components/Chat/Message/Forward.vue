@@ -157,7 +157,7 @@ import {
             message: $encryption.encrypt(newMessage.value),
             forward: {
               chat: props.chat.id,
-              message: props.message.id
+              message: props?.message.id
             }
           }
 

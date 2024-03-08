@@ -95,7 +95,7 @@ export default defineComponent({
               const data = doc.data();
               data.id = doc.id;
 
-              if (data.message.sent_by) {
+              if (data?.message.sent_by) {
                 // Assuming dispatch is reactive and updates user data in the store
                 const u = await dispatch('user/getOne', data.message.sent_by);
                 data.message.sent_by = u.username ?? u.first_name;
@@ -108,7 +108,7 @@ export default defineComponent({
             chatList.value = updatedChatList;
           });
       } catch (error) {
-        console.error('Error fetching chats:', error.message);
+        console.error('Error fetching chats:', error?.message);
       } finally {
         isLoading.value = false;
       }

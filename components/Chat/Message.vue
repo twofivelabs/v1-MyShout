@@ -328,7 +328,7 @@ export default defineComponent({
         // Delete Message
         await dispatch('chats/messages/remove', {
           chatId: props.chat.id,
-          id: props.message.id
+          id: props?.message.id
         })
 
         // Delete File
@@ -356,7 +356,7 @@ export default defineComponent({
 
     const getReadStatusIcon = (chat, message) => {
       const totalParticipantsExcludingSender = chat.participants.length - 1;
-      const seenCountExcludingSender = message.seen.filter(userId => userId !== message.owner).length;
+      const seenCountExcludingSender = message?.seen.filter(userId => userId !== message.owner).length;
 
       if (seenCountExcludingSender  === 0) {
         return 'mdi-eye-off'; // icon when no one has read
@@ -375,7 +375,7 @@ export default defineComponent({
     const deleteMessage = async (d) => {
       const res = await dispatch('chats/messages/updateField', {
           chatId: props.chat.id,
-          id: props.message.id,
+          id: props?.message.id,
           data: {
             deleted: d === 1 ? true : false,
             hide: d === 0 ? firebase.firestore.FieldValue.arrayUnion(userId.value) : []
@@ -387,7 +387,6 @@ export default defineComponent({
     const onHoverMessage = () => {
       if (!messageHover.value) messageHover.value = true
     }
-
     const onLeaveMessage = () => {
       if (messageHover.value) messageHover.value = false
     }
@@ -398,14 +397,19 @@ export default defineComponent({
       if (!m.forward) return;
 
       try {
-        const snapshot = await $fire.firestore
-          .doc(`Chats/${m.forward.chat}/Messages/${m.forward.message}`)
-          .get();
+        let data = null;
 
-        const data = snapshot.exists ? snapshot.data() : null;
+        if (m.forward?.message) {
+          const snapshot = await $fire.firestore
+              .doc(`Chats/${m.forward.chat}/Messages/${m.forward.message}`)
+              .get();
 
-        if (data.message) data.messge = $encryption.decrypt(data.messge);
+          data = snapshot.exists ? snapshot.data() : null;
+        }
+
+        if (data?.message) data.messge = $encryption.decrypt(data.messge);
         forward.value = data;
+
       } catch (error) {
         console.error("Error loading forwarded message:", error);
         forward.value = null;
