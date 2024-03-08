@@ -22,7 +22,7 @@
         <span v-if="myFriendshipAccess.status === 'approved'" class="d-flex justify-center ">
           <ElementH4 v-if="publicUser.location.country" :text="`${publicUser.location.city} ${publicUser.location.country}`" class="gray--text" />
         </span>
-<!--        <NotificationsLastcheckedin :publicUser="publicUser" />-->
+        <NotificationsLastcheckedin :publicUser="publicUser" />
         <div class="d-flex justify-center my-6">
           <UserActionsSendamessagebtn v-if="myFriendshipAccess.status === 'approved'" :user="publicUser">
             <v-btn color="myshoutGreen" class="elevation-0 rounded-lg white--text mr-2" large rounded>
