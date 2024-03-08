@@ -345,6 +345,11 @@ export default defineComponent({
       if (props.thread) return;
       messageMenu.value = !messageMenu.value
     }
+    const closeMessageMenu = () => {
+      if (props.thread) return;
+      messageMenu.value = false
+    }
+
 
     const triggerMessageThread = () => {
       messageThread.value = !messageThread.value
@@ -381,7 +386,8 @@ export default defineComponent({
             hide: d === 0 ? firebase.firestore.FieldValue.arrayUnion(userId.value) : []
           }
         })
-      if (res) return triggerMessageMenu()
+      if (res) return closeMessageMenu()
+      // if (res) return triggerMessageMenu()
     }
 
     const onHoverMessage = () => {
@@ -431,7 +437,7 @@ export default defineComponent({
       userId,
       showMedia,
       loading,
-      messageMenu, triggerMessageMenu,
+      messageMenu, triggerMessageMenu, closeMessageMenu,
       messageThread, triggerMessageThread,
       messageForward, triggerMessageForward,
       forward,
