@@ -74,6 +74,8 @@ export default defineComponent({
         loading.value = true
         // Take photo and upload it
         const photoBase64 = await $capacitor.cameraTakePicture()
+        if (!photoBase64) return
+
         const photoUrl = await $db.upload({
           path: `/USERS/${user.value.uid}/profile.jpg`,
           data: photoBase64,
