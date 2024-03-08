@@ -18,7 +18,7 @@
       <v-col cols="12" class="pt-6 pr-2" v-else>
         <v-list two-line class="pb-9" v-if="chatList.length > 0">
           <template v-for="(chat, index) in chatList">
-            <v-list-item v-if="chat" :key="index">
+            <v-list-item v-if="chat && chat.message" :key="index">
               <NuxtLink :to="`/chats/chat/${chat.id}`">
                 <v-badge v-if="chat.unseen && chat.unseen[user.data.uid] > 0"
                   :content="chat.unseen[user.data.uid]"

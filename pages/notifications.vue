@@ -19,7 +19,7 @@
           <div v-for="(notification, index) in filteredNotifications" :key="index">
             <UserNotifications :notification="notification" />
           </div>
-          <div class="mt-5 text-center">
+          <div class="mt-5 pb-10 text-center">
             <v-btn 
               text
               @click="archiveNotifications" 
