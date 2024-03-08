@@ -40,7 +40,7 @@ export default defineComponent({
     'url'
   ],
   setup (props, { emit }) {
-    const { $system, $capacitor, $db } = useContext()
+    const { $system, $capacitor, $db, $notify, i18n } = useContext()
     const imageLoading = ref(false)
     const uploadComplete = ref(false)
     const imageUrl = ref()
@@ -61,6 +61,7 @@ export default defineComponent({
             contentType: 'image/jpeg'
           }
         }).catch((e) => {
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
           console.log('STICKY: image upload error: ', e, JSON.stringify(e))
         })
 
@@ -71,6 +72,7 @@ export default defineComponent({
           emit('url', imageUrl.value)
         }
       } catch (e) {
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         console.log('STICKY: error trying to take/select picture: ', e, JSON.stringify(e))
 
         $system.log({

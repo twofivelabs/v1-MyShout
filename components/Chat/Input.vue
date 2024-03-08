@@ -143,7 +143,9 @@
 
         try {
           // If no user, OR no message, but it should be ok to just send a video/image/file etc.
-          if(!user.value.data.uid || (!imageUrl.value || !uploadedVideoUrl.value || !fileUrl.value) && !newMessage.value) {
+          if (!newMessage.value && (imageUrl.value || uploadedVideoUrl.value || fileUrl.value)) {
+            // we are good to send just the media, no need for a message
+          } else if(!user.value.data.uid || !newMessage.value) {
             $notify.show({
               text: i18n.t('notify.error_try_again'),
               color: 'error'
@@ -178,8 +180,11 @@
           });
 
           if (res && props.reply) {
+            console.log('STICKY: Array Union: ', res.id, JSON.stringify(res.id))
             await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(props.reply.id).update({
               replies: firebase.firestore.FieldValue.arrayUnion(res.id)
+            }).catch((e) => {
+              console.log('STICKY: Reply error:', e, JSON.stringify(e))
             })
           }
 
