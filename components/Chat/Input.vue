@@ -83,14 +83,12 @@
                       </v-btn>
 <!--                      <ChatUploadvideo :chat="chat" :currentUrl="imageUrl" @url="imageCallback" />-->
                     </v-list-item>
-                    <v-list-item>
-                      <ChatRecordaudio :chat="chat" />
-                    </v-list-item>
                   </v-list>
                 </v-card-text>
               </v-card>
             </v-menu>
           </v-btn>
+          <ChatRecordaudio :chat="chat" />
         </template>
       </v-text-field>
     </v-row>
