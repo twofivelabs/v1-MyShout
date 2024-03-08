@@ -75,7 +75,7 @@
           <ChatMessageLink :url="message.urls[0]" />
         </v-col>
 
-        <v-col cols="1" v-if="owner && message.owner !== userId" class="avatar-align-top">
+        <v-col cols="1" v-if="(owner && message.owner !== userId) && (!message.hide || !message.hide.includes(userId))" class="avatar-align-top">
           <ChatAvatar :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
         </v-col>
         <v-col
