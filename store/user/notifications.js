@@ -187,6 +187,7 @@ export const actions = {
     console.log('...LISTENING TO NOTIFICATIONS...')
     await this.$fire.firestore.collection(`Users/${uid}/${dbRootPath}`)
         .orderBy('created_at', 'desc')
+        .where('archive', '==', false)
         .limitToLast(100)
         .onSnapshot((snapshot) => {
           // commit('SET_ALL', [])
