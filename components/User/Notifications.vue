@@ -234,7 +234,7 @@ export default defineComponent({
             // Send response to requester
             dispatch('user/notifications/add', {
               uid: notification.meta.requestedBy,
-              type: 'checkinRequest',
+              type: 'checkIn',
               title: 'Checked-In',
               created_at: new Date(),
               seen: false,
