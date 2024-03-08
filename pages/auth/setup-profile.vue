@@ -5,6 +5,7 @@
       <!-- TOP PORTION -->
       <div class="d-flex flex-column justify-space-around align-center" style=" width:100vw; height:23vh;">
         <OnboardingCardheader class="gray--text mx-14" :h1="$t('onboarding.profile_setup_sub')" />
+        {{ user.onboarded }}
       </div>
 
       <!-- WHITE CARD -->
@@ -108,7 +109,7 @@
               dark
               x-large
               class="white--text"
-              @click="step=5"
+              @click="setProfilePhoto"
             >
               <v-icon>mdi-arrow-right</v-icon>
             </v-btn>
@@ -297,14 +298,16 @@ export default defineComponent({
       hear: ''
     })
 
-
-    // Watch for changes in user state to update the step
-    watch(user, async (profile) => { // Remove .value here
+    watch(user, async (profile) => {
       if (profile) {
-        if (!profile.username) step.value = 1;
-        else if (!profile.email) step.value = 2;
-        else if (!profile.country) step.value = 3;
-        else step.value = 8;
+        if (profile.onboarded < 1) step.value = 1;
+        else if (profile.onboarded < 2) step.value = 2;
+        else if (profile.onboarded < 3) step.value = 3;
+        else if (profile.onboarded < 4) step.value = 4;
+        else if (profile.onboarded < 5) step.value = 5;
+        else if (profile.onboarded < 6) step.value = 6;
+        else if (profile.onboarded < 7) step.value = 7;
+        else if (profile.onboarded < 8) step.value = 8;
       } else {
         step.value = 1;
       }
@@ -324,7 +327,8 @@ export default defineComponent({
           $notify.show({ text: i18n.t('notify.username_in_use'), color: 'red' })
         } else {
           await dispatch('user/updateField', {
-            username: username
+            username: username,
+            onboarded: user.value.email ? 2 : 1
           })
           step.value = user.value.email ? 3 : 2
         }
@@ -353,7 +357,8 @@ export default defineComponent({
           $notify.show({ text: i18n.t('onboarding.error_email_in_use'), color: 'red' })
         } else {
           await dispatch('user/updateField', {
-            email: email
+            email: email,
+            onboarded: 1
           })
           step.value = 3
         }
@@ -379,13 +384,22 @@ export default defineComponent({
         const country = form.value.country
 
         await dispatch('user/updateField', {
-          country: country
+          country: country,
+          onboarded: 3
         })
 
         step.value = 4
       }
 
       loading.value = false
+    }
+
+    const setProfilePhoto = async () => {
+      await dispatch('user/updateField', {
+          onboarded: 4
+        })
+
+        step.value = 5
     }
 
     const setLocationPermissions = async () => {
@@ -397,7 +411,8 @@ export default defineComponent({
         await dispatch('user/updateField', {
           permissions: {
             location: true
-          }
+          },
+          onboarded: 5
         })
 
         step.value = 6
@@ -415,7 +430,8 @@ export default defineComponent({
           await dispatch('user/updateField', {
             permissions: {
               notifications: true
-            }
+            },
+            onboarded: 6
           })
         })
 
@@ -431,7 +447,8 @@ export default defineComponent({
     const setHowDidYouHear = async () => {
       if (form.hear) {
         await dispatch('user/updateField', {
-          how_did_you_hear: form.hear
+          how_did_you_hear: form.hear,
+          onboarded: 7
         })
       } 
       
@@ -442,7 +459,7 @@ export default defineComponent({
       const device = await $capacitor.device()
       
       await dispatch('user/updateField', {
-        onboarded: true,
+        onboarded: 8,
         device: {
           model: device.model,
           operatingSystem: device.operatingSystem,
@@ -471,6 +488,7 @@ export default defineComponent({
       form,
       formUsername, formEmail, formCountry,
       validateUsername, validateEmail, validateCountry,
+      setProfilePhoto,
       setLocationPermissions, setNotificationPermissions,
       setHowDidYouHear, completeProfile
     }

@@ -73,7 +73,7 @@ exports.AddUserRole = functions.auth.user().onCreate((authUser) => {
             },
             securityPin: null,
             device: {},
-            onboarded: false
+            onboarded: 0
           }).then(() => {
             return Promise.resolve(true);
           }).catch(() => {
