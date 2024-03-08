@@ -429,7 +429,7 @@ export default defineComponent({
     }
 
     const setHowDidYouHear = async () => {
-      if (form.hear || form.hear.length > 0) {
+      if (form.hear) {
         await dispatch('user/updateField', {
           how_did_you_hear: form.hear
         })
