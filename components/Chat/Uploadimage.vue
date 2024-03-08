@@ -47,47 +47,32 @@ export default defineComponent({
 
     // METHODS
     const loadImageHandler = async () => {
-      $system.log({
-          comp: 'ChatUploadimage',
-          msg: 'loadImageHandler',
-          val: null
-        })
-
       imageLoading.value = true
       uploadComplete.value = false
 
       try {
         const photoBase64 = await $capacitor.cameraTakePicture(false)
 
-        $system.log({
-          comp: 'ChatUploadimage',
-          msg: 'photoBase64',
-          val: photoBase64
-        })
-
         const photoUrl = await $db.upload({
           path: `/CHATS/${props.chat.id}/${ new Date().getTime() }.jpg`,
           data: photoBase64,
-          base64: true
-        })
-        $system.log({
-          comp: 'ChatUploadimage',
-          msg: 'photoUrl',
-          val: photoUrl
+          base64: true,
+          metaData: {
+            contentType: 'image/jpeg'
+          }
+        }).catch((e) => {
+          console.log('STICKY: image upload error: ', e, JSON.stringify(e))
         })
 
         if (photoUrl) {
           uploadComplete.value = true
           imageUrl.value = photoUrl
 
-          $system.log({
-          comp: 'ChatUploadimage',
-          msg: 'imageUrl',
-          val: imageUrl.value
-        })
           emit('url', imageUrl.value)
         }
       } catch (e) {
+        console.log('STICKY: error trying to take/select picture: ', e, JSON.stringify(e))
+
         $system.log({
           comp: 'ChatUploadimage',
           msg: 'Error',

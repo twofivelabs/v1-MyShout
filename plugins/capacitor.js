@@ -609,6 +609,8 @@ inject('capacitor', {
             const image = await Camera.getPhoto(cameraOptions)
             return image.base64String  
         } catch (e) {
+            app.$notify.show({ text: app.i18n.t('notify.error_try_again'), color: 'error' })
+
             app.$system.log({
               comp: 'cameraTakePicture',
               msg: 'Error',

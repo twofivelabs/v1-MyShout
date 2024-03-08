@@ -15,7 +15,7 @@
       <v-col cols="12" class="mt-10" v-if="isLoading">
         <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
       </v-col>
-      <v-col cols="12" class="pr-12" v-else>
+      <v-col cols="12" class="pt-6 pr-2" v-else>
         <v-list two-line class="pb-9" v-if="chatList.length > 0">
           <template v-for="(chat, index) in chatList">
             <v-list-item v-if="chat" :key="index">
