@@ -48,6 +48,7 @@ class User extends FirestoreHelpers {
       notifications: {
         message: 0,
         alert: 0,
+        checkIn: 0,
         friendRequest: 0
       },
       gps: {
@@ -428,7 +429,8 @@ export const actions = {
               .onSnapshot(async (doc) => {
                 if (doc.exists) {
                   const data = doc.data()
-                  data.id = doc.id
+                  data.id = doc.id,
+
                   await commit('SET_USER_PROFILE_INIT', {...data})
                   // console.log('STICKY: BEFORE CHECKING USER DATA')
                   setTimeout(async () => {
@@ -535,7 +537,6 @@ export const actions = {
     await dispatch('setUserProfile', authUser.uid)
   },
   async setUserProfile ({ dispatch }, authUserUid) {
-    console.log("KYLE:", authUserUid)
     if (authUserUid) {
       //if (this.$db) { // This was stopping things from working....
         // await dispatch('get', authUserUid)
@@ -577,19 +578,6 @@ export const actions = {
         msg: 'signOut',
         val: e
       })
-    }
-  },
-  async setHas ({ dispatch }, data) {
-    if (data.type === 'notifications') {
-      //commit('SET_HAS_NOTIFICATIONS', data.value)
-      dispatch('updateField', {
-        has: {
-          notifications: data.value
-        }
-      })
-      if (data.value === false) {
-        this.$capacitor.pushNotificationsRemoveAllNotifications()
-      }
     }
   }
 }

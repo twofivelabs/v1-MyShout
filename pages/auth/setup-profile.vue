@@ -5,7 +5,6 @@
       <!-- TOP PORTION -->
       <div class="d-flex flex-column justify-space-around align-center" style=" width:100vw; height:23vh;">
         <OnboardingCardheader class="gray--text mx-14" :h1="$t('onboarding.profile_setup_sub')" />
-        {{ user.onboarded }}
       </div>
 
       <!-- WHITE CARD -->

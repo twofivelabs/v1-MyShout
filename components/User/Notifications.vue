@@ -95,10 +95,10 @@
         left
         overlap
       />
-        <v-btn text color="green" v-if="notification.type === 'friendRequest'" @click="approveFriendRequest(notification)">
+        <v-btn text color="green" v-if="notification.type === 'friendRequest'  && notification.title !== 'Friend Request Approved'" @click="approveFriendRequest(notification)">
           <span v-if="!notification.completed"><v-icon>mdi-check</v-icon></span>
         </v-btn>
-        <v-btn text color="red" v-if="notification.type === 'friendRequest'" @click="declineFriendRequest(notification)">
+        <v-btn text color="red" v-if="notification.type === 'friendRequest' && notification.title !== 'Friend Request Approved'" @click="declineFriendRequest(notification)">
           <span v-if="!notification.completed"><v-icon>mdi-delete</v-icon></span>
         </v-btn>
         <v-btn text v-else-if="notification.goTo" @click="goTo(notification.goTo)">
@@ -167,6 +167,7 @@ export default defineComponent({
             title: 'Friend Request Approved',
             seen: false,
             archived: false,
+            type: 'friendRequest',
             body: `@${profile.value.username} accepted your friendship.`,
           })
         })
@@ -233,6 +234,7 @@ export default defineComponent({
             // Send response to requester
             dispatch('user/notifications/add', {
               uid: notification.meta.requestedBy,
+              type: 'checkinRequest',
               title: 'Checked-In',
               created_at: new Date(),
               seen: false,
