@@ -7,10 +7,28 @@ export default async function ({ app, store, redirect }) {
     let userToken = user ? await user.getIdTokenResult() : false
 
     if (!user && device.platform !== 'web') {
-      user = await FirebaseAuthentication.getCurrentUser();
+      user = await FirebaseAuthentication.getCurrentUser()
       userToken = await FirebaseAuthentication.getIdToken().catch(e=> {
-          console.log('STICKY: not able to getIdToken', e, JSON.stringify(e))
+          console.log('STICKY: [auth] ERROR > No getIdToken', e, JSON.stringify(e))
       })
+    }
+
+    if (!user || !userToken) {
+        console.log('STICKY: [auth] ERROR > NO USER or TOKEN')
+        console.log('STICKY: [auth] ERROR > USER: ', user, JSON.stringify(user))
+        console.log('STICKY: [auth] ERROR > USER TOKEN: ', userToken, JSON.stringify(userToken))
+        // WE NEED TO PUT A BLOCK HERE
+
+        /*setTimeout(async() => {
+            console.log('STICKY: [auth] TESTING A TIMEOUT')
+            let user1 = app.$fire.auth.currentUser
+            let user2 = await FirebaseAuthentication.getCurrentUser()
+            console.log('STICKY: [auth] USER1: ', user, JSON.stringify(user1))
+            console.log('STICKY: [auth] USER2: ', user, JSON.stringify(user2))
+
+        }, 10000)
+
+        return redirect('/auth')*/
     }
 
     function checkUserStatus () {
