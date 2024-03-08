@@ -232,6 +232,8 @@ export default {
         username_heading: '¿Como deberíamos llamarte?',
         username_sub: 'Establezca un nombre para mostrar para que otros sepan con quién están hablando.',
         email_sub: 'Proporcione su dirección de correo electrónico. Esta se utilizará para recuperar su cuenta en caso de que pierda su número de teléfono.',
+        country_sub: `Háganos saber de dónde es.`,
+        how_did_you_hear: `¿Cómo te enteraste de nosotras?`,
         error_wrong_password: `La contraseña ingresada es incorrecta.`,
         error_user_not_found: `No existe ningún usuario. Por favor crea una nueva cuenta`,
         error_email_in_use: `La dirección de correo electrónico ya está en uso.`,

@@ -231,6 +231,8 @@ export default {
         username_heading: 'What should we call you?',
         username_sub: 'Set a display name for others to know who they are talking to.',
         email_sub: 'Provide your email address. This will be used to recover your account if your phone number is lost.',
+        country_sub: `Let us know where you are from.`,
+        how_did_you_hear: `How did you hear about us?`,
         error_wrong_password: `The password inputted is incorrect.`,
         error_user_not_found: `No user exists. Please create a new account.`,
         error_email_in_use: `The email address is already in use.`,

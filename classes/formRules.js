@@ -26,5 +26,8 @@ export default {
     ],
     title: [
         v => !!v || 'Is required'
+    ],
+    country: [
+        v => !!v || 'Is required'
     ]
 }
