@@ -7,7 +7,7 @@
         </div>
       </v-toolbar-title>
       <v-spacer />
-      <NotificationsClearbtn @filtersChanged="updateFilters"/>
+      <NotificationsClearbtn :filters="filters" @filtersChanged="updateFilters"/>
     </v-app-bar>
 
     <v-row class="pt-10 px-5">
@@ -18,6 +18,14 @@
         <div v-if="filteredNotifications.length > 0">
           <div v-for="(notification, index) in filteredNotifications" :key="index">
             <UserNotifications :notification="notification" />
+          </div>
+          <div class="mt-5 text-center">
+            <v-btn 
+              text
+              @click="archiveNotifications" 
+            >
+            {{ $t('notifications.archive_all') }}
+            </v-btn>
           </div>
         </div>
         <div v-else class="mt-10">
@@ -48,9 +56,8 @@ export default defineComponent({
     return +to.query.page < +from.query.page ? 'slide-right' : 'slide-left'
   },
   setup () {
-    const { state } = useStore()
+    const { state, dispatch } = useStore()
     const user = computed(() => state.user.data)
-
 
     const loading = ref(false)
     const allNotifications = computed(() => {
@@ -79,11 +86,22 @@ export default defineComponent({
 
     const updateFilters = (f) => filters.value = f;
 
+    const archiveNotifications = () => {
+      console.log("Archiving", filteredNotifications.value)
+      filteredNotifications.value.map(async (notification) => {
+        await dispatch('user/notifications/update', {
+          id: notification.id,
+          archived: true
+        })
+      })
+    }
+
     return {
       user,
       loading,
+      filters,
       filteredNotifications,
-      updateFilters
+      updateFilters, archiveNotifications
     }
   },
 })

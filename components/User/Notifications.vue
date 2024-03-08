@@ -166,6 +166,7 @@ export default defineComponent({
             uid: notification.meta.requestedBy,
             title: 'Friend Request Approved',
             seen: false,
+            archived: false,
             body: `@${profile.value.username} accepted your friendship.`,
           })
         })
@@ -235,6 +236,7 @@ export default defineComponent({
               title: 'Checked-In',
               created_at: new Date(),
               seen: false,
+              archived: false,
               body: `${username} has checked-in.`,
             })
 

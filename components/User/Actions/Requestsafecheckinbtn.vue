@@ -88,6 +88,7 @@ export default defineComponent({
           goTo: '/',
           type: 'checkIn',
           seen: false,
+          archived: false,
           created_at: new Date(),
           meta: {
             checkInId: checkAddId.value,

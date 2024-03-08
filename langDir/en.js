@@ -192,7 +192,9 @@ export default {
         checked_in_title: 'Checked-In',
         has_checked_in: ' has checked-in.',
         welcome_title: 'Welcome',
-        welcome_body: 'Welcome to MyShout'
+        welcome_body: 'Welcome to MyShout',
+        archive: 'Archive',
+        archive_all: 'Archive All Notifications'
     },
     gps: {
         gps: 'GPS',

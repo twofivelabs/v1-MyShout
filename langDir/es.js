@@ -193,7 +193,9 @@ export default {
         checked_in_title: 'Registrada',
         has_checked_in: ' se ha registrado.',
         welcome_title: 'Bienvenida',
-        welcome_body: 'Bienvenida a myShout'
+        welcome_body: 'Bienvenida a myShout',
+        archive: 'Archivo',
+        archive_all: 'Archivar todas las notificaciones'
     },
     gps: {
         gps: 'GPS',
