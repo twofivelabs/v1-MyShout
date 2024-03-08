@@ -9,6 +9,7 @@
         <v-card-title>Select Notification Filters</v-card-title>
         <v-card-text>
           <v-checkbox v-model="localFilters.alert" label="Alerts"></v-checkbox>
+          <v-checkbox v-model="localFilters.checkIn" label="Check-Ins"></v-checkbox>
           <v-checkbox v-model="localFilters.friendRequest" label="Friend Requests"></v-checkbox>
         </v-card-text>
         <v-card-actions>

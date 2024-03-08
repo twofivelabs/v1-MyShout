@@ -68,6 +68,7 @@ export default defineComponent({
     const filters = ref({
       alert: true,
       friendRequest: true,
+      checkIn: true
     })
 
     const filteredNotifications = computed(() => {
@@ -77,6 +78,9 @@ export default defineComponent({
           return true
         }
         if (notification.type === 'friendRequest' && filters.value.friendRequest) {
+          return true
+        }
+        if (notification.type === 'checkIn' && filters.value.checkIn) {
           return true
         }
 
