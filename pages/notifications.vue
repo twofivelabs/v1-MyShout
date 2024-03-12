@@ -61,6 +61,7 @@ export default defineComponent({
 
     const loading = ref(false)
     const allNotifications = computed(() => {
+      console.log("state.user.notifications", state.user.notifications)
       const loaded = state.user.notifications.all
       return orderBy(loaded, ['seconds'], ['desc'])
     })
@@ -72,6 +73,7 @@ export default defineComponent({
     })
 
     const filteredNotifications = computed(() => {
+      console.log("Notifications", allNotifications.value)
       // Apply filters to notifications
       return filter(allNotifications.value, (notification) => {
         if (notification.type === 'alert' && filters.value.alert) {

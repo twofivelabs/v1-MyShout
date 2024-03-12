@@ -1,5 +1,5 @@
 <template #activator="{ isActive, props }">
-  <main class="mb-3 px-3">
+  <main v-if="!message.hide || !message.hide.includes(userId)" class="mb-3 px-3">
     <div v-if="message.forward && forward">
       <v-row class="align-center py-1" :class="message.owner === userId ? 'flex-row-reverse ' : ''">
         <v-col
@@ -75,7 +75,7 @@
           <ChatMessageLink :url="message.urls[0]" />
         </v-col>
 
-        <v-col cols="1" v-if="(owner && message.owner !== userId) && (!message.hide || !message.hide.includes(userId))" class="avatar-align-top">
+        <v-col cols="1" v-if="owner && message.owner !== userId" class="avatar-align-top">
           <ChatAvatar :user="owner" :color="`${ (message.owner === userId) ? 'primary' : 'gray' }`" />
         </v-col>
         <v-col
