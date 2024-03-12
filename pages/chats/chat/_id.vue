@@ -17,17 +17,20 @@
     </v-app-bar>
 
 
-    <v-container v-if="messages && messages.length > 0" style=" z-index: 0; width: 100%; padding-bottom: 100px !important;">
-      <div v-for="(message) in messages" :key="message.id">
-        <ChatMessage :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" v-intersect="onMessageInterest(message)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
+    <v-container v-if="!messagesLoading" style=" z-index: 0; width: 100%;">
+      <div v-if="messages.length > 0">
+        <ChatMessage v-for="(message) in messages" :key="message.id" :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" v-intersect="onMessageInterest(message)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
+      </div>
+      <div v-else class="text-center pt-10" style="opacity:0.5">
+        {{$t('chat.no_messages')}}
       </div>
       <ChatTyping :chat="chat" :participants="participants" />
     </v-container>
     <v-container v-else class="pa-6 mt-5">
       <v-skeleton-loader v-for="x of 4" :key="x" width="100%" max-height="50" type="text" class="mb-6" />
     </v-container>
-    <div id="bottomOfChat" />
-
+    
+    <div id="bottomOfChat" style="padding-bottom: 100px !important;"></div>
     <ChatInput :chat="chat" :reply="isReply" @updateReply="handleReply" @updateTyping="updateTypingStatus" />
   </div>
 </template>
@@ -46,7 +49,7 @@ import {
 } from '@nuxtjs/composition-api';
 
 import { Intersect } from 'vuetify/lib/directives';
-//import Vue from 'vue'
+import Vue from 'vue'
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
@@ -55,7 +58,7 @@ export default defineComponent({
   middleware: 'authenticated',
   directives: { Intersect },
   setup() {
-    const { $vuetify, $fire, $helper, $capacitor, $encryption } = useContext();
+    const { /*$vuetify,*/ $fire, $capacitor, $helper, $encryption } = useContext();
     const { dispatch, state } = useStore();
     const route = useRoute();
     const user = computed(() => state.user);
@@ -110,13 +113,13 @@ export default defineComponent({
     };
 
     const loadMessages = async () => {
-      messagesLoading.value = true;
+      //messagesLoading.value = true;
       try {
         messageListener.value = await $fire.firestore
           .collection(`Chats/${chatId.value}/Messages`)
           .orderBy('created_at', 'asc')
           .limitToLast(100)
-          .onSnapshot((snapshot) => {
+          .onSnapshot( (snapshot) => {
             snapshot.docChanges().forEach((change) => {
               if (change.type === 'added') {
                 const data = change.doc.data()
@@ -126,7 +129,6 @@ export default defineComponent({
                 if (data.message) data.message = $encryption.decrypt(data.message)
                 if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
 
-                // Check if the message already exists before adding
                 const messageExists = messages.value.some(message => message.id === data.id)
                 if (!messageExists) messages.value.push(data)
 
@@ -135,23 +137,13 @@ export default defineComponent({
                 const data = change.doc.data();
                 const index = messages.value.findIndex(m => m.id === change.doc.id);
 
-                // For some reason, even though a new message was coming through, it still
-                // made it a 'modified message', not new.
-                /* if (index !== -1) messages.value[index] = {
-                  ...messages.value[index], ...data
-                }; */
-                //console.log('DATA BEFORE', data)
                 if (data.message) data.message = $encryption.decrypt(data.message)
                 if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
-                //console.log('DATA AFTER', data)
-                // TODO: we need to update this to be reactive
-                if (index !== -1) messages.value[index] = {
-                  ...messages.value[index], ...data
-                };
-                /*if (index !== -1) {
+                if (index !== -1) {
+                  //messages.value[index] = {...messages.value[index], ...data};
                   Vue.set(messages.value, index, {...data})
-                }*/
-
+                  Vue.up
+                }
               }
             });
             messagesLoading.value = false;
@@ -159,6 +151,8 @@ export default defineComponent({
       } catch (error) {
         console.error('ERROR LOADING MESSAGES', error);
         messagesLoading.value = false;
+      } finally {
+        messagesLoading.value = false
       }
     };
 
@@ -177,12 +171,7 @@ export default defineComponent({
           const unseenMessage = messages.value.find(message => !message.seen.includes(user.value.data.uid));
 
           if (unseenMessage) {
-            const messageElement = document.getElementById(`message-${unseenMessage.id}`);
-            if (messageElement) {
-              messageElement.scrollIntoView({ behavior: "smooth" });
-            }
-          } else {
-            $vuetify.goTo('#bottomOfChat', { behavior: "smooth" });
+            document.getElementById(`message-${unseenMessage.id}`).scrollIntoView({ behavior: "smooth" });
           }
         });
       } catch (error) {
@@ -213,12 +202,14 @@ export default defineComponent({
       if (to.params.id && !from || (to.params.id !== from.params.id)) loadChat();
     }, { immediate: true });
 
-    watch(() => messages.value, () => {
-      scrollToUnseenMessage();
+    watch(() => messages.value, (newMessages, oldMessages) => {
+      if (newMessages && oldMessages && newMessages !== oldMessages) return scrollToUnseenMessage();
     }, { deep: true });
 
     onMounted(() => {
       $capacitor.AdMob_hideBanner();
+
+      setTimeout(() => { document.getElementById(`bottomOfChat`).scrollIntoView({ behavior: "smooth" }) },400)
     });
 
     onUnmounted(() => {

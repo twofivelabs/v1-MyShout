@@ -294,7 +294,8 @@ export default {
         forward_to: 'Forward To',
         recent_chats: 'Recent Chats',
         download_file: 'Download File',
-        refresh_chat: 'Refresh Chat'
+        refresh_chat: 'Refresh Chat',
+        no_messages: 'This chat has no messages'
     },
 
     no_results: 'No results',

@@ -202,7 +202,7 @@
         </v-col>
         <v-col
           cols="10" style="margin-top:-2px;" class="pa-0"
-          v-if="!message.hide || !message.hide.includes(userId)"
+          v-if="!message.deleted && (!message.hide || !message.hide.includes(userId))"
         >
           <ChatMessageReactions :chat="chat" :message="message" :thread="thread" />
         </v-col>

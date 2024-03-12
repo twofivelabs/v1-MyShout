@@ -290,7 +290,8 @@ export default {
         forward_to: 'Reenviar a',
         recent_chats: 'Chats Recientes',
         download_file: 'Descargar Archivo',
-        refresh_chat: 'Actualizar chat'
+        refresh_chat: 'Actualizar chat',
+        no_messages: `Este chat no tiene mensajes.`
     },
 
     no_results: 'No hay resultados',

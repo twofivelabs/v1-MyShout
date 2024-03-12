@@ -1,6 +1,6 @@
 <template #activator="{ isActive, props }">
 <div class="reactions-display pa-0 align-center justify-end" style="margin-top:-5px;">
-  <div v-if="!message.deleted && reactions.length">
+  <div v-if="reactions.length">
      <template>
       <div v-for="reaction in reactions" :key="reaction.emoji" class="reaction-item">
         <span>{{ reaction.emoji }}</span>

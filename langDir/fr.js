@@ -289,7 +289,8 @@ export default {
         message_thread: 'Fil de Messages',
         forward_to: 'Transférer à',
         download_file: 'élécharger le fichier',
-        refresh_chat: 'Actualiser la discussion'
+        refresh_chat: 'Actualiser la discussion',
+        no_messages: `Ce chat n'a pas de messages`
     },
 
     no_results: 'Aucun résultat',
