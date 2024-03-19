@@ -1,4 +1,10 @@
+import Vue from 'vue'
+
+export const strict = false
+
 export const state = () => ({
+  isAppInit: false,
+  appLoading: true,
   authUser: null,
   onboarding: {
       phoneNumber: null
@@ -11,9 +17,16 @@ export const state = () => ({
 export const getters = {}
 
 export const mutations = {
-  SHOW_FOOTER: (state, data) => {
+    SHOW_FOOTER: (state, data) => {
     state.globals.showFooter = data
-  }
+    },
+    SET_APP_LOADING: (state, value) => {
+        Vue.set(state, 'loading', value)
+    },
+    SET_KEY: (state, { key, value }) => {
+        if (!key) return
+        Vue.set(state, key, value)
+    },
 }
 
 export const actions = {

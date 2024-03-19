@@ -6,9 +6,7 @@
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="50vh" class="rounded-t-xl">
         <div class="ma-3" style="padding-bottom:180px">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
           <v-form ref="formEl" @submit.prevent="validate">
             <v-text-field
@@ -48,7 +46,7 @@ export default defineComponent({
   name: 'FormsForgotpasswordbtn',
   directives: { Touch },
   setup() {
-    const { $system, $fire, i18n, $notify } = useContext()
+    const { $system, $db, i18n, $notify } = useContext()
     const loading = ref(false)
     const showBottomSheet = ref(false)
     const form = ref({
@@ -74,15 +72,14 @@ export default defineComponent({
     const forgotPassword = async () => {
       if (form.value.email) {
         try {
-          await $fire.auth.sendPasswordResetEmail(form.value.email)
+          await $db.fire().capAuth.sendPasswordResetEmail({
+            email: form.value.email
+          })
+          // await $db.fire().sendPasswordResetEmail($db.fire().auth, form.value.email)
           $notify.show({ text: i18n.t('notify.check_your_email') })
 
         } catch (e) {
-          $system.log({
-            comp: 'ForgotPasswordPop',
-            msg: 'Reset Password',
-            val: e
-          })
+          $system.log({ comp: 'ForgotPasswordPop', msg: 'Reset Password', val: e })
           $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } else {
@@ -94,10 +91,10 @@ export default defineComponent({
     return {
       loading,
       showBottomSheet,
-      swipe,
       rules,
       form,
       formEl,
+      swipe,
       validate,
       forgotPassword
     }

@@ -54,7 +54,7 @@ export default defineComponent({
   middleware: 'guest',
   setup () {
     const router = useRouter()
-    const { $config, $notify, $fire, $system, i18n } = useContext()
+    const { $config, $notify, $db, $system, i18n } = useContext()
     const loading = ref(false)
 
     // DEFINE CONTENT
@@ -78,15 +78,13 @@ export default defineComponent({
     const forgotPassword = async () => {
       if (form.value.email) {
         try {
-          await $fire.auth.sendPasswordResetEmail(form.value.email)
+          await $db.fire().sendPasswordResetEmail($db.fire().auth, form.value.email)
+
           $notify.show({ text: i18n.t('notify.check_your_email') })
           await router.push('/login')
+
         } catch (e) {
-          $system.log({
-            comp: 'ForgotPasswordPage',
-            msg: 'Reset Password',
-            val: e
-          })
+          $system.log({ comp: 'ForgotPasswordPage', msg: 'Reset Password', val: e })
           $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } else {

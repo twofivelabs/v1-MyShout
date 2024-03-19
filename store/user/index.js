@@ -117,6 +117,18 @@ const dataConverter = {
   }
 }
 
+function createInitial (data) {
+    if (data && data.username && data.initial.length > 0) {
+        return data.username.charAt(0).toUpperCase()
+    } else if (data && data.first_name && data.first_name.length > 0) {
+        return data.first_name.charAt(0).toUpperCase()
+    } else if (data && data.email && data.email.length > 0) {
+        return data.email.charAt(0).toUpperCase()
+    }
+    return 'A'
+}
+
+
 export const state = () => reactive({
   all: [],
   profile: new User({}).fields,
@@ -124,6 +136,7 @@ export const state = () => reactive({
   gps: {}, // Used for position GPS
   one: new User({}).fields,
   loaded: {},
+  authStateLoaded: false,
 })
 
 export const getters = {
@@ -278,9 +291,8 @@ export const mutations = {
   },
 
   ON_AUTH_STATE_CHANGED_MUTATION: (state, { authUser, claims }) => {
-    if (!authUser) {
-      // NO USER
-    } else {
+      if (!authUser) return
+
       const {
         uid,
         email,
@@ -288,34 +300,26 @@ export const mutations = {
         emailVerified,
         photoURL
       } = authUser
-      state.data = {
-        uid,
-        email,
-        phone: phoneNumber || null,
-        photoURL: photoURL || null,
-        customer: claims.customer,
-        admin: claims.admin,
-        role: { ...claims },
-        emailVerified
-      }
+
+      state.data.id = uid
+      state.data.uid = uid
+      state.data.email = email || null
+      state.data.emailVerified = emailVerified
+      state.data.phone = phoneNumber || null
+      state.data.photoURL = photoURL || null
+      state.data.customer = claims.customer
+      state.data.admin = claims.admin
+      state.data.role = { ...claims }
+      state.data.isAnonymous = false
+
+      state.profile.id = uid
       state.profile.email = email
       state.profile.phone = phoneNumber
       state.profile.emailVerified = emailVerified
       state.profile.photoURL = photoURL || null
-      if (state.profile.first_name && state.profile.first_name.length > 0) {
-        state.profile.initial = state.profile.first_name.charAt(0).toUpperCase()
-      } else if (email && email.length > 0) {
-        state.profile.initial = email.charAt(0).toUpperCase()
-      } else {
-        if(!state.profile.initial || state.profile.initial.length <= 0) {
-            if(state.profile.username && state.profile.initial.length >= 1) {
-                state.profile.initial = state.profile.username.charAt(0).toUpperCase()
-            }
-        }
-        state.data.isAnonymous = true
-        state.profile.initial = 'A'
-      }
-    }
+      state.profile.initial = createInitial(state.profile)
+      state.profile.role = { ...claims }
+
   }
 }
 
@@ -414,7 +418,8 @@ export const actions = {
     if (!id) {
       id = getters.userId
     }
-    const response = await this.$db.get_one(`${dbRootPath}/${id}`)
+    //const response = await this.$db.get_one(`${dbRootPath}/${id}`)
+    const response = await this.$db.get(`${dbRootPath}/${id}`)
     if (response) {
       //await commit('SET_HAS_NOTIFICATIONS', { ...response })
       await commit('SET_USER_PROFILE_INIT', { ...response })
@@ -424,23 +429,19 @@ export const actions = {
   async listen({ commit, dispatch }, id) {
       try {
         if(id) {
-          return this.$fire.firestore
-              .doc(`Users/${id}`)
-              .onSnapshot(async (doc) => {
-                if (doc.exists) {
-                  const data = doc.data()
-                  data.id = doc.id,
+            const userListener = await this.$db.listen({path:`Users/${id}`})
+            if (userListener) {
+                await commit('SET_USER_PROFILE_INIT', {...userListener})
 
-                  await commit('SET_USER_PROFILE_INIT', {...data})
-                  // console.log('STICKY: BEFORE CHECKING USER DATA')
-                  setTimeout(async () => {
+                setTimeout(async () => {
                     await dispatch("checkUserData")
-                  }, 1500)
-                }
-              })
+                }, 1000)
+            }
+
+            return userListener
         }
-      } catch {
-          console.log('Error listening to user')
+      } catch(e) {
+          console.log('Error listening to user:', e)
       }
   },
   async checkUserData ({ state }) {
@@ -468,7 +469,8 @@ export const actions = {
       const uid = id || rootState.user.data.uid
       if (!uid) { return }
 
-      const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
+      // const one = await this.$db.get(`${dbRootPath}/${id}`, dataConverter)
+      const one = await this.$db.get(`${dbRootPath}/${id}`)
       if (one) {
         await commit('SET_ONE', one)
         await commit('PUSH_TO_LOADED', one)
@@ -486,7 +488,7 @@ export const actions = {
   async joinUser({ commit }, user) {
     try {
         const uid = (user && user.id) ? user.id : user
-        return await this.$fire.firestore
+        return await this.$db.fire().fs
             .doc(`${dbRootPath}/${uid}`)
             .get()
             .then((doc) => {
@@ -498,11 +500,7 @@ export const actions = {
                 }
             })
     } catch (e) {
-        this.$system.log({
-          comp: 'store/user',
-          msg: 'joinUser',
-          val: e
-        })
+        this.$system.log({ comp: 'store/user', msg: 'joinUser', val: e })
         return false
     }
   },
@@ -515,8 +513,9 @@ export const actions = {
    * @returns {Promise<void>}
    */
   async onAuthStateChanged ({ commit, dispatch }, { authUser, claims }) {
+    console.info(`🔐Auth State Changed`)
     if (!authUser) {
-      return await dispatch('noUserCleanUp')
+        return await dispatch('signOut')
     }
 
     try {
@@ -528,23 +527,18 @@ export const actions = {
         val: e
       })
     }
-    // await commit('SET_AUTH_USER', { authUser, claims })
-    await commit('ON_AUTH_STATE_CHANGED_MUTATION', {
-      authUser,
-      claims
-    })
 
+    await this.$storage.setUniversal('uid', authUser.uid)
+    await this.$storage.setUniversal('claims', claims)
+    await commit('ON_AUTH_STATE_CHANGED_MUTATION', { authUser, claims })
     await dispatch('setUserProfile', authUser.uid)
+
+    console.info(`👤User: ${authUser.uid}`)
   },
   async setUserProfile ({ dispatch }, authUserUid) {
     if (authUserUid) {
-      //if (this.$db) { // This was stopping things from working....
-        // await dispatch('get', authUserUid)
         await dispatch('listen', authUserUid)
-        //await dispatch('cart/getCurrent', authUserUid, { root: true })
-        //await dispatch('user/favourites/getAll', authUserUid, { root: true })
-        //await dispatch('user/tagging/getAll', authUserUid, { root: true })
-        //await dispatch('user/notifications/getAll', {}, { root: true })
+
         await dispatch('user/notifications/listen', {
           where: [{
             field: 'archived',
@@ -552,7 +546,6 @@ export const actions = {
             value: false
           }]
         }, { root:true })
-      //}
     }
   },
   async noUserCleanUp ({ commit }) {
@@ -563,21 +556,18 @@ export const actions = {
    * Sign user out
    * @returns {Promise<void>}
    */
-  async signOut ({ dispatch }) {
-    try {
-      await this.$fire
-        .auth
-        .signOut()
-        .then(() => {
-          dispatch('noUserCleanUp')
-          this.$router.push('/auth/')
-        })
-    } catch (e) {
-      this.$system.log({
-        comp: 'store/user',
-        msg: 'signOut',
-        val: e
-      })
-    }
+  async signOut ({ commit }) {
+      try {
+          await this.$db.fire().signOut(this.$db.fire().auth).then(() => {
+              this.$db.fire().capAuth.signOut()
+
+              commit('RESET_STORE')
+              this.$storage.setUniversal('uid', null)
+              this.$router.push('/auth/')
+          })
+
+      } catch (e) {
+          this.$system.log({ comp: 'store/user', msg: 'signOut', val: e })
+      }
   }
 }

@@ -151,7 +151,8 @@ export const actions = {
         await commit('SET_ONE', state.loaded[id])
         return state.loaded[id]
       }
-      const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
+      //const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
+      const one = await this.$db.get(`${dbRootPath}/${id}`)
       if (one) {
         await commit('SET_ONE', one)
         await commit('PUSH_TO_LOADED', one)
@@ -174,7 +175,7 @@ export const actions = {
     if (this.$config?.wordpress?.usePosts) {
       all = await this.$wp.get_all(where, limit)
     } else {
-      all = await this.$db.get_all(`${dbRootPath}`, where, dataConverter)
+      all = await this.$db.get(`${dbRootPath}`, {where, limit})
     }
     if (all) {
       await commit('SET_ALL', all)

@@ -3,14 +3,15 @@
          class="appMaxWidth grey lighten-5"
          dark
   >
-    <v-main>
+    <v-progress-linear v-if="$store.state.appLoading" class="mb-0" indeterminate />
+    <v-main  v-if="!$store.state.appLoading">
       <div>
         <GlobalIsoffline/>
         <Nuxt keep-alive/>
       </div>
     </v-main>
-    <GlobalSnackbar/>
-    <GlobalFooter/>
+    <GlobalSnackbar v-if="!$store.state.appLoading"/>
+    <GlobalFooter v-if="!$store.state.appLoading"/>
 <!--    <GlobalMobilefooter/>-->
   </v-app>
 </template>
@@ -28,7 +29,7 @@ export default defineComponent({
   name: 'AdminLayout',
   setup () {
     const { state, dispatch } = useStore()
-    const { $config, $remoteConfig, $fire, $system, $capacitor } = useContext()
+    const { $config, $fire, $system, $capacitor } = useContext()
 
     // MOUNT
     onBeforeMount(async () => {
@@ -64,12 +65,6 @@ export default defineComponent({
 
       $capacitor.AdMob_hideBanner()
 
-      // Load remote config from firebase
-      try {
-        $remoteConfig.load()
-      } catch {
-        // ... ERROR
-      }
     })
 
     return {

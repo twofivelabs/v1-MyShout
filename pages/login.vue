@@ -5,7 +5,7 @@
       <v-col cols="12" md="5" :order="`${$vuetify.breakpoint.mdAndUp ? '' : 'last' }`">
         <div class="mt-8">
           <p>
-            <nuxt-link to="/onboarding/">
+            <nuxt-link to="/auth/">
               {{ $t('btn.register_no_account') }}
             </nuxt-link>
           </p>
@@ -36,52 +36,15 @@ import {
   ref
 } from '@nuxtjs/composition-api'
 
-import formRules from '~/classes/formRules'
-
 export default defineComponent({
   name: 'LoginPage',
   setup () {
-    const { $config, $notify, $fire, $system, i18n } = useContext()
+    const { $config } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
     // DEFINE CONTENT
-    const rules = formRules
-    const valid = ref(true)
-    const formEl = ref(null)
-    const form = ref({
-      email: '',
-      password: ''
-    })
-
-    // METHODS
-    const validate = async () => {
-      loading.value = true
-      const valid = await formEl.value.validate()
-      if (valid) {
-        await login()
-      }
-      loading.value = false
-    }
-    const login = async () => {
-      if (form.value.email && form.value.password) {
-        try {
-          await $fire.auth.signInWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
-          $fire.analytics.logEvent('login')
-          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
-          await router.push('/')
-        } catch (e) {
-          $system.log({
-            comp: 'LoginPage',
-            msg: 'Trying to login',
-            val: e
-          })
-          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        }
-      } else {
-        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-      }
-    }
+    router.push('/auth')
 
     // PAGE META
     useMeta({
@@ -95,12 +58,6 @@ export default defineComponent({
 
     return {
       loading,
-      valid,
-      form,
-      formEl,
-      rules,
-      validate,
-      login
     }
   },
   // REQUIRED FOR NUXT 2

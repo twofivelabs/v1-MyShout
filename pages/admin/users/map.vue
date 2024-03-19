@@ -132,11 +132,7 @@ export default defineComponent({
           }
         })
       } catch(e) {
-        $system.log({
-          comp: 'AdminUsersMap',
-          msg: 'Not able to get users for map',
-          val: e
-        })
+        $system.log({ comp: 'AdminUsersMap', msg: 'Not able to get users for map', val: e })
       } finally {
         loading.value = false
       }
@@ -402,11 +398,7 @@ export default defineComponent({
           $capacitor.gpsInit()
         }
       } catch(e) {
-        $system.log({
-          comp: 'MapPage',
-          msg: 'Not able to get position',
-          val: e
-        })
+        $system.log({ comp: 'MapPage', msg: 'Not able to get position', val: e })
       } finally {
         loading.value = false
       }

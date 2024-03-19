@@ -16,9 +16,9 @@
 import {
   computed,
   defineComponent,
-  ref,
+  ref, useContext,
   useStore,
-  watch
+  watch,
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -38,7 +38,8 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { state, dispatch } = useStore()
+    const { state } = useStore()
+    const { $db } = useContext()
     const user = computed(() => state.user.data)
     const url = ref(null)
     const participant = ref(null)
@@ -46,9 +47,9 @@ export default defineComponent({
     watch(() => props.chat, async (chat) => {
       if(chat && chat.participants.length === 2) {
         const filtedParticipants = chat.participants.filter(uid => uid !== user.value.uid)
-        participant.value = await dispatch('user/getOne', filtedParticipants[0]);
+        participant.value = await $db.get(`Users/${filtedParticipants[0]}`)
       }
-    }, { immediate: true });
+    }, { immediate: true })
 
     return {
       url,

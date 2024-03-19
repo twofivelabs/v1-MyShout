@@ -51,8 +51,8 @@ import lodash from 'lodash'
 export default defineComponent({
   name: 'ChatViewsearchmembers',
   setup(_, { emit }) {
-    const { $system, $helper } = useContext()
-    const { dispatch, state } = useStore()
+    const { $system, $helper, $db } = useContext()
+    const { state } = useStore()
     const loading = ref(false)
     const user = computed(() => state.user.data)
 
@@ -66,21 +66,24 @@ export default defineComponent({
     // METHODS
     const getFriends = async () => {
       loading.value = true
+
       try {
-        await dispatch('user/friends/getAll', {
+        await $db.get(`Users/${user.value.uid}/Friends`).then((res) => {
+          if (res !== false) {
+            friends.value = res
+            friendsUnFiltered.value = res
+          }
+        })
+        /* await dispatch('user/friends/getAll', {
           uid: user.value.uid
         }).then((res) => {
           if (res !== false) {
             friends.value = res
             friendsUnFiltered.value = res
           }
-        })
+        }) */
       } catch(e) {
-        $system.log({
-          comp: 'Newchat',
-          msg: 'getFriends',
-          val: e
-        })
+        $system.log({ comp: 'Newchat', msg: 'getFriends', val: e })
       } finally {
         loading.value = false
       }
@@ -109,11 +112,7 @@ export default defineComponent({
       try {
         await getFriends()
       } catch(e) {
-        $system.log({
-          comp: 'ChatViewsearchmembers',
-          msg: 'getFriends',
-          val: e
-        })
+        $system.log({ comp: 'ChatViewsearchmembers', msg: 'getFriends', val: e })
       } finally {
         loading.value = false
       }

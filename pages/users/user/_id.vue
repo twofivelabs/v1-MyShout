@@ -110,7 +110,7 @@ export default defineComponent({
     } = useMeta()
     const {
       $config,
-      $system,
+      $db,
       error
     } = useContext()
     const route = useRoute()
@@ -135,47 +135,22 @@ export default defineComponent({
     const getPageData = async () => {
       loading.value = true
       try {
-        await dispatch('user/getOne', route.value?.params?.id).then((res) => {
-          if (res !== false) {
-            publicUser.value = lodash.cloneDeep(res)
-          }
-        }).catch((e) => {
-          $system.log({
-            comp: 'PageUsersId',
-            msg: 'user/getOne',
-            val: e
-          })
-        })
+        const publicUserRes = await $db.get(`Users/${route.value?.params?.id}`)
+        if (publicUserRes) publicUser.value = lodash.cloneDeep(publicUserRes)
 
         // GET STATUS OF FRIENDSHIP
-        await dispatch('user/friends/getMyAccess', {
+        const myAccessRes = await dispatch('user/friends/getMyAccess', {
           userId: loggedInUser.value?.uid,
           id: route.value?.params?.id,
-        }).then((res) => {
-          if (res !== false) {
-            myFriendshipAccess.value = res
-          }
-        }).catch((e) => {
-          $system.log({
-            comp: 'PageUsersId',
-            msg: 'user/friends/getMyAccess',
-            val: e
-          })
         })
-        await dispatch('user/friends/getAccess', {
+        if (myAccessRes) myFriendshipAccess.value = myAccessRes
+
+        const getFriendAccess = await dispatch('user/friends/getAccess', {
           userId: loggedInUser.value?.uid,
           id: route.value?.params?.id,
-        }).then((res) => {
-          if (res !== false) {
-            friendshipAccess.value = res
-          }
-        }).catch((e) => {
-          $system.log({
-            comp: 'PageUsersId',
-            msg: 'user/friends/getAccess',
-            val: e
-          })
         })
+        if (getFriendAccess) friendshipAccess.value = getFriendAccess
+
 
         // PAGE META
         if (publicUser.value) {
@@ -184,7 +159,7 @@ export default defineComponent({
             meta.value[0] = {
               hid: 'description',
               name: 'description',
-              content: publicUser.value.username.replace(/^(.{155}[^\s]*).*/, '$1')
+              content: publicUser.value?.username.replace(/^(.{155}[^\s]*).*/, '$1')
             }
           }
         }

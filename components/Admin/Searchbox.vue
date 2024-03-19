@@ -85,12 +85,10 @@ export default defineComponent({
                 })
         }
       } catch(e) {
-        $system.log({
-          comp: 'AdminSearchbox', msg: 'querySelections', val: e
-        })
+        $system.log({ comp: 'AdminSearchbox', msg: 'querySelections', val: e })
       } finally {
-        loading.value = false
         console.log('ITEMS', localItems.length)
+        loading.value = false
         items.value = localItems
       }
     }

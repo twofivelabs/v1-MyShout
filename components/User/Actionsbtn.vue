@@ -6,9 +6,7 @@
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="50vh" class="rounded-t-xl">
         <div class="ma-3" style="padding-bottom:180px;">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
           <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
           <ElementH3 align="center" :text="$t('actions')" />
@@ -62,15 +60,11 @@ export default defineComponent({
 
     // METHODS
     const showUserActions = async () => {
+      loading.value = true
       try {
-        loading.value = true
         showBottomSheet.value = true
       } catch(e) {
-        $system.log({
-          comp: 'UserActionsbtn',
-          msg: 'showUserActions',
-          val: e
-        })
+        $system.log({ comp: 'UserActionsbtn', msg: 'showUserActions', val: e })
       } finally {
         loading.value = false
       }

@@ -30,9 +30,9 @@ export default defineComponent({
   middleware: 'authenticated',
   setup () {
     const {
-      state, dispatch
+      state,
     } = useStore()
-    const { $system } = useContext()
+    const { $system, $db } = useContext()
     const user = computed(() => state.user.data)
     const loading = ref(false)
 
@@ -41,8 +41,15 @@ export default defineComponent({
 
     // METHODS
     const getFriends = async () => {
+      loading.value = true
+
       try {
-        loading.value = true
+        await $db.get(`Users/${user.value.uid}/Friends`, {
+          where: ['isEmergency', '==', true]
+        }).then(response => {
+          friends.value = response
+        })
+        /*
         await dispatch('user/friends/getAll', {
           where: [{
             field: 'isEmergency',
@@ -52,13 +59,9 @@ export default defineComponent({
           uid: user.value.uid
         }).then((response) => {
           friends.value = response
-        })
+        }) */
       } catch(e) {
-        $system.log({
-          comp: 'UserAccountEmergency',
-          msg: 'getFriends',
-          val: e
-        })
+        $system.log({ comp: 'UserAccountEmergency', msg: 'getFriends', val: e })
       } finally {
         loading.value = false
       }

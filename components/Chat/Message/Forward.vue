@@ -95,8 +95,8 @@ import {
       },
     },
     setup(props) {
-      const { $fire, $notify, $encryption, i18n } = useContext();
-      const { state, dispatch } = useStore();
+      const { $db, $notify, $encryption, i18n } = useContext();
+      const { state } = useStore();
       const user = computed(() => state.user);
       const router = useRouter()
 
@@ -113,23 +113,59 @@ import {
       }
 
       const getFriends = async () => {
-        const result = await $fire.firestore
+        if (!user.value.data.uid) {
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' });
+          return
+        }
+
+        await $db.get(`Users/${user.value.data.uid}/Friends`, {
+          order: {
+            by: 'updated_at',
+            direction: 'desc'
+          },
+          where: ['status', '==', 'approved']
+        }).then(async results => {
+          for (const doc of results) {
+            const user = await $db.get(`Users/${doc.id}`)
+            console.log('IS THIS DATA:', user)
+            friends.value.push({selected: false, ...user.data()})
+          }
+
+        }).catch(() => {
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' });
+        })
+
+/*
+        const result = await $db.fire().fs
           .collection('Users').doc(user.value.data.uid).collection("Friends")
           .where('status', '==', "approved")
           .orderBy('updated_at', 'desc')
           .get();
 
         for (const doc of result.docs) {
-          const user = await $fire.firestore
+          const user = await $db.fire().fs
             .collection('Users').doc(doc.id)
             .get()
 
           friends.value.push({selected: false, ...user.data()})
-        }
+        } */
       };
 
-      const getRecentChats = async () => {        
-        const result = await $fire.firestore
+      const getRecentChats = async () => {
+        await $db.get(`Chats`, {
+          order: {
+            by: 'message.created_at',
+            direction: 'desc'
+          },
+          where: ['participants', 'array-contains', user.value.data.uid]
+        }).then(async results => {
+          results.forEach(doc => {
+            if (doc.id === props.chat.id) return;
+            recentChats.value.push({selected: false, ...doc.data()})
+          })
+        })
+
+        /* const result = await $db.fire().fs
           .collection('Chats')
           .where('participants', 'array-contains', user.value.data.uid)
           .orderBy('message.created_at', 'desc')
@@ -138,16 +174,13 @@ import {
         result.forEach(doc => {
           if (doc.id === props.chat.id) return;
           recentChats.value.push({selected: false, ...doc.data()})
-        })
+        }) */
       };
 
       const sendMessage = async () => {
         try {
           if (!user.value.data.uid) {
-            $notify.show({
-              text: i18n.t('notify.error_try_again'),
-              color: 'error'
-            });
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' });
             return;
           }
 
@@ -161,13 +194,30 @@ import {
             }
           }
 
-          for(const c of selectedChats.value) {
-            const res = await dispatch('chats/messages/add', {
-              chatId: c,
+          for(const chatId of selectedChats.value) {
+            const res = $db.save(`Chats/${chatId}/Messages`, {
+              chatId: chatId,
               message: payload
-            });
+            })
 
             if (res) {
+              $db.save(`Chats/${chatId}`, {
+                id: chatId,
+                message: {
+                  created_at: new Date(),
+                  sent_by: user.value.data.uid,
+                  snippet: newMessage.value || i18n.t('chats.forward_a_message')
+                },
+                seen: [user.value.data.uid]
+              })
+            }
+
+            /* const res = await dispatch('chats/messages/add', {
+              chatId: c,
+              message: payload
+            }); */
+
+            /* if (res) {
               await dispatch('chats/updateField', {
                 id: c,
                 message: {
@@ -177,12 +227,11 @@ import {
                 },
                 seen: [user.value.data.uid]
               });
-
-            }
+            } */
           }
 
           selectedFriends.value.forEach(f => {
-            console.log("Friend tto receive message", f)
+            console.log("Friend to receive message", f)
           })
 
           return router.push(`/chats/`)

@@ -175,7 +175,8 @@ export default {
         you_replied_to: 'tu respondiste a',
         replying_to: 'Respondiendo a',
         forward: 'Adelante',
-        video_not_supported: 'Vídeos no compatibles'
+        video_not_supported: 'Vídeos no compatibles',
+        forward_a_message: 'reenviado un mensaje'
     },
     notifications: {
         heading: 'Notificaciones',

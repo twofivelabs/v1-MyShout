@@ -8,9 +8,7 @@
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="75vh" class="rounded-t-xl">
         <div class="ma-3" style="padding-bottom:180px;">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
           <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
           <ElementH3 align="center" :text="$t('contacts.find_friends')" />
@@ -89,8 +87,8 @@ export default defineComponent({
       }
     }
     const getFriends = async () => {
+      loading.value = true
       try {
-        loading.value = true
         await dispatch('user/friends/getAll', {
           uid: user.value.uid
         }).then((res) => {
@@ -100,11 +98,7 @@ export default defineComponent({
           }
         })
       } catch(e) {
-        $system.log({
-          comp: 'UserAccountEmergency',
-          msg: 'getFriends',
-          val: e
-        })
+        $system.log({ comp: 'UserAccountEmergency', msg: 'getFriends', val: e })
       } finally {
         loading.value = false
       }

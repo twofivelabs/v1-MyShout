@@ -69,17 +69,19 @@ export default defineComponent({
     'isFriend'
   ],
   setup(props, { emit }) {
-    const { $notify, i18n } = useContext()
+    const { $notify, i18n, $db } = useContext()
     const { dispatch, state } = useStore()
     const router = useRouter()
     const loading = ref(false)
     const dialog = ref(false)
+    const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const pin = ref()
 
     // METHODS
     const userPinExist = async () => {
       if (pin.value) {
+        // TODO: replace query
         const hasUsers = await dispatch('user/search', {
           field: 'securityPin',
           operator: '==',
@@ -106,15 +108,19 @@ export default defineComponent({
       }
 
       // Add user with status of pending
-      const res = await dispatch('user/friends/add', {
+      const res = await $db.save(`Users/${user.value.uid}/Friends`, {
         id: props.user.id,
         status: 'pending'
       })
+      /* const res = await dispatch('user/friends/add', {
+        id: props.user.id,
+        status: 'pending'
+      }) */
       if(res) {
         // Create notification for friended user
         console.log('Add notification to: ', props.user.id)
 
-        await dispatch('user/notifications/add', {
+        await $db.save(`Users/${props.user.id}/Notifications`, {
           uid: props.user.id,
           title: i18n.t('new_friend_request'),
           body: `@${profile.value.username} ${i18n.t('requested_to_be_your_friend')}`,
@@ -126,6 +132,18 @@ export default defineComponent({
             requestedBy: profile.value.id
           }
         })
+        /* await dispatch('user/notifications/add', {
+          uid: props.user.id,
+          title: i18n.t('new_friend_request'),
+          body: `@${profile.value.username} ${i18n.t('requested_to_be_your_friend')}`,
+          seen: false,
+          archived: false,
+          created_at: new Date(),
+          type: 'friendRequest',
+          meta: {
+            requestedBy: profile.value.id
+          }
+        }) */
 
         // Finish up`
         dialog.value = false

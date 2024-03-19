@@ -150,16 +150,11 @@ export default defineComponent({
             }
           })
           if (isVendor.value && (state.user.data.role.companyId !== form.value.company.id)) {
-            router.push('/admin')
-            return
+            return router.push('/admin')
           }
         }
       } catch(e) {
-        $system.log({
-          comp: 'AdminFeedbackEdit',
-          msg: 'useFetch',
-          val: e
-        })
+        $system.log({ comp: 'AdminFeedbackEdit', msg: 'useFetch', val: e })
       } finally {
         loading.value = false
       }
@@ -182,16 +177,10 @@ export default defineComponent({
           $notify.show({ text: i18n.t('notify.success') })
           router.push('/admin/feedback')
         } catch (e) {
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'error'
-          })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } else {
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'error'
-        })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
     const remove = async () => {
@@ -200,10 +189,7 @@ export default defineComponent({
         $notify.show({ text: i18n.t('notify.success') })
         router.push('/admin/feedback')
       } else {
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'error'
-        })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
 

@@ -109,7 +109,8 @@ export const actions = {
     return response
   },
   async getOne ({ commit }, { adminPath, id }) {
-    const one = await this.$db.get_one(`${dbRootPath}${adminPath}/${id}`, dataConverter)
+    //const one = await this.$db.get_one(`${dbRootPath}${adminPath}/${id}`, dataConverter)
+    const one = await this.$db.get(`${dbRootPath}${adminPath}/${id}`)
     if (one) {
       await commit('SET_ONE', one)
     }

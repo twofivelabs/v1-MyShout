@@ -60,7 +60,7 @@ export default defineComponent({
   directives: { Touch },
   setup () {
     const { state, dispatch } = useStore()
-    const { $system, $fire } = useContext()
+    const { $system, $db } = useContext()
     // const router = useRouter()
     const loading = ref(true)
     const user = computed(() => state.user)
@@ -94,7 +94,7 @@ export default defineComponent({
             // Only get users if they aren't loaded
             if (!loopUsers[d.userId]) {
               loopUsers[d.userId] = { username: '' }
-              $fire.firestore.doc(`Users/${d.userId}`).get().then((userDoc) => {
+              $db.fire().fs.doc(`Users/${d.userId}`).get().then((userDoc) => {
                 if (userDoc.exists) loopUsers[d.userId] = userDoc.data()
               })
             }
@@ -102,11 +102,7 @@ export default defineComponent({
         }
 
       } catch (e) {
-        $system.log({
-          comp: 'AdminDashboard',
-          msg: 'useFetch',
-          val: e
-        })
+        $system.log({ comp: 'AdminDashboard', msg: 'useFetch', val: e })
       } finally {
         loadedUsers.value = loopUsers
         loading.value = false

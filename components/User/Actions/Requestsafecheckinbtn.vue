@@ -66,8 +66,8 @@ export default defineComponent({
 
     // METHODS
     const save = async () => {
+      loading.value = true
       try {
-        loading.value = true
         // Add A Checkin
         await dispatch('user/checkins/add', {
           userId: props.user.id,
@@ -96,11 +96,7 @@ export default defineComponent({
           }
         })
       } catch(e) {
-        $system.log({
-          comp: 'UserActionsRequestsafecheckinbtn',
-          msg: 'save',
-          val: e
-        })
+        $system.log({ comp: 'UserActionsRequestsafecheckinbtn', msg: 'save', val: e })
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
       } finally {
         loading.value = false

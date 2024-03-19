@@ -203,7 +203,8 @@ export const actions = {
         await commit('SET_ONE', state.loaded[id])
         return state.loaded[id]
       }
-      const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
+      //const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
+      const one = await this.$db.get(`${dbRootPath}/${id}`)
       if (one) {
         await commit('SET_ONE', one)
         await commit('PUSH_TO_LOADED', one)

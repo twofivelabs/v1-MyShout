@@ -39,9 +39,8 @@
             height="35vh"
             style="padding-bottom:180px;"
         >
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
+
           <div>
             <div class="d-flex align-center mb-12">
               <UserAvatar :key="`${Math.random()}`" :user="sheetData" class="mr-4" />
@@ -100,6 +99,7 @@ export default defineComponent({
         window.currentMap.panTo(panTo)
         showSheet.value = true
         sheetData.value = props.friends[key]
+
       } else {
         router.push(`/users/user/${props.friends[key].id}`)
       }

@@ -75,11 +75,7 @@ export default defineComponent({
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         console.log('STICKY: error trying to take/select picture: ', e, JSON.stringify(e))
 
-        $system.log({
-          comp: 'ChatUploadimage',
-          msg: 'Error',
-          val: e
-        })
+        $system.log({ comp: 'ChatUploadimage', msg: 'Error', val: e })
       } finally {
         imageLoading.value = false
       }

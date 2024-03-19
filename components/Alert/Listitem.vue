@@ -23,9 +23,7 @@
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="80vh" class="rounded-t-xl pb-14">
         <div class="ma-3" style="padding-bottom:180px;">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
           <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
           <ElementH1 align="center" :text="$t('alert_details')" />
@@ -89,17 +87,14 @@ export default defineComponent({
 
     // METHODS
     const viewAlertDetails = () => {
+      loading.value = true
       try {
-        loading.value = true
         showBottomSheet.value = true
 
         // GET MAP DETAILS
+
       } catch(e) {
-        $system.log({
-          comp: 'AlertListitem',
-          msg: 'viewAlertDetails',
-          val: e
-        })
+        $system.log({ comp: 'AlertListitem', msg: 'viewAlertDetails', val: e })
       } finally {
         loading.value = false
       }

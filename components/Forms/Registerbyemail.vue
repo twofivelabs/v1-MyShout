@@ -41,13 +41,14 @@
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="80vh" class="rounded-t-xl pb-14">
         <div class="ma-3" style="padding-bottom:180px;">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
+
           <ElementH2 align="center" :text="$t('verify_account')" />
 
-          <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="" @response="emittedResponseFunc" />
-          <FormsRegisterbyphonemobile v-else class="pt-6" goTo="" @response="emittedResponseFunc" />
+          <FormsRegisterbyphoneweb class="pt-6" goTo="" @response="emittedResponseFunc" />
+
+<!--          <FormsRegisterbyphoneweb v-if="device === 'web'" class="pt-6" goTo="" @response="emittedResponseFunc" />
+          <FormsRegisterbyphonemobile v-else class="pt-6" goTo="" @response="emittedResponseFunc" />-->
         </div>
       </v-sheet>
     </v-bottom-sheet>
@@ -83,7 +84,7 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const { $fire, $fireModule, $notify, $system, $capacitor, i18n } = useContext()
+    const { $db, $notify, $capacitor, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -111,16 +112,17 @@ export default defineComponent({
       const bypassPhoneAuth=false
       loading.value = true
       console.log('bypassPhoneAuth:', bypassPhoneAuth, 'preAuthWithPhone', props.preAuthWithPhone)
+
       if(bypassPhoneAuth === false) {
         if(props.preAuthWithPhone) {
-          showBottomSheet.value = true
-          return
+          return showBottomSheet.value = true
         }
       }
       valid.value = await formEl.value.validate()
       if (valid.value) {
         await register()
       }
+
       loading.value = false
     }
     // eslint-disable-next-line no-unused-vars
@@ -137,22 +139,45 @@ export default defineComponent({
     const register = async () => {
       if (form.value.email && form.value.password) {
         const email = form.value.email.trim().toLowerCase()
-        const credential = $fireModule.auth.EmailAuthProvider.credential(email, form.value.password)
-        await $fire.auth.currentUser.linkWithCredential(credential).then(async () => {
+
+        await $db.fire().capAuth.linkWithEmailAndPassword({
+          email: email,
+          password: form.value.password
+
+        }).then(async () => {
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
 
           // Update Profile
+          // TODO: Update User Data with proper $db.save()
           await dispatch('user/updateField', {
             email: email,
             created_at: new Date()
           })
 
-          // Send verification email
-          $fire.auth.currentUser.sendEmailVerification().catch(() => {
+          $db.fire().capAuth.sendEmailVerification().catch(() => {
             // ...
           })
 
           router.push(props.goTo)
+        })
+
+        // const credential = $fireModule.auth.EmailAuthProvider.credential(email, form.value.password)
+        /* await $fire.auth.currentUser.linkWithCredential(credential).then(async () => {
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
+
+          // Update Profile
+          // TODO: Update User Data with proper $db.save()
+          await dispatch('user/updateField', {
+            email: email,
+            created_at: new Date()
+          }) */
+
+          // Send verification email
+          /* $fire.auth.currentUser.sendEmailVerification().catch(() => {
+            // ...
+          }) */
+
+       /*    router.push(props.goTo)
 
         }).catch((e) => {
           console.log('STICKY: Error linking email with current user', e)
@@ -161,12 +186,9 @@ export default defineComponent({
           } else {
             $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
           }
-          $system.log({
-            comp: 'FormsRegisterbyemail',
-            msg: 'Register 2',
-            val: e
-          })
-        })
+
+          $system.log({ comp: 'FormsRegisterbyemail', msg: 'Register 2', val: e })
+        }) */
 
         /*await $fire.auth.createUserWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password).then(() => {
             $notify.show({ text: 'Success', color: 'green' })
@@ -206,9 +228,7 @@ export default defineComponent({
     // MOUNTED
     onMounted(async() => {
       const d = await $capacitor.device()
-      if(d.platform === 'web') {
-        device.value = 'web'
-      }
+      if(d.platform === 'web') device.value = 'web'
     })
 
     return {

@@ -106,9 +106,6 @@
     useRoute
   } from '@nuxtjs/composition-api';
 
-  import firebase from 'firebase';
-  import 'firebase/functions';
-
   import debounce from 'lodash/debounce';
   import * as linkify from 'linkifyjs';
   import { Filesystem } from '@capacitor/filesystem'
@@ -120,8 +117,8 @@
       reply: { type: Object, default: () => (null) }
     },
     setup(props, { emit }) {
-      const { dispatch, state } = useStore()
-      const { i18n, $notify, $fire, $encryption, $db } = useContext()
+      const { state } = useStore()
+      const { i18n, $notify, $db, $encryption } = useContext()
       const route = useRoute()
       const user = computed(() => state.user)
 
@@ -146,10 +143,7 @@
           if (!newMessage.value && (imageUrl.value || uploadedVideoUrl.value || fileUrl.value)) {
             // we are good to send just the media, no need for a message
           } else if(!user.value.data.uid || !newMessage.value) {
-            $notify.show({
-              text: i18n.t('notify.error_try_again'),
-              color: 'error'
-            });
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' });
             return;
           }
 
@@ -164,7 +158,18 @@
           if (newMessage.value) encryptedMessage = $encryption.encrypt(newMessage.value);
 
           // Dispatch action to add a new message.
-          const res = await dispatch('chats/messages/add', {
+          const res = await $db.save(`Chats/${props.chat.id}/Messages`, {
+            message: encryptedMessage,
+            urls: linkify.find(newMessage.value) || [],
+            replyTo: props.reply ? props.reply.id : null,
+            image: imageUrl.value || null,
+            file: fileUrl.value || null,
+            videoUrl: uploadedVideoUrl.value || null,
+            videoThumbnailUrl: videoThumbnailUrl.value || null,
+            owner: user.value.data.uid,
+            seen: [user.value.data.uid]
+          })
+          /* const res = await dispatch('chats/messages/add', {
             chatId: props.chat.id,
             message: {
               message: encryptedMessage,
@@ -177,26 +182,38 @@
               owner: user.value.data.uid,
               seen: [user.value.data.uid]
             }
-          });
+          }); */
 
           if (res && props.reply) {
             console.log('STICKY: Array Union: ', res.id, JSON.stringify(res.id))
-            await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(props.reply.id).update({
-              replies: firebase.firestore.FieldValue.arrayUnion(res.id)
+
+            $db.save(`Chats/${props.chat.id}/Messages/${props.reply.id}`, {
+              replies: $db.fire().arrayUnion(res.id)
             }).catch((e) => {
               console.log('STICKY: Reply error:', e, JSON.stringify(e))
             })
+            /*
+            await $db.fire().fs.collection("Chats").doc(props.chat.id).collection("Messages").doc(props.reply.id).update({
+              replies: $db.fire().fs.FieldValue.arrayUnion(res.id)
+            }).catch((e) => {
+              console.log('STICKY: Reply error:', e, JSON.stringify(e))
+            }) */
           }
 
           // Update chat's last message information.
-          await dispatch('chats/updateField', {
+          $db.save(`Chats/${props.chat.id}`, {
+            created_at: new Date(),
+            snippet: newMessage.value || null,
+            sent_by: user.value.data.uid
+          })
+          /* await dispatch('chats/updateField', {
             id: props.chat.id,
             message: {
               created_at: new Date(),
               snippet: newMessage.value || null,
               sent_by: user.value.data.uid
             }
-          });
+          }); */
 
           // Reset message
           clearReply()
@@ -212,10 +229,7 @@
           emit("messageSent")
 
         } catch (e) {
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'error'
-          });
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' });
           console.log("STICKY: Cannot Send Message", e);
 
         } finally {
@@ -244,10 +258,7 @@
           return url;
         } catch (error) {
           console.error('[camera] uploadVideo Error: ', error);
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'error'
-          });
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' });
           return null;
         }
       };

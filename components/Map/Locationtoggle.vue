@@ -33,13 +33,8 @@ export default defineComponent({
     }
   },
   setup () {
-    const {
-      state,
-      dispatch
-    } = useStore()
-    const {
-      $capacitor,
-    } = useContext()
+    const { state } = useStore()
+    const { $capacitor, $db } = useContext()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
@@ -58,11 +53,16 @@ export default defineComponent({
 
     // METHODS
     const removePermissions = async () => {
-      await dispatch('user/updateField', {
+      await $db.save(`Users/${user.value.uid}`, {
         permissions: {
           location: false
         }
       })
+      /* await dispatch('user/updateField', {
+        permissions: {
+          location: false
+        }
+      }) */
       // await $capacitor.clearWatchPosition()
     }
     const toggleLocation = async () => {
@@ -78,11 +78,16 @@ export default defineComponent({
        *       DeviceNotifications Permissions
        */
       if (locationPermissionGranted.value) {
-        await dispatch('user/updateField', {
+        await $db.save(`Users/${user.value.uid}`, {
           permissions: {
             location: locationPermissionGranted.value
           }
         })
+        /* await dispatch('user/updateField', {
+          permissions: {
+            location: locationPermissionGranted.value
+          }
+        }) */
       }
     }
 

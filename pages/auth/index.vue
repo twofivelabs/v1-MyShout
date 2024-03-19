@@ -43,52 +43,42 @@
             {{ $t('btn.sign_up') }}
           </v-tab>
           <v-tabs-items v-model="activeTab" class="">
+
+            <!-- LOGIN -->
             <v-tab-item>
               <div v-if="phoneAuth">
-                <FormsRegisterbyphoneweb v-if="device === 'web'" />
-                <FormsRegisterbyphonemobile v-else />
+                <FormsRegisterbyphoneweb />
+<!--                <FormsRegisterbyphoneweb v-if="device === 'web'" />
+                <FormsRegisterbyphonemobile v-else />-->
 
-                <v-btn
-                  text block
-                  class="mx-auto mt-5"
-                  @click="phoneAuth = false"
-                >
+                <v-btn @click="phoneAuth = false" class="mx-auto mt-5" text block>
                   {{ $t('use_email_address') }}
                 </v-btn>
               </div>
               <div v-else>
                 <FormsAuthemaillogin />
 
-                <v-btn
-                  text block
-                  class="mx-auto mt-5"
-                  @click="phoneAuth = true"
-                >
+                <v-btn @click="phoneAuth = true" class="mx-auto mt-5" text block>
                   {{ $t('use_phone_number') }}
                 </v-btn>
               </div>
             </v-tab-item>
+
+            <!-- SIGN UP -->
             <v-tab-item class="pt-3">
               <div v-if="phoneAuth">
-                <FormsRegisterbyphoneweb v-if="device === 'web'" />
-                <FormsRegisterbyphonemobile v-else />
+                <FormsRegisterbyphoneweb />
+<!--                <FormsRegisterbyphoneweb v-if="device === 'web'" />
+                <FormsRegisterbyphonemobile v-else />-->
 
-                <v-btn
-                  text block
-                  class="mx-auto mt-5"
-                  @click="phoneAuth = false"
-                >
+                <v-btn @click="phoneAuth = false" class="mx-auto mt-5" text block>
                   {{ $t('use_email_address') }}
                 </v-btn>
               </div>
               <div v-else>
                 <FormsAuthemailregister />
 
-                <v-btn
-                  text block
-                  class="mx-auto mt-5 mb-5"
-                  @click="phoneAuth = true"
-                >
+                <v-btn @click="phoneAuth = true" class="mx-auto mt-5 mb-5" text block>
                   {{ $t('use_phone_number') }}
                 </v-btn>
               </div>

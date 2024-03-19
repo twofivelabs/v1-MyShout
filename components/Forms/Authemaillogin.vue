@@ -59,7 +59,7 @@ import formRules from '~/classes/formRules'
 export default defineComponent({
   name: 'FormsAuthemaillogin',
   setup () {
-    const { $fire, $notify, i18n } = useContext()
+    const { $db, $fire, $notify, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
@@ -84,19 +84,29 @@ export default defineComponent({
     }
     const submitLogin = async () => {
       if (form.value.email && form.value.password) {
+
         try {
-          if ($fire.auth.currentUser === null) {
-            const authentication = await $fire.auth.signInWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
+          if (await $db.fire().capAuth.getCurrentUser() === null) {
+
+            const authentication = await $db.fire().capAuth.signInWithEmailAndPassword({
+              email: form.value.email.trim().toLowerCase(),
+              password: form.value.password
+            }).then(user => {
+              console.log('LOGGED IN USER: ', user)
+            })
+
             if (authentication.user) {
               $fire.analytics.logEvent('login')
-              $notify.show({ text: 'Successfully logged in', color: 'green' })
+              $notify.show({ text: i18n.t('notify.success'), color: 'green' })
               await router.push('/')
+
             } else {
               $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
             }
           } else {
             await router.push('/')
           }
+
         } catch (e) {
           switch (e.code) {
             case "auth/wrong-password":
@@ -106,6 +116,7 @@ export default defineComponent({
               $notify.show({ text: i18n.t('onboarding.error_user_not_found'), color: 'error' })
               break;
             default  :
+              console.log('STICKY: ERROR', e)
               $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
               break;
           }
@@ -121,8 +132,8 @@ export default defineComponent({
       form,
       formEl,
       rules,
+      showPassword,
       validate,
-      showPassword
     }
   }
 })

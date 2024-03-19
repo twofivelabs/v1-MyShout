@@ -129,7 +129,8 @@
             </div>
 
             <div class="caption text-right">
-              {{ moment(message.created_at.toDate()).fromNow() }}
+              {{ moment(message.created_at).fromNow() }}
+<!--          {{ moment(message.created_at.toDate()).fromNow() }}-->
               <v-icon v-if="!message.deleted && message.owner === userId" small color="white">{{ getReadStatusIcon(chat, message) }}</v-icon>
 
               <span v-if="message.audioUrl" class="pl-3">
@@ -248,8 +249,10 @@ import { Touch } from 'vuetify/lib/directives'
 
 import moment from 'moment'
 
+/*
 import firebase from 'firebase';
 import 'firebase/functions';
+*/
 
 export default defineComponent({
   name: 'ChatMessage',
@@ -296,8 +299,8 @@ export default defineComponent({
   ],
   directives: { Touch },
   setup(props, { emit }) {
-    const { state, dispatch } = useStore()
-    const { $helper, $fire, $encryption } = useContext()
+    const { state } = useStore()
+    const { $helper, $db, $encryption, $notify, i18n } = useContext()
     const user = computed(() => state.user)
     const userId = computed(() => state.user.data.uid)
     const showMedia = ref(false)
@@ -326,16 +329,20 @@ export default defineComponent({
         document.getElementById(`message-${props.message.id}`).style.display = 'none';
 
         // Delete Message
-        await dispatch('chats/messages/remove', {
+        if (props.chat.id && props.message.id) {
+          await $db.delete(`Chats/${props.chat.id}/Messages/${props.message.id}`)
+        }
+        /* await dispatch('chats/messages/remove', {
           chatId: props.chat.id,
           id: props?.message.id
         })
-
+ */
         // Delete File
-        await $fire.storage.refFromURL(file).delete()
+        await $db.fire().storage.refFromURL(file).delete()
 
       } catch (e) {
-        console.log('Error deleting file', e)
+        console.log('STICKY: Error deleting file', e)
+        $notify.show({ text: i18n.t('chat.error_try_again'), color: 'error' })
       } finally {
         loading.value = false
       }
@@ -349,7 +356,6 @@ export default defineComponent({
       if (props.thread) return;
       messageMenu.value = false
     }
-
 
     const triggerMessageThread = () => {
       messageThread.value = !messageThread.value
@@ -378,16 +384,28 @@ export default defineComponent({
     }
 
     const deleteMessage = async (d) => {
-      const res = await dispatch('chats/messages/updateField', {
+      if (!props.chat.id || !props.message.id) {
+        $notify.show({ text: i18n.t('chat.error_try_again'), color: 'error' })
+        return
+      }
+
+      $db.save(`Chats/${props.chat.id}/Messages/${props.message.id}`, {
+        deleted: d === 1 ? true : false,
+        hide: d === 0 ? $db.fire().arrayUnion(userId.value) : []
+      }).then(() => {
+        return closeMessageMenu()
+      })
+
+      /* const res = await dispatch('chats/messages/updateField', {
           chatId: props.chat.id,
           id: props?.message.id,
           data: {
             deleted: d === 1 ? true : false,
-            hide: d === 0 ? firebase.firestore.FieldValue.arrayUnion(userId.value) : []
+            hide: d === 0 ? $db.fire().arrayUnion(userId.value) : []
           }
         })
       if (res) return closeMessageMenu()
-      // if (res) return triggerMessageMenu()
+      // if (res) return triggerMessageMenu() */
     }
 
     const onHoverMessage = () => {
@@ -396,7 +414,6 @@ export default defineComponent({
     const onLeaveMessage = () => {
       if (messageHover.value) messageHover.value = false
     }
-
     const loadforward = async (m) => {
       loading.value = true;
 
@@ -406,11 +423,12 @@ export default defineComponent({
         let data = null;
 
         if (m.forward?.message) {
-          const snapshot = await $fire.firestore
+          const snapshot = await $db.get(`Chats/${m.forward.chat}/Messages/${m.forward.message}`)
+          /* const snapshot = await $db.fire().fs
               .doc(`Chats/${m.forward.chat}/Messages/${m.forward.message}`)
-              .get();
-
-          data = snapshot.exists ? snapshot.data() : null;
+              .get(); */
+          //data = snapshot.exists ? snapshot.data() : null;
+          data = snapshot ? snapshot : null;
         }
 
         if (data?.message) data.messge = $encryption.decrypt(data.messge);

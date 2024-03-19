@@ -45,7 +45,7 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const { $system } = useContext()
+    const { $system, $db } = useContext()
     const { dispatch, state, commit } = useStore()
     const loggedInUser = computed(() => state.user.data)
     const loading = ref(false)
@@ -63,7 +63,14 @@ export default defineComponent({
     const getUserFriends = async () => {
       loading.value = true
       try {
-        await dispatch('user/getOne', props.user.id).then((res) => {
+        await $db.get(`Users/${props.user.id}`).then((res) => {
+          if (res !== false) {
+            publicUser.value = lodash.cloneDeep(res)
+          }
+        }).catch((e) => {
+          $system.log({ comp: 'PageUsersId', msg: 'user/getOne', val: e })
+        })
+        /* await dispatch('user/getOne', props.user.id).then((res) => {
           if (res !== false) {
             publicUser.value = lodash.cloneDeep(res)
           }
@@ -73,7 +80,7 @@ export default defineComponent({
             msg: 'user/getOne',
             val: e
           })
-        })
+        }) */
         // GET STATUS OF FRIENDSHIP
         await dispatch('user/friends/getAccess', {
           userId: loggedInUser.value.uid,
@@ -90,11 +97,7 @@ export default defineComponent({
           }
         })
       } catch(e) {
-        $system.log({
-          comp: 'UserAlerts',
-          msg: 'getUserFriends',
-          val: e
-        })
+        $system.log({ comp: 'UserAlerts', msg: 'getUserFriends', val: e })
       } finally {
         loading.value = false
       }
@@ -108,17 +111,11 @@ export default defineComponent({
           return
         }
 
-        await dispatch('user/alerts/getAll', props.user.id).then((res) => {
-          if (res !== false) {
-            alerts.value = res
-          }
+        await $db.get(`Users/${props.user.id}/alerts`).then(res => {
+          if (res !== false) alerts.value = res
         })
       } catch(e) {
-        $system.log({
-          comp: 'UserAlerts',
-          msg: 'getAlerts',
-          val: e
-        })
+        $system.log({ comp: 'UserAlerts', msg: 'getAlerts', val: e })
       } finally {
         loading.value = false
         commit('user/alerts/HAS_NEW_ALERTS', false)

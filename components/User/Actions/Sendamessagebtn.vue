@@ -66,8 +66,8 @@ export default defineComponent({
       })
     }
     const startChat = async () => {
+      loading.value = true
       try {
-        loading.value = true
         // Search for an exising room first
         const existingChatRoom = await hasExistingChat()
         if(existingChatRoom && existingChatRoom.id) {
@@ -89,11 +89,7 @@ export default defineComponent({
           }
         })
       } catch(e) {
-        $system.log({
-          comp: 'UserActionsSendamessagebtn',
-          msg: 'startChat',
-          val: e
-        })
+        $system.log({ comp: 'UserActionsSendamessagebtn', msg: 'startChat', val: e })
       } finally {
         loading.value = false
       }

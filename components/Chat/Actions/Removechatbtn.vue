@@ -37,7 +37,7 @@
 <script>
 import {
   defineComponent,
-  ref, useRouter, useStore,
+  ref, useContext, useRouter,
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -51,16 +51,23 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { dispatch } = useStore()
+    const { $db, i18n, $notify } = useContext()
+    //const { dispatch } = useStore()
     const loading = ref(false)
     const dialog = ref(false)
     const router = useRouter()
 
     // METHODS
     const removeChat = async () => {
-      await dispatch('chats/remove', props.chatId)
-      dialog.value = false
-      await router.push(`/chats`)
+      $db.delete(`Chats/${props.chatId}`).then((res) => {
+        if (res) {
+          dialog.value = false
+          router.push(`/chats`)
+        } else {
+          return $notify.show({ text: i18n.t('chat.error_updating'), color: 'error' })
+        }
+      })
+      // await dispatch('chats/remove', props.chatId)
     }
 
     return {

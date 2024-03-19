@@ -1,12 +1,12 @@
 <template>
   <v-card v-if="!noPreview">
     <v-card-text>
-      <v-container class="pa-0" v-if="!generatingPreview" fluid>  
-        <v-row no-gutters>  
-          <v-col cols="12" md="3"> 
+      <v-container class="pa-0" v-if="!generatingPreview" fluid>
+        <v-row no-gutters>
+          <v-col cols="12" md="3">
             <a :href="url.href" target="_blank">
               <v-img
-                v-if="metadata.image" 
+                v-if="metadata.image"
                 :src="metadata.image"
                 max-height="100"
                 width="100%"
@@ -31,10 +31,10 @@
 </template>
 
 <script>
-import { 
-  defineComponent, 
-  ref, 
-  watch 
+import {
+  defineComponent,
+  ref,
+  watch
 } from '@nuxtjs/composition-api';
 
 export default defineComponent({
@@ -53,16 +53,18 @@ export default defineComponent({
     const metadata = ref({});
 
     async function fetchMetadata(url) {
-      try {        
+      try {
         if (!url.href) return;
         console.log("KYLE: Getting URL Preview")
-    
+
         const response = await fetch(`https://us-central1-my-shout-staging.cloudfunctions.net/Chat-fetchUrlMetadata?url=${encodeURIComponent(url.href)}`);
         console.log(`KYLE: URL is ${response.okay}`)
-        
+
         if (!response.ok) {
           noPreview.value = true
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          console.log(`HTTP error! Status: ${response.status}`)
+          // Might casue the app to crash if it doesn't work
+          // throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         const results = await response.json();
@@ -89,8 +91,8 @@ export default defineComponent({
         fetchMetadata(n);
       }
     }, { immediate: true });
-    
-    return { 
+
+    return {
       noPreview,
       generatingPreview,
       metadata,

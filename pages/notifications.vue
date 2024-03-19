@@ -20,9 +20,9 @@
             <UserNotifications :notification="notification" />
           </div>
           <div class="mt-5 pb-10 text-center">
-            <v-btn 
+            <v-btn
               text
-              @click="archiveNotifications" 
+              @click="archiveNotifications"
             >
             {{ $t('notifications.archive_all') }}
             </v-btn>
@@ -41,7 +41,7 @@ import {
   computed,
   defineComponent,
   useStore,
-  ref,
+  ref, useContext
 } from '@nuxtjs/composition-api'
 
 import {orderBy, filter} from 'lodash'
@@ -49,31 +49,24 @@ import {orderBy, filter} from 'lodash'
 export default defineComponent({
   name: 'NotificationsPage',
   middleware: 'authenticated',
-  transition (to, from) {
-    if (!from) {
-      return 'slide-left'
-    }
-    return +to.query.page < +from.query.page ? 'slide-right' : 'slide-left'
-  },
   setup () {
-    const { state, dispatch } = useStore()
+    const { state } = useStore()
+    const { $db } = useContext()
     const user = computed(() => state.user.data)
-
     const loading = ref(false)
+
     const allNotifications = computed(() => {
-      console.log("state.user.notifications", state.user.notifications)
+      // console.log("state.user.notifications", state.user.notifications)
       const loaded = state.user.notifications.all
       return orderBy(loaded, ['seconds'], ['desc'])
     })
-
     const filters = ref({
       alert: true,
       friendRequest: true,
       checkIn: true
     })
-
     const filteredNotifications = computed(() => {
-      console.log("Notifications", allNotifications.value)
+      // console.log("Notifications", allNotifications.value)
       // Apply filters to notifications
       return filter(allNotifications.value, (notification) => {
         if (notification.type === 'alert' && filters.value.alert) {
@@ -93,10 +86,9 @@ export default defineComponent({
     const updateFilters = (f) => filters.value = f;
 
     const archiveNotifications = () => {
-      console.log("Archiving", filteredNotifications.value)
+      // console.log("Archiving", filteredNotifications.value)
       filteredNotifications.value.map(async (notification) => {
-        await dispatch('user/notifications/update', {
-          id: notification.id,
+        $db.save(`Users/${user.value.uid}/Notifications/${notification.id}`, {
           archived: true,
           seen: true
         })

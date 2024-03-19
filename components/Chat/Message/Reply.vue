@@ -60,15 +60,18 @@ export default defineComponent({
   },
   setup(props) {
     const { state } = useStore()
-    const { $encryption, $fire } = useContext()
+    const { $encryption, $db } = useContext()
     const userId = computed(() => state.user.data.uid)
 
     const reply = ref([])
 
     watch(() => props.message, async (m) => {
       if (m && m.replyTo) {
-        const snapshot = await $fire.firestore.collection("Chats").doc(props.chat.id).collection("Messages").doc(m.replyTo).get()
-        reply.value = snapshot.data()
+        $db.get(`Chats/${props.chat.id}/Messages/${m.replyTo}`).then(data => {
+          reply.value = data
+        })
+        /* const snapshot = await $db.fire().fs.collection("Chats").doc(props.chat.id).collection("Messages").doc(m.replyTo).get()
+        reply.value = snapshot.data() */
       }
     }, { immediate: true });
 

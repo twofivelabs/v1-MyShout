@@ -8,7 +8,7 @@ import {
   defineComponent,
   ref, computed,
   useStore,
-  watch
+  watch, useContext
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -22,9 +22,9 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { state, dispatch } = useStore()
+    const { $db } = useContext()
+    const { state } = useStore()
     const user = computed(() => state.user)
-    
     const users = ref('')
 
     const truncateString = (str, num = 20) => {
@@ -33,17 +33,18 @@ export default defineComponent({
       } else {
         return str;
       }
-    }    
+    }
 
     watch(() => props.chat, async (chat) => {
       if(chat && chat.participants) {
         users.value = ''
         for (const participant of chat.participants) {
           if (participant !== user.value.data.uid) {
-            const joinedUser = await dispatch('user/getOne', participant)
-              if (joinedUser && (user.value.data.uid !== joinedUser.id)) {
-                users.value = users.value + `@${joinedUser.username} `
-              }
+            const joinedUser = await $db.get(`Users/${participant}`)
+            // const joinedUser = await dispatch('user/getOne', participant)
+            if (joinedUser && (user.value.data.uid !== joinedUser.id)) {
+              users.value = users.value + `@${joinedUser.username} `
+            }
           }
         }
       }

@@ -151,7 +151,9 @@ export const actions = {
   }) {
     uid = uid || rootState.user.data.uid
     if (uid) {
-      let response = await this.$db.get_all(`Users/${uid}/${dbRootPath}`, where, dataConverter, order, limit)
+      let response = await this.$db.get(`Users/${uid}/${dbRootPath}`, {
+          where, dataConverter, order, limit
+      })
       if (response) {
           commit('SET_ALL', response)
           // GET THE USER DETAILS
@@ -170,7 +172,8 @@ export const actions = {
       }
       const uid = data.userId || rootState.user.data.uid
       if (!uid) { return }
-      const one = await this.$db.get_one(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter)
+      // const one = await this.$db.get_one(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter)
+      const one = await this.$db.get_one(`Users/${uid}/${dbRootPath}/${data.id}`)
       if (one) {
         await commit('SET_ONE', one)
         await commit('PUSH_TO_LOADED', one)
@@ -191,13 +194,9 @@ export const actions = {
         if (!uid) { return }
         //console.log('FRIEND ACCESS', `Users/${data.id}/${dbRootPath}/${uid}`)
         //return await this.$db.get_one(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter)
-        return await this.$db.get_one(`Users/${data.id}/${dbRootPath}/${uid}`, dataConverter)
+        return await this.$db.get(`Users/${data.id}/${dbRootPath}/${uid}`)
     } catch (e) {
-        this.$system.log({
-            comp: 'store/friends',
-            msg: 'getAccess',
-            val: e
-        })
+        this.$system.log({ comp: 'store/friends', msg: 'getAccess', val: e })
         return false
     }
   },
@@ -206,14 +205,10 @@ export const actions = {
         const uid = data.userId || rootState.user.data.uid
         if (!uid) { return }
         // console.log('FRIEND My ACCESS', `Users/${data.id}/${dbRootPath}/${uid}`)
-        return await this.$db.get_one(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter)
+        return await this.$db.get(`Users/${uid}/${dbRootPath}/${data.id}`)
         //return await this.$db.get_one(`Users/${data.id}/${dbRootPath}/${uid}`, dataConverter)
     } catch (e) {
-        this.$system.log({
-            comp: 'store/friends',
-            msg: 'getAccess',
-            val: e
-        })
+        this.$system.log({ comp: 'store/friends', msg: 'getAccess', val: e })
         return false
     }
   },
@@ -229,13 +224,10 @@ export const actions = {
   },
   async joinUser({ commit }, user) {
     try {
-        return await this.$fire.firestore
-            .doc(`Users/${user.id}`)
-            .get()
-            .then((doc) => {
-                if (doc.exists) {
-                    const data = doc.data()
-                    const assignedData = Object.assign(lodash.cloneDeep(user), lodash.cloneDeep(data))
+        return await this.$db.get(`Users/${user.id}`).then((doc) => {
+                if (doc) {
+                    // const data = doc.data()
+                    const assignedData = Object.assign(lodash.cloneDeep(user), lodash.cloneDeep(doc))
                     commit('PUSH_TO_LOADED', assignedData)
                     return assignedData
                 }

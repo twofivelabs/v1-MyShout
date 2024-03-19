@@ -64,10 +64,8 @@ import {
 export default defineComponent({
   name: 'AlertAccidentbutton',
   setup () {
-    const {
-      state, dispatch, commit
-    } = useStore()
-    const { $capacitor, $helper, $system, $notify, i18n } = useContext()
+    const { state, commit } = useStore()
+    const { $capacitor, $helper, $system, $notify, i18n, $db } = useContext()
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
@@ -88,17 +86,25 @@ export default defineComponent({
         return
       }
 
-      // ADD NOTIFICATION TO USER
-      await dispatch('user/alerts/add', {
+      const payload = {
         type: 'accident',
         userId: user.value.uid,
         // gps: profile.value.gps,
-        gps: coords,
+        gps: coords || null,
         location: location.value
+      }
+      // ADD NOTIFICATION TO USER
+      await $db.save(`Users/${user.value.uid}/Alerts`, payload).then(() => {
+        $notify.show({ text: i18n.t('notify.success'), color: 'green' })
       }).catch((e) => {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         $system.log({ comp: 'AlertButton', msg: 'Trying to send alert', val: e })
       })
+
+      /* await dispatch('user/alerts/add', ).catch((e) => {
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+        $system.log({ comp: 'AlertButton', msg: 'Trying to send alert', val: e })
+      }) */
 
       commit('user/alerts/HAS_NEW_ALERTS', true)
       loading.value = false

@@ -71,24 +71,15 @@ export default defineComponent({
       loading.value = true
       try {
         await dispatch('posts/getAll', {
-          where: [{
-            field: 'published',
-            op: '==',
-            value: true
-          }, {
-            field: 'tags',
-            op: 'array-contains',
-            value: 'help'
-          }]
+          where: [
+            ['published', '==', true],
+            ['tags', 'array-contains', 'help']
+          ]
         }).then((response) => {
           posts.value = response
         })
       } catch(e) {
-        $system.log({
-          comp: 'PageHelpcenter',
-          msg: 'useFetch',
-          val: e
-        })
+        $system.log({ comp: 'PageHelpcenter', msg: 'useFetch', val: e })
       } finally {
         loading.value = false
       }

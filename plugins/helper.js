@@ -47,10 +47,7 @@ export default ({
           operator: '=='
         })
         if (result && result.length !== 0) {
-          app.$notify.show({
-            text: app.i18n.t('notify.error_try_again'),
-            color: 'red'
-          })
+          app.$notify.show({ text: app.i18n.t('notify.error_try_again'), color: 'red' })
           return false
         }
         return true

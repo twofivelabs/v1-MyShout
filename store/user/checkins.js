@@ -157,7 +157,8 @@ export const actions = {
       }
       const uid = uid || rootState?.user?.data?.uid
       if (!uid) { return }
-      const one = await this.$db.get_one(`Users/${uid}/${dbRootPath}/${id}`, dataConverter)
+      //const one = await this.$db.get_one(`Users/${uid}/${dbRootPath}/${id}`, dataConverter)
+      const one = await this.$db.get(`Users/${uid}/${dbRootPath}/${id}`)
       if (one) {
         await commit('SET_ONE', one)
         await commit('PUSH_TO_LOADED', one)

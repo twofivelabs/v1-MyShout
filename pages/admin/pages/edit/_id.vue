@@ -161,11 +161,7 @@ export default defineComponent({
           })
         }
       } catch(e) {
-        $system.log({
-          comp: 'AdminPagesEdit',
-          msg: 'useFetch',
-          val: e
-        })
+        $system.log({ comp: 'AdminPagesEdit', msg: 'useFetch', val: e })
       } finally {
         loading.value = false
       }
@@ -189,18 +185,12 @@ export default defineComponent({
           $notify.show({ text: i18n.t('notify.success') })
           router.push('/admin/pages')
         } catch {
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'error'
-          })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         } finally {
           loading.value = false
         }
       } else {
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'error'
-        })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
     const remove = async () => {
@@ -209,10 +199,7 @@ export default defineComponent({
         $notify.show({ text: i18n.t('notify.success') })
         router.push('/admin/pages')
       } else {
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'error'
-        })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
     const emittedFeaturedImage = (url) => {

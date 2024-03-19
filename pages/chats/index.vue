@@ -59,7 +59,7 @@ import {
   useStore,
   ref,
   useContext,
-  watch,
+  watchEffect,
   onUnmounted
 } from '@nuxtjs/composition-api'
 
@@ -69,8 +69,8 @@ export default defineComponent({
   name: 'ChatsIndex',
   middleware: 'authenticated',
   setup() {
-    const { state, dispatch } = useStore()
-    const { $fire, $capacitor } = useContext()
+    const { state,  } = useStore()
+    const { $db, $capacitor } = useContext()
     const user = computed(() => state.user)
 
     // DEFINE
@@ -79,56 +79,54 @@ export default defineComponent({
     const chatList = ref(null)
 
     const truncateMessage = (message, length = 25) => message ? (message.length > length ? message.substring(0, length) + '...' : message) : '';
-
     const fetchChats = async () => {
       isLoading.value = true;
 
       try {
-        chatsListener.value = await $fire.firestore
-          .collection('Chats')
-          .where('participants', 'array-contains', user.value.data.uid)
-          .orderBy('message.created_at', 'desc')
-          .onSnapshot(async (snapshot) => {
-            const updatedChatList = [];
+        chatsListener.value = await $db.listen({
+              path: 'Chats',
+              where: ['participants', 'array-contains', user.value.data.uid],
+              orderBy: 'message.created_at',
+              orderDirection: 'desc'
+          }).then(async docs => {
+            const updatedChatList = []
 
-            for (const doc of snapshot.docs) {
+            for (const doc of docs) {
               if (!doc) continue;
 
-              const data = doc.data();
-              data.id = doc.id;
-
-              if (data?.message.sent_by) {
+              if (doc?.message.sent_by) {
                 // Assuming dispatch is reactive and updates user data in the store
-                const u = await dispatch('user/getOne', data.message.sent_by);
-                data.message.sent_by = u.username ?? u.first_name;
+                const u = await $db.get(`Users/${doc.message.sent_by}`)
+                //const u = await dispatch('user/getOne', doc.message.sent_by);
+                doc.message.sent_by = u?.username ?? u.first_name
               }
 
-              updatedChatList.push(data);
+              updatedChatList.push(doc);
             }
 
             // Update chatList using Vue's reactivity
             chatList.value = updatedChatList;
-          });
+        })
+
       } catch (error) {
-        console.error('Error fetching chats:', error?.message);
+        console.error('STICKY: Error fetching chats:', error?.message);
       } finally {
         isLoading.value = false;
       }
     };
 
-
-    watch(user, (userData) => {
-      if (userData && userData.data.uid) {
+    watchEffect(() => {
+      if (user.value?.data?.uid) {
         // User data is available, load all chats the user participates in
         fetchChats()
 
         // Do not display AdMob if user is an Admin
-        if (!userData.profile.isAdmin) {
+        if (!user.value?.data?.role?.isAdmin) {
           $capacitor.AdMob_init();
           $capacitor.AdMob_banner();
         }
       }
-    }, {immediate: true});
+    });
 
     onUnmounted(() => {
       if (chatsListener.value) chatsListener.value();

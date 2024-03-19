@@ -62,9 +62,8 @@
           height="75vh"
           style="bottom:0; padding-bottom:180px;"
       >
-        <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                        @click.native="swipe('Down')"
-        />
+        <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
+
         <UserProfile v-if="whichComponent === 'profile'" @swipe="swipe('Down')"/>
         <UserNotifications v-if="whichComponent === 'notifications'"/>
       </v-sheet>

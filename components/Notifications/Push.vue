@@ -17,8 +17,9 @@ import {
 export default defineComponent({
   name: 'NotificationsPush',
   setup () {
-    const { dispatch, state } = useStore()
+    const { state } = useStore()
     const {
+      $db,
       $fire,
       $system,
       $notify,
@@ -46,11 +47,7 @@ export default defineComponent({
           }
         }
       } catch (e) {
-        $system.log({
-          comp: 'NotificationsPush',
-          msg: 'requestPermission',
-          val: e
-        })
+        $system.log({ comp: 'NotificationsPush', msg: 'requestPermission', val: e })
       }
     }
     const startListeners = () => {
@@ -82,19 +79,11 @@ export default defineComponent({
               snack.goTo = payload.data.goTo
             }
             $notify.show(snack)
-            $system.log({
-              comp: 'ProductFavouriteBtn',
-              msg: 'Message received',
-              val: payload
-            })
+            $system.log({ comp: 'ProductFavouriteBtn', msg: 'Message received', val: payload })
           })
         }
       } catch (e) {
-        $system.log({
-          comp: 'startOnMessageListener',
-          msg: 'onMessage',
-          val: e.message
-        })
+        $system.log({ comp: 'startOnMessageListener', msg: 'onMessage', val: e.message })
       }
     }
     const getIdToken = async () => {
@@ -114,11 +103,7 @@ export default defineComponent({
           $ttlStorage.set('notificationWebToken', notificationWebToken.value)
         }
       } catch (e) {
-        $system.log({
-          comp: 'NotificationPush',
-          msg: 'getIdToken',
-          val: e
-        })
+        $system.log({ comp: 'NotificationPush', msg: 'getIdToken', val: e })
         notificationWebToken.value = null
       } finally {
         loading.value = false
@@ -126,9 +111,12 @@ export default defineComponent({
 
       // If we have a token update user
       if (notificationWebToken.value) {
-        await dispatch('user/updateField', {
+        await $db.save(`Users/${user.value.uid}`, {
           notificationWebToken: notificationWebToken.value
         })
+        /* await dispatch('user/updateField', {
+          notificationWebToken: notificationWebToken.value
+        }) */
       }
     }
 

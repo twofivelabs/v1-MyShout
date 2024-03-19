@@ -1,6 +1,6 @@
 <template>
   <div>
-    {{ 
+    {{
       type === 'title'
         ? (chat.title ? chat.title : $t('chat.add_title'))
         : type === 'description'
@@ -60,8 +60,8 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { $notify, $system, i18n } = useContext()
-    const { state, dispatch } = useStore()
+    const { $notify, $system, i18n, $db } = useContext()
+    const { state } = useStore()
     const user = computed(() => state.user);
     const loading = ref(false)
     const dialog = ref(false)
@@ -72,24 +72,25 @@ export default defineComponent({
 
     // METHODS
     const saveChatUpdate = async () => {
+      loading.value = true
       try {
-        loading.value = true
-        const res = await dispatch('chats/updateField', {
+        $db.save(`Chats/${props.chat.id}`, {
+          id: props.chat.id,
+          title: form.value.title,
+          description: form.value.description
+        }).then((res) => {
+          if (res) return dialog.value = false
+        })
+
+        /* const res = await dispatch('chats/updateField', {
           id: props.chat.id,
           title: form.value.title,
           description: form.value.description
         })
-        if (res) return dialog.value = false
+        if (res) return dialog.value = false */
       } catch(e) {
-        $system.log({
-          comp: 'ChatActions',
-          msg: 'Rename > Save',
-          val: e
-        })
-        return $notify.show({
-          text: i18n.t('chat.error_updating'),
-          color: 'error'
-        })
+        $system.log({ comp: 'ChatActions', msg: 'Rename > Save', val: e })
+        return $notify.show({ text: i18n.t('chat.error_updating'), color: 'error' })
       } finally {
         loading.value = false
       }

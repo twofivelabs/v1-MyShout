@@ -20,9 +20,9 @@ export default defineComponent({
     }
   },
   setup() {
-    const { state, dispatch } = useStore();
-    const { $notify, $system, $capacitor, $fire } = useContext();
-    
+    const { state } = useStore();
+    const { $notify, $system, $capacitor, $fire, $db } = useContext();
+
     const user = state.user.data;
     const profile = state.user.profile;
     const notificationPermissionGranted = profile.permissions.notifications;
@@ -37,7 +37,10 @@ export default defineComponent({
             await $capacitor.pushNotificationsRequestAndRegisterPermissions();
           }
         } else {
-          await dispatch('user/updateField', { permissions: { notifications: false } });
+          await $db.save(`Users/${user.value.uid}`, {
+            permissions: { notifications: false }
+          })
+          // await dispatch('user/updateField', { permissions: { notifications: false } });
           if (!isWeb) await $capacitor.pushNotificationsRemoveListeners();
         }
       } catch (error) {
@@ -56,7 +59,10 @@ export default defineComponent({
         await $fire.messaging.getToken();
       }
 
-      await dispatch('user/updateField', { permissions: { notifications: permission === 'granted' } });
+      await $db.save(`Users/${user.value.uid}`, {
+        permissions: { notifications: permission === 'granted' }
+      })
+      //await dispatch('user/updateField', { permissions: { notifications: permission === 'granted' } });
     };
 
     const handleNotificationError = (error) => {

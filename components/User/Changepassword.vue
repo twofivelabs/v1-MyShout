@@ -112,46 +112,28 @@ export default defineComponent({
       }
     }
     const save = async () => {
+      loading.value = true
       try {
-        loading.value = true
 
         // Sign in
         const currUser = $fire.auth.currentUser
         await $fire.auth.signInWithEmailAndPassword(currUser.email, form.password).then(async () => {
-
-          console.log('Success signing in')
           // Update Firebase Auth
           $fire.auth.currentUser.updatePassword(form.newPassword).then(async () => {
-            $notify.show({
-              text: i18n.t('notify.success'),
-              color: 'success'
-            })
+            $notify.show({ text: i18n.t('notify.success'), color: 'success' })
           }).catch((e) => {
-            console.log('Error updating authentication', e)
-            $notify.show({
-              text: i18n.t('notify.error_try_again'),
-              color: 'red'
-            })
+            console.log('STICKY: Error updating authentication', e)
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
           })
 
         }).catch((e) => {
-          console.log('Error signing in', e)
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'red'
-          })
+          console.log('STICKY: Error signing in', e)
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
         })
 
       } catch (e) {
-        $system.log({
-          comp: 'UserProfile',
-          msg: 'change password',
-          val: e
-        })
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'red'
-        })
+        $system.log({ comp: 'UserProfile', msg: 'change password', val: e })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
       } finally {
         loading.value = false
       }

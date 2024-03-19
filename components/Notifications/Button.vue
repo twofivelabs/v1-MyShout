@@ -15,9 +15,7 @@
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="75vh" class="rounded-t-xl">
         <div class="ma-3" style="padding-bottom:180px">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
           <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
           <ElementH3 align="center" :text="$t('notifications.heading')" />
@@ -52,13 +50,10 @@ export default defineComponent({
       loading.value = true
       try {
         await dispatch('user/notifications/listen')
-        // await dispatch('user/notifications/getAll')
+
       } catch(e) {
-        $system.log({
-          comp: 'NotificationsButton',
-          msg: 'Not able to get notifications',
-          val: e
-        })
+        $system.log({ comp: 'NotificationsButton', msg: 'Not able to get notifications', val: e })
+
       } finally {
         loading.value = false
       }

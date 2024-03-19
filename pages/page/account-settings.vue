@@ -163,7 +163,7 @@ export default defineComponent({
       return hasUsers.length > 0
     }
     const deleteAccount = async () => {
-      // Deactive User Accoount
+      // Deactivate User Account
       await dispatch('user/updateField', {
         role: {
           isActive: false,

@@ -176,8 +176,8 @@ export const actions = {
     }
   },
   async listen ({ rootState, commit }) {
-    const uid = rootState.user.data.uid
-
+    const uid = rootState?.user?.data?.uid
+    console.log('uid', uid)
     if (hasInitNotifications) {
         console.log('...ALREADY LISTENING TO NOTIFICATIONS...')
         return
@@ -185,23 +185,45 @@ export const actions = {
     hasInitNotifications = true
 
     console.log('...LISTENING TO NOTIFICATIONS...')
-    await this.$fire.firestore.collection(`Users/${uid}/${dbRootPath}`)
-        .orderBy('created_at', 'desc')
-        .where('archived', '==', false)
-        .limitToLast(100)
-        .onSnapshot((snapshot) => {
-          // commit('SET_ALL', [])
-          snapshot.docChanges().forEach((change) => {
-            const data = change.doc.data()
-            data.id = change.doc.id
-            console.log('doc changes')
+
+    try {
+        const snap = await this.$db.listen({
+            path: `Users/${uid}/${dbRootPath}`,
+            where: [{
+                field: 'archived',
+                op: '==',
+                value: 'value'
+            }]
+        })
+
+        snap.forEach((data) => {
+            /* const data = change.doc.data()
+            data.id = change.doc.id */
             try {
                 data.seconds = data?.created_at?.seconds
                 data.created_at = data.created_at.toDate().toDateString()
             } catch {
                 // ...
             }
+
+            if (data?.seen === false) {
+                commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
+            }
+
+            const position = (hasInitNotifications ? 'unshift' : 'push')
+            commit('PUSH_TO_ALL', {data, position})
+            commit('PUSH_TO_LOADED', data)
+
+           /*
             if (change.type === 'modified') {
+                if (data?.seen === false) {
+                    //lodash.set(rootState.user.profile.has, 'notifications', true)
+                    //rootState.user.profile.has.notifications = true
+                    commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
+                }
+
+            }
+            else if (change.type === 'added') {
                 if (data?.seen === false) {
                     //lodash.set(rootState.user.profile.has, 'notifications', true)
                     //rootState.user.profile.has.notifications = true
@@ -210,22 +232,17 @@ export const actions = {
                 const position = (hasInitNotifications ? 'unshift' : 'push')
                 commit('PUSH_TO_ALL', {data, position})
                 commit('PUSH_TO_LOADED', data)
-            }
-            else if (change.type === 'added') {
-              if (data?.seen === false) {
-                  //lodash.set(rootState.user.profile.has, 'notifications', true)
-                  //rootState.user.profile.has.notifications = true
-                  commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
-              }
-              const position = (hasInitNotifications ? 'unshift' : 'push')
-              commit('PUSH_TO_ALL', {data, position})
-              commit('PUSH_TO_LOADED', data)
             } else if (change.type === 'removed') {
-              commit('REMOVE', data)
-            }
-          })
-          hasInitNotifications = true
+                commit('REMOVE', data)
+            } */
         })
+
+        if (snap.length > 0) hasInitNotifications = true
+
+    } catch (e) {
+        console.log('notifications error.', e)
+    }
+
   },
   async remove ({ commit, rootState }, doc) {
     const uid = rootState.user.data.uid

@@ -29,7 +29,7 @@
     <v-container v-else class="pa-6 mt-5">
       <v-skeleton-loader v-for="x of 4" :key="x" width="100%" max-height="50" type="text" class="mb-6" />
     </v-container>
-    
+
     <div id="bottomOfChat" style="padding-bottom: 100px !important;"></div>
     <ChatInput :chat="chat" :reply="isReply" @updateReply="handleReply" @updateTyping="updateTypingStatus" />
   </div>
@@ -50,16 +50,16 @@ import {
 
 import { Intersect } from 'vuetify/lib/directives';
 //import Vue from 'vue'
-import firebase from 'firebase/app';
-import 'firebase/firestore';
+/* import firebase from 'firebase/app';
+import 'firebase/firestore'; */
 
 export default defineComponent({
   name: 'ChatsChatId',
   middleware: 'authenticated',
   directives: { Intersect },
   setup() {
-    const { /*$vuetify,*/ $fire, $capacitor, $helper, $encryption } = useContext();
-    const { dispatch, state } = useStore();
+    const { $db, $capacitor, $helper, $encryption } = useContext();
+    const { state } = useStore();
     const route = useRoute();
     const user = computed(() => state.user);
 
@@ -80,24 +80,24 @@ export default defineComponent({
       try {
         chatLoading.value = true;
         if (chatId.value) {
-          chatListener.value = $fire.firestore.doc(`Chats/${chatId.value}`).onSnapshot(doc => {
-            if (doc.exists) {
-              chat.value = doc.data();
-              loadParticipants();
-              loadMessages();
-            }
-          }, error => console.error("Error listening to chat updates:", error));
-          chatLoading.value = false;
+
+          chatListener.value = await $db.listen({path:`Chats/${chatId.value}`}).then(async docs => {
+            chat.value = docs
+            loadParticipants()
+            loadMessages()
+          })
         }
       } catch (e) {
         console.log("Error Loading Chat", e)
+      } finally {
+        chatLoading.value = false
       }
     };
 
     const loadParticipants = async () => {
       try {
         const participantProfiles = await Promise.all(
-          chat.value?.participants?.map(participantUid => dispatch('user/getOne', participantUid))
+          chat.value?.participants?.map(participantUid => $db.get(`Users/${participantUid}`))
         );
 
         participantProfiles.forEach(profile => {
@@ -114,8 +114,34 @@ export default defineComponent({
 
     const loadMessages = async () => {
       //messagesLoading.value = true;
-      try {
-        messageListener.value = await $fire.firestore
+
+        messageListener.value = await $db.listen({
+          path: `Chats/${chatId.value}/Messages`,
+          limit: 100,
+          orderBy: 'created_at'
+        }).then(async docs => {
+          // console.log('docs', docs)
+
+          docs.forEach((data) => {
+            data.ownerData = participants.value[data.owner]
+            if (data.message) data.message = $encryption.decrypt(data.message)
+            if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
+
+            // Parse Date Issues
+            if (data.created_at && (typeof data.created_at === 'string' || data.created_at instanceof String)) {
+              data.created_at = Date.parse(data.created_at)
+            }
+            messages.value.push(data)
+            /* const messageExists = messages.value.some(message => message.id === data.id)
+            if (!messageExists) messages.value.push(data) */
+          })
+
+          messagesLoading.value = false
+        }).catch(e => {
+          messagesLoading.value = false
+          console.error('STICKY: ERROR LOADING MESSAGES', e);
+        })
+      /*     messageListener.value = await $db.fire().fs
           .collection(`Chats/${chatId.value}/Messages`)
           .orderBy('created_at', 'asc')
           .limitToLast(100)
@@ -146,21 +172,18 @@ export default defineComponent({
               }
             });
             messagesLoading.value = false;
-          });
-      } catch (error) {
-        console.error('ERROR LOADING MESSAGES', error);
-        messagesLoading.value = false;
-      } finally {
-        messagesLoading.value = false
-      }
+          }); */
+
     };
 
     const updateTypingStatus = async (typing) => {
       try {
-        const value = typing ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid);
-        await dispatch('chats/updateField', { id: chatId.value, typing: value });
+        const value = typing ? $db.fire().arrayUnion(user.value.data.uid) : $db.fire().arrayRemove(user.value.data.uid);
+        await $db.save(`Chats/${chatId.value}`, {
+          typing: value
+        })
       } catch (error) {
-        console.error('ERROR UPDATING TYPING STATUS', error);
+        console.error('STICKY: ERROR UPDATING TYPING STATUS', error);
       }
     };
 
@@ -174,23 +197,26 @@ export default defineComponent({
           }
         });
       } catch (error) {
-        console.error('ERROR SCROLLING TO UNSEEN MESSAGE', error);
+        console.error('STICKY: ERROR SCROLLING TO UNSEEN MESSAGE', error);
       }
     };
 
     const onMessageInterest = async (message) => {
       try {
-        if (!message.seen.includes(user.value.data.uid)) {
-          await dispatch('chats/messages/updateField', {
-            chatId: chatId.value,
-            id: message.id,
-            data: {
-              seen: firebase.firestore.FieldValue.arrayUnion(user.value.data.uid)
-            }
-          });
-        }
+          if (!message.seen.includes(user.value.data.uid)) {
+            $db.save(`Chats/${chatId.value}/Messages/${message.id}`, {
+              seen: $db.fire().arrayUnion(user.value.data.uid)
+            })
+            /* await dispatch('chats/messages/updateField', {
+              chatId: chatId.value,
+              id: message.id,
+              data: {
+                seen: $db.fire().arrayUnion(user.value.data.uid)
+              }
+            }); */
+          }
       } catch (error) {
-        console.error('ERROR UPDATING MESSAGE INTEREST', error);
+        console.error('STICKY: ERROR UPDATING MESSAGE INTEREST', error);
       }
     };
 

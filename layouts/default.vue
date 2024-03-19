@@ -4,14 +4,15 @@
     :class="`grey lighten-5`"
     dark
   >
-    <v-main>
+    <v-progress-linear v-if="$store.state.appLoading" class="mb-0" indeterminate />
+    <v-main v-if="!$store.state.appLoading">
       <div>
         <GlobalIsoffline/>
         <Nuxt keep-alive/>
       </div>
     </v-main>
-    <GlobalSnackbar/>
-    <GlobalMobilefooter/>
+    <GlobalSnackbar v-if="!$store.state.appLoading"/>
+    <GlobalMobilefooter v-if="!$store.state.appLoading"/>
   </v-app>
 </template>
 <script>
@@ -35,7 +36,6 @@ export default defineComponent({
     } = useStore()
 
     const {
-      $remoteConfig,
       $ttlStorage,
       $system,
       i18n,
@@ -79,13 +79,6 @@ export default defineComponent({
       }, 1500)
 
       $system.initDarkMode()
-
-      // Load remote config from firebase
-      try {
-        $remoteConfig.load()
-      } catch {
-        // ... ERROR
-      }
 
       setTimeout(() => {
         //Do not initiate AdMob if the user's role is Admin

@@ -14,7 +14,7 @@ export default ({ app, store }, inject) => {
             msg: obj.msg || null,
         }
 
-        console.log('LOGGER: ', obj.val)
+        console.log('LOGGER: ', obj?.val)
 
         if(obj.val) {
             // o.val = obj.val.toString()
@@ -40,7 +40,7 @@ export default ({ app, store }, inject) => {
         }
 
         if (app.$db) {
-            app.$db.add(path, null, o)
+            app.$db._add(path, null, o)
         }
     },
     initDarkMode () {
@@ -68,7 +68,7 @@ export default ({ app, store }, inject) => {
     },
     async isUserUsingWebsiteVersion () {
         const device = await app.$capacitor.device()
-        console.log('DEVICE', device.platform, window.location.hostname)
+        // console.log('DEVICE', device.platform, window.location.hostname)
         if ('web' !== device.platform) {
             return false
         }

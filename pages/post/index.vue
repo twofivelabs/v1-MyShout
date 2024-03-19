@@ -72,11 +72,7 @@ export default defineComponent({
           }
         })
       } catch(e) {
-        $system.log({
-          comp: 'Posts',
-          msg: 'useFetch',
-          val: e
-        })
+        $system.log({ comp: 'Posts', msg: 'useFetch', val: e })
       } finally {
         loading.value = false
       }

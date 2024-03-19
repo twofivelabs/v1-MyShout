@@ -1,362 +1,976 @@
-// import { defineNuxtPlugin } from '@nuxtjs/composition-api'
+import {
+    addDoc,
+    collection,
+    collectionGroup,
+    deleteDoc,
+    doc,
+    endAt,
+    endBefore,
+    getCountFromServer,
+    getDoc,
+    getDocs,
+    getFirestore,
+    limit,
+    limitToLast,
+    onSnapshot,
+    orderBy,
+    query,
+    setDoc,
+    startAfter,
+    startAt,
+    where,
+    FieldValue,
+    arrayUnion,
+    arrayRemove,
+    increment
+} from 'firebase/firestore'
+import {
+    createUserWithEmailAndPassword,
+    EmailAuthProvider,
+    getAuth,
+    linkWithCredential,
+    sendEmailVerification,
+    sendPasswordResetEmail,
+    signInWithEmailAndPassword,
+    signInWithPhoneNumber,
+    signOut,
+    initializeAuth,
+    PhoneAuthProvider,
+    RecaptchaVerifier
+} from 'firebase/auth'
+import {
+    deleteObject,
+    getDownloadURL,
+    getStorage,
+    ref,
+    uploadBytes,
+    uploadString,
+} from 'firebase/storage'
+
+import { Capacitor  } from '@capacitor/core'
+import {getMessaging, getToken, onMessage} from 'firebase/messaging'
+import {onBackgroundMessage} from 'firebase/messaging/sw'
+import {getAnalytics, logEvent} from 'firebase/analytics'
+import {getFunctions, httpsCallable} from 'firebase/functions'
+
+import firebaseApp from './../firebaseConfig'
+
+import {filter} from 'lodash'
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication'
+
+const fs = getFirestore(firebaseApp)
+const auth = getAuth(firebaseApp)
+const capAuth = FirebaseAuthentication
+const storage = getStorage(firebaseApp)
+const storageRef = ref(storage)
+const messaging = getMessaging(firebaseApp)
+const analytics = getAnalytics(firebaseApp)
+const functions = getFunctions(firebaseApp)
+const app = firebaseApp
+
+const fire = {
+    app,
+    capAuth,
+    fs, onSnapshot, doc, setDoc, addDoc, getDoc, getDocs, deleteDoc, collection, collectionGroup, query, limitToLast, endBefore, startAfter, limit, startAt, endAt, where, orderBy,
+    FieldValue, arrayUnion, arrayRemove, increment,
+    auth, PhoneAuthProvider, RecaptchaVerifier, sendPasswordResetEmail, signOut, sendEmailVerification, createUserWithEmailAndPassword, EmailAuthProvider, linkWithCredential, signInWithEmailAndPassword, signInWithPhoneNumber,
+    storage, storageRef,
+    messaging, getToken, onMessage, onBackgroundMessage,
+    analytics, logEvent,
+    functions, httpsCallable
+}
+
 const listeners = []
-export const paginationMarkers = {}
+const paginationMarkers = {}
 
-export default ({ app }, inject) => {
-  inject('db', {
-    set_doc (path) {
-      return app.$fire.firestore.doc(path)
-    },
-    async create_relationship (currentPath, relationshipCollectionPath) {
-      const ref = await app.$fire.firestore.doc(currentPath)
-      await app.$fire.firestore.doc(relationshipCollectionPath).set({ ref }, { merge: true })
-    },
-    async search_collection ({
-      path,
-      term,
-      field = 'title',
-      operator = '>',
-      limit = null
-    }, dataConverter = null) {
-      // If the TERM is a number, search for a number not a string
-      if(app.$helper.hasOnlyDigits(term)) {
-          term = parseInt(term)
-      }
-      console.log('SEARCH', path, field, operator, term)
-      let searchRef = app.$fire.firestore
-        .collection(path)
-        .where(field, operator, term)
-      if (operator !== '==') {
-        searchRef.orderBy(field, 'asc')
-      }
-      if (limit) {
-        searchRef = searchRef.limit(limit)
-      }
-      if (dataConverter) {
-        searchRef = searchRef.withConverter(dataConverter)
-      }
-      return await searchRef.get()
-        .then((docs) => {
-          const data = []
-          docs.forEach((doc) => {
-              const d = doc.data()
-              d.id = doc.id
-              data.push(d)
-          })
+const consoleFbStyles = [
+    'color: #ff6719',
+    'background: transparent',
+    'border: 1px solid #ff6719',
+    'font-weight:600;',
+    'box-shadow: 2px 2px black',
+    'border-radius: 5px;',
+    'padding: 2px 5px',
+].join(';')
 
-          return data
-        }).catch((e) => {
-          app.$system.log({
-              comp: 'Firebase',
-              msg: `SEARCH_COLLECTION: ${path}`,
-              val: e
-          })
-          return false
-        })
-    },
-    async unsubscribeToAllListeners () {
-      if (listeners.length > 0) {
-        listeners.forEach((listener) => {
-          listener()
-        })
-      }
-    },
-    async listen (what, where = {}, dataConverter) {
-      let response = []
-      try {
-          let listenTo = await app.$fire.firestore.collection(what).withConverter(dataConverter)
-          if (where && where.field && where.op && where.value) {
-            listenTo = listenTo.where(where.field, where.op, where.value)
-          }
-          let unsubscribe = await listenTo.onSnapshot((docs) => {
-            response = [] // reset
-            docs.forEach((doc) => {
-              const data = doc.data()
-              data.id = doc.id
-              response.push(data)
-            })
-          })
-          listeners.push(unsubscribe)
-          return response
-      } catch {
-            return false
-      } finally {
-        console.log('FINALLY', response)
-      }
-    },
-    async get_all (what, where = {}, dataConverter, order = {}, limit = null, paginate = false, direction = 'next') {
-      let getAll = await app.$fire.firestore.collection(what).withConverter(dataConverter)
-      if (Array.isArray(where)) {
-        where.forEach((w) => {
-          getAll = getAll.where(w.field, w.op, w.value)
-        })
-      } else if (where && where.field && where.op && where.value) {
-        getAll = getAll.where(where.field, where.op, where.value)
-      }
-      if (order && order.by && order.direction) {
-        getAll = getAll.orderBy(order.by, order.direction)
-      }
-      if (limit) {
-        getAll = getAll.limit(limit)
-      }
+FirebaseAuthentication.addListener('authStateChange', (change) => {
+    console.log('AUTH CHANGED', change)
+})
 
-        // If we are paginating, we require certain fields
-        if (paginate) {
-            if (!order || !order.by) {
-                getAll = getAll.orderBy('created_at', 'desc')
-            }
-            // PAGINATE NEXT
-            if (direction === 'next') {
-                if(paginationMarkers[`${what}-last`]) {
-                    getAll = getAll.startAfter(paginationMarkers[`${what}-last`])
-                    getAll = getAll.limit(limit)
-                }
-            }
-            // PREVIOUS
-            else {
-                if(paginationMarkers[`${what}-first`]) {
-                    getAll = getAll.endBefore(paginationMarkers[`${what}-first`])
-                    getAll = getAll.limitToLast(limit)
-                }
-            }
+
+export default ({ app, store }, inject) => {
+    function upperFirstChar(v) {
+        if (typeof v === "string") {
+            return v.charAt(0).toUpperCase() + v.slice(1)
         }
-
-      return await getAll.get()
-        .then((docs) => {
-          const allData = []
-
-            // SET PAGINATION LEVEL
-            if (paginate) {
-                paginationMarkers[`${what}-last`] = docs.docs[docs.docs.length - 1]
-                paginationMarkers[`${what}-first`] = docs.docs[0]
-            }
-
-          // This could be better by using OBJECT and not an array for working within the store
-          // obj[ID]... vs/looping
-          docs.forEach((doc) => {
-            const data = doc.data()
-            data.id = doc.id
-            allData.push(data)
-          })
-          return allData
-        }).catch((e) => {
-          app.$system.log({
-              comp: 'Firebase',
-              msg: `GET_ALL: ${what}, ${where}`,
-              val: e
-          })
-          return false
-        })
-    },
-    async get_one (path, dataConverter) {
-      try {
-        return await app.$fire.firestore
-          .doc(path)
-          .withConverter(dataConverter)
-          .get()
-          .then((doc) => {
-            if (doc.exists) {
-              const data = doc.data()
-              data.id = doc.id
-              return { ...data }
-            }
-            return false
-          }).catch((e) => {
-            app.$system.log({
-                comp: 'Firebase',
-                msg: `GET_ONE: ${path}`,
-                val: e
-            })
-            return false
-          })
-      } catch(e) {
-        app.$system.log({
-          comp: 'Firebase',
-          msg: `GET_ONE 2: ${path}`,
-          val: e
-        })
-        return false
-      }
-    },
-    async update (path, dataConverter = null, data, merge = true) {
-      try {
-        let updateThis = await app.$fire.firestore.doc(path)
-        if (dataConverter) {
-          updateThis = updateThis.withConverter(dataConverter)
-        }
-        // console.log('UPDATE DATA', data)
-        return await updateThis.set(data, { merge })
-          .then(() => {
-            return true
-          })
-          .catch((e) => {
-            app.$system.log({
-              comp: 'Firebase',
-              msg: `UPDATE: ${path}`,
-              val: { error: e, data: data }
-            })
-            return false
-          })
-      } catch (e) {
-        app.$system.log({
-          comp: 'Firebase',
-          msg: `UPDATE 2: ${path}`,
-          val: { error: e, data: data }
-        })
-        return false
-      }
-    },
-    async add (path, dataConverter = null, data) {
-      try {
-        let addThis = await app.$fire.firestore.collection(path)
-        if (dataConverter) {
-          addThis = addThis.withConverter(dataConverter)
-        }
-        return await addThis.add(data)
-          .then((response) => {
-            data.id = response.id
-            return data
-          })
-          .catch((e) => {
-            app.$system.log({
-              comp: 'Firebase',
-              msg: `ADD: ${path}`,
-              val: { error: e, data: data }
-            })
-            return false
-          })
-      } catch (e) {
-          app.$system.log({
-              comp: 'Firebase',
-              msg: `ADD 2: ${path}`,
-              val: { error: e, data: data }
-          })
-        return false
-      }
-    },
-    async group (what, where = {}, dataConverter, order = {}, limit = null, paginate = false, direction = 'next') {
-          let getAll = await app.$fire.firestore.collectionGroup(what).withConverter(dataConverter)
-          console.log('WHERE', where)
-          if (Array.isArray(where)) {
-              where.forEach((w) => {
-                  getAll = getAll.where(w.field, w.op, w.value)
-              })
-          } else if (where && where.field && where.op && where.value) {
-              getAll = getAll.where(where.field, where.op, where.value)
-          }
-          if (order && order.by && order.direction) {
-              getAll = getAll.orderBy(order.by, order.direction)
-          }
-          if (limit) {
-              getAll = getAll.limit(limit)
-          }
-
-        // If we are paginating, we require certain fields
-        if (paginate) {
-            if (!order || !order.by) {
-                getAll = getAll.orderBy('created_at', 'desc')
-            }
-            // PAGINATE NEXT
-            if (direction === 'next') {
-                if(paginationMarkers[`${what}-last`]) {
-                    getAll = getAll.startAfter(paginationMarkers[`${what}-last`])
-                    getAll = getAll.limit(limit)
-                }
-            }
-            // PREVIOUS
-            else {
-                if(paginationMarkers[`${what}-first`]) {
-                    getAll = getAll.endBefore(paginationMarkers[`${what}-first`])
-                    getAll = getAll.limitToLast(limit)
-                }
-            }
-        }
-
-          return await getAll.get()
-              .then((docs) => {
-                  const allData = []
-
-                  // SET PAGINATION LEVEL
-                  if (paginate) {
-                      paginationMarkers[`${what}-last`] = docs.docs[docs.docs.length - 1]
-                      paginationMarkers[`${what}-first`] = docs.docs[0]
-                  }
-
-                  // This could be better by using OBJECT and not an array for working within the store
-                  // obj[ID]... vs/looping
-                  docs.forEach((doc) => {
-                      const data = doc.data()
-                      data.id = doc.id
-                      allData.push(data)
-                  })
-                  return allData
-              }).catch((e) => {
-                  app.$system.log({
-                      comp: 'Firebase',
-                      msg: 'paginate',
-                      val: e
-                  })
-                  return false
-              })
-      },
-    async delete_doc (path) {
-      try {
-        return await app.$fire.firestore
-          .doc(path)
-          .delete()
-          .then(() => {
-            return true
-          })
-          .catch((e) => {
-            app.$system.log({
-              comp: 'Firebase',
-              msg: `DELETE_DOC: ${path}`,
-              val: e
-            })
-            return false
-          })
-      } catch(e) {
-        app.$system.log({
-          comp: 'Firebase',
-          msg: `DELETE_DOC 2: ${path}`,
-          val: e
-        })
-        return false
-      }
-    },
-    async upload({
-        path = null,
-        data = null,
-        base64 = false,
-        metaData = {}
-    }) {
-        if (!path) {
-            return false
-        }
-
-        let uploadResponse
-        if (base64) {
-            uploadResponse = await app.$fire.storage.ref(path).putString(data, 'base64', metaData)
-        } else if (data) {
-            uploadResponse = await app.$fire.storage.ref(path).put(data, metaData)
-        }
-
-        if ('canceled' === uploadResponse.state) {
-            console.log('STICKY: [upload]: Canceled...')
-        }
-        if ('error' === uploadResponse.state) {
-            console.log('STICKY: [upload]: Error...')
-        }
-        if ('paused' === uploadResponse.state) {
-            console.log('STICKY: [upload]: Paused...')
-        }
-        if ('running' === uploadResponse.state) {
-            console.log('STICKY: [upload]: Uploading...')
-        }
-        if ('success' === uploadResponse.state) {
-            return await uploadResponse.ref.getDownloadURL()
-        }
-        return false
+        return v
     }
-  })
+    function parse_path(path, data=null) {
+        let storeToUseAll = path
+        let storeToUseOne = path
+        let storeToUse = path
+        let pathId = path
+        let newPath
+        let slug
+
+        path = upperFirstChar(path)
+        newPath = path
+
+        // Check for ID in object data
+        if (data && typeof data === 'object') {
+            // if (data.id || data.slug || data.title || data.name) {
+            if (data.id || data.slug || data.name) {
+                //path = path + '/' + (app.$helper.slugify(data.id, '-', false) || app.$helper.slugify(data.slug || data.title || data.name))
+                slug = (app.$helper.slugify(data.id, '-', false) || app.$helper.slugify(data.slug || data.name))
+                if (!path.includes(slug)) {
+                    path = path + '/' + slug
+                }
+            }
+        }
+        if (path && path.includes('/')) {
+            let pathParts = path.split('/')
+
+            pathId = pathParts[pathParts.length - 1]
+            storeToUseAll = pathParts[pathParts.length - 1].toLowerCase()
+            storeToUseOne = pathParts[pathParts.length - 2].toLowerCase()
+            storeToUse = store.state[storeToUseOne] ? storeToUseOne : storeToUseAll
+
+            newPath = pathParts.map((p) => {
+                if (!p || p === 'undefined') return
+                if (store.state[p]) {
+                    storeToUse = p
+                    return upperFirstChar(p)
+                }
+                return p
+            }).join('/')
+            //.replace(/\/+$/, '')
+        }
+
+        // verify
+        if (!store.state[storeToUseOne]) {
+            storeToUseOne = storeToUseOne?.toLowerCase()
+        }
+        if (!store.state[storeToUseAll]) {
+            storeToUseAll = storeToUseAll?.toLowerCase()
+        }
+        if (!store.state[storeToUse]) {
+            storeToUse = storeToUse?.toLowerCase()
+        }
+
+        return {
+            newPath, storeToUseAll, storeToUseOne, storeToUse, pathId, slug
+        }
+    }
+
+    inject('db', {
+        fire () {
+            return fire
+        },
+        isWeb () {
+            if (Capacitor.isNativePlatform()) {
+                console.log('IS NATIVE')
+                return false
+            }
+            console.log('IS WEB')
+            return true
+        },
+        whichAuth () {
+            let auth
+            if (!this.isWeb()) {
+                auth = initializeAuth(firebaseApp, {
+                    persistence: true
+                })
+            } else {
+                auth = getAuth()
+            }
+            return auth
+        },
+        parsePath (path) {
+            return parse_path(path)
+        },
+        // DO NOT DIRECTLY ACCESS THESE METHODS, only through the store
+        async _search_collection ({ path, term, field = 'title', operator = '>', limit = null }, dataConverter = null) {
+            if (!path) return
+
+            // If the TERM is a number, search for a number not a string
+            if(app.$helper.hasOnlyDigits(term)) {
+                term = parseInt(term)
+            }
+
+            console.info(`%c🔥SEARCH: ${path} ${field} ${operator} ${term}`, consoleFbStyles)
+
+            const queryConstraints = []
+            let collectionDoc
+
+            collectionDoc = fire.collection(fire.fs, path)
+
+            queryConstraints.push( fire.where(field, operator, term) )
+
+            if (operator !== '==') {
+                queryConstraints.push( fire.orderBy(field, 'asc') )
+            }
+            if (limit) {
+                queryConstraints.push( fire.limit(limit) )
+            }
+            if (dataConverter) {
+                // queryConstraints.push( fire.withConverter(dataConverter) )
+            }
+
+            const q = fire.query( collectionDoc, ...queryConstraints ).withConverter(dataConverter)
+
+            return await fire.getDocs(q)
+                .then((docs) => {
+                    const data = []
+                    // TODO: Perhaps don't loop the data right away, only when needed?
+                    docs.forEach((doc) => {
+                        data.push({ id: doc.id, ...doc.data() })
+                    })
+                    return data
+
+                }).catch((e) => {
+                    app.$system.log({ comp: 'Firebase', msg: `SEARCH_COLLECTION: ${path}`, val: e.message })
+                    return false
+                })
+        },
+        /**
+         * This is temporary until it's cleaned up
+         * @param v
+         * @param options
+         * @returns {Promise<boolean>}
+         */
+        async simpleSearch (collection, field, value, options={}) {
+            // Min input length before searching
+            //const localItems = []
+            //const localItems = new Set()
+
+            if (!value || value.length < 3) {
+                console.log('Search with a minimum of 2 characters')
+                return false
+            }
+
+            const queryConstraints = []
+            let collectionDoc
+            collectionDoc = fire.collection(fire.fs, collection)
+
+            queryConstraints.push( fire.orderBy(field, 'asc') )
+            queryConstraints.push( fire.startAt(value) )
+            queryConstraints.push( fire.endAt(`${value}~`) )
+            queryConstraints.push( fire.limit(50) )
+
+            console.info(`%c🔍 SEARCH: ${upperFirstChar(options.collection)}/Searches WHERE: ${value}`, consoleFbStyles)
+
+            const q = fire.query( collectionDoc, ...queryConstraints ).withConverter(null)
+
+            return await fire.getDocs(q).then(snapshot => {
+                if (snapshot.empty) {
+                    console.info(`%c🔍 SEARCH: Empty`, consoleFbStyles)
+                    return false
+                }
+
+                const allData = []
+
+                snapshot.docs.forEach((doc) => {
+                    allData.push({ id: doc.id, ...doc.data() })
+                })
+
+                return allData
+
+            })
+        },
+        async search (v, options={}) {
+            // Min input length before searching
+            //const localItems = []
+            //const localItems = new Set()
+
+            if (!v || v.length < 3) {
+                console.log('Search with a minimum of 2 characters')
+                return false
+            }
+
+            v = v.trim().toLowerCase()
+            const queryConstraints = []
+            let collectionDoc
+
+            collectionDoc = fire.collectionGroup(fire.fs, 'Searches')
+
+            queryConstraints.push( fire.orderBy('q', 'asc') )
+            queryConstraints.push( fire.startAt(v) )
+            queryConstraints.push( fire.endAt(`${v}~`) )
+            queryConstraints.push( fire.limit(50) )
+            if (options?.collection) {
+                queryConstraints.push( fire.where('collection', '==', upperFirstChar(options.collection)) )
+            }
+
+            console.info(`%c🔍 SEARCH: ${upperFirstChar(options.collection)}/Searches WHERE: ${v}`, consoleFbStyles)
+
+            const q = fire.query( collectionDoc, ...queryConstraints ).withConverter(null)
+
+            return await fire.getDocs(q).then(r => {
+                const dataPathCheck = {}
+
+                // Loop docs
+                const newDataArray = r.docs.map(async (doc) => {
+                    if (options?.getFullDoc === true) {
+                        if (!dataPathCheck[doc.data().path]){
+                            // Set 'has checked'
+                            dataPathCheck[doc.data().path] = doc.data().path
+
+                            const res = await this._get_one(doc.data().path, null, true)
+                            if (res) return res
+                        }
+                    } else {
+                        return {
+                            text: doc.data().name,
+                            value: `${doc.data().q}-${doc.data().name}`,
+                            path: doc.data().path,
+                        }
+                    }
+                    // return { id: doc.id, ...doc.data() }
+                })
+
+                return Promise.all(newDataArray).then((results) => {
+                    return results.filter(e => e != null)
+                })
+            })
+        },
+        async unsubscribeToAllListeners () {
+            if (listeners.length > 0) {
+                listeners.forEach((listener) => {
+                    listener()
+                })
+            }
+        },
+        async _listen (what, where = {}, dataConverter, orderBy={}) {
+            let response = []
+
+            try {
+                const queryConstraints = []
+                let collectionDoc
+
+                collectionDoc = fire.collection(fire.fs, what)
+                // queryConstraints.push( fire.withConverter(dataConverter) )
+
+                if (where && where.field && where.op && where.value) {
+                    queryConstraints.push( fire.where(where.field, where.op, where.value) )
+                }
+                if (orderBy && orderBy.field) {
+                    queryConstraints.push( fire.orderBy(orderBy.field, orderBy.direction || 'asc') )
+                }
+
+                const q = fire.query( collectionDoc, ...queryConstraints ).withConverter(dataConverter)
+
+                let unsubscribe = await fire.onSnapshot( q, (docs) => {
+                    response = [] // reset
+                    docs.forEach((doc) => {
+                        response.push({ id: doc.id, ...doc.data() })
+                    })
+                })
+
+                listeners.push(unsubscribe)
+                return response
+
+            } catch (e) {
+                app.$system.log({ comp: 'Firebase', msg: `LISTEN: ${what}, ${JSON.stringify(where)}`, val: e.message })
+                return false
+
+            } finally {
+                console.info(`%c🔥LISTEN FINALLY: ${response}`, consoleFbStyles)
+            }
+        },
+        /**
+         * IF you are missing the "CREATED_AT" field, this will return ZERO results
+         * @param what
+         * @param where
+         * @param dataConverter
+         * @param order
+         * @param limit
+         * @param paginate
+         * @param direction
+         * @returns {Promise<*[]|boolean>}
+         * @private
+         */
+        async _get_all (what, where = {}, dataConverter, order = {}, limit = null, paginate = false, direction = 'next') {
+            if (!what) return
+
+            let pageSize = (limit ?? 15)
+            let collectionDoc
+            const queryConstraints = []
+
+            collectionDoc = fire.collection(fire.fs, what)
+
+            // WHERE STATEMENT
+            if (Array.isArray(where) && where.length >= 1) {
+                // multi level where statements
+                if (Array.isArray(where[0])) {
+                    where.forEach((w) => {
+                        queryConstraints.push( fire.where(w[0], w[1], w[2]) )
+                    })
+                } else {
+                    queryConstraints.push( fire.where(where[0], where[1], where[2]) )
+                }
+            }
+
+            // ORDER STATEMENT
+            if (order && order.by && order.direction) {
+                queryConstraints.push( fire.orderBy(order.by, order.direction) )
+            }
+
+            // LIMIT STATEMENT
+            queryConstraints.push( fire.limit(pageSize) )
+
+            // PAGINATION STATEMENT, we require certain fields
+            if (paginate) {
+
+                if (!order || !order.by) {
+                    queryConstraints.push( fire.orderBy('created_at', 'desc') )
+                }
+
+                // PAGINATE NEXT
+                if (direction === 'next') {
+                    if (paginationMarkers[`${what}-lastVisible`]) {
+                        queryConstraints.push( fire.startAfter(paginationMarkers[`${what}-lastVisible`]) )
+                        queryConstraints.push( fire.limit(pageSize) )
+                    }
+                }
+                    // PREVIOUS
+                //else if (direction === 'first') {
+                else if (direction === 'first' || direction === 'previous') {
+                    if (paginationMarkers[`${what}-first`]) {
+                        queryConstraints.push( fire.endBefore(paginationMarkers[`${what}-first`]) )
+                        queryConstraints.push( fire.limitToLast(pageSize) )
+                    }
+                }
+            }
+
+            console.info(`%c🔥GET_ALL: ${what} WHERE: ${JSON.stringify(where)}, ORDER: ${JSON.stringify(order)}, LIMIT: ${limit}, PAGINATE: ${paginate}, DIRECTION: ${direction}`, consoleFbStyles)
+
+            const q = fire.query( collectionDoc, ...queryConstraints ).withConverter(dataConverter)
+
+            if (paginate) {
+                const getCountConstraints = filter(queryConstraints, (o) => {
+                    if (o.type !== 'limit') return o
+                })
+
+                if (!(what in store.state.counter)) {
+                    const queryTotalCount = await getCountFromServer(fire.query(collectionDoc, ...getCountConstraints))
+                    store.state.counter[what] = queryTotalCount?.data()?.count
+                }
+            }
+
+            return await fire.getDocs(q).then((docs) => {
+                const allData = []
+
+                // SET PAGINATION LEVEL
+                if (paginate) {
+                    if (!paginationMarkers[`${what}-top`]) {
+                        paginationMarkers[`${what}-top`] = docs.docs[docs.docs.length - 1]
+                    }
+                    // paginationMarkers[`${what}-last`] = docs.docs[docs.docs.length - 1]
+                    paginationMarkers[`${what}-lastVisible`] = docs.docs[docs.docs.length - 1]
+                    paginationMarkers[`${what}-first`] = docs.docs[0]
+                    // console.log('FIRST', paginationMarkers[`${what}-first`])
+                }
+
+                // TODO: Push this right onto the state, so we don't loop again?
+                docs.forEach((doc) => {
+                    allData.push({ id: doc.id, ...doc.data() })
+                })
+
+                return allData
+
+            }).catch((e) => {
+                app.$system.log({ comp: 'Firebase', msg: `GET_ALL: ${what}, ${where}`, val: e.message })
+                return false
+            })
+        },
+        async _count(what, where = {}) {
+            if (!what) return
+
+            let collectionDoc
+            const queryConstraints = []
+
+            collectionDoc = fire.collection(fire.fs, what)
+
+            // WHERE STATEMENT
+            if (Array.isArray(where) && where.length >= 1) {
+                // multi level where statements
+                if (Array.isArray(where[0])) {
+                    where.forEach((w) => {
+                        queryConstraints.push( fire.where(w[0], w[1], w[2]) )
+                    })
+                } else {
+                    queryConstraints.push( fire.where(where[0], where[1], where[2]) )
+                }
+            }
+
+            console.info(`%c🔥COUNT: ${what} WHERE: ${JSON.stringify(queryConstraints)}`, consoleFbStyles)
+
+            const queryTotalCount = await getCountFromServer(fire.query(collectionDoc, ...queryConstraints))
+            return queryTotalCount?.data()?.count
+        },
+        async _get_one (path, dataConverter, returnIfHasData=false) {
+            if (!path) return
+
+            console.info(`%c🔥GET_ONE: ${path}`, consoleFbStyles)
+            try {
+
+                const queryConstraints = []
+                let collectionDoc
+
+                collectionDoc = fire.doc(fire.fs, path)
+
+                const q = fire.query( collectionDoc, ...queryConstraints ).withConverter(dataConverter)
+
+                return await fire.getDoc(q).then((doc) => {
+                    if (returnIfHasData) {
+                        if (doc.data()) {
+                            return { id: doc.id, ...doc.data() }
+                        }
+                        return false
+                    } else {
+                        return { id: doc.id, ...doc.data() }
+                    }
+
+                }).catch((e) => {
+                    app.$system.log({ comp: 'Firebase', msg: `GET_ONE: ${path}`, val: e.message })
+                    return false
+                })
+
+            } catch(e) {
+                app.$system.log({ comp: 'Firebase', msg: `GET_ONE 2: ${path}`, val: e.message })
+                return false
+            }
+        },
+        async _update (path, dataConverter = null, data, merge = true) {
+            if (!path) return
+
+            console.info(`%c🔥UPDATE, ${path}, DATA:${JSON.stringify(data)}`, consoleFbStyles)
+            try {
+                // Adjusted on 2023-01-20
+                let docRef
+
+                if (path.split('/').length % 2 === 0) {
+                    // EVEN
+                    const queryConstraints = []
+                    let collectionDoc
+                    collectionDoc = fire.doc(fire.fs, path)
+                    docRef = fire.query( collectionDoc, ...queryConstraints ).withConverter(dataConverter)
+
+                } else {
+                    // ODD
+                    docRef = doc(collection(fire.fs, path)).withConverter(dataConverter)
+                    if (!data.id) {
+                        data.id = docRef.id
+                    }
+                }
+
+                return await fire.setDoc(docRef, data, { merge }).then(() => {
+                    return true
+                }).catch((e) => {
+                    app.$system.log({ comp: 'Firebase', msg: `UPDATE: ${path}`, val: { error: e.message, data: data } })
+                    return false
+                })
+
+            } catch (e) {
+                app.$system.log({ comp: 'Firebase', msg: `UPDATE 2: ${path}`, val: { error: e.message, data: data } })
+                return false
+            }
+        },
+        async _add (path, dataConverter = null, data) {
+            if (!path) return
+
+            if ('Log' !== path) {
+                console.info(`%c🔥ADD: ${path} ${JSON.stringify(data)}`, consoleFbStyles)
+            }
+
+            try {
+                const queryConstraints = []
+                let collectionDoc
+
+                collectionDoc = fire.collection(fire.fs, path)
+
+                if (dataConverter) {
+                    // queryConstraints.push(fire.withConverter(dataConverter))
+                }
+
+                const q = fire.query( collectionDoc, ...queryConstraints ).withConverter(dataConverter)
+
+                return await fire.addDoc(q, data).then((response) => {
+                    data.id = response.id
+                    return data
+                }).catch((e) => {
+                    app.$system.log({ comp: 'Firebase', msg: `ADD: ${path}`, val: { error: e.message, data: data } })
+                    return false
+                })
+
+            } catch (e) {
+                app.$system.log({ comp: 'Firebase', msg: `ADD 2: ${path}`, val: { error: e.message, data: data } })
+                return false
+            }
+        },
+        async _group (what, where = {}, dataConverter, order = {}, limit = null) {
+            if (!what) return
+
+            const queryConstraints = []
+            let collectionDoc
+
+            collectionDoc = fire.collectionGroup(fire.fs, what)
+
+            if (dataConverter) {
+                // queryConstraints.push(fire.withConverter(dataConverter))
+            }
+
+            if (Array.isArray(where) && where.length >= 1) {
+                // multi level where statements
+                if (Array.isArray(where[0])) {
+                    where.forEach((w) => {
+                        queryConstraints.push(fire.where(w[0], w[1], w[2]))
+                    })
+                } else {
+                    queryConstraints.push(fire.where(where[0], where[1], where[2]))
+                }
+            }
+            if (order && order.by && order.direction) {
+                // Will require firebase INDEX
+                queryConstraints.push(fire.orderBy(order.by, order.direction))
+            }
+            if (limit) {
+                queryConstraints.push(fire.limit(limit))
+            }
+
+            console.info(`%c🔥GROUP: ${what} WHERE: ${JSON.stringify(where)}, ORDER: ${JSON.stringify(order)}, LIMIT: ${limit}`, consoleFbStyles)
+
+            const q = fire.query( collectionDoc, ...queryConstraints ).withConverter(dataConverter)
+
+            return await fire.getDocs(q).then((docs) => {
+                const allData = []
+
+                // TODO: Push this right onto the state, so we don't loop again?
+                docs.forEach((doc) => {
+                    allData.push({ id: doc.id, ...doc.data() })
+                })
+
+                return allData
+
+            }).catch((e) => {
+                app.$system.log({ comp: 'Firebase', msg: 'group', val: e.message })
+                return false
+            })
+        },
+        async _delete_doc (path) {
+            if (!path) return
+
+            try {
+                const queryConstraints = []
+                let collectionDoc
+
+                collectionDoc = fire.doc(fire.fs, path)
+                const q = fire.query( collectionDoc, ...queryConstraints )
+
+                return await fire.deleteDoc(q).then(() => {
+                    return true
+                }).catch((e) => {
+                    app.$system.log({  comp: 'Firebase', msg: `DELETE_DOC: ${path}`, val: e.message })
+                    return false
+                })
+            } catch(e) {
+                app.$system.log({ comp: 'Firebase', msg: `DELETE_DOC 2: ${path}`, val: e.message })
+                return false
+            }
+        },
+
+        // Use these for DIRECT ACCESS, it will collect from the store, and re-use these FB functions
+        /**
+         * Upload a file to fire storage
+         * @param path, url of the path to store it at
+         * @param data, file is an object
+         * @param options
+         * @returns {Promise<boolean|*>}
+         */
+        async upload(path, data, options = { 'base64': false, metadata: {} }) {
+            if (!path) return false
+            if (!data) return false
+
+            const storage = getStorage()
+            const filePath = ref(storage, path)
+
+            let uploadResponse
+            if (options.base64) {
+                uploadResponse = await uploadString(filePath, data, 'base64')
+            } else if (data) {
+                uploadResponse = await uploadBytes(filePath, data, options.metadata)
+            }
+            if (uploadResponse) {
+                return await getDownloadURL(filePath)
+            }
+            console.log('Upload Response: ', uploadResponse)
+            return false
+        },
+        async deleteFile(path) {
+            if (!path) return false
+
+            const storage = getStorage()
+            const filePath = ref(storage, path)
+
+            return await deleteObject(filePath).then(() => {
+                return true
+            }).catch((e) => {
+                console.log('Error: deleting file', e)
+                return false
+            })
+        },
+        async count(path, data= null) {
+            if (!path) return false
+            if (!store.state) return false
+
+            // PARSE THE PATH GIVEN
+            let {newPath} = parse_path(path)
+            const where = (data.where ? data.where : null)
+
+            return await this._count(newPath, where)
+        },
+        async get(path, data= null) {
+            if (!path) return false
+
+            // PARSE THE PATH GIVEN
+            let {
+                newPath,
+                //storeToUseAll,
+                //storeToUseOne
+            } = parse_path(path)
+            // const mergedData = Object.assign({path:newPath}, {...data})
+            /*
+            console.table({
+                'NewPath': newPath,
+                'Store To Use All': storeToUseAll,
+                'Store To Use One': storeToUseOne
+            }) */
+
+            if ( (newPath.split('/').length % 2) === 0 ) {
+                const getOneRes = await this._get_one(newPath, null, true)
+                return (getOneRes) ? getOneRes : false
+            } else {
+                const getAllRes = await this._get_all(newPath, data, null)
+                return (getAllRes) ? getAllRes : false
+            }
+        },
+        async listen_withStore(path, data= null) {
+            if (!path) return false
+            if (!store.state) return false
+
+            let {newPath, storeToUseAll, storeToUseOne} = parse_path(path)
+            const mergedData = Object.assign({path:newPath}, {...data})
+
+            // Last element in array is in the store, it's GET ALL
+            if (store.state[storeToUseAll]) {
+                if (!mergedData.path) mergedData.path = upperFirstChar(storeToUseAll)
+                // console.log('Listen All', mergedData)
+                return await store.dispatch(`${storeToUseAll}/listen`, mergedData)
+            }
+            // GET ONE
+            else if (store.state[storeToUseOne]) {
+                if (!mergedData.path) mergedData.path = upperFirstChar(storeToUseOne)
+                // We use this to determine if the path is incomplete and need to return default
+                return await store.dispatch(`${storeToUseOne}/listen`, mergedData)
+            }
+            console.log('No store available')
+            return false
+        },
+        // PATCH JOBS FOR MYSHOUT
+        async listen({ path, where = [], limit = 25, position = 'push', orderBy = 'created_at', orderDirection = 'asc' }) {
+            if (!path) return console.log('No path provided')
+            console.log('position:', position) // just a temp fix
+
+            try {
+                const pathSplit = path.split('/')
+                const queryConstraints = []
+                let collectionDoc
+
+                if ( (pathSplit.length % 2) === 0 ) {
+                    collectionDoc = fire.doc(fire.fs, path)
+                } else {
+                    collectionDoc = fire.collection(fire.fs, path)
+                    queryConstraints.push( fire.orderBy(orderBy, orderDirection) )
+                    queryConstraints.push( fire.limitToLast(limit) )
+                }
+
+                if ( where && (where.length >= 3) ) {
+                    queryConstraints.push( fire.where(where[0],where[1],where[2]) )
+                }
+
+                console.info(`👂Listening: ${path} WHERE: ${JSON.stringify(where)}, ORDER: ${JSON.stringify(orderBy)}, LIMIT: ${limit}`)
+
+                const q = fire.query( collectionDoc, ...queryConstraints )
+
+                return new Promise((resolve, reject) => {
+                    fire.onSnapshot( q, (snapshot) => {
+                        const responseData = []
+
+                        // DOCUMENT
+                        if ( (pathSplit.length % 2) === 0 ) {
+                            const data = { id: snapshot.id, ...snapshot.data() }
+                            resolve(data)
+                        }
+
+                        // COLLECTION
+                        else {
+                            snapshot.docChanges().forEach(async (change) => {
+                                const data = { id: change.doc.id, ...change.doc.data() }
+                                let formattedData
+
+                                try {
+                                    data.created_at = data.created_at.toDate().toDateString()
+                                } catch { /**/ }
+
+                                formattedData = data
+
+                                if (change.type === 'added' || change.type === 'modified') {
+                                    responseData.push(formattedData)
+
+                                } else if (change.type === 'removed') {
+                                    //commit('REMOVE_ONE', (formattedData.id || formattedData.slug))
+                                }
+                            })
+                            resolve(responseData)
+                        }
+                    }, reject)
+                })
+
+            } catch (e) {
+                console.log('STICKY: Error listening: ', e, JSON.stringify(e))
+                return Promise.resolve(false)
+            }
+        },
+
+        async paginate(path, data= null) {
+            if (!path) return false
+            if (!data) return false
+
+            let { newPath, storeToUse, storeToUseAll } = parse_path(path)
+            // let { newPath, storeToUse, storeToUseAll, pathId } = parse_path(path)
+            // console.log('storeToUse', newPath, storeToUse, storeToUseAll)
+
+            if (store.state[storeToUse]) {
+                if (!store.state[storeToUseAll]) {
+                    data.id = storeToUseAll
+                }
+                const mergedData = Object.assign({paginate:true, path:newPath}, {...data})
+                return await store.dispatch(`${storeToUse}/paginate`, mergedData)
+            }
+            return false
+        },
+        async save(path, data= null) {
+            if (!path) return false
+            if (!data) return false
+
+            let response = null
+            let { newPath, /* storeToUse, storeToUseAll, pathId,  */slug } = parse_path(path, data)
+            // const dataPosition = (data.position ? data.position : 'push')
+            //console.log(dataPosition, { newPath, storeToUse, storeToUseAll, pathId, slug })
+
+            // Don't want this to be saved to db
+            delete data.position
+            delete data.path
+            delete data.joined
+            delete data.timeAgo
+
+            // EXISTING DOC
+            if ('id' in data || 'slug' in data) {
+                console.log('SAVE > existing doc', newPath, data)
+                data.slug = slug
+                data.id = data.slug
+                data.updated_at = new Date()
+                if (!data.created_at) {
+                    data.created_at = new Date()
+                } else {
+                    delete data.created_at
+                }
+                response = await this._update(newPath, null, data, true)
+            }
+            // NEW DOC
+            else if (!data.created_at && (data.id || data.slug) ) {
+                console.log('SAVE > new doc', newPath, data)
+                data.id = data.id || data.slug || null
+                data.created_at = new Date()
+                response = await this._update(newPath, null, data)
+            }
+            // NEW DOC SAFETY
+            else {
+                console.log('SAVE > new doc last', newPath, data)
+                data.created_at = new Date()
+                response = await this._update(newPath, null, data)
+            }
+
+            return response || false
+        },
+        async save_withStore(path, data= null) {
+            if (!path) return false
+            if (!data) return false
+
+            let { newPath, storeToUse, storeToUseAll, pathId } = parse_path(path, data)
+
+            // storeToUseAll if it's an ID will mess things up
+            if (store.state[storeToUse]) {
+                if (!store.state[storeToUseAll]) {
+                    if (!data.id) data.id = pathId
+                }
+
+                const mergedData = Object.assign({path:newPath}, {...data})
+                // console.log('MERGED DATA', mergedData)
+                return await store.dispatch(`${storeToUse}/save`, mergedData)
+            }
+            return false
+        },
+        async delete(path) {
+            if (!path) return false
+
+            let { newPath } = parse_path(path)
+
+            return await this._delete_doc(newPath).then(() => {
+                return true
+            }).catch(() => {
+                return false
+            })
+        },
+        async delete_withStore(path) {
+            if (!path) return false
+
+            let { newPath, storeToUseOne } = parse_path(path)
+            storeToUseOne = storeToUseOne.toLowerCase()
+
+            if (store.state[storeToUseOne]) {
+                return await store.dispatch(`${storeToUseOne}/remove`, newPath)
+            }
+            return false
+        },
+        async update(path, data) {
+            if (!path) return false
+            if (!data) return false
+
+            let { newPath, storeToUseAll, storeToUseOne, pathId } = parse_path(path)
+            storeToUseOne = storeToUseOne.toLowerCase()
+
+            if (store.state[storeToUseOne]) {
+                if (!store.state[storeToUseAll]) {
+                    if (!data.id) data.id = pathId
+                }
+                const mergedData = Object.assign({path:newPath}, {...data})
+                return await store.dispatch(`${storeToUseOne}/updateField`, mergedData)
+            }
+            return false
+        },
+        async group(path, data= {}) {
+            if (!path) return false
+
+            let { storeToUse, storeToUseAll } = parse_path(path)
+
+            if (store.state[storeToUse]) {
+                if (!store.state[storeToUseAll]) {
+                    data.id = storeToUseAll
+                }
+                return await store.dispatch(`${storeToUse}/group`, data)
+            }
+            return false
+        }
+    })
 }

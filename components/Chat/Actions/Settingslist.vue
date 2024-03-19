@@ -32,15 +32,15 @@
 </template>
 
 <script>
-  import {
-    defineComponent,
-    useStore,
-    useRouter,
-    computed,
-  } from '@nuxtjs/composition-api'
+import {
+  defineComponent,
+  useStore,
+  useRouter,
+  computed, useContext,
+} from '@nuxtjs/composition-api'
 
-  import firebase from 'firebase';
-  import 'firebase/functions';
+/*   import firebase from 'firebase';
+  import 'firebase/functions'; */
 
   export default defineComponent({
     name: 'SettingsList',
@@ -65,7 +65,8 @@
       }
     },
     setup(props) {
-      const { state, dispatch } = useStore()
+      const { state } = useStore()
+      const { $db } = useContext()
       const router = useRouter()
       const user = computed(() => state.user);
 
@@ -74,17 +75,24 @@
       }
 
       const setChatMuteState = async () => {
-        return await dispatch('chats/updateField', {
-            id: props.chat.id,
-            muted: !props.chat.muted.includes(user.value.data.uid) ? firebase.firestore.FieldValue.arrayUnion(user.value.data.uid) : firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
+        return $db.save(`Chats/${props.chat.id}`, {
+          id: props.chat.id,
+          muted: !props.chat.muted.includes(user.value.data.uid) ? $db.fire().arrayUnion(user.value.data.uid) : $db.fire().arrayRemove(user.value.data.uid)
         })
+        /* return await dispatch('chats/updateField', {
+
+        }) */
       }
 
       const leaveChat = async () => {
-        const res = await dispatch('chats/updateField', {
+        const res = $db.save(`Chats/${props.chat.id}`, {
           id: props.chat.id,
-          participants: firebase.firestore.FieldValue.arrayRemove(user.value.data.uid)
+          participants: $db.fire().arrayRemove(user.value.data.uid)
         })
+        /* const res = await dispatch('chats/updateField', {
+          id: props.chat.id,
+          participants: $db.fire().fs.FieldValue.arrayRemove(user.value.data.uid)
+        }) */
         if (res) return router.push('/chats')
       }
 

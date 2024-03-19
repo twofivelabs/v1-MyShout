@@ -39,16 +39,9 @@ import {
 export default defineComponent({
   name: 'MapPage',
   middleware: 'authenticated',
-  transition (to, from) {
-    if (!from) {
-      return 'slide-left'
-    }
-    return +to.query.page < +from.query.page ? 'slide-right' : 'slide-left'
-  },
   setup () {
     const {
       state,
-      dispatch
     } = useStore()
     const {
       $config,
@@ -56,6 +49,7 @@ export default defineComponent({
       $system,
       $vuetify,
       $helper,
+      $db
     } = useContext()
     const loading = ref(true)
 
@@ -147,19 +141,12 @@ export default defineComponent({
     const getFriends = async () => {
       loading.value = true
       try {
-        await dispatch('user/friends/getAll', {
-          uid: user.value.uid
-        }).then((res) => {
-          if (res !== false) {
-            friends.value = res
-          }
+        await $db.get(`Users/${user.value.uid}/Friends`).then(res => {
+          if (res) friends.value = res
         })
+
       } catch(e) {
-        $system.log({
-          comp: 'MapPage',
-          msg: 'Not able to get friends for map',
-          val: e
-        })
+        $system.log({ comp: 'MapPage', msg: 'Not able to get friends for map', val: e })
       } finally {
         loading.value = false
       }
@@ -171,7 +158,6 @@ export default defineComponent({
         currentMap.value.panTo(mapPoint)
 
         moveMarker(markers[user.value.data.uid], gps.value.lat, gps.value.lng)
-
       }
     }
     const onDrag = async () => {
@@ -199,7 +185,6 @@ export default defineComponent({
       // Center on me
       console.log('USER GPS', user.value.gps)
       if (!user.value.gps.lat) {
-
         user.value.gps.lat = 49.8995757
         user.value.gps.lng = -119.6195832
       }
@@ -435,11 +420,7 @@ export default defineComponent({
           $capacitor.gpsInit()
         }
       } catch(e) {
-        $system.log({
-          comp: 'MapPage',
-          msg: 'Not able to get position',
-          val: e
-        })
+        $system.log({ comp: 'MapPage', msg: 'Not able to get position', val: e })
       } finally {
         loading.value = false
       }

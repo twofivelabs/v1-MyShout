@@ -108,8 +108,8 @@ export default defineComponent({
       loading,
       dialog,
       user,
-      changeLang,
       profile,
+      changeLang,
     }
   },
   head: {}

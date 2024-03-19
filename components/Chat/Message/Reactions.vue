@@ -8,11 +8,11 @@
       </div>
     </template>
   </div>
-  
+
   <v-btn icon @click="triggerEmojiMenu">
     <v-icon small>mdi-emoticon-happy-outline</v-icon>
   </v-btn>
-            
+
   <v-menu v-if="!thread" v-model="emojiMenu" bottom right transition="slide-y-transition">
     <template v-slot:activator="{ on }">
       <div v-on="on"></div>
@@ -38,10 +38,10 @@ import {
   computed,
   ref, watch,
 } from '@nuxtjs/composition-api'
-   
-  import firebase from 'firebase';
-  import 'firebase/functions';
-  
+
+/*   import firebase from 'firebase';
+  import 'firebase/functions'; */
+
   export default defineComponent({
     name: 'ChatMessageReactions',
     props: {
@@ -65,10 +65,10 @@ import {
       }
     },
     setup(props) {
-      const { $fire } = useContext()
-      const { state, dispatch } = useStore()
+      const { $db } = useContext()
+      const { state } = useStore()
       const userId = computed(() => state.user.data.uid)
-  
+
       const reactions = ref([])
       const emojiMenu = ref(false)
       const emojis = ref([
@@ -78,28 +78,47 @@ import {
         { name: 'sad', value: '😢' },
         { name: 'angry', value: '😡' }
       ]);
-   
+
       const triggerEmojiMenu = () => {
         if (props.thread) return;
         emojiMenu.value = !emojiMenu.value
       }
-  
+
       const selectEmoji = async (emoji) => {
         if (!userId && userId.value) return;
 
-        const index = reactions.value.findIndex(reaction => reaction.emoji === emoji.value);  
-        const messageRef = $fire.firestore.collection('Chats').doc(props.chat.id)
-          .collection("Messages").doc(props.message.id)
-        
-        const reactionDoc = await messageRef.collection("Reactions").doc(userId.value).get()
+        const index = reactions.value.findIndex(reaction => reaction.emoji === emoji.value)
 
-        if (reactionDoc.exists) {
+        /* const messageRef = $db.fire().fs.collection('Chats').doc(props.chat.id)
+          .collection("Messages").doc(props.message.id)
+        const reactionDoc = await messageRef.collection("Reactions").doc(userId.value).get() */
+
+        await $db.get(`Chats/${props.chat.id}/Messages/${props.message.id}/Reactions/${userId.value}`).then(async reactions => {
+          if (reactions) {
+            if (reactions.reaction === emoji.name) {
+              await $db.save(`Chats/${props.chat.id}/Messages/${props.message.id}`, {
+                reactions: {
+                  [emoji.name]: $db.fire().increment(-1)
+                }
+              }).then(async () => {
+                await $db.delete(`Chats/${props.chat.id}/Messages/${props.message.id}/Reactions/${userId.value}`)
+
+                if (index !== -1) {
+                  reactions.value[index].count -= 1;
+                  if (reactions.value[index].count === 0) reactions.value.splice(index, 1)
+                }
+              })
+            }
+          }
+        })
+
+        /* if (reactionDoc.exists) {
           if (reactionDoc.data().reaction === emoji.name) {
             await dispatch('chats/messages/updateField', {
               chatId: props.chat.id,
               id: props.message.id,
               data: {
-                reactions: { [emoji.name]: firebase.firestore.FieldValue.increment(-1) }
+                reactions: { [emoji.name]: $db.fire().fs.FieldValue.increment(-1) }
               }
             })
 
@@ -112,24 +131,24 @@ import {
           }
 
           return;
-        }
+        } */
 
-        await dispatch('chats/messages/updateField', {
-          chatId: props.chat.id,
-          id: props.message.id,
-          data: {
-            reactions: { [emoji.name]: firebase.firestore.FieldValue.increment(1) }
+        await $db.save(`Chats/${props.chat.id}/Messages/${props.message.id}`, {
+          reactions: {
+            [emoji.name]: $db.fire().increment(1)
           }
         })
-        
-        await messageRef.collection("Reactions").doc(userId.value).set({reaction: emoji.name, created_at: new Date()})
-  
+        await $db.save(`Chats/${props.chat.id}/Messages/${props.message.id}/Reactions/${userId.value}`, {
+          reaction: emoji.name
+        })
+        // await messageRef.collection("Reactions").doc(userId.value).set({reaction: emoji.name, created_at: new Date()})
+
         if (index !== -1) reactions.value[index].count += 1;
         else reactions.value.push({ emoji: emoji.value, count: 1 });
-        
+
         emojiMenu.value = false;
       }
-    
+
       watch(() => props.message.reactions, (newReactions) => {
         if (newReactions) {
           reactions.value = Object.entries(newReactions)
@@ -145,27 +164,27 @@ import {
           reactions.value = [];
         }
       }, { deep: true, immediate: true });
-  
+
       return {
-        emojiMenu, triggerEmojiMenu, 
+        emojiMenu, triggerEmojiMenu,
         emojis, selectEmoji, reactions,
       }
     }
   })
   </script>
   <style>
-    
+
   .emoji-style {
     cursor: pointer;
     font-size: 18px;
   }
-  
+
   .reactions-display {
     display: flex;
     flex-wrap: wrap;
     margin-top: 4px; /* Adjust based on your layout */
   }
-  
+
   .reaction-item {
     display: inline-flex;
     align-items: center;
@@ -173,7 +192,6 @@ import {
     font-size: 0.75rem; /* Small font size for emoji and count */
     white-space: nowrap;
   }
-  
-  
+
+
   </style>
-  

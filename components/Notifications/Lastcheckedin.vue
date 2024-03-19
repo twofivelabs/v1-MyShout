@@ -6,7 +6,7 @@
 <script>
 import {
   defineComponent,
-  ref, useContext, useStore, onMounted,
+  ref, useContext, onMounted,
 } from '@nuxtjs/composition-api'
 import { Touch } from 'vuetify/lib/directives'
 
@@ -20,8 +20,8 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { dispatch } = useStore()
-    const { $system } = useContext()
+    // const { dispatch } = useStore()
+    const { $system, $db } = useContext()
     const loading = ref(false)
     const checkedInDate = ref(false)
 
@@ -29,17 +29,15 @@ export default defineComponent({
     const getLatestCheckin = async () => {
       loading.value = true
       try {
-        const res = await dispatch('user/checkins/getAll', props?.publicUser?.id)
+        const res = await $db.get(`Users/${props?.publicUser?.id}`)
+        // const res = await dispatch('user/checkins/getAll', props?.publicUser?.id)
         if (res) {
           checkedInDate.value = res[0]?.updated_at
         }
 
       } catch(e) {
-        $system.log({
-          comp: 'NotificationsLastcheckedin',
-          msg: 'Not able to get checkins',
-          val: e
-        })
+        $system.log({ comp: 'NotificationsLastcheckedin', msg: 'Not able to get checkins', val: e })
+
       } finally {
         loading.value = false
       }

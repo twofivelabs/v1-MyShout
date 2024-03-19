@@ -99,11 +99,7 @@ export default defineComponent({
           }
         })
       } catch (e) {
-        $system.log({
-          comp: 'AdminUsers',
-          msg: 'getAll',
-          val: e
-        })
+        $system.log({ comp: 'AdminUsers', msg: 'getAll', val: e })
       } finally {
         loading.value = false
       }

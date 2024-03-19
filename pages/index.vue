@@ -67,6 +67,8 @@ export default defineComponent({
       await LocalNotifications.requestPermissions()
     }
 
+
+
     // WATCH
     watchEffect(async () => {
       // NOTIFICATION PERMISSIONS
@@ -89,6 +91,7 @@ export default defineComponent({
 
     // MOUNTED
     onMounted(async () => {
+
       // Check user if they have profile pieces
       setTimeout(async() => {
         // NEW GPS

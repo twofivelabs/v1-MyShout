@@ -10,9 +10,7 @@
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="75vh" class="rounded-t-xl">
         <div class="ma-3" style="padding-bottom:180px;">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
           <ElementH3 align="center" :text="$t('contacts.invite_friends')" />
           <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
@@ -31,7 +29,6 @@
 import {
   defineComponent, onMounted,
   ref, useContext, watch
-  // useStore
 } from '@nuxtjs/composition-api'
 import { Touch } from 'vuetify/lib/directives'
 import lodash from 'lodash'
@@ -41,7 +38,6 @@ export default defineComponent({
   directives: { Touch },
   setup() {
     const { $system, $capacitor, $helper } = useContext()
-    // const {  } = useStore()
     const loading = ref(false)
     const showButton = ref(true)
     const isWeb = ref(false)
@@ -51,15 +47,12 @@ export default defineComponent({
 
     // METHODS
     const showInviteSheet = async () => {
+      loading.value = true
+
       try {
-        loading.value = true
         showBottomSheet.value = true
       } catch(e) {
-        $system.log({
-          comp: 'ContactsInvitebtn',
-          msg: 'showInviteSheet',
-          val: e
-        })
+        $system.log({ comp: 'ContactsInvitebtn', msg: 'showInviteSheet', val: e })
       } finally {
         loading.value = false
       }
@@ -72,11 +65,10 @@ export default defineComponent({
 
     // MOUNT
     onMounted(async () => {
+      // Only show button if is not web
       device.value = await $capacitor.device()
-      if (device.value && device.value.platform && (device.value.platform === 'web' || typeof device.value.platform === 'undefined' || device.value.platform === null)) {
-        isWeb.value = true
-        showButton.value = false
-      }
+      isWeb.value = $capacitor.device()?.platform === 'web'
+      if (isWeb.value) showButton.value = false
     })
 
     watch(showBottomSheet, async () => {
@@ -87,16 +79,11 @@ export default defineComponent({
           const deviceContacts = await $capacitor.getContacts().then(async () => {
             return await $capacitor.getContacts()
           })
-          // console.log('Device Contacts', JSON.stringify(deviceContacts))
           const unsortedContacts = $helper.normalizeDeviceContacts(deviceContacts)
           contacts.value = lodash.sortBy(unsortedContacts, ['name'])
-          // console.log('STICKY: NORMALIZED:' + JSON.stringify(contacts.value))
+
         } catch(e) {
-          $system.log({
-            comp: 'ContactsInvitebtn',
-            msg: 'showBottomSheet',
-            val: e
-          })
+          $system.log({ comp: 'ContactsInvitebtn', msg: 'showBottomSheet', val: e })
           console.log('Not able to get contacts:', e)
         } finally {
           loading.value = false

@@ -99,10 +99,7 @@ export default {
     async validateAndUpload (file) {
       if (!file.type.match('image.*')) {
 
-        this.$notify.show({
-          text: this.i18n.t('notify.file_uploaded_error_type'),
-          color: 'error'
-        })
+        this.$notify.show({ text: this.i18n.t('notify.file_uploaded_error_type'), color: 'error' })
       } else {
         this.isUploadingImage = true
         // Create a reference to the destination where we're uploading
@@ -120,10 +117,7 @@ export default {
           return url
         })
       }).catch(() => {
-        this.$notify.show({
-          text: this.i18n.t('notify.error_try_again'),
-          color: 'error'
-        })
+        this.$notify.show({ text: this.i18n.t('notify.error_try_again'), color: 'error' })
       })
     },
 
@@ -134,10 +128,7 @@ export default {
             this.$notify.show({ text: this.i18n.t('notify.success') })
           })
           .catch(() => {
-            this.$notify.show({
-              text: this.i18n.t('notify.error_try_again'),
-              color: 'error'
-            })
+            this.$notify.show({ text: this.i18n.t('notify.error_try_again'), color: 'error' })
           })
     },
 

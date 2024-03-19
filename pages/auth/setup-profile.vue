@@ -15,6 +15,8 @@
         duration: 600,
         delay:600
       }">
+
+        <!-- USERNAME SUB -->
         <div v-if="step===1">
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.username_sub') }}</h5>
           <v-form ref="formUsername" @submit.prevent="validateUsername">
@@ -42,6 +44,7 @@
           </v-form>
         </div>
 
+        <!-- EMAIL SUB -->
         <div v-else-if="step===2">
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.email_sub') }}</h5>
           <v-form ref="formEmail" @submit.prevent="validateEmail">
@@ -69,6 +72,7 @@
           </v-form>
         </div>
 
+        <!-- COUNTRY SUB -->
         <div v-else-if="step===3" class="text-center">
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.country_sub') }}</h5>
           <v-form ref="formCountry" @submit.prevent="validateCountry">
@@ -95,6 +99,7 @@
           </v-form>
         </div>
 
+        <!-- PHOTO AVATAR -->
         <div v-else-if="step===4" class="text-center">
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.add_photo_sub') }}</h5>
 
@@ -115,9 +120,9 @@
           </div>
         </div>
 
+        <!-- LOCATION PERMISSIONS -->
         <div v-else-if="step===5" class="text-center">
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.enable_location_permissions_heading') }}</h5>
-
           <h5 class="text-h5 text-center mb-6">
             {{ $t('onboarding.enable_location_permissions_sub') }}
           </h5>
@@ -159,11 +164,11 @@
           </div>
         </div>
 
+        <!-- NOTIFICATION PERMISSIONS -->
         <div v-else-if="step===6" class="text-center">
           <h5 class="text-h5 text-center mb-6">
             {{ $t('onboarding.enable_notification_permissions') }}
           </h5>
-
           <h6 class="primary--text text-h6 text-center mb-6">
             {{ $t('onboarding.notification_requirements_1') }}
           </h6>
@@ -196,11 +201,11 @@
             <v-btn
                 :loading="loading"
                 @click="setNotificationPermissions"
-                color="primary"
-                dark
-                x-large
-                type="submit"
                 class="white--text mt-10"
+                color="primary"
+                type="submit"
+                x-large
+                dark
             >
               <v-icon>mdi-check</v-icon>
               {{ $t('btn.yes_i_agree') }}
@@ -208,6 +213,7 @@
           </div>
         </div>
 
+        <!-- HOW DID YOU HEAR? -->
         <div v-else-if="step===7" class="text-center">
           <h5 class="text-h5 text-center mb-6">{{ $t('onboarding.how_did_you_hear') }}</h5>
           <v-text-field v-model="form.hear"
@@ -229,6 +235,7 @@
           </div>
         </div>
 
+        <!-- THANK YOU -->
         <div v-else-if="step===8" class="text-center">
           <div>
             <h5 class="text-h5 text-center">{{ $t('onboarding.thank_you_sub') }}</h5>
@@ -277,11 +284,11 @@ export default defineComponent({
       $helper,
       $notify,
       $capacitor,
-      i18n
+      i18n,
+      $db
     } = useContext()
     const { state, dispatch } = useStore()
     const router = useRouter()
-
     const user = computed(() => state.user.profile)
 
     const loading = ref(false)
@@ -312,7 +319,6 @@ export default defineComponent({
       }
     }, { immediate: true, deep: true }); // Correct syntax for options object
 
-
     // METHODS
     const validateUsername = async () => {
       loading.value = true
@@ -324,6 +330,7 @@ export default defineComponent({
 
         if(await userExists(username)) {
           $notify.show({ text: i18n.t('notify.username_in_use'), color: 'red' })
+
         } else {
           await dispatch('user/updateField', {
             username: username,
@@ -336,15 +343,9 @@ export default defineComponent({
       loading.value = false
     }
     const userExists = async (username) => {
-      const hasUsers = await dispatch('user/search', {
-        field: 'username',
-        operator: '==',
-        term: username,
-        limit: 3
-      })
-      return hasUsers.length > 0;
+      const hasUsers = await $db.simpleSearch('Users', 'username', username)
+      return hasUsers.length > 0
     }
-
     const validateEmail = async () => {
       loading.value = true
       const isValid = await formEmail.value.validate()
@@ -366,24 +367,16 @@ export default defineComponent({
       loading.value = false
     }
     const emailExists = async (email) => {
-      const hasUsers = await dispatch('user/search', {
-        field: 'email',
-        operator: '==',
-        term: email,
-        limit: 3
-      })
-      return hasUsers.length > 0;
+      const hasUsers = await $db.simpleSearch('Users', 'email', email)
+      return hasUsers.length > 0
     }
-
     const validateCountry = async () => {
       loading.value = true
       const isValid = await formCountry.value.validate()
 
       if (isValid) {
-        const country = form.value.country
-
         await dispatch('user/updateField', {
-          country: country,
+          country: form.value.country,
           onboarded: 3
         })
 
@@ -392,7 +385,6 @@ export default defineComponent({
 
       loading.value = false
     }
-
     const setProfilePhoto = async () => {
       await dispatch('user/updateField', {
           onboarded: 4
@@ -400,7 +392,6 @@ export default defineComponent({
 
         step.value = 5
     }
-
     const setLocationPermissions = async () => {
       loading.value = true
 
@@ -418,7 +409,6 @@ export default defineComponent({
         loading.value = false
       },1000)
     }
-
     const setNotificationPermissions = () => {
       loading.value = true
 
@@ -442,21 +432,19 @@ export default defineComponent({
 
       },1500)
     }
-
     const setHowDidYouHear = async () => {
       if (form.hear) {
         await dispatch('user/updateField', {
           how_did_you_hear: form.hear,
           onboarded: 7
         })
-      } 
-      
+      }
+
       return step.value = 8
     }
-
     const completeProfile = async () => {
       const device = await $capacitor.device()
-      
+
       await dispatch('user/updateField', {
         onboarded: 8,
         device: {

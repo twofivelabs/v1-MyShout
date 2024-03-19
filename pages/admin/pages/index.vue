@@ -80,12 +80,9 @@ export default defineComponent({
           return
         }
         await dispatch('pages/getAll')
+
       } catch (e) {
-        $system.log({
-          comp: 'AdminPages',
-          msg: 'getAll',
-          val: e
-        })
+        $system.log({ comp: 'AdminPages', msg: 'getAll', val: e })
       } finally {
         loading.value = false
       }

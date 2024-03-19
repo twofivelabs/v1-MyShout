@@ -1,8 +1,12 @@
-import Vue from 'vue'
 import { reactive } from '@nuxtjs/composition-api'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
-
-const dbRootPath = 'ADMIN/Content/Pages'
+import {
+    stateController,
+    setDataConverter,
+    actionsController,
+    gettersController,
+    mutationsController,
+} from '~/classes/storeController'
 
 class Pages extends FirestoreHelpers {
   constructor (data) {
@@ -15,6 +19,9 @@ class Pages extends FirestoreHelpers {
       isMarkdown: true,
       featured_image_url: null,
       language: {},
+      meta: {
+          author: this.state('users.id')
+      }
     }
     this.multiLingualFields = {
       title: null,
@@ -24,7 +31,9 @@ class Pages extends FirestoreHelpers {
   }
 
   write () {
-    this.fields.slug = this.slugify(this.fields.title)
+    if (!this.fields.slug) {
+      this.fields.slug = this.slugify(this.fields.title)
+    }
     return this
   }
 
@@ -34,139 +43,20 @@ class Pages extends FirestoreHelpers {
   }
 }
 
-const dataConverter = {
-  toFirestore (data) {
-    return new Pages(data).merge().write().format('write')
-  },
-  fromFirestore (snapshot, options) {
-    const data = snapshot.data(options)
-    return new Pages(data).merge().read().format('read')
-  }
-}
-
 export const state = () => reactive({
-  all: [],
-  default: new Pages({}).fields,
-  one: new Pages({}).fields,
-  loaded: {}
+    ...stateController(Pages),
+    'dataConverter': setDataConverter(Pages),
+    'collectionName': 'Pages',
 })
 
 export const getters = {
-  all: (state) => {
-    try {
-      return state.all
-    } catch {
-      return false
-    }
-  },
-  one: (state) => {
-    try {
-      return state.one
-    } catch {
-      return false
-    }
-  },
-  loaded: state => (id) => {
-    try {
-      if (id && state.loaded[id]) {
-        return state.loaded[id]
-      }
-      return {}
-    } catch {
-      return {}
-    }
-  }
+    ...gettersController
 }
 
 export const mutations = {
-  SET_ALL: (state, data) => {
-    state.all = data
-  },
-  PUSH_TO_ALL: (state, data) => {
-    const indexOfMatchingSlug = state.all.findIndex(one => one.slug === data.slug)
-    if (indexOfMatchingSlug > -1) {
-      // !! Need to use Vue, to keep the properties Reactive
-      Vue.set(state.all, indexOfMatchingSlug, data)
-    } else {
-      state.all.push(data)
-    }
-  },
-  PUSH_TO_LOADED: (state, data) => {
-    Vue.set(state.loaded, data.id, data)
-  },
-  SET_ONE: (state, data) => {
-    state.one = data
-  },
-  REMOVE_ONE: (state, slug) => {
-    const indexOfMatchingSlug = state.all.findIndex(one => one.slug === slug)
-    if (indexOfMatchingSlug > -1) {
-      state.all.splice(indexOfMatchingSlug, 1)
-      return true
-    }
-    return false
-  }
+    ...mutationsController
 }
 
 export const actions = {
-  async search (_, {
-    term,
-    field = 'title',
-    operator = '>',
-    limit = null
-  }) {
-    return await this.$db.search_collection({
-      path: dbRootPath,
-      term,
-      field,
-      operator,
-      limit
-    }, dataConverter)
-  },
-  async add ({ commit }, data) {
-    data.slug = new FirestoreHelpers().slugify(data.title)
-    const response = await this.$db.update(`${dbRootPath}/${data.slug}`, dataConverter, data)
-    if (response) {
-      await commit('PUSH_TO_ALL', data)
-      await commit('PUSH_TO_LOADED', data)
-    }
-    return response
-  },
-  async getOne ({
-    state,
-    commit
-  }, id) {
-    try {
-      if (state.loaded && state.loaded[id]) {
-        await commit('SET_ONE', state.loaded[id])
-        return state.loaded[id]
-      }
-      const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
-      if (one) {
-        await commit('SET_ONE', one)
-        await commit('PUSH_TO_LOADED', one)
-      }
-      return one
-    } catch (e) {
-      this.$system.log({
-        comp: 'store/pages',
-        msg: 'getOne',
-        val: e
-      })
-      return false
-    }
-  },
-  async getAll ({ commit }, where = {}) {
-    const all = await this.$db.get_all(`${dbRootPath}`, where, dataConverter)
-    if (all) {
-      await commit('SET_ALL', all)
-    }
-    return all
-  },
-  async remove ({ commit }, doc) {
-    const response = await this.$db.delete_doc(`${dbRootPath}/${doc}`)
-    if (response) {
-      await commit('REMOVE_ONE', doc)
-    }
-    return response
-  }
+    ...actionsController
 }

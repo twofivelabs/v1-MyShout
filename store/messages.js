@@ -109,11 +109,12 @@ export const actions = {
       await commit('SET_ONE', response)
       await commit('PUSH_TO_ALL', data)
     }*/
-    return await this.$db.add(`${dbRootPath}`, dataConverter, data)
+    return await this.$db._add(`${dbRootPath}`, dataConverter, data)
   },
   async getOne ({ commit }, id) {
     try {
-      const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
+      //const one = await this.$db.get_one(`${dbRootPath}/${id}`, dataConverter)
+      const one = await this.$db.get(`${dbRootPath}/${id}`)
       if (one) {
         await commit('SET_ONE', one)
       }

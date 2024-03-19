@@ -6,9 +6,7 @@
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="80vh" class="rounded-t-xl pb-14">
         <div class="ma-3" style="padding-bottom:180px;">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
           <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
           <ElementH1 align="center" :text="$t('chats.add_member')" />
@@ -33,7 +31,6 @@ import {
   defineComponent,
   ref,
   useContext,
-  useStore,
   // computed,
   useRouter,
 } from '@nuxtjs/composition-api'
@@ -53,8 +50,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { $system, $notify, i18n } = useContext()
-    const { dispatch } = useStore()
+    const { $system, $notify, $db, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
     // const user = computed(() => state.user.data)
@@ -68,15 +64,11 @@ export default defineComponent({
       newChatFriends.value = fs
     }
     const newChat = async () => {
+      loading.value = true
       try {
-        loading.value = true
         showBottomSheet.value = true
       } catch(e) {
-        $system.log({
-          comp: 'ChatsIndex',
-          msg: 'getChats',
-          val: e
-        })
+        $system.log({ comp: 'ChatsIndex', msg: 'getChats', val: e })
       } finally {
         loading.value = false
       }
@@ -86,23 +78,28 @@ export default defineComponent({
         $notify.show({ text: i18n.t('chats.select_friend_first'), color: 'error' })
         return
       }
+      loading.value = true
       try {
-        loading.value = true
         const updatedChat = lodash.cloneDeep(props.chat) // Needed for VUEX mutation
         updatedChat.participants = [...updatedChat.participants, ...newChatFriends.value]
-        await dispatch('chats/update', updatedChat).then(async (room) => {
+
+        await $db.save(`Chats/${props.chat.id}`, updatedChat).then(async (room) => {
           if (room !== false) {
             // await router.push(`/chats/chat/${props.chat.id}`)
             await router.push(`/chats/chat/${props.chat.id}`)
             $notify.show({ text: i18n.t('notify.success'), color: 'success' })
           }
         })
+
+        /* await dispatch('chats/update', updatedChat).then(async (room) => {
+          if (room !== false) {
+            // await router.push(`/chats/chat/${props.chat.id}`)
+            await router.push(`/chats/chat/${props.chat.id}`)
+            $notify.show({ text: i18n.t('notify.success'), color: 'success' })
+          }
+        }) */
       } catch(e) {
-        $system.log({
-          comp: 'ChatAddmemberstochatbtn',
-          msg: 'startChat',
-          val: e
-        })
+        $system.log({ comp: 'ChatAddmemberstochatbtn', msg: 'startChat', val: e })
       } finally {
         loading.value = false
       }

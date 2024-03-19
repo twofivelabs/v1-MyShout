@@ -117,7 +117,8 @@ export const actions = {
     }
   },
   async getAll ({ commit }, { uid }) {
-    const response = await this.$db.get_one(`Users/${uid}/${dbRootPath}`)
+    // const response = await this.$db.get_one(`Users/${uid}/${dbRootPath}`)
+    const response = await this.$db.get(`Users/${uid}/${dbRootPath}`)
     if (response) {
       await commit('SET_ALL', response)
     }

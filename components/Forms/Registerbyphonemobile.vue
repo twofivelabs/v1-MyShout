@@ -16,7 +16,7 @@
         :loading="loading"
         color="primary"
         elevation="0"
-        id="recaptcha-container"
+        id="recaptchaContainer"
         type="submit"
       >
         {{ $t('btn.send_code') }}
@@ -72,14 +72,12 @@ import {
   useContext,
   useRouter,
   useStore,
-  ref,
+  ref, onMounted, nextTick,
 } from '@nuxtjs/composition-api'
-
+import {firebaseApp} from '~/firebaseConfig'
 import formRules from '~/classes/formRules'
 import VuePhoneNumberInput from 'vue-phone-number-input'
 import 'vue-phone-number-input/dist/vue-phone-number-input.css'
-
-import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 
 export default defineComponent({
   name: 'FormsRegisterbyphonemobile',
@@ -87,7 +85,7 @@ export default defineComponent({
     VuePhoneNumberInput
   },
   setup () {
-    const { $notify, $system, $ttlStorage, i18n, $helper } = useContext()
+    const { $notify, $system, $ttlStorage, i18n, $helper, $db } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -96,6 +94,7 @@ export default defineComponent({
     const valid = ref(true)
     const agreeToTerms = ref(true)
     const rules = formRules
+    const recaptchaContainer = ref(null)
     const formEl = ref(null)
     const form = ref({
       phone: '',
@@ -116,7 +115,7 @@ export default defineComponent({
 
       if (agreeToTerms.value) {
         valid.value = await formEl.value.validate()
-        if (valid.value) await registerPhoneNumber()
+        if (valid.value) await signInWithPhoneNumber()
       } else {
         $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
       }
@@ -124,27 +123,53 @@ export default defineComponent({
       loading.value = false
     }
 
+    const signInWithPhoneNumber = async () => {
+      //eslint-disable-next-line no-async-promise-executor
+      return new Promise(async resolve => {
+
+        await $db.fire().capAuth.addListener('phoneCodeSent', async event => {
+          // 2. Let the user enter the SMS code
+          const verificationCode = window.prompt(
+              'Please enter the verification code that was sent to your mobile device.',
+          )
+          // 3. Sign in on the web layer using the verification ID and verification code.
+          const credential = $db.fire().PhoneAuthProvider.credential(
+              event.verificationId,
+              verificationCode,
+          )
+
+          await $db.fire().signInWithCredential($db.fire().auth, credential)
+          resolve()
+        })
+
+        // 1. Start phone number verification
+        await $db.fire().capAuth.signInWithPhoneNumber({
+          phoneNumber: form.value.phone.trim().toLowerCase(),
+          timeout: 0, // Disable SMS auto-retrieval
+        }).then(() => {
+          console.log('STICKY: SIGNED IN WITH PHONE?')
+        }).catch(e => {
+          console.log('STICKY: Error logging in with phone:', e)
+        })
+      })
+    }
+    //eslint-disable-next-line no-unused-vars
     const registerPhoneNumber = async () => {
       loading.value = true
 
-      const phone = form.value.phone.trim().toLowerCase();
+      const phone = form.value.phone.trim().toLowerCase()
 
       try {
         // Start sign in with phone number and send the SMS
-        await FirebaseAuthentication.signInWithPhoneNumber({
+        await $db.fire().capAuth.signInWithPhoneNumber({
           phoneNumber: phone,
-        });
-
+        })
         form.value.showOtpInput = true
+
       } catch (e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        if(e) {
-          $system.log({
-            comp: 'FormsRegisterbyphonemobile',
-            msg: 'registerPhoneNumber',
-            val: e
-          })
-        }
+        $system.log({ comp: 'FormsRegisterbyphonemobile', msg: 'registerPhoneNumber', val: e })
+
       } finally {
         loading.value = false
       }
@@ -154,28 +179,31 @@ export default defineComponent({
       loading.value = true
 
       try {
-        await FirebaseAuthentication.addListener('phoneCodeSent', async event => {
-          const result = await FirebaseAuthentication.confirmVerificationCode({
+        await $db.fire().capAuth.addListener('phoneCodeSent', async event => {
+          const result = await $db.fire().capAuth.confirmVerificationCode({
             verificationId: event.verificationId,
             verificationCode: form.value.otpProvided,
-          });
+          })
 
           console.log("Mobile Phone Authentication Result", result, JSON.stringify(result))
 
           $ttlStorage.set('onboardingComplete', true)
-          $notify.show({ text: i18n.t('notify.success'), color: 'green' });
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
 
           if (!result.additionalUserInfo.isNewUser) {
             console.log("registerbyphonemobile: Returning User") /* I get to this but it's not actually logging the user in or storing the authenticated user */
             $notify.show({text: i18n.t('notify.success'), color: 'green'})
             $helper.sleep(500)
+
             return router.push('/')
+
           } else {
             console.log("registerbyphonemobile: New User")
 
             form.value.showOtpInput = false
             $notify.show({ text: i18n.t('notify.success'), color: 'green' })
 
+            // TODO: Update with new $db.save()
             await dispatch('user/updateField', {
               phone: form.value.phone.trim().toLowerCase(),
               created_at: new Date()
@@ -185,17 +213,34 @@ export default defineComponent({
           }
         });
       } catch (e) {
-        $system.log({
-          comp: 'FormsRegisterbyphonemobile',
-          msg: 'Error with phone code',
-          val: e
-        })
+        $system.log({ comp: 'FormsRegisterbyphonemobile', msg: 'Error with phone code', val: e })
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+
       } finally {
         loading.value = false
         form.value.showOtpInput = false
       }
     }
+
+    const initRecaptcha = async () => {
+      try {
+        await $helper.sleep(2000)
+        recaptchaContainer.value = new firebaseApp.auth.RecaptchaVerifier('recaptchaContainer',{
+          size: 'invisible',
+          callback: () => {
+            console.log('WORKS')
+          }
+        })
+      } catch (e) {
+        console.log('initRecaptcha error:', e)
+      }
+    }
+
+    onMounted(async() => {
+      nextTick(async () => {
+        await initRecaptcha()
+      })
+    })
 
     return {
       loading,
@@ -203,6 +248,7 @@ export default defineComponent({
       form,
       formEl,
       rules,
+      recaptchaContainer,
       updatePhoneNumber,
       validate,
       registerWithOTPCode

@@ -145,11 +145,7 @@ export default defineComponent({
         $notify.show({ text: i18n.t('notify.success'), color: 'success' })
         form.value.message = null
       }).catch((e) => {
-        $system.log({
-          comp: 'PageContact',
-          msg: 'Form',
-          val: e
-        })
+        $system.log({ comp: 'PageContact', msg: 'Form', val: e })
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       })
     }

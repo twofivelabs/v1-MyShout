@@ -16,7 +16,7 @@
       <v-sheet height="93vh" class="rounded-t-xl">
         <div class="ma-3" style="padding-bottom:180px;">
           <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
-          
+
           <v-row no-gutters class="text-center mb-10" v-if="participant">
             <v-col cols="12">
               <ChatAvatar :user="participant" :size="80"/>
@@ -25,7 +25,7 @@
               {{ participant.username ? participant.username : (participant.first_name ? participant.first_name : '') }}
             </v-col>
           </v-row>
-                    
+
           <v-list-item-group class="mt-10">
             <v-list-item key="profile" @click="viewParticipantProfile(participant)">
               <v-list-item-avatar>
@@ -67,15 +67,15 @@
 import {
   defineComponent,
   useContext,
-  ref, 
+  ref,
   useStore,
   useRouter,
   computed,
 } from '@nuxtjs/composition-api'
 
 import { Touch } from 'vuetify/lib/directives'
-import firebase from 'firebase';
-import 'firebase/functions';
+/* import firebase from 'firebase';
+import 'firebase/functions'; */
 
 export default defineComponent({
   name: 'ParticipantSheet',
@@ -101,11 +101,11 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { $notify, i18n } = useContext()
-    const { state, dispatch } = useStore()
+    const { $notify, i18n, $db } = useContext()
+    const { state } = useStore()
     const router = useRouter()
     const user = computed(() => state.user);
-    
+
     const showBottomSheet = ref(false)
     const participant = ref({})
 
@@ -127,27 +127,39 @@ export default defineComponent({
 
     const setParticipantAsAdmin = async (p) => {
       const isAdmin = props.chat.admins.includes(p.id)
-      if (isAdmin && props.chat.admins.length === 1) return $notify.show({
-          text: i18n.t('notify.not_enough_admins'),
-          color: 'error'
-        })
+      if (isAdmin && props.chat.admins.length === 1) {
+        return $notify.show({ text: i18n.t('notify.not_enough_admins'), color: 'error' })
+      }
 
-      await dispatch('chats/updateField', {
+      $db.save(`Chats/${props.chat.id}`, {
         id: props.chat.id,
-        admins: !isAdmin ? firebase.firestore.FieldValue.arrayUnion(p.id) : firebase.firestore.FieldValue.arrayRemove(p.id)
+        admins: !isAdmin ? $db.fire().arrayUnion(p.id) : $db.fire().arrayRemove(p.id)
       })
+      /* await dispatch('chats/updateField', {
+        id: props.chat.id,
+        admins: !isAdmin ? $db.fire().fs.FieldValue.arrayUnion(p.id) : $db.fire().fs.FieldValue.arrayRemove(p.id)
+      }) */
     }
 
     const removeParticipant = async (p) => {
-      const res = await dispatch('chats/updateField', {
+      $db.save(`Chats/${props.chat.id}`, {
         id: props.chat.id,
-        admins: firebase.firestore.FieldValue.arrayRemove(p.id),
-        participants: firebase.firestore.FieldValue.arrayRemove(p.id),
-        seen: firebase.firestore.FieldValue.arrayRemove(p.id),
-        unseen: firebase.firestore.FieldValue.arrayRemove(p.id)
+        admins: $db.fire().arrayRemove(p.id),
+        participants: $db.fire().arrayRemove(p.id),
+        seen: $db.fire().arrayRemove(p.id),
+        unseen: $db.fire().arrayRemove(p.id)
+      }).then((res) => {
+        showBottomSheet.value = false
+        if (res && p.id === user.value.data.uid) return router.push('/chats')
       })
-      if (res && p.id === user.value.data.uid) return router.push('/chats')
-      showBottomSheet.value = false
+
+      /* const res = await dispatch('chats/updateField', {
+        id: props.chat.id,
+        admins: $db.fire().fs.FieldValue.arrayRemove(p.id),
+        participants: $db.fire().fs.FieldValue.arrayRemove(p.id),
+        seen: $db.fire().fs.FieldValue.arrayRemove(p.id),
+        unseen: $db.fire().fs.FieldValue.arrayRemove(p.id)
+      }) */
     }
 
     return {

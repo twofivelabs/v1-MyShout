@@ -34,6 +34,7 @@ export default defineComponent({
     // METHODS
     const playAudio = () => {
       isPlaying.value = true
+      // TODO: FIX AUTH
       const currUser = $fire.auth.currentUser
       sound.value = new Howl({
         src: [props.file],

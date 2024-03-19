@@ -65,7 +65,6 @@ export default defineComponent({
   setup () {
     const {
       state,
-      dispatch
     } = useStore()
     const {
       title,
@@ -74,6 +73,7 @@ export default defineComponent({
     const {
       $config,
       $system,
+      $db,
       error
     } = useContext()
     const route = useRoute()
@@ -86,7 +86,7 @@ export default defineComponent({
     useFetch(async () => {
       loading.value = true
       try {
-        await dispatch('pages/getOne', route.value.params.id).then((res) => {
+        await $db.get(`ADMIN/Content/Pages/${route.value.params.id}`).then((res) => {
           if (res !== false) {
             page.value = res
           }
@@ -104,11 +104,7 @@ export default defineComponent({
           }
         }
       } catch(e) {
-        $system.log({
-          comp: 'PageId',
-          msg: 'getOne',
-          val: e
-        })
+        $system.log({ comp: 'PageId', msg: 'getOne', val: e })
         error({ statusCode: 404 })
       } finally {
         loading.value = false

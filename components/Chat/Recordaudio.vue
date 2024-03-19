@@ -44,7 +44,7 @@ export default defineComponent({
   setup (props) {
     const { $capacitor, $db, $vuetify } = useContext()
     const user = computed(() => state.user)
-    const { dispatch, state } = useStore()
+    const { state } = useStore()
 
     const defaultButtonText = ref('Press to record')
     const buttonText = ref(defaultButtonText.value)
@@ -100,16 +100,21 @@ export default defineComponent({
           })
 
           // Send Message
-          await dispatch('chats/messages/add', {
+          await $db.save(`Chats/${props.chat.id}/Messages`, {
+            message: '',
+            owner: user.value.data.uid,
+            audioUrl: audioUrl.value
+          })
+          /* await dispatch('chats/messages/add', {
             chatId: props.chat.id,
             message: {
-              message: '',
-              owner: user.value.data.uid,
-              audioUrl: audioUrl.value
+
             }
-          })
+          }) */
           try {
-            await $vuetify.goTo('#bottomOfChat')
+            setTimeout(async () => {
+              await $vuetify.goTo('#bottomOfChat')
+            }, 500)
           } catch {
             // ...
           }

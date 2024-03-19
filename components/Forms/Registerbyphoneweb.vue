@@ -79,6 +79,7 @@ import {
 import formRules from '~/classes/formRules'
 import VuePhoneNumberInput from 'vue-phone-number-input'
 import 'vue-phone-number-input/dist/vue-phone-number-input.css'
+import { getAuth, RecaptchaVerifier } from "firebase/auth"
 
 export default defineComponent({
   name: 'FormsRegisterbyphoneweb',
@@ -86,7 +87,7 @@ export default defineComponent({
     VuePhoneNumberInput
   },
   setup () {
-    const { $fire, $fireModule, $helper, $notify, $system, $ttlStorage, i18n } = useContext()
+    const { $db, $helper, $notify, $system, $ttlStorage, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
@@ -129,24 +130,20 @@ export default defineComponent({
         form.value.showOtpInput = true
 
         try {
-          window.confirmationResult = await $fire.auth.signInWithPhoneNumber(form.value.phone.trim().toLowerCase(), recaptchaContainer.value)
+          window.confirmationResult = await $db.fire().capAuth.signInWithPhoneNumber({
+            phoneNumber: form.value.phone.trim().toLowerCase(),
+            recaptchaVerifier: recaptchaContainer.value
+          })
 
         } catch (e) {
-          if(e && e.message) {
-            if (e.message === 'reCAPTCHA placeholder element must be an element or id') {
-              // ...
-            } else {
-              $notify.show({ text: e.message, color: 'error' })
-            }
-          } else {
-            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+          if (e && e.message && e.message !== 'reCAPTCHA placeholder element must be an element or id') {
+            $notify.show({ text: e.message, color: 'error' })
+            return
           }
 
-          $system.log({
-            comp: 'FormsRegisterbyphoneweb',
-            msg: 'Registering phone number',
-            val: e
-          })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+          $system.log({ comp: 'FormsRegisterbyphoneweb', msg: 'Registering phone number', val: e })
+
         }
       } else {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
@@ -161,7 +158,7 @@ export default defineComponent({
         // Technically they have an account now, so we can bypass onboarding IF they are already a user
         $ttlStorage.set('onboardingComplete', true)
 
-        console.log('CONFIRM RESULT', result)
+        console.log('STICKY: CONFIRM RESULT', result)
         // If EXISTING user show logged in message
         if (!result.additionalUserInfo.isNewUser) {
           $notify.show({text: i18n.t('notify.success'), color: 'green'})
@@ -172,6 +169,7 @@ export default defineComponent({
           form.value.showOtpInput = false
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
 
+          // TODO: Update with $db.save()
           await dispatch('user/updateField', {
             phone: form.value.phone.trim().toLowerCase(),
             created_at: new Date()
@@ -181,12 +179,7 @@ export default defineComponent({
         }
       } catch (e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-
-        $system.log({
-          comp: 'FormsRegisterbyphoneweb',
-          msg: 'Registering phone code',
-          val: e
-        })
+        $system.log({ comp: 'FormsRegisterbyphoneweb', msg: 'Registering phone code', val: e })
 
       } finally {
         loading.value = false
@@ -196,10 +189,12 @@ export default defineComponent({
     const initRecaptcha = async () => {
       try {
         await $helper.sleep(2000)
-        recaptchaContainer.value = new $fireModule.auth.RecaptchaVerifier('recaptchaContainer', {
+
+
+        recaptchaContainer.value = new $db.fire().RecaptchaVerifier($db.fire().app.auth, 'recaptchaContainer', {
           size: 'invisible',
           callback: () => {
-            console.log('WORKS')
+            console.log('WORKS > Sign user on')
           }
         })
       } catch (e) {

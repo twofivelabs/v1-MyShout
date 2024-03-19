@@ -71,8 +71,8 @@ export default defineComponent({
 
     // METHODS
     const getFriendship = async () => {
+      loading.value = true
       try {
-        loading.value = true
         await dispatch('user/friends/getOne', {
           id: props.user.id,
         }).then((res) => {
@@ -81,11 +81,7 @@ export default defineComponent({
           }
         })
       } catch(e) {
-        $system.log({
-          comp: 'UserActionsToggleemergencycontactbtn',
-          msg: 'getFriendship',
-          val: e
-        })
+        $system.log({ comp: 'UserActionsToggleemergencycontactbtn', msg: 'getFriendship', val: e })
       } finally {
         loading.value = false
       }
@@ -100,11 +96,7 @@ export default defineComponent({
         $notify.show({ text: i18n.t('notify.success'), color: 'success' })
       } else {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        $system.log({
-          comp: 'UserActionsToggleemergencycontactbtn',
-          msg: 'toggleEmergencyContact',
-          val: 'bad response'
-        })
+        $system.log({ comp: 'UserActionsToggleemergencycontactbtn', msg: 'toggleEmergencyContact', val: 'bad response' })
       }
     }
 

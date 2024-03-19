@@ -437,33 +437,20 @@ export default defineComponent({
       }
     }
     const save = async () => {
+      loading.value = true
       try {
-        loading.value = true
         // Update Firebase Doc
         const response = await dispatch('user/update', form)
         if (response) {
-          $notify.show({
-            text: i18n.t('notify.success'),
-            color: 'success'
-          })
+          $notify.show({ text: i18n.t('notify.success'), color: 'success' })
           // Reset original form upon save
           formOriginal = form
         } else {
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'red'
-          })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
         }
       } catch (e) {
-        $system.log({
-          comp: 'UserProfile',
-          msg: 'Save',
-          val: e
-        })
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'red'
-        })
+        $system.log({ comp: 'UserProfile', msg: 'Save', val: e })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
       } finally {
         loading.value = false
         emit('swipe', 'Down')

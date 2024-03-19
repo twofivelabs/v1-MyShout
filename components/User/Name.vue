@@ -46,18 +46,14 @@ export default defineComponent({
 
     // GET CONTENT
     useFetch(async () => {
+      loading.value = true
       try {
-        loading.value = true
         if (name.value === 'Anonymous') {
           const res = await dispatch('feedback/addUserToFeedback', props.u.id)
           setName(res)
         }
       } catch(e) {
-        $system.log({
-          comp: 'UserName',
-          msg: 'Getting user for comment',
-          val: e
-        })
+        $system.log({ comp: 'UserName', msg: 'Getting user for comment', val: e })
       } finally {
         loading.value = false
       }

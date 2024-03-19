@@ -347,15 +347,8 @@ inject('capacitor', {
       try {
         await Share.share(payload)
       } catch (e) {
-        app.$notify.show({
-          text: 'Sorry, sharing is not available at the moment.',
-          color: 'orange'
-        })
-        app.$system.log({
-          comp: 'Capacitor',
-          msg: 'share',
-          val: e
-        })
+        app.$notify.show({ text: 'Sorry, sharing is not available at the moment.', color: 'orange' })
+        app.$system.log({ comp: 'Capacitor', msg: 'share', val: e })
       }
     },
 
@@ -367,11 +360,7 @@ inject('capacitor', {
         console.log(`STICKY: navigator ${navigator.userAgent}`)*/
         return await Device.getInfo()
       } catch (e) {
-        app.$system.log({
-            comp: 'Capacitor',
-            msg: 'device',
-            val: e
-        })
+        app.$system.log({ comp: 'Capacitor', msg: 'device', val: e })
         return null
       }
     },
@@ -398,11 +387,7 @@ inject('capacitor', {
 
                     return true
                 } else {
-                    app.$system.log({
-                        comp: 'Capacitor',
-                        msg: 'pushNotificationsRequestAndRegisterPermissions > Permission',
-                        val: permission
-                    })
+                    app.$system.log({ comp: 'Capacitor', msg: 'pushNotificationsRequestAndRegisterPermissions > Permission', val: permission })
                     return false
                 }
             }
@@ -422,11 +407,7 @@ inject('capacitor', {
             }
 
         } catch (e) {
-            app.$system.log({
-                comp: 'Capacitor',
-                msg: 'pushNotificationsRequestAndRegisterPermissions 3',
-                val: e
-            })
+            app.$system.log({ comp: 'Capacitor', msg: 'pushNotificationsRequestAndRegisterPermissions 3', val: e })
             return false
         }
     },
@@ -434,18 +415,18 @@ inject('capacitor', {
     async pushNotificationsGetToken () {
         try {
           console.log("STICKY: pushNotificationsGetToken Start")
-            if (app.$fire.messaging) {
-                const token = await app.$fire.messaging.getToken({ vapidKey: app.$config.firebase.fcmPublicVapidKey })
+            if (app.$db.fire().messaging) {
+                const token = await app.$db.fire().getToken(
+                    app.$db.fire().messaging,
+                    {
+                        vapidKey: app.$config.firebase.fcmPublicVapidKey
+                    })
                 console.log('STICKY: pushNotificationsGetToken', token)
 
                 app.$ttlStorage.set('notificationWebToken', token)
             }
         } catch (e) {
-            app.$system.log({
-                comp: 'Capacitor',
-                msg: 'trying to get notification token',
-                val: e
-            })
+            app.$system.log({ comp: 'Capacitor', msg: 'trying to get notification token', val: e })
         }
     },
     async pushNotificationsListeners () {
@@ -463,11 +444,7 @@ inject('capacitor', {
                             notificationDeviceToken: r.token
                         })
                     }).catch((e) => {
-                        app.$system.log({
-                            comp: 'Capacitor',
-                            msg: 'FCM Error',
-                            val: e
-                        })
+                        app.$system.log({ comp: 'Capacitor', msg: 'FCM Error', val: e })
                     });
                 }
                 // ANDROID DEVICES
@@ -482,19 +459,11 @@ inject('capacitor', {
                             })
                         }
                     }).catch((e) => {
-                        app.$system.log({
-                            comp: 'Capacitor',
-                            msg: 'pushNotificationsListeners > registration',
-                            val: e
-                        })
+                        app.$system.log({ comp: 'Capacitor', msg: 'pushNotificationsListeners > registration', val: e })
                     })
                     await PushNotifications.addListener('registrationError', (error) => {
                         // TODO: try getting the token again?
-                        app.$system.log({
-                            comp: 'Capacitor',
-                            msg: 'pushNotificationsListeners > registrationError',
-                            val: JSON.stringify(error)
-                        })
+                        app.$system.log({ comp: 'Capacitor', msg: 'pushNotificationsListeners > registrationError', val: JSON.stringify(error) })
                     })
                 }
                 await PushNotifications.addListener('pushNotificationReceived', (notification) => {
@@ -535,12 +504,12 @@ inject('capacitor', {
                     }
                 })
             }
-            if (app.$fire.messaging) {
+            if (app.$db.fire().messaging) {
                 console.log('STICKY: Start onMessage')
-                app.$fire.messaging.onBackgroundMessage((payload) => {
+                app.$db.fire().onBackgroundMessage(app.$db.fire().messaging, (payload) => {
                     console.log('STICKY: onBackgroundMessage', payload)
                 })
-                app.$fire.messaging.onMessage((payload) => {
+                app.$db.fire().onMessage(app.$db.fire().message, (payload) => {
                     console.log('STICKY: We have a message', payload)
                     const snack = {
                         title: payload.notification.title,
@@ -560,11 +529,7 @@ inject('capacitor', {
             }
         } catch (e) {
             if(e.code !== 'messaging/only-available-in-sw') {
-                app.$system.log({
-                    comp: 'Capacitor',
-                    msg: 'pushNotificationsListeners',
-                    val: e
-                })
+                app.$system.log({ comp: 'Capacitor', msg: 'pushNotificationsListeners', val: e })
             }
         }
     },
@@ -613,14 +578,9 @@ inject('capacitor', {
             return false
         } catch (e) {
             app.$notify.show({ text: app.i18n.t('notify.error_try_again'), color: 'error' })
-
-            app.$system.log({
-              comp: 'cameraTakePicture',
-              msg: 'Error',
-              val: e  
-            })
+            app.$system.log({ comp: 'cameraTakePicture', msg: 'Error', val: e })
         }
-        
+
     },
 
     // Microphone
@@ -648,11 +608,7 @@ inject('capacitor', {
                 return result.value
             })
             .catch(e => {
-                app.$system.log({
-                    comp: 'Capacitor',
-                    msg: 'microphoneStart',
-                    val: e
-                })
+                app.$system.log({ comp: 'Capacitor', msg: 'microphoneStart', val: e })
                 return false
             })
     },
@@ -668,11 +624,7 @@ inject('capacitor', {
                 })
                 .catch(e => {
                     console.log('STOP RECORDING ERROR: ', e)
-                    app.$system.log({
-                        comp: 'Capacitor',
-                        msg: 'microphoneStop',
-                        val: e
-                    })
+                    app.$system.log({ comp: 'Capacitor', msg: 'microphoneStop', val: e })
                     return false
                 })
         } catch (e) {

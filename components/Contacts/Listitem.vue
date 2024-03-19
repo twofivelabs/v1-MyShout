@@ -52,8 +52,8 @@ export default defineComponent({
       const phoneClean = phone.replace(/\D/g, '')
       const body = 'I found this really great app! Check out MyShout. Visit https://myshout.net/download'
 
+      loading.value = true
       try {
-        loading.value = true
         const device = await $capacitor.device()
 
         if (device.platform !== 'web') {
@@ -62,17 +62,12 @@ export default defineComponent({
             text: body,
           }).catch(() => {
             $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-
           })
           // success
           buttonText.value = 'Invited'
         }
       } catch (e) {
-        $system.log({
-          comp: 'ContactsListitem',
-          msg: 'Not able to invite',
-          val: e
-        })
+        $system.log({ comp: 'ContactsListitem', msg: 'Not able to invite', val: e })
       } finally {
         loading.value = false
       }

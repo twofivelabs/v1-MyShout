@@ -139,18 +139,15 @@ export const actions = {
               await commit('SET_ONE', state.loaded[id])
               return state.loaded[id]
             }
-            const one = await this.$db.get_one(`Chats/${id}/${dbRootPath}`, dataConverter)
+            //const one = await this.$db.get_one(`Chats/${id}/${dbRootPath}`, dataConverter)
+            const one = await this.$db.get(`Chats/${id}/${dbRootPath}`)
             if (one) {
                 await commit('SET_ONE', one)
                 await commit('PUSH_TO_LOADED', one)
             }
             return one
         } catch (e) {
-            this.$system.log({
-                comp: 'store/chats/messages',
-                msg: 'getOne',
-                val: e
-            })
+            this.$system.log({ comp: 'store/chats/messages', msg: 'getOne', val: e })
             return false
         }
     },

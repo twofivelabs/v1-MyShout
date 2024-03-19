@@ -70,8 +70,8 @@ export default defineComponent({
 
     // METHODS
     const takePhoto = async () => {
+      loading.value = true
       try {
-        loading.value = true
         // Take photo and upload it
         const photoBase64 = await $capacitor.cameraTakePicture()
         if (!photoBase64) return
@@ -93,11 +93,7 @@ export default defineComponent({
           $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } catch (e) {
-        $system.log({
-          comp: 'UserProfileavatar',
-          msg: 'takePhoto',
-          val: e
-        })
+        $system.log({ comp: 'UserProfileavatar', msg: 'takePhoto', val: e })
       } finally {
         loading.value = false
       }

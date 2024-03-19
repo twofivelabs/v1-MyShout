@@ -113,10 +113,6 @@ const config = {
       src: '~/plugins/capacitor.js',
       mode: 'client'
     },
-    {
-      src: '~/plugins/remoteConfig.js',
-      mode: 'client'
-    },
     { src: '~/plugins/system.js' },
     // { src: '~/plugins/vue-stripe.js', ssr: false },
     {
@@ -181,7 +177,6 @@ const config = {
   modules: [
     '@nuxtjs/axios',
     '@nuxtjs/pwa',
-    '@nuxtjs/firebase',
     '@nuxtjs/auth',
     '@nuxtjs/universal-storage',
     'vuejs-google-maps/nuxt',
@@ -507,7 +502,7 @@ const config = {
   router: {
     base: baseHref,
     mode: 'history',
-    middleware: 'routes',
+    middleware: ['initApp', 'routes'],
     prefetchLinks: true
   },
 

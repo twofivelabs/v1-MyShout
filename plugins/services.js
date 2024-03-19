@@ -62,11 +62,7 @@ export default ({
           return res
         })
         .catch((e) => {
-          app.$system.log({
-            comp: 'Services',
-            msg: 'getVisitorLocationByIP',
-            val: e
-          })
+          app.$system.log({ comp: 'Services', msg: 'getVisitorLocationByIP', val: e })
           return false
         })
     },
@@ -74,11 +70,7 @@ export default ({
       try {
         return await $axios.$get(`https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${val}&inputtype=textquery&fields=formatted_address&key=${GOOGLE_MAPS_API_KEY}`)
       } catch (e) {
-        app.$system.log({
-          comp: 'Services',
-          msg: 'searchAddress',
-          val: e
-        })
+        app.$system.log({ comp: 'Services', msg: 'searchAddress', val: e })
       }
     },
     /** FIREBASE CALLABLE FUNCTION */

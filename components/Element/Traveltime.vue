@@ -79,11 +79,7 @@ export default defineComponent({
           })
         }
       } catch(e) {
-        $system.log({
-          comp: 'ElementTravelTime',
-          msg: 'getTime',
-          val: e
-        })
+        $system.log({ comp: 'ElementTravelTime', msg: 'getTime', val: e })
       }
     }
     const getLocalTime = async () => {
@@ -98,11 +94,7 @@ export default defineComponent({
           duration.value = res.time
         }
       } catch(e) {
-        $system.log({
-          comp: 'ElementTravelTime',
-          msg: 'getLocalTime',
-          val: e
-        })
+        $system.log({ comp: 'ElementTravelTime', msg: 'getLocalTime', val: e })
       }
     }
     const addLocalTime = async (time) => {
@@ -115,11 +107,7 @@ export default defineComponent({
           }
         })
       } catch(e) {
-        $system.log({
-          comp: 'ElementTravelTime',
-          msg: 'addLocalTime',
-          val: e
-        })
+        $system.log({ comp: 'ElementTravelTime', msg: 'addLocalTime', val: e })
       }
     }
 

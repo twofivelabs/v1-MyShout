@@ -63,7 +63,7 @@ import formRules from '~/classes/formRules'
 export default defineComponent({
   name: 'FormsAuthemailregister',
   setup () {
-    const { $fire, $notify, i18n } = useContext()
+    const { $db, $fire, $notify, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
@@ -95,12 +95,20 @@ export default defineComponent({
     }
     const register = async () => {
       if (form.value.email && form.value.password) {
+
         try {
-          if ($fire.auth.currentUser === null) {
-            const authentication = await $fire.auth.createUserWithEmailAndPassword(form.value.email.trim().toLowerCase(), form.value.password)
+          if (await $db.fire().capAuth.getCurrentUser() === null) {
+            const authentication = await $db.fire().capAuth.createUserWithEmailAndPassword({
+              email: form.value.email.trim().toLowerCase(),
+              password: form.value.password
+            })
+
             if (authentication.user) {
+              $notify.show({ text: i18n.t('notify.success'), color: 'error' })
               $fire.analytics.logEvent('signup')
+
               await router.push('/auth/setup-profile')
+
             } else {
               $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
             }
@@ -108,11 +116,13 @@ export default defineComponent({
             await router.push('/')
           }
         } catch (e) {
-          console.log("Error", e)
-
           switch (e.code) {
             case "auth/email-already-in-use":
               $notify.show({ text: i18n.t('onboarding.error_email_in_use'), color: 'error' })
+              break;
+            default  :
+              console.log('STICKY: ERROR', e)
+              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
               break;
           }
         }

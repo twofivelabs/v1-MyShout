@@ -6,9 +6,7 @@
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
       <v-sheet height="80vh" class="rounded-t-xl pb-14">
         <div class="ma-3  mb-12" style="padding-bottom:180px;">
-          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }"
-                          @click.native="swipe('Down')"
-          />
+          <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
           <ElementH3 v-if="loading" align="center" :text="$t('is_loading')" />
           <ElementH1 align="center" :text="$t('chats.new_chat')" />
@@ -31,7 +29,7 @@ import {
   defineComponent,
   ref, useContext,
   useStore,
-  computed, 
+  computed,
   //useRouter,
 } from '@nuxtjs/composition-api'
 import { Touch } from 'vuetify/lib/directives'
@@ -39,8 +37,8 @@ export default defineComponent({
   name: 'ChatNewchatbtn',
   directives: { Touch },
   setup() {
-    const { $system, $notify, i18n } = useContext()
-    const { dispatch, state } = useStore()
+    const { $db, $system, $notify, i18n } = useContext()
+    const { state } = useStore()
     //const router = useRouter()
     const loading = ref(false)
     const user = computed(() => state.user.data)
@@ -54,15 +52,11 @@ export default defineComponent({
       newChatFriends.value = fs
     }
     const newChat = async () => {
+      loading.value = true
       try {
-        loading.value = true
         showBottomSheet.value = true
       } catch(e) {
-        $system.log({
-          comp: 'ChatNewchatbtn',
-          msg: 'getChats',
-          val: e
-        })
+        $system.log({ comp: 'ChatNewchatbtn', msg: 'getChats', val: e })
       } finally {
         loading.value = false
       }
@@ -72,14 +66,14 @@ export default defineComponent({
         $notify.show({ text: i18n.t('chats.select_friend_first'), color: 'error' })
         return
       }
+
+      loading.value = true
       try {
-        loading.value = true
         newChatFriends.value.push(user.value.uid)
         const admins = []
         admins.push(user.value.uid)
-        console.log("Admins", admins)
 
-        await dispatch('chats/add', {
+        await $db.save(`Chats`, {
           admins: admins,
           owner: user.value.uid,
           participants: newChatFriends.value
@@ -90,12 +84,19 @@ export default defineComponent({
             //await router.push(`/chats/chat/${room.id}`)
           }
         })
+        /* await dispatch('chats/add', {
+          admins: admins,
+          owner: user.value.uid,
+          participants: newChatFriends.value
+        }).then(async (room) => {
+          console.log("ROOM", room)
+          if (room !== false) {
+            newChatFriends.value = []
+            //await router.push(`/chats/chat/${room.id}`)
+          }
+        }) */
       } catch(e) {
-        $system.log({
-          comp: 'ChatNewchatbtn',
-          msg: 'startChat',
-          val: e
-        })
+        $system.log({ comp: 'ChatNewchatbtn', msg: 'startChat', val: e })
       } finally {
         loading.value = false
       }

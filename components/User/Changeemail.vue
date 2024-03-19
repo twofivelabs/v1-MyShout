@@ -107,8 +107,8 @@ export default defineComponent({
       }
     }
     const save = async () => {
+      loading.value = true
       try {
-        loading.value = true
 
         // Sign in
         const currUser = $fire.auth.currentUser
@@ -121,36 +121,20 @@ export default defineComponent({
             await dispatch('user/updateField', {
               email: form.email
             })
-            $notify.show({
-              text: i18n.t('notify.success'),
-              color: 'success'
-            })
+            $notify.show({ text: i18n.t('notify.success'), color: 'success' })
           }).catch((e) => {
             console.log('Error updating authentication', e)
-            $notify.show({
-              text: i18n.t('notify.error_try_again'),
-              color: 'red'
-            })
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
           })
 
         }).catch((e) => {
-          console.log('Error signing in', e)
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'red'
-          })
+          console.log('STICKY: Error signing in', e)
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
         })
 
       } catch (e) {
-        $system.log({
-          comp: 'UserProfile',
-          msg: 'change email',
-          val: e
-        })
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'red'
-        })
+        $system.log({ comp: 'UserProfile', msg: 'change email', val: e })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
       } finally {
         loading.value = false
       }

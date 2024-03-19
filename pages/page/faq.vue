@@ -56,7 +56,7 @@ export default defineComponent({
   middleware: 'authenticated',
   setup () {
     const { state, dispatch, getters } = useStore()
-    const { $config, $system,  } = useContext()
+    const { $config, $system } = useContext()
     const isLoggedIn = computed(() => getters['user/isLoggedIn'])
     const user = computed(() => state.user.data)
     const profile = computed(() => lodash.cloneDeep(state.user.profile))
@@ -70,30 +70,19 @@ export default defineComponent({
       loading.value = true
       try {
         await dispatch('posts/getAll', {
-          where: [{
-            field: 'published',
-            op: '==',
-            value: true
-          },{
-            field: 'tags',
-            op: 'array-contains',
-            value: 'faq'
-          }]
+          where: [
+              ['published', '==', true],
+              ['tags', 'array-contains', 'faq']
+          ]
         }).then((response) => {
           posts.value = response
         })
       } catch(e) {
-        $system.log({
-          comp: 'Posts',
-          msg: 'useFetch',
-          val: e
-        })
+        $system.log({ comp: 'Posts', msg: 'useFetch', val: e })
       } finally {
         loading.value = false
       }
     })
-
-    // METHODS
 
     // PAGE META
     useMeta({

@@ -143,11 +143,7 @@ export default defineComponent({
           })
         }
       } catch(e) {
-        $system.log({
-          comp: 'AdminUserEdit',
-          msg: 'useFetch',
-          val: e
-        })
+        $system.log({ comp: 'AdminUserEdit', msg: 'useFetch', val: e })
       } finally {
         loading.value = false
       }
@@ -167,19 +163,14 @@ export default defineComponent({
           await dispatch('user/update', form.value)
           $notify.show({ text: i18n.t('notify.success') })
           router.push('/admin/users')
+
         } catch {
-          $notify.show({
-            text: i18n.t('notify.error_try_again'),
-            color: 'error'
-          })
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         } finally {
           loading.value = false
         }
       } else {
-        $notify.show({
-          text: i18n.t('notify.error_try_again'),
-          color: 'error'
-        })
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
     }
 

@@ -176,11 +176,7 @@ export default defineComponent({
         })
       } catch(e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
-        $system.log({
-          comp: 'UserNotifications',
-          msg: 'approveFriendRequest',
-          val: e
-        })
+        $system.log({ comp: 'UserNotifications', msg: 'approveFriendRequest', val: e })
       } finally {
         $notify.show({ text: i18n.t('notify.success'), color: 'green' })
         // TODO: hide approve button
@@ -205,11 +201,7 @@ export default defineComponent({
         })
       } catch(e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
-        $system.log({
-          comp: 'UserNotifications',
-          msg: 'declineFriendRequest',
-          val: e
-        })
+        $system.log({ comp: 'UserNotifications', msg: 'declineFriendRequest', val: e })
       } finally {
         loading.value = false
       }
@@ -253,11 +245,7 @@ export default defineComponent({
         })
       } catch(e) {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
-        $system.log({
-          comp: 'UserNotifications',
-          msg: 'checkIn',
-          val: e
-        })
+        $system.log({ comp: 'UserNotifications', msg: 'checkIn', val: e })
       } finally {
         $notify.show({ text: i18n.t('notify.success'), color: 'green' })
         // TODO: hide approve button
@@ -310,7 +298,7 @@ export default defineComponent({
       for (const i in loaded) {
         dispatch('user/notifications/update', loaded[i], {seen: true})
       }
-      
+
       $capacitor.pushNotificationsClearBadge()
     }
 

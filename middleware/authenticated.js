@@ -1,10 +1,27 @@
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication'
+import { getAuth } from 'firebase/auth'
+import {firebaseApp} from '~/firebaseConfig'
+const a = getAuth(firebaseApp)
 
 export default async function ({ app, store, redirect }) {
     const device = await app.$capacitor.device();
+    let userToken
+    let user
 
-    let user = app.$fire.auth.currentUser;
-    let userToken = user ? await user.getIdTokenResult() : false
+    const au = app.$db.whichAuth()
+    console.log('WHICH AUTH:', au)
+
+    // No user
+    if (!a || !a.currentUser) {
+        // ... REF initApp
+    } else {
+        user = a.currentUser
+        userToken = await a.currentUser.getIdTokenResult(false)
+        if (typeof(userToken.claims.isActive) === "undefined") {
+            userToken = await a.currentUser.getIdTokenResult(true)
+            console.log('LOOPER > CLAIMS', userToken.claims.isActive)
+        }
+    }
 
     if (!user && device.platform !== 'web') {
       user = await FirebaseAuthentication.getCurrentUser()
@@ -15,20 +32,6 @@ export default async function ({ app, store, redirect }) {
 
     if (!user || !userToken) {
         console.log('STICKY: [auth] ERROR > NO USER or TOKEN')
-        console.log('STICKY: [auth] ERROR > USER: ', user, JSON.stringify(user))
-        console.log('STICKY: [auth] ERROR > USER TOKEN: ', userToken, JSON.stringify(userToken))
-        // WE NEED TO PUT A BLOCK HERE
-
-        /*setTimeout(async() => {
-            console.log('STICKY: [auth] TESTING A TIMEOUT')
-            let user1 = app.$fire.auth.currentUser
-            let user2 = await FirebaseAuthentication.getCurrentUser()
-            console.log('STICKY: [auth] USER1: ', user, JSON.stringify(user1))
-            console.log('STICKY: [auth] USER2: ', user, JSON.stringify(user2))
-
-        }, 10000)
-
-        return redirect('/auth')*/
     }
 
     function checkUserStatus () {
@@ -54,8 +57,8 @@ export default async function ({ app, store, redirect }) {
       await redirectToAdmin()
       return true
     } else {
-      console.log('Redirect to login page')
-      return redirect('/auth')
+      console.log('Redirect to login page?')
+      // return redirect('/auth')
     }
 }
 

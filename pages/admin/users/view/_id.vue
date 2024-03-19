@@ -85,7 +85,7 @@ export default defineComponent({
       dispatch
     } = useStore()
     const {
-      $system, $fire, $notify, i18n
+      $system, $db, $notify, i18n
     } = useContext()
     const router = useRouter()
     const route = useRoute()
@@ -121,11 +121,7 @@ export default defineComponent({
           })
         }
       } catch(e) {
-        $system.log({
-          comp: 'AdminUserView',
-          msg: 'useFetch',
-          val: e
-        })
+        $system.log({ comp: 'AdminUserView', msg: 'useFetch', val: e })
       } finally {
         loading.value = false
       }
@@ -137,7 +133,7 @@ export default defineComponent({
           return
         }
         alerts.value = []
-        await $fire.firestore.collection(`Users/${route.value.params.id}/Alerts`)
+        await $db.fire().fs.collection(`Users/${route.value.params.id}/Alerts`)
             .orderBy('created_at', 'desc')
             .get()
             .then((docs) => {
@@ -148,11 +144,7 @@ export default defineComponent({
               })
             })
       } catch (e) {
-        $system.log({
-          comp: 'AdminDashboard',
-          msg: 'AdminUserView > Load Alerts',
-          val: e
-        })
+        $system.log({ comp: 'AdminDashboard', msg: 'AdminUserView > Load Alerts', val: e })
       } finally {
         loading.value = false
       }
@@ -161,7 +153,7 @@ export default defineComponent({
     // METHODS
     const sendPasswordReset = async () => {
       if(form.value.email) {
-        await $fire.auth.sendPasswordResetEmail(form.value.email)
+        await $db.fire().auth.sendPasswordResetEmail(form.value.email)
       } else {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'red' })
       }

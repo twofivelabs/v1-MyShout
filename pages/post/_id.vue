@@ -99,11 +99,7 @@ export default defineComponent({
           }
         }
       } catch(e) {
-        $system.log({
-          comp: 'PostId',
-          msg: 'useFetch',
-          val: e
-        })
+        $system.log({ comp: 'PostId', msg: 'useFetch', val: e })
         error({ statusCode: 404 })
       } finally {
         loading.value = false

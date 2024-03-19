@@ -39,7 +39,7 @@
 
 import {
   defineComponent,
-  ref, useContext, useStore,
+  ref, useContext,
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -54,9 +54,7 @@ export default defineComponent({
     const dialog = ref(false)
     const loading = ref(false)
     const {
-      dispatch
-    } = useStore()
-    const {
+      $db,
       error
     } = useContext()
 
@@ -67,7 +65,7 @@ export default defineComponent({
     const loadPage = async () => {
       loading.value = true
       try {
-        await dispatch('pages/getOne', 'privacy').then((res) => {
+        await $db.get(`ADMIN/Content/Pages/privacy`).then((res) => {
           if (res !== false) {
             page.value = res
           }

@@ -48,7 +48,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const {  $fire, $encryption } = useContext();
+    const {  $db, $encryption } = useContext();
     const { state } = useStore()
     const user = computed(() => state.user);
 
@@ -74,24 +74,28 @@ export default defineComponent({
 
         if (!props.message.replyTo) return;
 
-        const replyToRef = $fire.firestore.collection(`Chats/${props.chat.id}/Messages`).doc(props.message.replyTo);
-        const replyTo = await replyToRef.get();
+        //const replyToRef = $db.fire().fs.collection(`Chats/${props.chat.id}/Messages`).doc(props.message.replyTo);
+        //const replyTo = await replyToRef.get();
+        const replyTo = await $db.get(`Chats/${props.chat.id}/Messages/${props.message.replyTo}`)
 
-        if (!replyTo.exists) {
+        if (!replyTo) {
           console.log("Original message does not exist.");
           return;
         }
 
         thread.value.push({
           id: replyTo.id,
-          ownerData: props.participants[replyTo.data().owner],
-          ...replyTo.data(),
-          message: replyTo.data().message ? $encryption.decrypt(replyTo.data().message) : ''
+          ownerData: props.participants[replyTo.owner],
+          ...replyTo,
+          message: replyTo.message ? $encryption.decrypt(replyTo.message) : ''
         });
 
         console.log("Thread", thread.value)
 
-        const repliesPromises = replyTo.data().replies.map(docId => $fire.firestore.collection(`Chats/${props.chat.id}/Messages`).doc(docId).get());
+        const repliesPromises = replyTo.replies.map(docId => {
+          $db.get(`Chats/${props.chat.id}/Messages/${docId}`)
+          // $db.fire().fs.collection(`Chats/${props.chat.id}/Messages`).doc(docId).get()
+        })
         const repliesDocs = await Promise.all(repliesPromises);
         console.log("repliesDocs", repliesDocs)
 
@@ -100,9 +104,9 @@ export default defineComponent({
 
           thread.value.push({
             id: response.id,
-            ownerData: props.participants[response.data().owner],
-            ...response.data(), // having this afterwards was overriding the encryption
-            message: response.data().message ? $encryption.decrypt(response.data().message) : ''
+            ownerData: props.participants[response.owner],
+            ...response, // having this afterwards was overriding the encryption
+            message: response.message ? $encryption.decrypt(response.message) : ''
           });
         });
 
