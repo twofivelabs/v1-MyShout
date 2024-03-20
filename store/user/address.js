@@ -92,7 +92,8 @@ export const actions = {
   async add ({ commit }, { uid, data, type }) {
     if (uid) {
       data.slug = new FirestoreHelpers().slugify(data.address_2 + data.address_1)
-      const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.slug}`, dataConverter, data)
+      //const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.slug}`, dataConverter, data)
+      const response = await this.$db.save(`Users/${uid}/${dbRootPath}/${data.slug}`, data)
       if (response) {
         if (type === 'shipping') {
           await commit('SET_SHIPPING', response)
@@ -105,7 +106,8 @@ export const actions = {
   },
   async update ({ commit }, { data, type }) {
     if (data.uid && data.id) {
-      const response = await this.$db.update(`Users/${data.uid}/${dbRootPath}/${data.id}`, dataConverter, data)
+      //const response = await this.$db.update(`Users/${data.uid}/${dbRootPath}/${data.id}`, dataConverter, data)
+      const response = await this.$db.save(`Users/${data.uid}/${dbRootPath}/${data.id}`, data)
       if (response) {
         if (type === 'shipping') {
           await commit('SET_SHIPPING', response)

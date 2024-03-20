@@ -114,7 +114,8 @@ export const actions = {
   async add ({ commit, rootState }, data) {
     const uid = rootState.user.data.uid
     if (uid) {
-      const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter, data)
+      //const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter, data)
+      const response = await this.$db.save(`Users/${uid}/${dbRootPath}/${data.id}`, data)
       if (response) {
         await commit('SET_ALL', data)
         await commit('PUSH_TO_LOADED', data)
@@ -125,7 +126,8 @@ export const actions = {
   async update ({ commit, rootState }, data) {
     const uid = (data.uid) ? data.uid : rootState.user.data.uid
     if (uid && data.id) {
-      const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter, data)
+      //const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, dataConverter, data)
+      const response = await this.$db.save(`Users/${uid}/${dbRootPath}/${data.id}`, data)
       if (response) {
         await commit('PUSH_TO_LOADED', data)
       }
@@ -136,7 +138,7 @@ export const actions = {
       const uid = rootState.user.data.uid
       if (uid && data.id) {
         // const response = await this.$db.update(`Users/${uid}/${dbRootPath}`, null, data)
-        const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, null, data)
+        const response = await this.$db.save(`Users/${uid}/${dbRootPath}/${data.id}`, data)
         if (response) {
             // await commit('SET_PROFILE_FIELD', data)
       }

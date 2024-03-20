@@ -175,7 +175,8 @@ export const actions = {
     if(!data.id) {
         return false
     }
-    const response = await this.$db.update(`${dbRootPath}/${data.id}`, dataConverter, data)
+    //const response = await this.$db.update(`${dbRootPath}/${data.id}`, dataConverter, data)
+    const response = await this.$db.save(`${dbRootPath}/${data.id}`, data)
     if (response) {
         await commit('PUSH_TO_ALL', data)
         await commit('PUSH_TO_LOADED', data)
@@ -187,7 +188,8 @@ export const actions = {
       return false
     }
     if (this.$db) {
-        const response = await this.$db.update(`${dbRootPath}/${data.id}`, null, data)
+        //const response = await this.$db.update(`${dbRootPath}/${data.id}`, null, data)
+        const response = await this.$db.save(`${dbRootPath}/${data.id}`, data)
         if (response) {
           await commit('SET_FIELD', data)
         }

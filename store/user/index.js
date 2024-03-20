@@ -338,7 +338,7 @@ export const actions = {
       id = data.id
     }
     if (id) {
-      return await this.$db.update(`${dbRootPath}/${id}`, dataConverter, data)
+      return await this.$db.save(`${dbRootPath}/${id}`, data)
     }
   },
   async update ({ getters, commit }, data) {
@@ -349,7 +349,7 @@ export const actions = {
           userId = data.id
       }
       if (userId && this.$db) {
-          const response = await this.$db.update(`${dbRootPath}/${userId}`, dataConverter, data)
+          const response = await this.$db.save(`${dbRootPath}/${userId}`, data)
           if (response) {
             await commit('SET_USER_PROFILE_INIT', data)
           }
@@ -365,7 +365,7 @@ export const actions = {
     }
 
     if (userId && this.$db) {
-      const response = await this.$db.update(`${dbRootPath}/${userId}`, null, data)
+      const response = await this.$db.save(`${dbRootPath}/${userId}`, data)
       if (response) {
         await commit('SET_PROFILE_FIELD', data)
       }
@@ -429,7 +429,8 @@ export const actions = {
   async listen({ commit, dispatch }, id) {
       try {
         if(id) {
-            const userListener = await this.$db.listen({path:`Users/${id}`})
+            const userListener = await this.$db.listen(`Users/${id}`, {where:null})
+            console.log('Listening to user', userListener)
             if (userListener) {
                 await commit('SET_USER_PROFILE_INIT', {...userListener})
 
@@ -513,7 +514,6 @@ export const actions = {
    * @returns {Promise<void>}
    */
   async onAuthStateChanged ({ commit, dispatch }, { authUser, claims }) {
-    console.info(`🔐Auth State Changed`)
     if (!authUser) {
         return await dispatch('signOut')
     }
@@ -521,11 +521,7 @@ export const actions = {
     try {
       await this.$storage.setUniversal('uid', authUser.uid)
     } catch (e) {
-      this.$system.log({
-        comp: 'store/user',
-        msg: 'onAuthStateChanged > getIdToken',
-        val: e
-      })
+      this.$system.log({ comp: 'store/user', msg: 'onAuthStateChanged > getIdToken', val: e })
     }
 
     await this.$storage.setUniversal('uid', authUser.uid)

@@ -32,6 +32,8 @@ const getFirebaseAuth = async () => {
             persistence: indexedDBLocalPersistence,
         });
     } else {
+        const auth = getAuth()
+        auth.useDeviceLanguage()
         return getAuth()
     }
 }

@@ -36,7 +36,7 @@ import {
     signOut,
     initializeAuth,
     PhoneAuthProvider,
-    RecaptchaVerifier
+    RecaptchaVerifier,
 } from 'firebase/auth'
 import {
     deleteObject,
@@ -92,10 +92,24 @@ const consoleFbStyles = [
     'border-radius: 5px;',
     'padding: 2px 5px',
 ].join(';')
-
-FirebaseAuthentication.addListener('authStateChange', (change) => {
-    console.log('AUTH CHANGED', change)
-})
+const consoleGreenStyles = [
+    'color: #0bbe4d',
+    'background: transparent',
+    'border: 1px solid #0bbe4d',
+    'font-weight:600;',
+    'box-shadow: 2px 2px black',
+    'border-radius: 5px;',
+    'padding: 2px 5px',
+].join(';')
+const consoleYellowStyles = [
+    'color: #ffdd00',
+    'background: transparent',
+    'border: 1px solid #ffdd00',
+    'font-weight:600;',
+    'box-shadow: 2px 2px black',
+    'border-radius: 5px;',
+    'padding: 2px 5px',
+].join(';')
 
 
 export default ({ app, store }, inject) => {
@@ -234,15 +248,12 @@ export default ({ app, store }, inject) => {
         },
         /**
          * This is temporary until it's cleaned up
-         * @param v
-         * @param options
+         * @param col - Collection Name
+         * @param field - field to search within
+         * @param value - the value to search with
          * @returns {Promise<boolean>}
          */
-        async simpleSearch (collection, field, value, options={}) {
-            // Min input length before searching
-            //const localItems = []
-            //const localItems = new Set()
-
+        async simpleSearch (col, field, value) {
             if (!value || value.length < 3) {
                 console.log('Search with a minimum of 2 characters')
                 return false
@@ -250,14 +261,14 @@ export default ({ app, store }, inject) => {
 
             const queryConstraints = []
             let collectionDoc
-            collectionDoc = fire.collection(fire.fs, collection)
+            collectionDoc = fire.collection(fire.fs, col)
 
             queryConstraints.push( fire.orderBy(field, 'asc') )
             queryConstraints.push( fire.startAt(value) )
             queryConstraints.push( fire.endAt(`${value}~`) )
             queryConstraints.push( fire.limit(50) )
 
-            console.info(`%c🔍 SEARCH: ${upperFirstChar(options.collection)}/Searches WHERE: ${value}`, consoleFbStyles)
+            console.info(`%c🔍 SEARCH: ${upperFirstChar(col)} WHERE: ${value}`, consoleFbStyles)
 
             const q = fire.query( collectionDoc, ...queryConstraints ).withConverter(null)
 
@@ -274,7 +285,6 @@ export default ({ app, store }, inject) => {
                 })
 
                 return allData
-
             })
         },
         async search (v, options={}) {
@@ -374,7 +384,7 @@ export default ({ app, store }, inject) => {
                 return false
 
             } finally {
-                console.info(`%c🔥LISTEN FINALLY: ${response}`, consoleFbStyles)
+                console.info(`%c🔥LISTEN FINALLY: ${response}`, consoleYellowStyles)
             }
         },
         /**
@@ -777,9 +787,8 @@ export default ({ app, store }, inject) => {
             return false
         },
         // PATCH JOBS FOR MYSHOUT
-        async listen({ path, where = [], limit = 25, position = 'push', orderBy = 'created_at', orderDirection = 'asc' }) {
+        async listen(path, { where = [], limit = 25, position = 'push', orderBy = 'created_at', orderDirection = 'asc' }) {
             if (!path) return console.log('No path provided')
-            console.log('position:', position) // just a temp fix
 
             try {
                 const pathSplit = path.split('/')
@@ -798,17 +807,21 @@ export default ({ app, store }, inject) => {
                     queryConstraints.push( fire.where(where[0],where[1],where[2]) )
                 }
 
-                console.info(`👂Listening: ${path} WHERE: ${JSON.stringify(where)}, ORDER: ${JSON.stringify(orderBy)}, LIMIT: ${limit}`)
+                console.info(`%c👂Listening: ${path} WHERE: ${JSON.stringify(where)}, ORDER: ${JSON.stringify(orderBy)}, LIMIT: ${limit}, POS: ${position}`, consoleYellowStyles)
 
                 const q = fire.query( collectionDoc, ...queryConstraints )
-
+                /* fire.onSnapshot( q, (snapshot) => {
+                    console.log('snapshot 1', snapshot)
+                }) */
                 return new Promise((resolve, reject) => {
                     fire.onSnapshot( q, (snapshot) => {
+
                         const responseData = []
 
                         // DOCUMENT
                         if ( (pathSplit.length % 2) === 0 ) {
                             const data = { id: snapshot.id, ...snapshot.data() }
+                            console.log('Snapshot Document:', data)
                             resolve(data)
                         }
 
@@ -831,6 +844,7 @@ export default ({ app, store }, inject) => {
                                     //commit('REMOVE_ONE', (formattedData.id || formattedData.slug))
                                 }
                             })
+                            console.log('Snapshot Collection:', responseData)
                             resolve(responseData)
                         }
                     }, reject)
@@ -876,7 +890,7 @@ export default ({ app, store }, inject) => {
 
             // EXISTING DOC
             if ('id' in data || 'slug' in data) {
-                console.log('SAVE > existing doc', newPath, data)
+                console.info(`%c💾 SAVE > existing doc: ${newPath} ${data}`, consoleGreenStyles)
                 data.slug = slug
                 data.id = data.slug
                 data.updated_at = new Date()
@@ -889,14 +903,14 @@ export default ({ app, store }, inject) => {
             }
             // NEW DOC
             else if (!data.created_at && (data.id || data.slug) ) {
-                console.log('SAVE > new doc', newPath, data)
+                console.info(`%c💾 SAVE > new doc: ${newPath} ${data}`, consoleGreenStyles)
                 data.id = data.id || data.slug || null
                 data.created_at = new Date()
                 response = await this._update(newPath, null, data)
             }
             // NEW DOC SAFETY
             else {
-                console.log('SAVE > new doc last', newPath, data)
+                console.info(`%c💾 SAVE > new doc last: ${newPath} ${data}`, consoleGreenStyles)
                 data.created_at = new Date()
                 response = await this._update(newPath, null, data)
             }

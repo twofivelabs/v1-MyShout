@@ -68,7 +68,8 @@ export const actions = {
     const uid = rootState.user.data.uid
     if (uid) {
       data.slug = new FirestoreHelpers().slugify(data.tag)
-      const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.slug}`, dataConverter, data)
+      //const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.slug}`, dataConverter, data)
+      const response = await this.$db.save(`Users/${uid}/${dbRootPath}/${data.slug}`, data)
       if (response) {
         await commit('SET_ALL', response)
       }
@@ -77,7 +78,8 @@ export const actions = {
   },
   async update ({ commit }, { data }) {
     if (data.uid && data.id) {
-      const response = await this.$db.update(`Users/${data.uid}/${dbRootPath}/${data.id}`, dataConverter, data)
+      //const response = await this.$db.update(`Users/${data.uid}/${dbRootPath}/${data.id}`, dataConverter, data)
+      const response = await this.$db.save(`Users/${data.uid}/${dbRootPath}/${data.id}`, data)
       if (response) {
         await commit('SET_ALL', response)
       }

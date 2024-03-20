@@ -5,7 +5,7 @@ import { FCM } from "@capacitor-community/fcm"
 import { PushNotifications } from '@capacitor/push-notifications'
 
 import { App } from '@capacitor/app'
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
+import { Camera, CameraResultType,  } from '@capacitor/camera'
 import { VoiceRecorder } from 'capacitor-voice-recorder'
 
 import { Contacts } from '@capacitor-community/contacts'
@@ -560,18 +560,16 @@ inject('capacitor', {
     // Will return a URL of the path we can use to upload
     async cameraTakePicture (allowEditing = true) {
         const permission = Camera.checkPermissions()
-        console.log("CAMERA Permissions", permission)
-        if (!permission) Camera.requestPermissions()
+        if (!permission) await Camera.requestPermissions()
 
         try {
             const cameraOptions = {
                 quality: 90,
                 allowEditing: allowEditing,
                 resultType: CameraResultType.Base64,
-                source: [CameraSource.Photos, CameraSource.Camera]
+                // source: [CameraSource.Photos, CameraSource.Camera]
             }
-
-            const image = await Camera.getPhoto(cameraOptions)
+            const image= await Camera.getPhoto(cameraOptions)
             if (image) {
                 return image?.base64String
             }

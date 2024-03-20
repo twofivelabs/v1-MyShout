@@ -47,7 +47,7 @@
             <!-- LOGIN -->
             <v-tab-item>
               <div v-if="phoneAuth">
-                <FormsRegisterbyphoneweb />
+                <FormsRegisterbyphone />
 <!--                <FormsRegisterbyphoneweb v-if="device === 'web'" />
                 <FormsRegisterbyphonemobile v-else />-->
 
@@ -67,7 +67,7 @@
             <!-- SIGN UP -->
             <v-tab-item class="pt-3">
               <div v-if="phoneAuth">
-                <FormsRegisterbyphoneweb />
+                <FormsRegisterbyphone />
 <!--                <FormsRegisterbyphoneweb v-if="device === 'web'" />
                 <FormsRegisterbyphonemobile v-else />-->
 

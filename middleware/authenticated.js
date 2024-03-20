@@ -8,9 +8,6 @@ export default async function ({ app, store, redirect }) {
     let userToken
     let user
 
-    const au = app.$db.whichAuth()
-    console.log('WHICH AUTH:', au)
-
     // No user
     if (!a || !a.currentUser) {
         // ... REF initApp

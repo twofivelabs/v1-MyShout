@@ -171,7 +171,8 @@ export const actions = {
     },
     async updateField ({ commit }, data) {
         if (this.$db) {
-            const response = await this.$db.update(`Chats/${data.chatId}/${dbRootPath}/${data.id}`, null, data.data)
+            //const response = await this.$db.update(`Chats/${data.chatId}/${dbRootPath}/${data.id}`, null, data.data)
+            const response = await this.$db.save(`Chats/${data.chatId}/${dbRootPath}/${data.id}`, data.data)
             if (response) {
                 await commit('SET_STATE_FIELD', data)
             }

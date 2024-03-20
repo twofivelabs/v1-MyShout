@@ -58,6 +58,7 @@ export default defineComponent({
     const friends = ref([])
     const gps = computed(() => state.user.gps)
     const user = computed(() => state.user)
+    const userData = computed(() => state.user.data)
     const center = ref([])
     const slider = ref([])
     const mapInit = ref(false)
@@ -141,7 +142,7 @@ export default defineComponent({
     const getFriends = async () => {
       loading.value = true
       try {
-        await $db.get(`Users/${user.value.uid}/Friends`).then(res => {
+        await $db.get(`Users/${userData.value.uid}/Friends`).then(res => {
           if (res) friends.value = res
         })
 
@@ -157,7 +158,7 @@ export default defineComponent({
         mapPoint = new window.google.maps.LatLng(lat, lng)
         currentMap.value.panTo(mapPoint)
 
-        moveMarker(markers[user.value.data.uid], gps.value.lat, gps.value.lng)
+        moveMarker(markers[userData.value.uid], gps.value.lat, gps.value.lng)
       }
     }
     const onDrag = async () => {
@@ -440,7 +441,7 @@ export default defineComponent({
           // Add "YOU" Marker
           if (user.value.gps && user.value.gps.lat) {
             await createMarker({
-              id: user.value.data.uid,
+              id: userData.value.uid,
               lat: user.value.gps.lat,
               lng: user.value.gps.lng,
               title: 'You',
@@ -462,8 +463,8 @@ export default defineComponent({
       console.log('STICKY: WATCH GPS', gps.value, after)
       if (parseFloat(before.lat) !== after.lat) {
         if (gps.value && mapInit.value === true) {
-          console.log('STICKY: [map] move marker: ', user.value.data.uid, gps.value.lat, gps.value.lng)
-          moveMarker(markers[user.value.data.uid], gps.value.lat, gps.value.lng)
+          console.log('STICKY: [map] move marker: ', userData.value.uid, gps.value.lat, gps.value.lng)
+          moveMarker(markers[userData.value.uid], gps.value.lat, gps.value.lng)
         }
       }
     })

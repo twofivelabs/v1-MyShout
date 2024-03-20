@@ -22,7 +22,7 @@ export default ({
          document.body.removeChild(anchor);
     },
     sleep (ms) {
-      console.log('SLEEP', ms)
+      console.log('💤', ms)
       return new Promise(resolve => setTimeout(resolve, ms))
     },
     sort (property) {

@@ -21,10 +21,6 @@ const consoleUserStyles = [
     'padding: 2px 5px',
 ].join(';')
 
-/*function sleep (ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}*/
-
 
 
 export default async function ({ store, app, redirect, route } ) {
@@ -32,73 +28,96 @@ export default async function ({ store, app, redirect, route } ) {
         return null
     }
     store.state.appLoading = true
+    let hasInitAppLocal = false
 
-    app.$db.fire().capAuth.addListener('authStateChange', (res) => {
-        console.log('CAP AUTH *** AUTH STATE CHANGED', res)
-    })
+    function parseJwt (token) {
+        try {
+            if (typeof token === 'object' && token !== null) {
+                token = token.token
+            }
+            let base64Url = token.split('.')[1];
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            let jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
 
-    onAuthStateChanged( a, async (
-        authUser
-    ) => {
-        // console.log('*** NEW AUTH STATE CHANGED', authUser, a)
-        console.log('FB *** AUTH STATE CHANGED')
+            return JSON.parse(jsonPayload);
+        } catch {
+            return null
+        }
+    }
 
-        if (!a || !a.currentUser) {
+    async function getTokenResult(a, forceRefresh) {
+        let tokenResult
+        try {
+            tokenResult = await a.currentUser.getIdTokenResult(forceRefresh)
+        } catch { /* */ }
+
+        if (!tokenResult) {
+            try {
+                tokenResult = await app.$db.fire().capAuth.getIdToken({forceRefresh: forceRefresh})
+            } catch { /* */ }
+        }
+        return tokenResult
+    }
+
+    async function initStateChange(authUser, a=null) {
+        hasInitAppLocal = true
+        console.info(`%c🔐AUTH STATE CHANGED `, consoleUserStyles)
+
+        if (!authUser || !authUser.uid) {
             store.state.isAppInit = true
             store.state.appLoading = false
 
-            console.info(`%c 🏃Ready To Run...`, consoleInitStyles)
+            console.info(`%c 🏃Ready To Run 2...`, consoleInitStyles)
+
             if(route.path === '/auth/' || route.path === '/auth') {
-                // DO NOTHING
-                console.log('DO NOT REDIRECT')
+                console.log('Already here. Do not redirect')
             } else {
-                console.log('REDIRECT TO ONBOARDING')
                 redirect('/auth')
             }
         }
 
-        try {
-            if (!a.currentUser) {
-                console.info(`%c🔐No Auth `, consoleUserStyles)
-                if(route.path === '/auth/' || route.path === '/auth') {
-                    // Already on auth page
-                    return false
-                }
-                redirect('/auth')
-                return false
-            }
-            let tokenResult = await a.currentUser.getIdTokenResult(false)
+        // We are going to try and get the user auth claims before loading
+        // This will help with security and ensure we have an accurate user
+        let tokenResult = await getTokenResult(a, false)
+        let claims = parseJwt(tokenResult)
 
-            /**
-             * Here we are waiting for Firebase to respond with active 'claims' on their
-             * user account. We try for a max of 10 attempts
-             */
-            for (let i = 0; i < 9; i++) {
-                await app.$helper.sleep(500)
-                if (typeof(tokenResult.claims.isActive) === "undefined") {
-                    tokenResult = await a.currentUser.getIdTokenResult(true)
-                    console.log('LOOPER > CLAIMS', tokenResult.claims.isActive)
-
+        if (claims && claims?.isActive && (typeof(claims?.isActive) !== "undefined")) {
+            // Good to go
+        } else {
+            for (let i = 0; i < 15; i++) {
+                if (!claims?.isActive) {
+                    await app.$helper.sleep(500)
+                    tokenResult = await getTokenResult(a, true)
+                    claims = parseJwt(tokenResult)
+                    console.log('Waiting for user claims: ', claims?.isActive)
                 } else {
                     break;
                 }
             }
+        }
 
-            await store.dispatch('user/onAuthStateChanged', {
-                authUser,
-                claims: tokenResult.claims
-            })
+        if (claims.user_id) {
 
-            // console.info(`%c🔐authStateLoaded, ${tokenResult}`, consoleUserStyles)
+            // Send off that we have a user
+            await store.dispatch('user/onAuthStateChanged', { authUser, claims: claims })
+
             store.state.isAppInit = true
             store.state.appLoading = false
 
-            console.info(`%c 🏃Ready To Run...`, consoleInitStyles)
-
-        } catch (e) {
-            console.info(`%c🔐Auth Failed To Load, `, consoleUserStyles)
-            console.log('Error with Auth', e)
+            console.info(`%c 🏃Ready To Run 1...`, consoleInitStyles)
         }
-    })
+    }
 
+    onAuthStateChanged( a, async (authUser) => {
+        if (!hasInitAppLocal) await initStateChange(authUser, a)
+    })
+    app.$db.fire().capAuth.addListener('authStateChange', async (authUser) => {
+        if (authUser.user) {
+            if (!hasInitAppLocal) await initStateChange(authUser.user)
+            return
+        }
+        if (!hasInitAppLocal) await initStateChange(authUser)
+    })
 }

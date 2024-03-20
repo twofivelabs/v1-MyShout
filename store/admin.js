@@ -102,7 +102,8 @@ export const actions = {
   },
   async add ({ commit }, { adminPath, data }) {
     data.slug = new FirestoreHelpers().slugify(data.title)
-    const response = await this.$db.update(`${dbRootPath}${adminPath}/${data.slug}`, dataConverter, data)
+    //const response = await this.$db.update(`${dbRootPath}${adminPath}/${data.slug}`, dataConverter, data)
+    const response = await this.$db.save(`${dbRootPath}${adminPath}/${data.slug}`, data)
     if (response) {
       await commit('PUSH_TO_ALL', toFirestoreData)
     }

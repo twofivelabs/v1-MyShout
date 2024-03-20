@@ -83,8 +83,7 @@ export default defineComponent({
       isLoading.value = true;
 
       try {
-        chatsListener.value = await $db.listen({
-              path: 'Chats',
+        chatsListener.value = await $db.listen('Chats', {
               where: ['participants', 'array-contains', user.value.data.uid],
               orderBy: 'message.created_at',
               orderDirection: 'desc'

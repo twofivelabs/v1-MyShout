@@ -81,7 +81,7 @@ export default defineComponent({
         chatLoading.value = true;
         if (chatId.value) {
 
-          chatListener.value = await $db.listen({path:`Chats/${chatId.value}`}).then(async docs => {
+          chatListener.value = await $db.listen(`Chats/${chatId.value}`).then(async docs => {
             chat.value = docs
             loadParticipants()
             loadMessages()
@@ -115,8 +115,7 @@ export default defineComponent({
     const loadMessages = async () => {
       //messagesLoading.value = true;
 
-        messageListener.value = await $db.listen({
-          path: `Chats/${chatId.value}/Messages`,
+        messageListener.value = await $db.listen(`Chats/${chatId.value}/Messages`, {
           limit: 100,
           orderBy: 'created_at'
         }).then(async docs => {

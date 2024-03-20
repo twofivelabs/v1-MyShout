@@ -143,7 +143,8 @@ export const actions = {
       if (data.created_at) {
           delete data.created_at
       }
-      const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, null, data)
+      //const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, null, data)
+      const response = await this.$db.save(`Users/${uid}/${dbRootPath}/${data.id}`, data)
       if (response) {
         const position = (hasInitNotifications ? 'unshift' : 'push')
         await commit('PUSH_TO_ALL', {data, position})
@@ -177,23 +178,18 @@ export const actions = {
   },
   async listen ({ rootState, commit }) {
     const uid = rootState?.user?.data?.uid
-    console.log('uid', uid)
+
     if (hasInitNotifications) {
-        console.log('...ALREADY LISTENING TO NOTIFICATIONS...')
+        //console.log('...ALREADY LISTENING TO NOTIFICATIONS...')
         return
     }
     hasInitNotifications = true
 
-    console.log('...LISTENING TO NOTIFICATIONS...')
+    //console.log('...LISTENING TO NOTIFICATIONS...')
 
     try {
-        const snap = await this.$db.listen({
-            path: `Users/${uid}/${dbRootPath}`,
-            where: [{
-                field: 'archived',
-                op: '==',
-                value: 'value'
-            }]
+        const snap = await this.$db.listen(`Users/${uid}/${dbRootPath}`, {
+            where: ['archived', '==', false]
         })
 
         snap.forEach((data) => {

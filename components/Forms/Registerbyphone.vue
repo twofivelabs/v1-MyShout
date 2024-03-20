@@ -16,7 +16,7 @@
         :loading="loading"
         color="primary"
         elevation="0"
-        id="recaptchaContainer"
+        id="signInButton"
         type="submit"
       >
         {{ $t('btn.send_code') }}
@@ -54,12 +54,10 @@
               elevation="0"
               class="text-center"
               type="submit"
-              @click="registerWithOTPCode"
+              @click="confirmWithOTPCode"
           >
             {{ $t('btn.verify') }}
           </v-btn>
-
-<!--          <FormsRecoverbyemail />-->
         </div>
       </v-card>
     </v-dialog>
@@ -79,21 +77,21 @@ import {
 import formRules from '~/classes/formRules'
 import VuePhoneNumberInput from 'vue-phone-number-input'
 import 'vue-phone-number-input/dist/vue-phone-number-input.css'
-import { getAuth, RecaptchaVerifier } from "firebase/auth"
+import { RecaptchaVerifier } from "firebase/auth"
 
 export default defineComponent({
-  name: 'FormsRegisterbyphoneweb',
+  name: 'FormsRegisterbyphone',
   components: {
     VuePhoneNumberInput
   },
   setup () {
-    const { $db, $helper, $notify, $system, $ttlStorage, i18n } = useContext()
+    const { $db, $helper, $notify, $ttlStorage, i18n } = useContext()
     const { dispatch } = useStore()
     const router = useRouter()
     const loading = ref(false)
-    // DEFINE CONTENT
     const valid = ref(true)
     const recaptchaContainer = ref(null)
+    const signInButton = ref(null)
     const agreeToTerms = ref(true)
     const rules = formRules
     const formEl = ref(null)
@@ -108,102 +106,102 @@ export default defineComponent({
     // METHODS
     const updatePhoneNumber = (e) => {
       form.value.phoneNumberFormatted = e.formattedNumber
-      form.value.phone = e.formattedNumber
+      form.value.phone = e?.formattedNumber?.trim().toLowerCase()
     }
     const validate = async () => {
       loading.value = true
 
-      if (agreeToTerms.value) {
-        valid.value = await formEl.value.validate()
-        if (valid.value) {
-          await register()
-        }
-      } else {
-        $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
+      if (!agreeToTerms.value) {
+        return $notify.show({text: i18n.t('notify.agree_to_terms'), color: 'error'})
+      }
+
+      valid.value = await formEl.value.validate()
+
+      if (!form.value.phone) {
+        $notify.show({text: i18n.t('notify.error_try_again'), color: 'error'})
+        valid.value = false
+      }
+
+      if (valid.value) {
+        await register()
       }
 
       loading.value = false
     }
     const register = async () => {
-      if (form.value.phone) {
-        loading.value = true
-        form.value.showOtpInput = true
+      loading.value = true
 
-        try {
-          window.confirmationResult = await $db.fire().capAuth.signInWithPhoneNumber({
-            phoneNumber: form.value.phone.trim().toLowerCase(),
-            recaptchaVerifier: recaptchaContainer.value
-          })
+      await $db.fire().signInWithPhoneNumber($db.fire().auth, form.value.phone, window.recaptchaVerifier).then(confirmationResult => {
+        // SUCCESS -> confirm
+        window.confirmationResult = confirmationResult
+        loading.value = false
 
-        } catch (e) {
-          if (e && e.message && e.message !== 'reCAPTCHA placeholder element must be an element or id') {
-            $notify.show({ text: e.message, color: 'error' })
-            return
-          }
+      }).catch(e => {
+        loading.value = false
+        console.log('STICKY: Error signing in with phone number:', e)
 
-          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-          $system.log({ comp: 'FormsRegisterbyphoneweb', msg: 'Registering phone number', val: e })
-
+        if (e && e.message && e.message !== 'reCAPTCHA placeholder element must be an element or id') {
+          $notify.show({ text: e.message, color: 'error' })
+          return
         }
-      } else {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-      }
+      })
     }
-    const registerWithOTPCode = async () => {
+    const confirmWithOTPCode = async () => {
+      if (!form.value.otpProvided || form.value.otpProvided.length < 6) {
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+        return false
+      }
+
       loading.value = true
 
       try {
-        const result = await window.confirmationResult.confirm(form.value.otpProvided)
-
-        // Technically they have an account now, so we can bypass onboarding IF they are already a user
-        $ttlStorage.set('onboardingComplete', true)
-
-        console.log('STICKY: CONFIRM RESULT', result)
-        // If EXISTING user show logged in message
-        if (!result.additionalUserInfo.isNewUser) {
-          $notify.show({text: i18n.t('notify.success'), color: 'green'})
-          return router.push('/')
-        }
-        // If NEW user
-        else {
+        await window.confirmationResult.confirm(form.value.otpProvided).then(result => {
           form.value.showOtpInput = false
+          loading.value = false
+
+          $ttlStorage.set('onboardingComplete', true)
+          console.log('STICKY: USER', result.user)
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
 
-          // TODO: Update with $db.save()
-          await dispatch('user/updateField', {
-            phone: form.value.phone.trim().toLowerCase(),
-            created_at: new Date()
-          })
+          // If EXISTING user show logged in message
+          if (!result?.additionalUserInfo?.isNewUser) {
+            return router.push('/')
+          }
+          // NEW USER
+          else {
+            dispatch('user/updateField', {
+              phone: form.value.phone.trim().toLowerCase(),
+              created_at: new Date()
+            })
+            return router.push('/auth/setup-profile')
+          }
 
-          return router.push('/auth/setup-profile')
-        }
+        })
       } catch (e) {
+        console.log('STICKY: Error signing in with phone number:', e)
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        $system.log({ comp: 'FormsRegisterbyphoneweb', msg: 'Registering phone code', val: e })
 
       } finally {
         loading.value = false
-        form.value.showOtpInput = false
       }
     }
     const initRecaptcha = async () => {
       try {
         await $helper.sleep(1000)
 
-        const auth = getAuth();
-        recaptchaContainer.value = new RecaptchaVerifier(auth, 'recaptchaContainer', {
+        window.recaptchaVerifier = new RecaptchaVerifier($db.fire().auth, 'signInButton', {
           size: 'invisible',
-          callback: () => {
-            console.log('WORKS > Sign user on')
+          callback: (response) => {
+            console.log('WORKS > Sign user on:', response)
+            form.value.showOtpInput = true
+          },
+          'expired-callback': () => {
+            console.log('Expired reCaptcha')
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
           }
         })
 
-        /* recaptchaContainer.value = new $db.fire().RecaptchaVerifier($db.fire().auth, 'recaptchaContainer', {
-          size: 'invisible',
-          callback: () => {
-            console.log('WORKS > Sign user on')
-          }
-        }) */
       } catch (e) {
         console.log('initRecaptcha', e)
       }
@@ -223,10 +221,11 @@ export default defineComponent({
       formEl,
       rules,
       recaptchaContainer,
+      signInButton,
       updatePhoneNumber,
       validate,
       register,
-      registerWithOTPCode
+      confirmWithOTPCode
     }
   }
 })
