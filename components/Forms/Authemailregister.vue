@@ -63,7 +63,7 @@ import formRules from '~/classes/formRules'
 export default defineComponent({
   name: 'FormsAuthemailregister',
   setup () {
-    const { $db, $fire, $notify, i18n } = useContext()
+    const { $db, $notify, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
@@ -84,8 +84,13 @@ export default defineComponent({
 
       if (agreeToTerms.value) {
         valid.value = await formEl.value.validate()
+        if (!form.value.email || !form.value.password) {
+          valid.value = false
+        }
         if (valid.value) {
           await register()
+        } else {
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
       } else {
         $notify.show({ text: i18n.t('notify.agree_to_terms'), color: 'error' })
@@ -94,41 +99,33 @@ export default defineComponent({
       loading.value = false
     }
     const register = async () => {
-      if (form.value.email && form.value.password) {
 
-        try {
-          if (await $db.fire().capAuth.getCurrentUser() === null) {
-            const authentication = await $db.fire().capAuth.createUserWithEmailAndPassword({
-              email: form.value.email.trim().toLowerCase(),
-              password: form.value.password
-            })
+      await $db.fire().capAuth.createUserWithEmailAndPassword({
+        email: form.value.email.trim().toLowerCase(),
+        password: form.value.password
+      }).then(async user => {
+        if (user) {
+          $notify.show({ text: i18n.t('notify.success'), color: 'error' })
+          $db.fire().logEvent($db.fire().analytics, 'sign_up')
 
-            if (authentication.user) {
-              $notify.show({ text: i18n.t('notify.success'), color: 'error' })
-              $fire.analytics.logEvent('signup')
+          await router.push('/auth/setup-profile')
 
-              await router.push('/auth/setup-profile')
-
-            } else {
-              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-            }
-          } else {
-            await router.push('/')
-          }
-        } catch (e) {
-          switch (e.code) {
-            case "auth/email-already-in-use":
-              $notify.show({ text: i18n.t('onboarding.error_email_in_use'), color: 'error' })
-              break;
-            default  :
-              console.log('STICKY: ERROR', e)
-              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-              break;
-          }
+        } else {
+          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
         }
-      } else {
-        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-      }
+
+      }).catch(e => {
+        switch (e.code) {
+          case "auth/email-already-in-use":
+            $notify.show({ text: i18n.t('onboarding.error_email_in_use'), color: 'error' })
+            break;
+          default  :
+            console.log('STICKY: ERROR', e)
+            $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
+            break;
+        }
+      })
+
     }
 
     return {

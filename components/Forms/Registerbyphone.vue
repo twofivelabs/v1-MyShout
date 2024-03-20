@@ -161,7 +161,7 @@ export default defineComponent({
           loading.value = false
 
           $ttlStorage.set('onboardingComplete', true)
-          console.log('STICKY: USER', result.user)
+          // console.log('STICKY: USER', result.user)
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
 
           // If EXISTING user show logged in message

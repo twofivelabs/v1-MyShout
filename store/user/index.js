@@ -148,11 +148,19 @@ export const getters = {
     }
   },
   isLoggedIn: (state) => {
-    try {
-      return state.data.uid && state.data.uid.length > 1
-    } catch {
-      return false
+    if (state.profile.email) return true
+    else if (state.data.uid) return true
+    else if (state.data && state.data.role && state.data.role.isAnonymous) return false
+    else if (state.data && state.data.isReset) return false
+    else if (!state.data) return false
+    return false
+  },
+  authStateLoaded: async (state) => {
+    while (state.authStateLoaded === false) {
+        console.info(`%c🔐authStateLoaded, ${state.authStateLoaded}`)
+        await new Promise(resolve => setTimeout(resolve, 250))
     }
+    return true
   },
   userId: (state) => {
     try {
@@ -205,6 +213,10 @@ export const getters = {
 }
 
 export const mutations = {
+  SET_KEY: (state, { key, value }) => {
+    if (!key) return
+    Vue.set(state, key, value)
+  },
   RESET_STORE: (state) => {
     state.data = {}
     state.profile = new User({}).fields
@@ -319,7 +331,6 @@ export const mutations = {
       state.profile.photoURL = photoURL || null
       state.profile.initial = createInitial(state.profile)
       state.profile.role = { ...claims }
-
   }
 }
 
@@ -430,7 +441,6 @@ export const actions = {
       try {
         if(id) {
             const userListener = await this.$db.listen(`Users/${id}`, {where:null})
-            console.log('Listening to user', userListener)
             if (userListener) {
                 await commit('SET_USER_PROFILE_INIT', {...userListener})
 
@@ -552,13 +562,15 @@ export const actions = {
    * Sign user out
    * @returns {Promise<void>}
    */
-  async signOut ({ commit }) {
+  async signOut ({ commit, rootState }) {
       try {
           await this.$db.fire().signOut(this.$db.fire().auth).then(() => {
               this.$db.fire().capAuth.signOut()
 
               commit('RESET_STORE')
               this.$storage.setUniversal('uid', null)
+              rootState.appLoading = true
+              rootState.isAppInit = false
               this.$router.push('/auth/')
           })
 

@@ -71,21 +71,25 @@ export default defineComponent({
 
     // WATCH
     watchEffect(async () => {
-      // NOTIFICATION PERMISSIONS
-      if (hasRequestedNotificationPermissions.value === false) {
-        // console.log('STICKY: watchEffect > Request Push Notifications')
-        await $capacitor.pushNotificationsRequestAndRegisterPermissions().then(() => {
-          hasRequestedNotificationPermissions.value = true
-          $capacitor.pushNotificationsListeners()
-        })
-      }
 
-      // MICROPHONE PERMISSIONS
-      if (hasRequestedMicrophonePermissions.value === false) {
-        // console.log('STICKY: watchEffect > Request Microphone')
-        await $capacitor.microphonePermissions().then(() => {
-          hasRequestedMicrophonePermissions.value = true
-        })
+      // Wait to have userId first
+      if (user.value.data.uid) {
+        // NOTIFICATION PERMISSIONS
+        if (hasRequestedNotificationPermissions.value === false) {
+          // console.log('STICKY: watchEffect > Request Push Notifications')
+          await $capacitor.pushNotificationsRequestAndRegisterPermissions().then(() => {
+            hasRequestedNotificationPermissions.value = true
+            $capacitor.pushNotificationsListeners()
+          })
+        }
+
+        // MICROPHONE PERMISSIONS
+        if (hasRequestedMicrophonePermissions.value === false) {
+          // console.log('STICKY: watchEffect > Request Microphone')
+          await $capacitor.microphonePermissions().then(() => {
+            hasRequestedMicrophonePermissions.value = true
+          })
+        }
       }
     })
 
@@ -94,27 +98,19 @@ export default defineComponent({
 
       // Check user if they have profile pieces
       setTimeout(async() => {
-        // NEW GPS
-        $capacitor.gpsInit()
 
-        const d = await $capacitor.device()
+        // Wait to have userId first
+        if (user.value.data.uid) {
+          $capacitor.gpsInit()
 
-        console.log(d)
-
-        try {
           Preferences.set({
             key: 'currentUserId',
             value: user.value.data.uid,
-          })
-        } catch {
-          // ...
+          }).catch(() => {})
+
+          localNotificationRequestPermission().catch(() => {})
         }
 
-        try {
-          localNotificationRequestPermission()
-        } catch {
-          // ...
-        }
       }, 2500)
     })
 

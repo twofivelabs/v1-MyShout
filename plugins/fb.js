@@ -175,6 +175,14 @@ export default ({ app, store }, inject) => {
             newPath, storeToUseAll, storeToUseOne, storeToUse, pathId, slug
         }
     }
+    function invalidPath(path) {
+        let invalid = false
+        if (!path) invalid = true
+        if (path.slice(-1) === '/') invalid = true
+        if (path.includes('//')) invalid = true
+        if (invalid) console.log('Path is invalid: ', path)
+        return invalid
+    }
 
     inject('db', {
         fire () {
@@ -698,7 +706,7 @@ export default ({ app, store }, inject) => {
          * @returns {Promise<boolean|*>}
          */
         async upload(path, data, options = { 'base64': false, metadata: {} }) {
-            if (!path) return false
+            if (invalidPath(path)) return false
             if (!data) return false
 
             const storage = getStorage()
@@ -717,7 +725,7 @@ export default ({ app, store }, inject) => {
             return false
         },
         async deleteFile(path) {
-            if (!path) return false
+            if (invalidPath(path)) return false
 
             const storage = getStorage()
             const filePath = ref(storage, path)
@@ -730,7 +738,7 @@ export default ({ app, store }, inject) => {
             })
         },
         async count(path, data= null) {
-            if (!path) return false
+            if (invalidPath(path)) return false
             if (!store.state) return false
 
             // PARSE THE PATH GIVEN
@@ -740,7 +748,7 @@ export default ({ app, store }, inject) => {
             return await this._count(newPath, where)
         },
         async get(path, data= null) {
-            if (!path) return false
+            if (invalidPath(path)) return false
 
             // PARSE THE PATH GIVEN
             let {
@@ -765,7 +773,7 @@ export default ({ app, store }, inject) => {
             }
         },
         async listen_withStore(path, data= null) {
-            if (!path) return false
+            if (invalidPath(path)) return false
             if (!store.state) return false
 
             let {newPath, storeToUseAll, storeToUseOne} = parse_path(path)
@@ -788,7 +796,7 @@ export default ({ app, store }, inject) => {
         },
         // PATCH JOBS FOR MYSHOUT
         async listen(path, { where = [], limit = 25, position = 'push', orderBy = 'created_at', orderDirection = 'asc' }) {
-            if (!path) return console.log('No path provided')
+            if (invalidPath(path)) return false
 
             try {
                 const pathSplit = path.split('/')
@@ -815,13 +823,13 @@ export default ({ app, store }, inject) => {
                 }) */
                 return new Promise((resolve, reject) => {
                     fire.onSnapshot( q, (snapshot) => {
+                        console.info(`%c👂Change: ${path}`, consoleYellowStyles)
 
                         const responseData = []
 
                         // DOCUMENT
                         if ( (pathSplit.length % 2) === 0 ) {
                             const data = { id: snapshot.id, ...snapshot.data() }
-                            console.log('Snapshot Document:', data)
                             resolve(data)
                         }
 
@@ -844,7 +852,6 @@ export default ({ app, store }, inject) => {
                                     //commit('REMOVE_ONE', (formattedData.id || formattedData.slug))
                                 }
                             })
-                            console.log('Snapshot Collection:', responseData)
                             resolve(responseData)
                         }
                     }, reject)
@@ -857,7 +864,7 @@ export default ({ app, store }, inject) => {
         },
 
         async paginate(path, data= null) {
-            if (!path) return false
+            if (invalidPath(path)) return false
             if (!data) return false
 
             let { newPath, storeToUse, storeToUseAll } = parse_path(path)
@@ -874,7 +881,7 @@ export default ({ app, store }, inject) => {
             return false
         },
         async save(path, data= null) {
-            if (!path) return false
+            if (invalidPath(path)) return false
             if (!data) return false
 
             let response = null
@@ -918,7 +925,7 @@ export default ({ app, store }, inject) => {
             return response || false
         },
         async save_withStore(path, data= null) {
-            if (!path) return false
+            if (invalidPath(path)) return false
             if (!data) return false
 
             let { newPath, storeToUse, storeToUseAll, pathId } = parse_path(path, data)
@@ -936,7 +943,7 @@ export default ({ app, store }, inject) => {
             return false
         },
         async delete(path) {
-            if (!path) return false
+            if (invalidPath(path)) return false
 
             let { newPath } = parse_path(path)
 
@@ -947,7 +954,7 @@ export default ({ app, store }, inject) => {
             })
         },
         async delete_withStore(path) {
-            if (!path) return false
+            if (invalidPath(path)) return false
 
             let { newPath, storeToUseOne } = parse_path(path)
             storeToUseOne = storeToUseOne.toLowerCase()
@@ -958,7 +965,7 @@ export default ({ app, store }, inject) => {
             return false
         },
         async update(path, data) {
-            if (!path) return false
+            if (invalidPath(path)) return false
             if (!data) return false
 
             let { newPath, storeToUseAll, storeToUseOne, pathId } = parse_path(path)
@@ -974,7 +981,7 @@ export default ({ app, store }, inject) => {
             return false
         },
         async group(path, data= {}) {
-            if (!path) return false
+            if (invalidPath(path)) return false
 
             let { storeToUse, storeToUseAll } = parse_path(path)
 

@@ -4,35 +4,33 @@
         v-model="form.email"
         :rules="rules.email"
         :label="$t('form.email')"
-        required
         prepend-inner-icon="mdi-email"
-        outlined
         background-color="#f8f9fa"
         class="py-0 my-0"
+        required
+        outlined
     />
-
     <v-text-field
         v-model="form.password"
         :rules="rules.password"
-        autocomplete="off"
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         @click:append="showPassword = !showPassword"
         :type="showPassword ? 'text' : 'password'"
         :label="$t('form.password')"
-        required
         prepend-inner-icon="mdi-lock"
-        counter
-        outlined
         background-color="#f8f9fa"
+        autocomplete="off"
+        required
+        outlined
+        counter
     />
 
     <div class="text-center">
       <v-btn
-        :disabled="!valid"
         :loading="loading"
+        class="text-center"
         color="primary"
         elevation="0"
-        class="text-center"
         type="submit"
       >
         {{ $t('btn.login') }}
@@ -59,7 +57,7 @@ import formRules from '~/classes/formRules'
 export default defineComponent({
   name: 'FormsAuthemaillogin',
   setup () {
-    const { $db, $fire, $notify, i18n } = useContext()
+    const { $db, $notify, i18n } = useContext()
     const router = useRouter()
     const loading = ref(false)
 
@@ -75,39 +73,33 @@ export default defineComponent({
 
     // METHODS
     const validate = async () => {
-      loading.value = true
       valid.value = await formEl.value.validate()
+      if (!form.value.email || !form.value.password) {
+        valid.value = false
+      }
       if (valid.value) {
         await submitLogin()
+      } else {
+        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
-      loading.value = false
     }
     const submitLogin = async () => {
-      if (form.value.email && form.value.password) {
+        loading.value = true
 
-        try {
-          if (await $db.fire().capAuth.getCurrentUser() === null) {
+        console.log('submit login')
 
-            const authentication = await $db.fire().capAuth.signInWithEmailAndPassword({
-              email: form.value.email.trim().toLowerCase(),
-              password: form.value.password
-            }).then(user => {
-              console.log('LOGGED IN USER: ', user)
-            })
+        await $db.fire().capAuth.signInWithEmailAndPassword({
+          email: form.value.email.trim().toLowerCase(),
+          password: form.value.password
+        }).then(async user => {
+          loading.value = false
+          console.log('LOGGED IN USER: ', user)
+          $db.fire().logEvent($db.fire().analytics, 'login')
+          $notify.show({ text: i18n.t('notify.success'), color: 'green' })
+          await router.push('/')
 
-            if (authentication.user) {
-              $fire.analytics.logEvent('login')
-              $notify.show({ text: i18n.t('notify.success'), color: 'green' })
-              await router.push('/')
-
-            } else {
-              $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-            }
-          } else {
-            await router.push('/')
-          }
-
-        } catch (e) {
+        }).catch(e => {
+          loading.value = false
           switch (e.code) {
             case "auth/wrong-password":
               $notify.show({ text: i18n.t('onboarding.error_wrong_password'), color: 'error' })
@@ -115,15 +107,13 @@ export default defineComponent({
             case "auth/user-not-found":
               $notify.show({ text: i18n.t('onboarding.error_user_not_found'), color: 'error' })
               break;
-            default  :
+            default:
               console.log('STICKY: ERROR', e)
               $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
               break;
           }
-        }
-      } else {
-        $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-      }
+        })
+
     }
 
     return {

@@ -21,8 +21,8 @@ export default ({
          // Remove element from DOM
          document.body.removeChild(anchor);
     },
-    sleep (ms) {
-      console.log('💤', ms)
+    sleep (ms, log=null) {
+      console.log('💤', ms, log)
       return new Promise(resolve => setTimeout(resolve, ms))
     },
     sort (property) {

@@ -111,7 +111,7 @@ export default defineComponent({
           return
         }
 
-        await $db.get(`Users/${props.user.id}/alerts`).then(res => {
+        await $db.get(`Users/${props.user.id}/Alerts`).then(res => {
           if (res !== false) alerts.value = res
         })
       } catch(e) {

@@ -25,6 +25,7 @@ const consoleUserStyles = [
 
 export default async function ({ store, app, redirect, route } ) {
     if (store.state.isAppInit) {
+        console.log('!! App is init already')
         return null
     }
     store.state.appLoading = true
@@ -66,13 +67,14 @@ export default async function ({ store, app, redirect, route } ) {
         console.info(`%c🔐AUTH STATE CHANGED `, consoleUserStyles)
 
         if (!authUser || !authUser.uid) {
-            store.state.isAppInit = true
+            //store.state.isAppInit = true
             store.state.appLoading = false
 
             console.info(`%c 🏃Ready To Run 2...`, consoleInitStyles)
 
             if(route.path === '/auth/' || route.path === '/auth') {
                 console.log('Already here. Do not redirect')
+                return
             } else {
                 redirect('/auth')
             }
@@ -88,18 +90,16 @@ export default async function ({ store, app, redirect, route } ) {
         } else {
             for (let i = 0; i < 15; i++) {
                 if (!claims?.isActive) {
-                    await app.$helper.sleep(500)
+                    await app.$helper.sleep(500, 'Waiting for user claims')
                     tokenResult = await getTokenResult(a, true)
                     claims = parseJwt(tokenResult)
-                    console.log('Waiting for user claims: ', claims?.isActive)
                 } else {
                     break;
                 }
             }
         }
 
-        if (claims.user_id) {
-
+        if (claims?.user_id) {
             // Send off that we have a user
             await store.dispatch('user/onAuthStateChanged', { authUser, claims: claims })
 
@@ -107,13 +107,17 @@ export default async function ({ store, app, redirect, route } ) {
             store.state.appLoading = false
 
             console.info(`%c 🏃Ready To Run 1...`, consoleInitStyles)
+        } else {
+            console.log('No user, waiting for authentication to run')
         }
     }
 
     onAuthStateChanged( a, async (authUser) => {
+        console.log('** FB > Auth State Changed')
         if (!hasInitAppLocal) await initStateChange(authUser, a)
     })
     app.$db.fire().capAuth.addListener('authStateChange', async (authUser) => {
+        console.log('** CAP > Auth State Changed')
         if (authUser.user) {
             if (!hasInitAppLocal) await initStateChange(authUser.user)
             return

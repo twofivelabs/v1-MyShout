@@ -8,6 +8,9 @@ export default async function ({ app, store, redirect }) {
     let userToken
     let user
 
+    console.log('AUTH STATE LOADED: ', await store.getters['users/authStateLoaded'])
+    console.log('store.state.user', store.state.user)
+
     // No user
     if (!a || !a.currentUser) {
         // ... REF initApp
