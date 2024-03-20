@@ -86,17 +86,16 @@ export default defineComponent({
     const submitLogin = async () => {
         loading.value = true
 
-        console.log('submit login')
-
         await $db.fire().capAuth.signInWithEmailAndPassword({
           email: form.value.email.trim().toLowerCase(),
           password: form.value.password
-        }).then(async user => {
+        }).then(() => {
           loading.value = false
-          console.log('LOGGED IN USER: ', user)
+
           $db.fire().logEvent($db.fire().analytics, 'login')
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
-          await router.push('/')
+
+          router.push('/')
 
         }).catch(e => {
           loading.value = false

@@ -86,7 +86,7 @@ export default defineComponent({
         chatsListener.value = await $db.listen('Chats', {
               where: ['participants', 'array-contains', user.value.data.uid],
               orderBy: 'message.created_at',
-              orderDirection: 'desc'
+              orderDirection: 'asc'
           }).then(async docs => {
             const updatedChatList = []
 
@@ -108,7 +108,7 @@ export default defineComponent({
         })
 
       } catch (error) {
-        console.error('STICKY: Error fetching chats:', error?.message);
+        console.log('STICKY: Error fetching chats:', error?.message);
       } finally {
         isLoading.value = false;
       }

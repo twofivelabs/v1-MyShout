@@ -96,6 +96,9 @@ export default defineComponent({
     // MOUNTED
     onMounted(async () => {
 
+      //const load = await getters['user/authStateLoaded']
+      // console.log('mounted loaded: ', load)
+
       // Check user if they have profile pieces
       setTimeout(async() => {
 

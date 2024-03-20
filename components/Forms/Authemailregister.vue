@@ -103,16 +103,11 @@ export default defineComponent({
       await $db.fire().capAuth.createUserWithEmailAndPassword({
         email: form.value.email.trim().toLowerCase(),
         password: form.value.password
-      }).then(async user => {
-        if (user) {
-          $notify.show({ text: i18n.t('notify.success'), color: 'error' })
-          $db.fire().logEvent($db.fire().analytics, 'sign_up')
+      }).then(() => {
+        $notify.show({ text: i18n.t('notify.success'), color: 'error' })
+        $db.fire().logEvent($db.fire().analytics, 'sign_up')
 
-          await router.push('/auth/setup-profile')
-
-        } else {
-          $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
-        }
+        router.push('/auth/setup-profile')
 
       }).catch(e => {
         switch (e.code) {

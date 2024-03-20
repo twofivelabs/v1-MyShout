@@ -1,11 +1,13 @@
 <template #activator="{ isActive, props }">
 <div class="reactions-display pa-0 align-center justify-end" style="margin-top:-5px;">
-  <div v-if="reactions.length">
+  <div v-if="message.reactions">
      <template>
-      <div v-for="reaction in reactions" :key="reaction.emoji" class="reaction-item">
-        <span>{{ reaction.emoji }}</span>
-        <span>{{ reaction.count }}</span>
-      </div>
+      <template v-for="[emoji, count] of Object.entries(message.reactions)" >
+        <span v-if="count > 0" :key="emoji" class="reaction-item">
+          <span>{{ emojisObj[emoji] }}</span>
+          <span>{{ count }}</span>
+        </span>
+      </template>
     </template>
   </div>
 
@@ -36,12 +38,10 @@ import {
   useStore,
   useContext,
   computed,
-  ref, watch,
+  ref,
+  //watch,
 } from '@nuxtjs/composition-api'
-
-/*   import firebase from 'firebase';
-  import 'firebase/functions'; */
-
+import Vue from 'vue'
   export default defineComponent({
     name: 'ChatMessageReactions',
     props: {
@@ -68,16 +68,23 @@ import {
       const { $db } = useContext()
       const { state } = useStore()
       const userId = computed(() => state.user.data.uid)
-
       const reactions = ref([])
       const emojiMenu = ref(false)
+      const emojisObj = {
+          smile: '😀' ,
+          laugh: '😂' ,
+          love: '😍' ,
+          sad: '😢' ,
+          angry: '😡'
+      }
+
       const emojis = ref([
         { name: 'smile', value: '😀' },
         { name: 'laugh', value: '😂' },
         { name: 'love', value: '😍' },
         { name: 'sad', value: '😢' },
         { name: 'angry', value: '😡' }
-      ]);
+      ])
 
       const triggerEmojiMenu = () => {
         if (props.thread) return;
@@ -85,34 +92,94 @@ import {
       }
 
       const selectEmoji = async (emoji) => {
-        if (!userId && userId.value) return;
+        if (!userId && userId.value) return
+        let previousReactionEmoji
+        let newReactionEmoji = emoji.name
+        const adjustedReactions = {
+          [newReactionEmoji]: $db.fire().increment(1)
+        }
 
-        const index = reactions.value.findIndex(reaction => reaction.emoji === emoji.value)
+        const userReactionToMessagePath = `Chats/${props.chat.id}/Messages/${props.message.id}/Reactions/${userId.value}`
+        const messagePath = `Chats/${props.chat.id}/Messages/${props.message.id}`
 
-        /* const messageRef = $db.fire().fs.collection('Chats').doc(props.chat.id)
+        // Check Reaction of message
+        try {
+          const userMessageReaction = await $db.get(userReactionToMessagePath)
+          previousReactionEmoji = userMessageReaction.reaction
+          if (userMessageReaction && (userMessageReaction.reaction === newReactionEmoji)) {
+            // Do nothing, because it's already marked as the same reaction
+            console.log('SAME REACTION')
+            return
+          }
+
+          // New Reaction
+          if (userMessageReaction) {
+
+            // Remove previous reaction on UI
+            const previousReactionCount = props.message.reactions[previousReactionEmoji] - 1
+            Vue.set(props.message.reactions, previousReactionEmoji, previousReactionCount)
+            // This is for adjusting the DB query later
+            adjustedReactions[previousReactionEmoji] = $db.fire().increment(-1)
+          }
+
+          // Update reaction on UI
+          if (props.message.reactions[newReactionEmoji] === 0) {
+            Vue.set(props.message.reactions, newReactionEmoji, 1)
+          } else {
+            const newReactionCount = props.message.reactions[newReactionEmoji] + 1
+            Vue.set(props.message.reactions, newReactionEmoji, newReactionCount)
+          }
+
+          // Update Database Reactions
+          await $db.save(userReactionToMessagePath, {
+            reaction: emoji.name,
+            created_at: new Date()
+          }).then(() => {
+            // Update message reaction counter
+            $db.save(messagePath, { reactions: adjustedReactions })
+          })
+
+          emojiMenu.value = false
+
+          /*   await $db.save(messagePath, {
+            reactions: {
+              [emoji.name]: $db.fire().increment(-1)
+            }
+          }).then(async () => {
+            await $db.delete(userReactionToMessagePath)
+            if (index !== -1) {
+              reactions.value[index].count -= 1;
+              if (reactions.value[index].count === 0) reactions.value.splice(index, 1)
+            }
+          })
+        } catch (e) {
+          console.log('STICKY: Reacting Increment -: ', e)
+        } */
+
+          /*  // Add Reaction to message
+        try {
+          await $db.save(messagePath, {
+            reactions: {
+              [emoji.name]: $db.fire().increment(1)
+            }
+          })
+          await $db.save(userReactionToMessagePath, {
+            reaction: emoji.name
+          })
+          if (index !== -1) reactions.value[index].count += 1
+          else reactions.value.push({ emoji: emoji.value, count: 1 })
+
+          emojiMenu.value = false
+
+        } catch (e) {
+          console.log('STICKY: Reacting Increment +: ', e)
+        } */
+
+
+          /* const messageRef = $db.fire().fs.collection('Chats').doc(props.chat.id)
           .collection("Messages").doc(props.message.id)
         const reactionDoc = await messageRef.collection("Reactions").doc(userId.value).get() */
-
-        await $db.get(`Chats/${props.chat.id}/Messages/${props.message.id}/Reactions/${userId.value}`).then(async reactions => {
-          if (reactions) {
-            if (reactions.reaction === emoji.name) {
-              await $db.save(`Chats/${props.chat.id}/Messages/${props.message.id}`, {
-                reactions: {
-                  [emoji.name]: $db.fire().increment(-1)
-                }
-              }).then(async () => {
-                await $db.delete(`Chats/${props.chat.id}/Messages/${props.message.id}/Reactions/${userId.value}`)
-
-                if (index !== -1) {
-                  reactions.value[index].count -= 1;
-                  if (reactions.value[index].count === 0) reactions.value.splice(index, 1)
-                }
-              })
-            }
-          }
-        })
-
-        /* if (reactionDoc.exists) {
+          /* if (reactionDoc.exists) {
           if (reactionDoc.data().reaction === emoji.name) {
             await dispatch('chats/messages/updateField', {
               chatId: props.chat.id,
@@ -133,23 +200,13 @@ import {
           return;
         } */
 
-        await $db.save(`Chats/${props.chat.id}/Messages/${props.message.id}`, {
-          reactions: {
-            [emoji.name]: $db.fire().increment(1)
-          }
-        })
-        await $db.save(`Chats/${props.chat.id}/Messages/${props.message.id}/Reactions/${userId.value}`, {
-          reaction: emoji.name
-        })
-        // await messageRef.collection("Reactions").doc(userId.value).set({reaction: emoji.name, created_at: new Date()})
-
-        if (index !== -1) reactions.value[index].count += 1;
-        else reactions.value.push({ emoji: emoji.value, count: 1 });
-
-        emojiMenu.value = false;
+          // await messageRef.collection("Reactions").doc(userId.value).set({reaction: emoji.name, created_at: new Date()})
+        } catch (e) {
+          console.log('STICKY: REACTION Error: ', e)
+        }
       }
 
-      watch(() => props.message.reactions, (newReactions) => {
+      /* watch(() => props.message.reactions, (newReactions) => {
         if (newReactions) {
           reactions.value = Object.entries(newReactions)
             .filter(([, count]) => count > 0)
@@ -158,16 +215,16 @@ import {
               return {
                 emoji: emojiObj ? emojiObj.value : '',
                 count: count
-              };
-            });
+              }
+            })
         } else {
-          reactions.value = [];
+          reactions.value = []
         }
-      }, { deep: true, immediate: true });
+      }, { deep: true, immediate: true }); */
 
       return {
         emojiMenu, triggerEmojiMenu,
-        emojis, selectEmoji, reactions,
+        emojis, emojisObj, selectEmoji, reactions,
       }
     }
   })
@@ -188,7 +245,7 @@ import {
   .reaction-item {
     display: inline-flex;
     align-items: center;
-    margin-right: 8px;
+    margin-right: 7px;
     font-size: 0.75rem; /* Small font size for emoji and count */
     white-space: nowrap;
   }
