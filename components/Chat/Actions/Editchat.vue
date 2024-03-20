@@ -8,20 +8,14 @@
         : ''
     }}
     <v-icon v-if="chat.admins.includes(user.data.uid)" @click="dialog = true" small>mdi-pencil</v-icon>
-    <v-dialog
-      v-model="dialog"
-      width="500"
-    >
+    <v-dialog v-model="dialog" width="500">
       <v-card class="rounded-xl pa-2">
         <v-card-text class="mt-5">
           <v-text-field v-if="type === 'title'" v-model="form.title" flat outlined/>
           <v-text-field v-else-if="type === 'description'" v-model="form.description" flat outlined/>
         </v-card-text>
         <v-card-actions class="justify-center">
-          <v-btn
-            text
-            @click="dialog = false"
-          >
+          <v-btn @click="dialog = false" text>
             {{ $t('btn.cancel') }}
           </v-btn>
           <v-btn
@@ -40,7 +34,8 @@
 import {
   defineComponent,
   ref, useContext, useStore,
-  computed, watch
+  computed,
+  //watch
 } from '@nuxtjs/composition-api'
 
 export default defineComponent({
@@ -55,7 +50,7 @@ export default defineComponent({
     chat: {
       type: Object,
       default: () => {
-        return null
+        return {}
       }
     }
   },
@@ -75,10 +70,14 @@ export default defineComponent({
       loading.value = true
       try {
         $db.save(`Chats/${props.chat.id}`, {
-          id: props.chat.id,
           title: form.value.title,
           description: form.value.description
         }).then((res) => {
+          //eslint-disable-next-line vue/no-mutating-props
+          props.chat.title = form.value.title,
+              //eslint-disable-next-line vue/no-mutating-props
+          props.chat.description = form.value.description
+
           if (res) return dialog.value = false
         })
 
@@ -96,13 +95,13 @@ export default defineComponent({
       }
     }
 
-    watch(() => props.chat, (c) => {
+   /*  watch(() => props.chat, (c) => {
       if (c) {
         form.value.title = c.title ? c.title : ''
         form.value.description = c.description ? c.description : ''
       }
     }, { immediate: true });
-
+ */
     return {
       user,
       dialog,

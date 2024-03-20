@@ -73,6 +73,7 @@ export default defineComponent({
     const messages = ref([]);
     const messageListener = ref(null);
     const isReply = ref(null);
+    const chatsLoaded = {}
 
     $capacitor.AdMob_hideBanner();
 
@@ -81,16 +82,26 @@ export default defineComponent({
         chatLoading.value = true;
         if (chatId.value) {
 
-          chatListener.value = await $db.listen(`Chats/${chatId.value}`, {where:null}).then(async docs => {
-            chat.value = docs
-            loadParticipants()
-            loadMessages()
-          })
+          if (!chatsLoaded[chatId.value]) {
+            chatListener.value = await $db.listen(`Chats/${chatId.value}`, {where: null}).then(async docs => {
+              chatsLoaded[chatId.value] = true
+              chat.value = docs
+              loadParticipants()
+              loadMessages()
+            })
+          } else {
+            console.log('Chat already loaded and listening')
+          }
         }
       } catch (e) {
         console.log("Error Loading Chat", e)
       } finally {
         chatLoading.value = false
+        messagesLoading.value = false
+
+        setTimeout(() => {
+          document.getElementById(`bottomOfChat`).scrollIntoView({ behavior: "smooth" });
+        }, 500)
       }
     };
 

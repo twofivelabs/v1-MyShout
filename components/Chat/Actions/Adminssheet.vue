@@ -1,9 +1,9 @@
 <template>
   <div>
     <v-list-item key="mute-chat" v-if="chat.admins.includes(user.data.uid)" @click="showBottomSheet = true">
-      <v-list-item-avatar>
+      <v-list-item-icon>
         <v-icon small>mdi-account-lock</v-icon>
-      </v-list-item-avatar>
+      </v-list-item-icon>
       <v-list-item-title>
         {{ $t('chat.admins') }}
       </v-list-item-title>
@@ -13,7 +13,7 @@
         <div class="ma-3" style="padding-bottom:180px;">
           <GlobalSlidebar v-touch="{ down: () => swipe('Down') }" @click.native="swipe('Down')" />
 
-          <ChatActionsAdminslist :admins="admins" />          
+          <ChatActionsAdminslist :admins="admins" />
 
         </div>
       </v-sheet>
@@ -23,7 +23,7 @@
 <script>
 import {
   defineComponent,
-  ref, 
+  ref,
   useStore,
   computed,
 } from '@nuxtjs/composition-api'
@@ -50,7 +50,7 @@ export default defineComponent({
   setup() {
     const { state } = useStore()
     const user = computed(() => state.user);
-    
+
     const showBottomSheet = ref(false)
 
     const swipe = (direction) => {
