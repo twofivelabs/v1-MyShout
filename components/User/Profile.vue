@@ -89,7 +89,7 @@ export default defineComponent({
     const {
       $system,
       $helper,
-      $notify, i18n
+      $notify, i18n, $db
       // $services,
     } = useContext()
     const user = computed(() => state.user.data)
@@ -361,13 +361,7 @@ export default defineComponent({
       if (formOriginal.username === form.username) {
         return true
       }
-      const hasUsers = await dispatch('user/search', {
-        field: 'username',
-        operator: '==',
-        term: form.username,
-        limit: 3
-      })
-      console.log('hasUsers', hasUsers)
+      const hasUsers = await $db.simpleSearch('Users', 'username', form.username)
       if (hasUsers.length > 0) {
         $notify.show({ text: i18n.t('notify.username_in_use'), color: 'error' })
         return false
@@ -399,12 +393,7 @@ export default defineComponent({
       if (formOriginal.email === form.email) {
         return true
       }
-      const hasUsers = await dispatch('user/search', {
-        field: 'email',
-        operator: '==',
-        term: form.email,
-        limit: 3
-      })
+      const hasUsers = await $db.simpleSearch('Users', 'email', form.email)
       if (hasUsers.length > 0) {
         $notify.show({ text: i18n.t('notify.email_in_use'), color: 'error' })
         return false

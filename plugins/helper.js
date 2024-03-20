@@ -1,4 +1,5 @@
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
+import moment from 'moment'
 
 export default ({
   app,
@@ -6,6 +7,13 @@ export default ({
   $vuetify
 }, inject) => {
   inject('helper', {
+     fromNow(date) {
+         try {
+             return moment(date.toDate()).fromNow()
+         } catch {
+             return date
+         }
+     },
      downloadFile(path, filename) {
          // Create a new link
          const anchor = document.createElement('a');

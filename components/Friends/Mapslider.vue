@@ -8,10 +8,7 @@
           center-active
           class="pa-0"
       >
-        <v-slide-item
-            v-for="(friend, key) in friends"
-            :key="key"
-        >
+        <v-slide-item v-for="(friend, key) in friends" :key="key" >
           <div>
             <v-hover v-slot="{ hover }">
               <v-card

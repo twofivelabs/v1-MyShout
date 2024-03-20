@@ -1,32 +1,37 @@
 <template>
   <div>
-    <v-text-field
-        v-if="friends && friends.length > 0"
-        :label="$t('form.search_friends')"
-        :placeholder="$t('form.search_friends')"
-        append-icon="mdi-magnify"
-        filled
-        rounded
-        class="mx-6 mt-6"
-        v-model="searchFriendInput"
-        @keyup.native="searchFriends"
-    ></v-text-field>
-    <v-list v-if="friends && friends.length > 0" color="transparent" rounded>
-      <template v-for="(u, index) in friends">
-        <UserListitem
-            :key="index"
-            :user="u"
-            urlBase="/users/user/"
-        >
-          <template v-slot:action>
-            <UserActionsbtn :user="u" />
-          </template>
-        </UserListitem>
-      </template>
-    </v-list>
-    <div v-else>
-      <ElementH4 v-if="!loading" align="center" class="my-5" :text="$t('chats.no_friends')"/>
-    </div>
+    <template v-if="loading">
+      <v-progress-circular color="primary" indeterminate />
+    </template>
+    <template v-else>
+      <v-text-field
+          v-if="friendsUnFiltered && friendsUnFiltered.length > 0"
+          v-model="searchFriendInput"
+          @keyup.native="searchFriends"
+          :label="$t('form.search_friends')"
+          :placeholder="$t('form.search_friends')"
+          append-icon="mdi-magnify"
+          class="mx-6 mt-6"
+          rounded
+          filled
+      ></v-text-field>
+      <v-list v-if="friends && friends.length > 0" color="transparent" rounded>
+        <template v-for="(u, index) in friends">
+          <UserListitem
+              :key="index"
+              :user="u"
+              urlBase="/users/user/"
+          >
+            <template v-slot:action>
+              <UserActionsbtn :user="u" />
+            </template>
+          </UserListitem>
+        </template>
+      </v-list>
+      <div v-else>
+        <ElementH4 v-if="!loading" align="center" class="my-5" :text="$t('chats.no_friends')"/>
+      </div>
+    </template>
   </div>
 </template>
 <script>
@@ -113,6 +118,7 @@ export default defineComponent({
       state,
       friends,
       searchFriendInput,
+      friendsUnFiltered,
       searchFriends
     }
   }

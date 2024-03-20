@@ -111,6 +111,7 @@ export default defineComponent({
           return
         }
 
+        console.log('PROPS USER ID:', props.user.id)
         await $db.get(`Users/${props.user.id}/Alerts`).then(res => {
           if (res !== false) alerts.value = res
         })

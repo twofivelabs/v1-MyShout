@@ -13,16 +13,19 @@
       <div class="text-center">
         <UserProfileavatar :user="profile" :size="120" />
         <ElementH1 v-if="profile.username" :text="`@${profile.username}`" />
-        <ElementH4 v-if="profile.location.country" :text="`${profile.location.city} ${profile.location.country}`" class="gray--text" />
+        <h4 v-if="profile.location.city || profile.location.country" class="`no-break text-center gray--text text-h6 text-md-h5 text-lg-h4`" style="letter-spacing:0px !important;">
+          <span v-if="profile.location.city">{{ profile.location.city }}</span>
+          <span v-if="profile.location.country">{{ profile.location.country }}</span>
+        </h4>
       </div>
       <v-tabs
           v-model="activeTab"
-          show-arrows
-          center-active
-          grow
           background-color="transparent"
           class="mb-15"
           style="max-width:800px; margin:0 auto;"
+          center-active
+          show-arrows
+          grow
       >
         <v-tab>
           {{ $t('alerts') }}

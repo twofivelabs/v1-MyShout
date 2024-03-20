@@ -17,7 +17,7 @@
         <span class="caption" v-else-if="alert.gps.lat">{{ alert.gps.lat }}, {{ alert.gps.lng }}</span>
       </v-list-item-content>
       <v-list-item-action class="mr-3">
-        <span class="caption">{{ alert.created_at }}</span>
+        <span class="caption">{{ $helper.fromNow(alert.created_at) }}</span>
       </v-list-item-action>
     </v-list-item>
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
@@ -34,16 +34,12 @@
           <IconsShout v-if="alert.type === 'shout'" width="60" />
 
           <div class="text-center my-3">
-            <span class="caption">
-              <v-icon>
-                mdi-calendar
-              </v-icon>
-              {{ alert.created_at }}
+            <span v-if="alert.created_at" class="caption">
+              <v-icon>mdi-calendar</v-icon>
+              {{ $helper.fromNow(alert.created_at) }}
             </span>
-            <span class="caption">
-              <v-icon>
-                mdi-map
-              </v-icon>
+            <span v-if="alert.gps.lat" class="caption">
+              <v-icon>mdi-map</v-icon>
               {{ alert.gps.lat }}, {{ alert.gps.lng }}
             </span>
           </div>
@@ -68,6 +64,7 @@ import {
   ref, useContext,
 } from '@nuxtjs/composition-api'
 import { Touch } from 'vuetify/lib/directives'
+
 
 export default defineComponent({
   name: 'AlertListitem',

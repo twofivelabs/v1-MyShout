@@ -132,12 +132,11 @@ export default ({ app, store }, inject) => {
 
         // Check for ID in object data
         if (data && typeof data === 'object') {
-            // if (data.id || data.slug || data.title || data.name) {
             if (data.id || data.slug || data.name) {
-                //path = path + '/' + (app.$helper.slugify(data.id, '-', false) || app.$helper.slugify(data.slug || data.title || data.name))
-                slug = (app.$helper.slugify(data.id, '-', false) || app.$helper.slugify(data.slug || data.name))
-                if (!path.includes(slug)) {
-                    path = path + '/' + slug
+                const additionalPath = (app.$helper.slugify(data.id, '-', false) || app.$helper.slugify(data.slug || data.name))
+                slug = additionalPath
+                if (!path.includes(additionalPath)) {
+                    //path = path + '/' + additionalPath
                 }
             }
         }
@@ -145,18 +144,17 @@ export default ({ app, store }, inject) => {
             let pathParts = path.split('/')
 
             pathId = pathParts[pathParts.length - 1]
+            slug = pathId
             storeToUseAll = pathParts[pathParts.length - 1].toLowerCase()
             storeToUseOne = pathParts[pathParts.length - 2].toLowerCase()
             storeToUse = store.state[storeToUseOne] ? storeToUseOne : storeToUseAll
 
-            newPath = pathParts.map((p) => {
+            // Auto capitalize the elements in the string
+            /* newPath = pathParts.map((p) => {
                 if (!p || p === 'undefined') return
-                if (store.state[p]) {
-                    storeToUse = p
-                    return upperFirstChar(p)
-                }
-                return p
-            }).join('/')
+                if (p === slug) return p
+                return upperFirstChar(p)
+            }).join('/') */
             //.replace(/\/+$/, '')
         }
 
