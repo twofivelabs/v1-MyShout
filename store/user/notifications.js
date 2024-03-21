@@ -143,6 +143,7 @@ export const actions = {
       if (data.created_at) {
           delete data.created_at
       }
+      
       //const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, null, data)
       const response = await this.$db.save(`Users/${uid}/${dbRootPath}/${data.id}`, data)
       if (response) {
@@ -193,10 +194,8 @@ export const actions = {
         })
 
         snap.forEach((data) => {
-            /* const data = change.doc.data()
-            data.id = change.doc.id */
             try {
-                data.seconds = data?.created_at?.seconds
+                data.seconds = data?.created_at?.seconds || null //TODO This OR statement needs to be refined. Quick patch for now.
                 data.created_at = data.created_at.toDate().toDateString()
             } catch {
                 // ...
