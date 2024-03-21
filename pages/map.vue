@@ -74,7 +74,7 @@ export default defineComponent({
 
     // GET CONTENT
     useFetch(async () => {
-      await getFriends()
+      // await getFriends()
     })
 
     // METHODS
@@ -120,6 +120,7 @@ export default defineComponent({
         })
       })
     }
+    //eslint-disable-next-line no-unused-vars
     const docsToMarkers = (docs) => {
       if (docs) {
         doneAddingMarkers.value = true
@@ -139,18 +140,21 @@ export default defineComponent({
         })
       }
     }
+    //eslint-disable-next-line no-unused-vars
     const getFriends = async () => {
-      loading.value = true
-      try {
-        await $db.get(`Users/${userData.value.uid}/Friends`).then(res => {
-          if (res) friends.value = res
-        })
+      await $db.get(`Users/${userData.value.uid}/Friends`).then(async friendsList => {
+        const allFriends = []
+        for (const friend of friendsList) {
+          await $db.get(`Users/${friend.id}`).then(details => {
+            allFriends.push(details)
+          })
+        }
+        friends.value = allFriends
+        docsToMarkers(allFriends)
 
-      } catch(e) {
+      }).catch(e => {
         $system.log({ comp: 'MapPage', msg: 'Not able to get friends for map', val: e })
-      } finally {
-        loading.value = false
-      }
+      })
     }
     const centerOn = ({ lat = null, lng = null }) => {
       let mapPoint
@@ -166,7 +170,7 @@ export default defineComponent({
       if (currentMap.value) {
         currentMap.value.addListener('dragend', async () => {
           center.value = [currentMap.value.getCenter().lat(), currentMap.value.getCenter().lng()]
-          console.log('STICKY: Your dragging the map around, new center is', center.value)
+          // console.log('STICKY: Your dragging the map around, new center is', center.value)
           // TODO: when dragging, add other elements
         })
       }
@@ -450,9 +454,9 @@ export default defineComponent({
           }
           console.log('STICKY: INIT MAP DONE')
 
-          if (!doneAddingMarkers.value && friends.value && friends.value.length > 0) {
+          if (!doneAddingMarkers.value) {
             // console.log('STICKY: Add Friends', friends.value)
-            await docsToMarkers(friends.value)
+            await getFriends()
           }
         }
       }

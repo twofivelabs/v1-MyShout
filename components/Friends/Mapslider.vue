@@ -1,12 +1,12 @@
 <template>
   <div>
-    <div v-if="friends">
+    <div v-if="friends && friends.length > 0">
       <v-slide-group
           v-model="model"
           :show-arrows="$vuetify.breakpoint.mdAndUp"
           active-class="success"
-          center-active
           class="pa-0"
+          center-active
       >
         <v-slide-item v-for="(friend, key) in friends" :key="key" >
           <div>
@@ -28,8 +28,8 @@
           v-model="showSheet"
           :scrollable="true"
           class="bottom-sheet"
-          inset
           max-width="700"
+          inset
       >
         <v-sheet
             class="pa-5 overflow-y-auto rounded-t-xl slide-up"
@@ -65,7 +65,7 @@ import {
   defineComponent,
   ref,
   useContext,
-  useRouter
+  useRouter,
 } from '@nuxtjs/composition-api'
 import { Touch } from 'vuetify/lib/directives'
 
@@ -81,7 +81,7 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const { $vuetify } = useContext()
+    const { $vuetify, $db } = useContext()
     const router = useRouter()
 
     // DEFINE CONTENT
@@ -89,16 +89,33 @@ export default defineComponent({
     const howManyPlaceholders = computed(() => $vuetify.breakpoint.smAndDown ? 2 : 3)
     const showSheet = ref(false)
     const sheetData = ref(null)
+    const friendsWithData = ref([])
 
     const goTo = (key) => {
-      if (props.friends[key] && props.friends[key] && props.friends[key].gps && props.friends[key].gps.lat) {
-        const panTo = new window.google.maps.LatLng(props.friends[key].gps.lat, props.friends[key].gps.lng)
+      const friend = props.friends
+      if (friend[key] && friend[key]?.gps && friend[key]?.gps?.lat) {
+        const panTo = new window.google.maps.LatLng(friend[key].gps.lat, friend[key].gps.lng)
         window.currentMap.panTo(panTo)
+        sheetData.value = friend[key]
         showSheet.value = true
-        sheetData.value = props.friends[key]
-
       } else {
-        router.push(`/users/user/${props.friends[key].id}`)
+        router.push(`/users/user/${friend[key].id}`)
+      }
+    }
+
+    //eslint-disable-next-line no-unused-vars
+    const getFriendsProfile = () => {
+      if (props.friends?.length >=1 ) {
+        props.friends.forEach( async(friend) => {
+          // Basically if the friend has a username, it assumes we have the entire profile
+          // Otherwise get the user data
+          if (friend?.username) {
+            friendsWithData.value.push(friend)
+          } else {
+            const friendDetails = await $db.get(`Users/${friend.id}`)
+            friendsWithData.value.push(friendDetails)
+          }
+        })
       }
     }
 
@@ -107,12 +124,19 @@ export default defineComponent({
         showSheet.value = false
       }
     }
+/*
+    watchEffect(() => {
+      if (props.friends?.length >=1 ) {
+        getFriendsProfile()
+      }
+    }) */
 
     return {
       howManyPlaceholders,
       model,
       showSheet,
       sheetData,
+      friendsWithData,
       swipe,
       goTo
     }
