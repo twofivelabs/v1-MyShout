@@ -414,11 +414,8 @@ inject('capacitor', {
     // Token Type: web/mobile
     async pushNotificationsGetToken () {
         try {
-          console.log("STICKY: pushNotificationsGetToken Start")
-            if (app.$db.fire().messaging) {
-                const token = await app.$db.fire().getToken(
-                    app.$db.fire().messaging,
-                    {
+            if (app.$db.fire().messaging && app.$config.firebase.fcmPublicVapidKey) {
+                const token = await app.$db.fire().getToken(app.$db.fire().messaging, {
                         vapidKey: app.$config.firebase.fcmPublicVapidKey
                     })
                 console.log('STICKY: pushNotificationsGetToken', token)
@@ -434,9 +431,7 @@ inject('capacitor', {
             const device = await this.device()
             // Mobile notifications
             if (device.platform !== 'web') {
-              console.log("STICKY: Device is not WEB")
-                // IOS DEVICES
-                // Capacitor plugin does not return the proper FCM token
+                // IOS DEVICES Capacitor plugin does not return the proper FCM token
                 if (device.platform === 'ios') {
                     await FCM.getToken().then(async(r) => {
                         console.log('STICKY FCM TOKEN: ', r.token)
@@ -520,11 +515,7 @@ inject('capacitor', {
                         snack.goTo = payload.data.goTo
                     }
                     app.$notify.show(snack)
-                    app.$system.log({
-                        comp: 'Capacitor',
-                        msg: 'Message received',
-                        val: payload
-                    })
+                    app.$system.log({ comp: 'Capacitor', msg: 'Message received', val: payload })
                 })
             }
         } catch (e) {
@@ -582,12 +573,12 @@ inject('capacitor', {
     },
 
     // Microphone
-      /**
-       * https://github.com/tchvu3/capacitor-voice-recorder
-       * android/ios - audio/aac,
-       * chrome/firefox - audio/webm;codecs=opus
-       * safari - audio/mp4
-       */
+    /**
+    * https://github.com/tchvu3/capacitor-voice-recorder
+    * android/ios - audio/aac,
+    * chrome/firefox - audio/webm;codecs=opus
+    * safari - audio/mp4
+    */
     async microphonePermissions () {
         VoiceRecorder.hasAudioRecordingPermission().then((result) => {
             console.log('STICKY: MICROPHONE', result.value)
