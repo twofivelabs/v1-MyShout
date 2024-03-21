@@ -114,7 +114,7 @@
     name: 'ChatInput',
     props: {
       chat: { type: Object, default: () => ({}) },
-      reply: { type: Object, default: () => (null) }
+      reply: { type: Object, default: () => ({}) }
     },
     setup(props, { emit }) {
       const { state } = useStore()
@@ -203,17 +203,14 @@
           // Update chat's last message information.
           $db.save(`Chats/${props.chat.id}`, {
             created_at: new Date(),
-            snippet: newMessage.value || null,
-            sent_by: user.value.data.uid
-          })
-          /* await dispatch('chats/updateField', {
-            id: props.chat.id,
+            snippet: truncateMessage(newMessage.value) || null,
+            sent_by: user.value.data.uid,
             message: {
               created_at: new Date(),
-              snippet: newMessage.value || null,
+              snippet: truncateMessage(newMessage.value) || null,
               sent_by: user.value.data.uid
             }
-          }); */
+          })
 
           // Reset message
           clearReply()
@@ -239,7 +236,6 @@
       const updateTyping = debounce((isTyping) => {
         emit('updateTyping', isTyping);
       }, 500);
-
       const uploadVideo = async (filePath) => {
         console.log('[camera] Start video upload')
         try {

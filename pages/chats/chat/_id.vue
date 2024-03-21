@@ -82,16 +82,13 @@ export default defineComponent({
         chatLoading.value = true;
         if (chatId.value) {
 
-          if (!chatsLoaded[chatId.value]) {
             chatListener.value = await $db.listen(`Chats/${chatId.value}`, {where: null}).then(async docs => {
               chatsLoaded[chatId.value] = true
               chat.value = docs
               loadParticipants()
               loadMessages()
             })
-          } else {
-            console.log('Chat already loaded and listening')
-          }
+
         }
       } catch (e) {
         console.log("Error Loading Chat", e)

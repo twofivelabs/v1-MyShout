@@ -793,7 +793,7 @@ export default ({ app, store }, inject) => {
             return false
         },
         // PATCH JOBS FOR MYSHOUT
-        async listen(path, { where = [], limit = 25, position = 'push', orderBy = 'created_at', orderDirection = 'asc' }) {
+        async listen(path, { where = [], limit = 25, position = 'push', orderBy = null, orderDirection =null }) {
             if (invalidPath(path)) return false
 
             try {
@@ -805,8 +805,12 @@ export default ({ app, store }, inject) => {
                     collectionDoc = fire.doc(fire.fs, path)
                 } else {
                     collectionDoc = fire.collection(fire.fs, path)
-                    queryConstraints.push( fire.orderBy(orderBy, orderDirection) )
-                    queryConstraints.push( fire.limitToLast(limit) )
+                    if (orderBy && orderDirection) {
+                        queryConstraints.push(fire.orderBy(orderBy, orderDirection))
+                        queryConstraints.push( fire.limitToLast(limit) )
+                    } else {
+                        queryConstraints.push( fire.limit(limit) )
+                    }
                 }
 
                 if ( where && (where.length >= 3) ) {
@@ -827,12 +831,14 @@ export default ({ app, store }, inject) => {
 
                         // DOCUMENT
                         if ( (pathSplit.length % 2) === 0 ) {
+                            if (snapshot.empty) resolve({})
                             const data = { id: snapshot.id, ...snapshot.data() }
                             resolve(data)
                         }
 
                         // COLLECTION
                         else {
+                            if (snapshot.empty) resolve([])
                             snapshot.docChanges().forEach(async (change) => {
                                 const data = { id: change.doc.id, ...change.doc.data() }
                                 let formattedData

@@ -12,13 +12,14 @@
     </v-app-bar>
 
     <v-row class="pt-10 px-5">
-      <v-col cols="12" class="mt-10" v-if="isLoading">
+      <v-col v-if="isLoading" cols="12" class="mt-10" >
         <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
       </v-col>
-      <v-col cols="12" class="pt-6 pr-2" v-else>
+      <v-col v-else cols="12" class="pt-6 pr-2">
         <v-list two-line class="pb-9" v-if="chatList && chatList.length > 0">
           <template v-for="(chat, index) in chatList">
-            <v-list-item v-if="chat && chat.message" :key="index">
+
+            <v-list-item v-if="chat" :key="index">
               <NuxtLink :to="`/chats/chat/${chat.id}`">
                 <v-badge v-if="chat.unseen && chat.unseen[user.data.uid] > 0"
                   :content="chat.unseen[user.data.uid]"
@@ -34,10 +35,12 @@
                   <v-list-item-title class="d-flex justify-start align-center myshoutDarkGrey--text">
                     <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
                     <v-spacer />
-                    <span class="caption" v-if="chat.message.created_at">{{ moment(chat.message.created_at.toDate()).fromNow() }}</span>
+                    <span class="caption" v-if="chat && chat.message && chat.message.created_at">
+                      { moment(chat.message.created_at.toDate()).fromNow() }}
+                    </span>
                   </v-list-item-title>
-                  <v-list-item-subtitle>
-                    <Span v-if="chat.message.sent_by">{{ chat.message.sent_by }}: </Span>{{ truncateMessage(chat.message.snippet) }}
+                  <v-list-item-subtitle v-if="chat && chat.message && chat.message.sent_by">
+                    <span>{{ chat.message.sent_by }}: </span>{{ truncateMessage(chat.message.snippet) }}
                   </v-list-item-subtitle>
                 </v-list-item-content>
               </NuxtLink>
@@ -85,15 +88,14 @@ export default defineComponent({
       try {
         chatsListener.value = await $db.listen('Chats', {
               where: ['participants', 'array-contains', user.value.data.uid],
-              orderBy: 'message.created_at',
-              orderDirection: 'asc'
+              limit: 200
           }).then(async docs => {
             const updatedChatList = []
-
+console.log('DOCS', docs)
             for (const doc of docs) {
               if (!doc) continue;
 
-              if (doc?.message.sent_by) {
+              if (doc?.message?.sent_by) {
                 // Assuming dispatch is reactive and updates user data in the store
                 const u = await $db.get(`Users/${doc.message.sent_by}`)
                 //const u = await dispatch('user/getOne', doc.message.sent_by);
