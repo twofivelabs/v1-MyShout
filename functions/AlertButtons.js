@@ -51,6 +51,7 @@ exports.sendAlert = functions.https.onCall((data) => {
                     type: "alert",
                     created_at: new Date(),
                     seen: false,
+                    archived: false
                   }).then(() => {
                     return Promise.resolve(true);
                   }).catch(() => {
