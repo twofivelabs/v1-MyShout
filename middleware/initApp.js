@@ -25,7 +25,7 @@ const consoleUserStyles = [
 
 export default async function ({ store, app, redirect, route } ) {
     if (store.state.isAppInit) {
-        console.log('!! App is init already')
+        //console.log('!! App is init already')
         return null
     }
     store.state.appLoading = true

@@ -1,7 +1,7 @@
 export default async function ({ app, store, redirect }) {
 
     // console.log('AUTH STATE LOADED: ', await store.getters['users/authStateLoaded'])
-    console.log('store.state.user', store.state.user)
+    // console.log('store.state.user', store.state.user)
 
 
     function checkUserStatus () {

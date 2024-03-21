@@ -23,7 +23,6 @@
           <p>
             {{ $t('page.contact_intro') }}
           </p>
-          <GlobalSocialmedia />
         </div>
       </v-col>
       <v-col>
@@ -92,9 +91,8 @@ export default defineComponent({
   name: 'PageContact',
   middleware: 'authenticated',
   setup () {
-    const { state, dispatch, getters } = useStore()
+    const { state, dispatch,  } = useStore()
     const { $config, $system, $notify, i18n } = useContext()
-    const isLoggedIn = computed(() => getters['user/isLoggedIn'])
     const user = computed(() => state.user.data)
     const profile = computed(() => state.user.profile)
     const loading = ref(false)
@@ -115,7 +113,10 @@ export default defineComponent({
     onMounted(() => {
       form.value.email = user.value.email
       if (profile.value.first_name) {
-        form.value.name = `${profile.value.first_name} ${profile.value.last_name}`
+        form.value.name = `${profile.value.first_name}`
+      }
+      if (profile.value.last_name) {
+        form.value.name += ` ${profile.value.last_name}`
       }
       form.value.phone = profile.value.phone
       form.value.userId = profile.value.id
@@ -162,7 +163,6 @@ export default defineComponent({
 
     return {
       loading,
-      isLoggedIn,
       user,
       profile,
       valid,
