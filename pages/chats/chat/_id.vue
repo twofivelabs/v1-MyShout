@@ -100,7 +100,9 @@ export default defineComponent({
         messagesLoading.value = false
 
         setTimeout(() => {
-          document.getElementById(`bottomOfChat`).scrollIntoView({ behavior: "smooth" });
+          try {
+            document.getElementById(`bottomOfChat`).scrollIntoView({behavior: "smooth"});
+          } catch { /**/ }
         }, 500)
       }
     };
@@ -203,7 +205,9 @@ export default defineComponent({
           const unseenMessage = messages.value.find(message => !message.seen.includes(user.value.data.uid));
 
           if (unseenMessage) {
-            document.getElementById(`message-${unseenMessage.id}`).scrollIntoView({ behavior: "smooth" });
+            try {
+              document.getElementById(`message-${unseenMessage.id}`).scrollIntoView({ behavior: "smooth" });
+            } catch { /**/ }
           }
         });
       } catch (error) {
@@ -244,7 +248,11 @@ export default defineComponent({
     onMounted(() => {
       $capacitor.AdMob_hideBanner();
 
-      setTimeout(() => { document.getElementById(`bottomOfChat`).scrollIntoView({ behavior: "smooth" }) },400)
+      setTimeout(() => {
+        try {
+          document.getElementById(`bottomOfChat`).scrollIntoView({ behavior: "smooth" })
+        } catch { /**/ }
+      },400)
     });
 
     onUnmounted(() => {
