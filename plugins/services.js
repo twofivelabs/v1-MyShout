@@ -75,7 +75,8 @@ export default ({
     },
     /** FIREBASE CALLABLE FUNCTION */
     async reverseGeocode (lat, lng) {
-        const responseFunc = app.$fire.functions.httpsCallable('Location-reverseGeocode')
+        const responseFunc = app.$db.fire().httpsCallable(app.$db.fire().functions, 'Location-reverseGeocode')
+        //const responseFunc = app.$fire.functions.httpsCallable('Location-reverseGeocode')
         const reverse = await responseFunc({
             lat,
             lng
@@ -108,7 +109,8 @@ export default ({
      * User: object
      */
     async alertButton (type=null, data={}) {
-      const responseFunc = app.$fire.functions.httpsCallable('AlertButtons-sendAlert')
+      // const responseFunc = app.$fire.functions.httpsCallable('AlertButtons-sendAlert')
+      const responseFunc = app.$db.fire().httpsCallable(app.$db.fire().functions, 'AlertButtons-sendAlert')
       const res = await responseFunc({
             type,
             data
@@ -131,7 +133,8 @@ export default ({
 
           if (!userToken.token) return console.log('STICKY: no user token available')
           console.log('STICKY: UserTokenClaims:', userToken.claims.user_id)
-          const responseFunc = app.$fire.functions.httpsCallable('Rest-updateGPS')
+          const responseFunc = app.$db.fire().httpsCallable(app.$db.fire().functions, 'Rest-updateGPS')
+          // const responseFunc = app.$fire.functions.httpsCallable('Rest-updateGPS')
           //const responseFunc = app.$fire.functions.httpsCallable('REST-getLocationByIP')
           const payload = {
               userId: userToken.claims.user_id,
@@ -149,7 +152,8 @@ export default ({
     */
     async sendSMS (data={}) {
       console.log('SEND SMS', JSON.stringify(data))
-      const responseFunc = app.$fire.functions.httpsCallable('Twilio-sendSMS')
+      const responseFunc = app.$db.fire().httpsCallable(app.$db.fire().functions, 'Twilio-sendSMS')
+      // const responseFunc = app.$fire.functions.httpsCallable('Twilio-sendSMS')
       const res = await responseFunc({
           data
       })
@@ -162,7 +166,8 @@ export default ({
     */
     async getPhoneNumber (data={}) {
       console.log('SEND SMS', JSON.stringify(data))
-      const responseFunc = app.$fire.functions.httpsCallable('Twilio-getPhoneNumber')
+      const responseFunc = app.$db.fire().httpsCallable(app.$db.fire().functions, 'Twilio-getPhoneNumber')
+      // const responseFunc = app.$fire.functions.httpsCallable('Twilio-getPhoneNumber')
       const res = await responseFunc({
           data
       })
@@ -172,7 +177,8 @@ export default ({
 
     /** STRIPE FUNCTIONS */
     async subscriber (data) {
-      const subscribeUser = app.$fire.functions.httpsCallable('MailerLite-subscribeUser')
+      const subscribeUser = app.$db.fire().httpsCallable(app.$db.fire().functions, 'MailerLite-subscribeUser')
+      //const subscribeUser = app.$fire.functions.httpsCallable('MailerLite-subscribeUser')
       return await subscribeUser(data)
     },
     /*async sendStripeTransfers (userId, orderId) {
