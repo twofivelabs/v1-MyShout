@@ -55,7 +55,7 @@
           {{$t('chats.video_not_supported')}}
         </video>
       </div>
-      <div v-if="message.message">
+      <div>
         <v-row
           class="align-center py-3"
           :class="message.owner === userId ? 'flex-row-reverse ' : ''"
