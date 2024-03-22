@@ -27,15 +27,14 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { $fire } = useContext()
+    const { $db } = useContext()
     const isPlaying = ref(false)
     const sound = ref()
 
     // METHODS
-    const playAudio = () => {
+    const playAudio = async () => {
       isPlaying.value = true
-      // TODO: FIX AUTH
-      const currUser = $fire.auth.currentUser
+      const currUser = await $db.fire().capAuth?.getIdToken()
       sound.value = new Howl({
         src: [props.file],
         html5: true,
@@ -43,7 +42,7 @@ export default defineComponent({
         xhr: {
           method: 'POST',
           headers: {
-            Authorization: 'Bearer:' + currUser.refreshToken,
+            Authorization: 'Bearer:' + currUser.token,
           },
           withCredentials: true,
         },

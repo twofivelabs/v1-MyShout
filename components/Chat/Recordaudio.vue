@@ -46,6 +46,7 @@ export default defineComponent({
     const user = computed(() => state.user)
     const { state } = useStore()
 
+    // TODO: translate text
     const defaultButtonText = ref('Press to record')
     const buttonText = ref(defaultButtonText.value)
     const isRecording = ref(false)
@@ -93,9 +94,8 @@ export default defineComponent({
 
         // Upload Audio File
         if (audio) {
-          audioUrl.value = await $db.upload({
-            path: `/CHATS/${props.chat.id}/${user.value.data.uid}-${Date.now()}.wav`,
-            data: audio.recordDataBase64,
+          const filePath = `/CHATS/${props.chat.id}/${user.value.data.uid}-${Date.now()}.wav`
+          audioUrl.value = await $db.upload(filePath, audio.recordDataBase64, {
             base64: true
           })
 
@@ -105,12 +105,7 @@ export default defineComponent({
             owner: user.value.data.uid,
             audioUrl: audioUrl.value
           })
-          /* await dispatch('chats/messages/add', {
-            chatId: props.chat.id,
-            message: {
 
-            }
-          }) */
           try {
             setTimeout(async () => {
               await $vuetify.goTo('#bottomOfChat')

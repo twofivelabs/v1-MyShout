@@ -4,7 +4,7 @@ import { Device } from '@capacitor/device'
 import { registerPlugin } from '@capacitor/core'
 import {Http} from '@capacitor-community/http'
 const BackgroundGeolocation = registerPlugin('BackgroundGeolocation')
-import { geohashForLocation } from 'geofire-common'
+// import { geohashForLocation } from 'geofire-common'
 import { Preferences } from '@capacitor/preferences';
 
 let backgroundGeoLocationWatcherId = null
@@ -31,7 +31,7 @@ export default {
     async updateLoggedInUsersGPS(gps) {
         if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: no gps data')
 
-        const user = window.$nuxt.context.$fire.auth.currentUser
+        /* const user = window.$nuxt.context.$fire.auth.currentUser
         const userToken = user ? await user.getIdTokenResult() : false
 
         if (!userToken.token) return console.log('STICKY: no user token available')
@@ -61,7 +61,7 @@ export default {
                 }
             }
         }
-        /*const url = 'https://us-central1-my-shout-app.cloudfunctions.net/Rest-updateGPS'
+        /!*const url = 'https://us-central1-my-shout-app.cloudfunctions.net/Rest-updateGPS'
         const payload = {
             "userId": userToken.claims.user_id,
             "gps": {
@@ -76,7 +76,7 @@ export default {
                 }
             }
         }
-*/
+*!/
         try {
             await Http.request({
                 method: 'PATCH',
@@ -93,7 +93,7 @@ export default {
             // console.log('STICKY: updateLoggedInUsersGPS > RESPONSE:', response.status, JSON.stringify(response.data))
         } catch (e) {
             console.log('STICKY: updateLoggedInUsersGPS > ERROR', e, JSON.stringify(e))
-        }
+        } */
     },
     async updateLoggedInUsersGPS2(gps) {
         if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: no gps data')

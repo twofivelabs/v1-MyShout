@@ -415,7 +415,8 @@ inject('capacitor', {
     async pushNotificationsGetToken () {
         try {
             if (app.$db.fire().messaging && app.$config.firebase.fcmPublicVapidKey) {
-                const token = await app.$db.fire().getToken(app.$db.fire().messaging, {
+                const token = await app.$db.fire().getToken(
+                    app.$db.fire().messaging, {
                         vapidKey: app.$config.firebase.fcmPublicVapidKey
                     })
                 console.log('STICKY: pushNotificationsGetToken', token)

@@ -57,7 +57,7 @@ import lodash from 'lodash'
 export default defineComponent({
   name: 'UserChangeemail',
   setup () {
-    const { $notify, $system, $fire, i18n, $db } = useContext()
+    const { $notify, $system, i18n, $db } = useContext()
     const { state, dispatch } = useStore()
     const loading = ref(false)
     const user = computed(() => state.user.data)
@@ -106,12 +106,18 @@ export default defineComponent({
       try {
 
         // Sign in
-        const currUser = $fire.auth.currentUser
-        await $fire.auth.signInWithEmailAndPassword(currUser.email, form.password).then(async () => {
+        // const currUser = $fire.auth.currentUser
+        const currUser = await $db.fire().capAuth.getCurrentUser()
+
+        await $db.fire().capAuth.signInWithEmailAndPassword({
+          email: currUser.user.email,
+          password: form.password
+        }).then(async () => {
+        // await $fire.auth.signInWithEmailAndPassword(currUser.email, form.password).then(async () => {
 
           console.log('Success signing in')
           // Update Firebase Auth
-          $fire.auth.currentUser.updateEmail(form.email).then(async () => {
+          await $db.fire().capAuth.updateEmail({ newEmail: form.email }).then(async () => {
             // Update Firebase Doc
             await dispatch('user/updateField', {
               email: form.email
