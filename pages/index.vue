@@ -67,8 +67,6 @@ export default defineComponent({
       await LocalNotifications.requestPermissions()
     }
 
-
-
     // WATCH
     watchEffect(async () => {
 

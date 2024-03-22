@@ -394,7 +394,9 @@ export default defineComponent({
       if (isValid) {
         await $db.save(`Users/${userData.value.uid}`, {
           country: form.value.country,
-          'location.country': form.value.country,
+          location: {
+            country: form.value.country
+          },
           onboarded: 3
         })
         /* await dispatch('user/updateField', {
