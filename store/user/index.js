@@ -1,6 +1,6 @@
 import lodash from 'lodash'
 import Vue from 'vue'
-import { reactive } from '@nuxtjs/composition-api'
+import { reactive, watch } from '@nuxtjs/composition-api'
 import { geohashForLocation } from 'geofire-common'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
 import {Badge} from '@capawesome/capacitor-badge'
@@ -437,17 +437,19 @@ export const actions = {
     }
     return response
   },
-  async listen({ commit, dispatch }, id) {
+  async listen({ commit, dispatch, rootState }, id) {
       try {
         if(id) {
             const userListener = await this.$db.listen(`Users/${id}`, {where:null})
-            if (userListener) {
-                await commit('SET_USER_PROFILE_INIT', {...userListener})
 
+            watch (rootState.listeners, async (_, listener) => {
+                if (listener[`Users/${id}`]) {
+                    await commit('SET_USER_PROFILE_INIT', {...listener[`Users/${id}`]})
+                }
                 setTimeout(async () => {
                     await dispatch("checkUserData")
                 }, 1000)
-            }
+            })
 
             return userListener
         }
