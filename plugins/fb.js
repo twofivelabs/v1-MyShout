@@ -57,6 +57,7 @@ import firebaseApp from './../firebaseConfig'
 
 import {filter} from 'lodash'
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication'
+import Vue from "vue"
 
 const fs = getFirestore(firebaseApp)
 const auth = getAuth(firebaseApp)
@@ -794,7 +795,7 @@ export default ({ app, store }, inject) => {
         },
         // PATCH JOBS FOR MYSHOUT
         async listen(path, { where = [], limit = 25, position = 'push', orderBy = null, orderDirection =null }) {
-            if (invalidPath(path)) return false
+            if (invalidPath(path)) false
 
             try {
                 const pathSplit = path.split('/')
@@ -823,44 +824,49 @@ export default ({ app, store }, inject) => {
                 /* fire.onSnapshot( q, (snapshot) => {
                     console.log('snapshot 1', snapshot)
                 }) */
-                return new Promise((resolve, reject) => {
-                    fire.onSnapshot( q, (snapshot) => {
+                const snapshotListener = fire.onSnapshot( q, (snapshot) => {
                         console.info(`%c👂Change: ${path}`, consoleYellowStyles)
-
-                        const responseData = []
 
                         // DOCUMENT
                         if ( (pathSplit.length % 2) === 0 ) {
-                            if (snapshot.empty) resolve({})
+                            if (snapshot.empty) return({})
+
                             const data = { id: snapshot.id, ...snapshot.data() }
-                            resolve(data)
+                            Vue.set(store.state.listeners, path, data)
+                            // store.state.listeners[path] = data
+                            return (data)
                         }
 
                         // COLLECTION
                         else {
-                            if (snapshot.empty) resolve([])
+                            if (snapshot.empty) return([])
+
+                            const responseData = []
                             snapshot.docChanges().forEach(async (change) => {
                                 const data = { id: change.doc.id, ...change.doc.data() }
-                                let formattedData
 
                                 try {
                                     data.created_at = data.created_at.toDate().toDateString()
                                 } catch { /**/ }
 
-                                formattedData = data
-
-                                if (change.type === 'added' || change.type === 'modified') {
-                                    responseData.push(formattedData)
-
+                                if (change.type === 'added') {
+                                    data._changeType = 'added'
+                                    responseData.push(data)
+                                } else if (change.type === 'modified') {
+                                    data._changeType = 'modified'
+                                    responseData.push(data)
                                 } else if (change.type === 'removed') {
+                                    data._changeType = 'removed'
+                                    responseData.push(data)
                                     //commit('REMOVE_ONE', (formattedData.id || formattedData.slug))
                                 }
                             })
-                            resolve(responseData)
+                            Vue.set(store.state.listeners, path, responseData)
+                            return (responseData)
                         }
-                    }, reject)
-                })
+                    })
 
+                return snapshotListener
             } catch (e) {
                 console.log('STICKY: Error listening: ', e, JSON.stringify(e))
                 return Promise.resolve(false)

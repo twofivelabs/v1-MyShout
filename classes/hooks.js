@@ -11,6 +11,7 @@ export const hooks = {
         hooks.queue[name].push(fn);
     },
     create: function (name, ...params) {
+        console.log('QUEUE', hooks.queue)
         if (hooks.queue[name]) {
             hooks.queue[name].forEach(fn => fn(...params));
             // If you use this DELETES, hooks will only run 1 time

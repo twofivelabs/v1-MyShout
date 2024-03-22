@@ -16,8 +16,9 @@
         <v-skeleton-loader v-for="x of 4" :key="`skeleton-${x}`" width="100%" max-height="50" type="text" class="mb-6" />
       </v-col>
       <v-col v-else cols="12" class="pt-6 pr-2">
-        <v-list two-line class="pb-9" v-if="chatList && chatList.length > 0">
-          <template v-for="(chat, index) in chatList">
+
+        <v-list two-line class="pb-9" v-if="userChats && Object.keys(userChats).length > 0">
+          <template v-for="(chat, index) in userChats">
 
             <v-list-item v-if="chat" :key="index">
               <NuxtLink :to="`/chats/chat/${chat.id}`">
@@ -36,11 +37,11 @@
                     <ChatUsername :chat="chat" :loggedInUser="user.data.uid" />
                     <v-spacer />
                     <span class="caption" v-if="chat && chat.message && chat.message.created_at">
-                      { moment(chat.message.created_at.toDate()).fromNow() }}
+                      {{ moment(chat.message.created_at.toDate()).fromNow() }}
                     </span>
                   </v-list-item-title>
-                  <v-list-item-subtitle v-if="chat && chat.message && chat.message.sent_by">
-                    <span>{{ chat.message.sent_by }}: </span>{{ truncateMessage(chat.message.snippet) }}
+                  <v-list-item-subtitle v-if="chat && chat.message && chat.message.sent_by_name">
+                    <span>{{ chat.message.sent_by_name }}: </span>{{ truncateMessage(chat.message.snippet) }}
                   </v-list-item-subtitle>
                 </v-list-item-content>
               </NuxtLink>
@@ -63,50 +64,33 @@ import {
   ref,
   useContext,
   watchEffect,
-  onUnmounted
+  onUnmounted, watch
 } from '@nuxtjs/composition-api'
 
 import moment from 'moment'
+import Vue from "vue"
 
 export default defineComponent({
   name: 'ChatsIndex',
   middleware: 'authenticated',
   setup() {
-    const { state,  } = useStore()
+    const { state } = useStore()
     const { $db, $capacitor } = useContext()
     const user = computed(() => state.user)
 
     // DEFINE
     const isLoading = ref(true)
-    const chatsListener = ref();
-    const chatList = ref(null)
+    const currentLoadedUsers = {}
+    const userChats = ref({})
 
     const truncateMessage = (message, length = 25) => message ? (message.length > length ? message.substring(0, length) + '...' : message) : '';
     const fetchChats = async () => {
       isLoading.value = true;
 
       try {
-        chatsListener.value = await $db.listen('Chats', {
+        await $db.listen('Chats', {
               where: ['participants', 'array-contains', user.value.data.uid],
               limit: 200
-          }).then(async docs => {
-            const updatedChatList = []
-console.log('DOCS', docs)
-            for (const doc of docs) {
-              if (!doc) continue;
-
-              if (doc?.message?.sent_by) {
-                // Assuming dispatch is reactive and updates user data in the store
-                const u = await $db.get(`Users/${doc.message.sent_by}`)
-                //const u = await dispatch('user/getOne', doc.message.sent_by);
-                doc.message.sent_by = u?.username ?? u.first_name
-              }
-
-              updatedChatList.push(doc);
-            }
-
-            // Update chatList using Vue's reactivity
-            chatList.value = updatedChatList;
         })
 
       } catch (error) {
@@ -116,8 +100,35 @@ console.log('DOCS', docs)
       }
     };
 
+    watch (state.listeners, (_, listener) => {
+      if (listener['Chats']) {
+
+        listener['Chats'].forEach(async (chat) => {
+          chat.message.sent_by_name = null
+          if (chat?.message?.sent_by) {
+            let u
+            // This will help just eliminate an extra call to firebase
+            if (!currentLoadedUsers[chat.message.sent_by]) {
+              u = await $db.get(`Users/${chat.message.sent_by}`)
+              currentLoadedUsers[chat.message.sent_by] = u
+            } else {
+              u = currentLoadedUsers[chat.message.sent_by]
+            }
+            chat.message.sent_by_name = u?.username ?? u.first_name
+          }
+
+          if (chat._changeType === "added" || chat._changeType === "modified") {
+            Vue.set(userChats.value, chat.id, chat)
+          } else {
+            Vue.delete(userChats.value, chat.id)
+          }
+
+        })
+      }
+    })
     watchEffect(() => {
       if (user.value?.data?.uid) {
+
         // User data is available, load all chats the user participates in
         fetchChats()
 
@@ -127,18 +138,18 @@ console.log('DOCS', docs)
           $capacitor.AdMob_banner();
         }
       }
-    });
+    })
 
     onUnmounted(() => {
-      if (chatsListener.value) chatsListener.value();
+      // if (chatsListener.value) chatsListener.value();
     })
 
     return {
       moment,
       isLoading,
       user,
-      chatList,
       state,
+      userChats,
       truncateMessage
     }
   }

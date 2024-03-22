@@ -155,11 +155,11 @@ export const getters = {
     else if (!state.data) return false
     return false
   },
-  authStateLoaded: async (state) => {
-    while (state.authStateLoaded === false) {
+  authStateLoaded: async () => {
+    /* while (state.authStateLoaded === false) {
         console.info(`%c🔐authStateLoaded, ${state.authStateLoaded}`)
         await new Promise(resolve => setTimeout(resolve, 250))
-    }
+    } */
     return true
   },
   userId: (state) => {

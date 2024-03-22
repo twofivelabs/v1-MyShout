@@ -1,11 +1,13 @@
 import Vue from 'vue'
+import { reactive } from '@nuxtjs/composition-api'
 
 export const strict = false
 
-export const state = () => ({
+export const state = () => reactive({
   isAppInit: false,
   appLoading: true,
   authUser: null,
+  listeners: reactive({}),
   onboarding: {
       phoneNumber: null
   },
@@ -14,7 +16,18 @@ export const state = () => ({
   }
 })
 
-export const getters = {}
+export const getters = {
+    listeners: state => (path) => {
+        try {
+            if (path && state.listeners[path]) {
+                return state.listeners[path]
+            }
+            return state.listeners
+        } catch {
+            return {}
+        }
+    },
+}
 
 export const mutations = {
     SHOW_FOOTER: (state, data) => {

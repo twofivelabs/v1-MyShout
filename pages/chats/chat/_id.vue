@@ -18,8 +18,9 @@
 
 
     <v-container v-if="!messagesLoading" style=" z-index: 0; width: 100%;">
-      <div v-if="messages.length > 0">
-        <ChatMessage v-for="(message) in messages" :key="message.id" :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" v-intersect="onMessageInterest(message)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
+      <div v-if="chatMessages &&  Object.keys(chatMessages).length > 0">
+        <ChatMessage v-for="(message) in chatMessages" :key="message.id" :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" v-intersect="onMessageInterest(message)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />
+<!--        <ChatMessage v-for="(message) in messages" :key="message.id" :message="message" :chat="chat" :owner="participants[message.owner]" :participants="participants" v-intersect="onMessageInterest(message)" class="chat-message" :id="`message-${message.id}`" @reply="handleReply" />-->
       </div>
       <div v-else class="text-center pt-10" style="opacity:0.5">
         {{$t('chat.no_messages')}}
@@ -49,16 +50,18 @@ import {
 } from '@nuxtjs/composition-api';
 
 import { Intersect } from 'vuetify/lib/directives';
+import Vue from 'vue'
 //import Vue from 'vue'
-/* import firebase from 'firebase/app';
-import 'firebase/firestore'; */
+
 
 export default defineComponent({
   name: 'ChatsChatId',
   middleware: 'authenticated',
   directives: { Intersect },
   setup() {
-    const { $db, $capacitor, $helper, $encryption } = useContext();
+    const { $db, $capacitor,
+      $helper, $encryption
+    } = useContext();
     const { state } = useStore();
     const route = useRoute();
     const user = computed(() => state.user);
@@ -71,25 +74,25 @@ export default defineComponent({
     const participants = ref({});
     const messagesLoading = ref(true);
     const messages = ref([]);
+    const chatMessages = ref({});
     const messageListener = ref(null);
     const isReply = ref(null);
-    const chatsLoaded = {}
 
     $capacitor.AdMob_hideBanner();
 
     const loadChat = async () => {
+      chatLoading.value = true;
+
       try {
-        chatLoading.value = true;
-        if (chatId.value) {
-
-            chatListener.value = await $db.listen(`Chats/${chatId.value}`, {where: null}).then(async docs => {
-              chatsLoaded[chatId.value] = true
-              chat.value = docs
-              loadParticipants()
-              loadMessages()
-            })
-
+        if (!chatId.value) {
+          console.log("Error no chat id")
+          return
         }
+
+        chatListener.value = await $db.listen(`Chats/${chatId.value}`, {where: null}).then(() => {
+          loadMessages()
+        })
+
       } catch (e) {
         console.log("Error Loading Chat", e)
       } finally {
@@ -107,49 +110,56 @@ export default defineComponent({
     const loadParticipants = async () => {
       try {
         const participantProfiles = await Promise.all(
-          chat.value?.participants?.map(participantUid => $db.get(`Users/${participantUid}`))
-        );
+          chat.value?.participants?.map(participantUid => {
+              return $db.get(`Users/${participantUid}`)
+          })
+        )
+        participantProfiles?.forEach(profile => {
+          if (profile) {
+            participants.value[profile.id] = profile;
+          }
+        })
+      } catch (e) {
+        console.error("Error Loading Participants", e);
+      }
 
-        participantProfiles.forEach(profile => {
-          if (profile) participants.value[profile.id] = profile;
-        });
-
-        chat.value.admins.forEach(adminUid => {
+      try {
+        chat.value.admins?.forEach(adminUid => {
           if (participants.value[adminUid]) admins.value[adminUid] = participants.value[adminUid];
         });
       } catch (e) {
-        console.error("Error Loading Participants", e);
+        console.error("Error Loading Admins", e);
       }
     };
 
     const loadMessages = async () => {
-      //messagesLoading.value = true;
+      messagesLoading.value = true;
+      messageListener.value = await $db.listen(`Chats/${chatId.value}/Messages`, {
+        limit: 100,
+        orderBy: 'created_at',
+        orderDirection: 'asc'
+      }).then(() => {
+        /* console.log('CHANGED', docs)
 
-        messageListener.value = await $db.listen(`Chats/${chatId.value}/Messages`, {
-          limit: 100,
-          orderBy: 'created_at'
-        }).then(async docs => {
-          // console.log('docs', docs)
+        docs.all.forEach((data) => {
+          data.ownerData = participants.value[data.owner]
+          if (data?.message) data.message = $encryption.decrypt(data.message)
+          if (data?.urls?.length > 0) data.message = $helper.linkifyText(data.message)
 
-          docs.forEach((data) => {
-            data.ownerData = participants.value[data.owner]
-            if (data.message) data.message = $encryption.decrypt(data.message)
-            if (data.urls?.length > 0) data.message = $helper.linkifyText(data.message)
+          // Parse Date Issues
+          if (data?.created_at && (typeof data.created_at === 'string' || data.created_at instanceof String)) {
+            data.created_at = Date.parse(data.created_at)
+          }
+          messages.value.push(data)
+          /!* const messageExists = messages.value.some(message => message.id === data.id)
+          if (!messageExists) messages.value.push(data) *!/
+        }) */
 
-            // Parse Date Issues
-            if (data.created_at && (typeof data.created_at === 'string' || data.created_at instanceof String)) {
-              data.created_at = Date.parse(data.created_at)
-            }
-            messages.value.push(data)
-            /* const messageExists = messages.value.some(message => message.id === data.id)
-            if (!messageExists) messages.value.push(data) */
-          })
-
-          messagesLoading.value = false
-        }).catch(e => {
-          messagesLoading.value = false
-          console.error('STICKY: ERROR LOADING MESSAGES', e);
-        })
+        messagesLoading.value = false
+      }).catch(e => {
+        messagesLoading.value = false
+        console.error('STICKY: ERROR LOADING MESSAGES', e);
+      })
       /*     messageListener.value = await $db.fire().fs
           .collection(`Chats/${chatId.value}/Messages`)
           .orderBy('created_at', 'asc')
@@ -182,7 +192,6 @@ export default defineComponent({
             });
             messagesLoading.value = false;
           }); */
-
     };
 
     const updateTypingStatus = async (typing) => {
@@ -233,6 +242,33 @@ export default defineComponent({
 
     const handleReply = message => isReply.value = message;
 
+    watch (state.listeners, (_, listener) => {
+      if (listener[`Chats/${chatId.value}`]) {
+        chat.value = state.listeners[`Chats/${chatId.value}`]
+        if (chat.value && chat.value?.participants) loadParticipants()
+      }
+
+      // MESSAGES
+      if (listener[`Chats/${chatId.value}/Messages`]) {
+        listener[`Chats/${chatId.value}/Messages`].forEach(async (message) => {
+          message.ownerData = participants.value[message.owner]
+          if (message?.message) message.message = $encryption.decrypt(message.message)
+          if (message?.urls?.length > 0) message.message = $helper.linkifyText(message.message)
+
+          // Parse Date Issues
+          if (message?.created_at && (typeof message.created_at === 'string' || message.created_at instanceof String)) {
+            message.created_at = Date.parse(message.created_at)
+          }
+
+          if (message._changeType === "added" || message._changeType === "modified") {
+            Vue.set(chatMessages.value, message.id, message)
+          } else {
+            Vue.delete(chatMessages.value, message.id)
+          }
+
+        })
+      }
+    })
     watch(route, (to, from) => {
       chatId.value = to.params.id;
       if (to.params.id && !from || (to.params.id !== from.params.id)) loadChat();
@@ -264,6 +300,7 @@ export default defineComponent({
       chat,
       isReply,
       messages,
+      chatMessages,
       participants,
       admins,
       user,

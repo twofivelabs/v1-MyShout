@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { reactive } from '@nuxtjs/composition-api'
+import { reactive, watch } from '@nuxtjs/composition-api'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
 
 const dbRootPath = 'Notifications'
@@ -78,21 +78,21 @@ export const mutations = {
     state.all = data
     // Vue.set(state, 'all', data)
   },
-  PUSH_TO_ALL: (state, { data, position }) => {
-    if (!data) return
+  PUSH_TO_ALL: (state, { notification, position }) => {
+    if (!notification) return
 
     let indexOfMatchingSlug = -1
-    if (data?.id) {
-        indexOfMatchingSlug = state.all.findIndex(one => one.id === data.id)
+    if (notification?.id) {
+        indexOfMatchingSlug = state.all.findIndex(one => one.id === notification.id)
     }
     if (indexOfMatchingSlug > -1) {
-        Vue.set(state.all, indexOfMatchingSlug, data)
+        Vue.set(state.all, indexOfMatchingSlug, notification)
         Vue.set(state, 'allCount', state.all.length)
     } else {
         if (!position || position === 'push') {
-            state.all.push(data)
+            state.all.push(notification)
         } else {
-            state.all.unshift(data)
+            state.all.unshift(notification)
         }
     }
   },
@@ -143,7 +143,7 @@ export const actions = {
       if (data.created_at) {
           delete data.created_at
       }
-      
+
       //const response = await this.$db.update(`Users/${uid}/${dbRootPath}/${data.id}`, null, data)
       const response = await this.$db.save(`Users/${uid}/${dbRootPath}/${data.id}`, data)
       if (response) {
@@ -186,53 +186,40 @@ export const actions = {
     }
     hasInitNotifications = true
 
-    //console.log('...LISTENING TO NOTIFICATIONS...')
-
     try {
-        const snap = await this.$db.listen(`Users/${uid}/${dbRootPath}`, {
+        await this.$db.listen(`Users/${uid}/${dbRootPath}`, {
             where: ['archived', '==', false]
         })
 
-        snap.forEach((data) => {
-            try {
-                data.seconds = data?.created_at?.seconds || null //TODO This OR statement needs to be refined. Quick patch for now.
-                data.created_at = data.created_at.toDate().toDateString()
-            } catch {
-                // ...
+        watch (rootState.listeners, (_, listener) => {
+            if (listener[`Users/${uid}/${dbRootPath}`]) {
+
+                listener[`Users/${uid}/${dbRootPath}`].forEach(async (notification) => {
+                    try {
+                        notification.seconds = notification?.created_at?.seconds || null //TODO This OR statement needs to be refined. Quick patch for now.
+                        notification.created_at = notification.created_at.toDate().toDateString()
+                    } catch { /**/ }
+
+                    if (notification?.seen === false) {
+                        commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
+                    }
+
+                    const position = (hasInitNotifications ? 'unshift' : 'push')
+                    commit('PUSH_TO_ALL', {notification, position})
+                    commit('PUSH_TO_LOADED', notification)
+
+                    if (notification._changeType === 'added' || notification._changeType === 'modified') {
+                        const position = (hasInitNotifications ? 'unshift' : 'push')
+                        commit('PUSH_TO_ALL', {notification, position})
+                        commit('PUSH_TO_LOADED', notification)
+                    } else if (notification._changeType === 'removed') {
+                        commit('REMOVE', notification)
+                    }
+                })
+
+                if (listener[`Users/${uid}/${dbRootPath}`].length > 0) hasInitNotifications = true
             }
-
-            if (data?.seen === false) {
-                commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
-            }
-
-            const position = (hasInitNotifications ? 'unshift' : 'push')
-            commit('PUSH_TO_ALL', {data, position})
-            commit('PUSH_TO_LOADED', data)
-
-           /*
-            if (change.type === 'modified') {
-                if (data?.seen === false) {
-                    //lodash.set(rootState.user.profile.has, 'notifications', true)
-                    //rootState.user.profile.has.notifications = true
-                    commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
-                }
-
-            }
-            else if (change.type === 'added') {
-                if (data?.seen === false) {
-                    //lodash.set(rootState.user.profile.has, 'notifications', true)
-                    //rootState.user.profile.has.notifications = true
-                    commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
-                }
-                const position = (hasInitNotifications ? 'unshift' : 'push')
-                commit('PUSH_TO_ALL', {data, position})
-                commit('PUSH_TO_LOADED', data)
-            } else if (change.type === 'removed') {
-                commit('REMOVE', data)
-            } */
         })
-
-        if (snap.length > 0) hasInitNotifications = true
 
     } catch (e) {
         console.log('notifications error.', e)

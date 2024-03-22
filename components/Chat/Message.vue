@@ -1,6 +1,6 @@
 <template #activator="{ isActive, props }">
   <div v-if="message">
-    <main v-if="!message.hide || !message.hide.includes(userId)" class="mb-3 px-3">
+    <main v-if="!message.hide || !message.hide.includes(userId)" class="px-3">
       <div v-if="message.forward && forward">
         <v-row class="align-center py-1" :class="message.owner === userId ? 'flex-row-reverse ' : ''">
           <v-col
@@ -94,9 +94,7 @@
               </div>
 
               <div v-else>
-                <div
-                  v-if="message.message"  class="mb-3"
-                  v-html="message.message" ></div>
+                <div v-if="message.message" class="mb-1" v-html="message.message" ></div>
 
                 <div v-if="message.file">
                   <a :href="message.file" target="_blank" class="caption pa-2 rounded-lg" style="border: 1px solid #e3e3e3">
