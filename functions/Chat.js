@@ -235,6 +235,16 @@ exports.scheduledFunctionExpireAudioMessages = functions.pubsub.schedule("59 11 
       });
     });
 
+// firebase deploy --only functions:Chat-ChatViewMessage
+exports.ChatViewMessage = functions
+  .runWith({ memory: "512MB" })
+  .https.onCall(async (body, context) => {
+    if (!context.auth) return; 
+
+    console.log(`User ${context.auth.uid} Has Viewed Message`, body);
+
+    return true;
+  })     
 
 // https://us-central1-my-shout-staging.cloudfunctions.net/Chat-fetchUrlMetadata
 // firebase deploy --only functions:Chat-fetchUrlMetadata
