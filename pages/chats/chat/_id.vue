@@ -223,7 +223,7 @@ export default defineComponent({
 
     const onMessageInterest = async (message) => {
       try {
-          if (!message.seen.includes(user.value.data.uid)) {
+          if (!message?.seen?.includes(user.value.data.uid)) {
             $db.save(`Chats/${chatId.value}/Messages/${message.id}`, {
               seen: $db.fire().arrayUnion(user.value.data.uid)
             })
