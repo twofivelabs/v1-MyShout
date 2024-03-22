@@ -61,8 +61,8 @@ import lodash from 'lodash'
 export default defineComponent({
   name: 'UserChangepassword',
   setup () {
-    const { $notify, $system, $fire, i18n } = useContext()
-    const { state, dispatch } = useStore()
+    const { $notify, $system, $fire, i18n, $db } = useContext()
+    const { state } = useStore()
     const loading = ref(false)
     const user = computed(() => state.user.data)
 
@@ -84,12 +84,7 @@ export default defineComponent({
       if (formOriginal.email === form.email.toLowerCase()) {
         return true
       }
-      const hasUsers = await dispatch('user/search', {
-        field: 'email',
-        operator: '==',
-        term: form.email.toLowerCase(),
-        limit: 3
-      })
+      const hasUsers = await $db.simpleSearch('Users', 'email', form.email.toLowerCase())
       if (hasUsers.length > 0) {
         $notify.show({ text: i18n.t('notify.email_in_use'), color: 'error' })
         return false

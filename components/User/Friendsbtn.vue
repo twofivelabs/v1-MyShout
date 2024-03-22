@@ -70,7 +70,7 @@ export default defineComponent({
     const loading = ref(false)
     const user = computed(() => state.user.data)
     const showBottomSheet = ref(false)
-    const { $system } = useContext()
+    const { $system, $db } = useContext()
 
     // DEFINE
     const friends = ref([])
@@ -108,11 +108,7 @@ export default defineComponent({
         let searchInput = searchFriendInput.value.toLowerCase()
 
         // SEARCH USERNAMES
-        const foundUsernames = await dispatch('user/search', {
-          field: 'username',
-          operator: '==',
-          term: searchInput
-        })
+        const foundUsernames = await $db.simpleSearch('Users', 'username', searchInput)
         if (foundUsernames && foundUsernames.length > 0) {
           friends.value = [...new Map(foundUsernames.map(item =>
               [item['id'], item])).values()];
@@ -126,11 +122,7 @@ export default defineComponent({
         if (searchInput.substring(0, 1) !== '+') {
           searchInput = `+${searchInput}`
         }
-        const foundPhone = await dispatch('user/search', {
-          field: 'phone',
-          operator: '==',
-          term: searchInput
-        })
+        const foundPhone = await $db.simpleSearch('Users', 'phone', searchInput)
         if (foundPhone && foundPhone.length > 0) {
           friends.value = [...new Map(foundPhone.map(item =>
               [item['id'], item])).values()];

@@ -49,7 +49,7 @@ import lodash from 'lodash'
 export default defineComponent({
   name: 'UserChangephone',
   setup () {
-    const { $notify, $system, $fire, $helper, i18n } = useContext()
+    const { $notify, $system, $fire, $helper, i18n, $db } = useContext()
     const { state, dispatch } = useStore()
     const loading = ref(false)
     const user = computed(() => state.user.data)
@@ -69,12 +69,7 @@ export default defineComponent({
         return false
       }
 
-      const hasUsers = await dispatch('user/search', {
-        field: 'phone',
-        operator: '==',
-        term: $helper.formatPhone(form.phone, 'db'),
-        limit: 3
-      })
+      const hasUsers = await $db.simpleSearch('Users', 'phone', $helper.formatPhone(form.phone, 'db'))
       if (hasUsers.length > 0) {
         $notify.show({ text: i18n.t('notify.phone_in_use'), color: 'error' })
         return false

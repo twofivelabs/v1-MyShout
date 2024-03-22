@@ -70,7 +70,7 @@ export default defineComponent({
   ],
   setup(props, { emit }) {
     const { $notify, i18n, $db } = useContext()
-    const { dispatch, state } = useStore()
+    const { state } = useStore()
     const router = useRouter()
     const loading = ref(false)
     const dialog = ref(false)
@@ -81,13 +81,7 @@ export default defineComponent({
     // METHODS
     const userPinExist = async () => {
       if (pin.value) {
-        // TODO: replace query
-        const hasUsers = await dispatch('user/search', {
-          field: 'securityPin',
-          operator: '==',
-          term: pin.value,
-          limit: 1
-        })
+        const hasUsers = await $db.simpleSearch('Users', 'securityPin', pin.value)
         if (hasUsers.length > 0) {
           return hasUsers
         }
