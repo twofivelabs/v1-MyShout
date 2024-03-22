@@ -301,7 +301,7 @@ export default defineComponent({
     const { state, dispatch } = useStore()
     const router = useRouter()
     const user = computed(() => state.user.profile)
-    // const userData = computed(() => state.user.data)
+    const userData = computed(() => state.user.data)
 
     const loading = ref(false)
     const rules = formRules
@@ -392,11 +392,16 @@ export default defineComponent({
       const isValid = await formCountry.value.validate()
 
       if (isValid) {
-        await dispatch('user/updateField', {
+        await $db.save(`Users/${userData.value.uid}`, {
           country: form.value.country,
           'location.country': form.value.country,
           onboarded: 3
         })
+        /* await dispatch('user/updateField', {
+          country: form.value.country,
+          'location.country': form.value.country,
+          onboarded: 3
+        }) */
 
         step.value = 4
       }

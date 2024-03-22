@@ -145,7 +145,7 @@ export default defineComponent({
   middleware: 'authenticated',
   setup () {
     const { state, dispatch, getters } = useStore()
-    const { $config, $helper, $db } = useContext()
+    const { $config, $helper,  } = useContext()
     const isLoggedIn = computed(() => getters['user/isLoggedIn'])
     const user = computed(() => state.user.data)
     const profile = computed(() => lodash.cloneDeep(state.user.profile))
