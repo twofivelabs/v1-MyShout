@@ -61,7 +61,7 @@ import lodash from 'lodash'
 export default defineComponent({
   name: 'UserChangepassword',
   setup () {
-    const { $notify, $system, $fire, i18n, $db } = useContext()
+    const { $notify, $system, i18n, $db } = useContext()
     const { state } = useStore()
     const loading = ref(false)
     const user = computed(() => state.user.data)
@@ -111,10 +111,18 @@ export default defineComponent({
       try {
 
         // Sign in
-        const currUser = $fire.auth.currentUser
-        await $fire.auth.signInWithEmailAndPassword(currUser.email, form.password).then(async () => {
+        // const currUser = $fire.auth.currentUser
+        const currUser = await $db.fire().capAuth.getCurrentUser()
+
+        // await $fire.auth.signInWithEmailAndPassword(currUser.email, form.password).then(async () => {
+        await $db.fire().capAuth.signInWithEmailAndPassword({
+            email: currUser.user.email,
+            password: form.password
+        }).then(async () => {
+          console.log('Success signing in')
+
           // Update Firebase Auth
-          $fire.auth.currentUser.updatePassword(form.newPassword).then(async () => {
+          $db.fire().capAuth.updatePassword({ newPassword: form.newPassword }).then(async () => {
             $notify.show({ text: i18n.t('notify.success'), color: 'success' })
           }).catch((e) => {
             console.log('STICKY: Error updating authentication', e)

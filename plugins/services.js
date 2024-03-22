@@ -125,6 +125,7 @@ export default ({
     async restUpdateGPS (gps={}) {
           if (!gps || !gps.lat || !gps.lng) return console.log('STICKY: no gps data')
 
+          await app.$db.fire().capAuth?.getIdToken()
           const user = app.$fire.auth.currentUser
           const userToken = user ? await user.getIdTokenResult() : false
 

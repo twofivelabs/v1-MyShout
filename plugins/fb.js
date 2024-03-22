@@ -63,7 +63,6 @@ const fs = getFirestore(firebaseApp)
 const auth = getAuth(firebaseApp)
 const capAuth = FirebaseAuthentication
 const storage = getStorage(firebaseApp)
-const storageRef = ref(storage)
 let messaging
 
 try {
@@ -82,7 +81,7 @@ const fire = {
     fs, onSnapshot, doc, setDoc, addDoc, getDoc, getDocs, deleteDoc, collection, collectionGroup, query, limitToLast, endBefore, startAfter, limit, startAt, endAt, where, orderBy,
     FieldValue, arrayUnion, arrayRemove, increment,
     auth, PhoneAuthProvider, RecaptchaVerifier, sendPasswordResetEmail, signOut, sendEmailVerification, createUserWithEmailAndPassword, EmailAuthProvider, linkWithCredential, signInWithEmailAndPassword, signInWithPhoneNumber,
-    storage, storageRef,
+    storage,
     messaging, getToken, onMessage, onBackgroundMessage,
     analytics, logEvent,
     functions, httpsCallable
@@ -716,19 +715,22 @@ export default ({ app, store }, inject) => {
             if (invalidPath(path)) return false
             if (!data) return false
 
-            const storage = getStorage()
-            const filePath = ref(storage, path)
+            try {
+                const filePath = ref(storage, path)
 
-            let uploadResponse
-            if (options.base64) {
-                uploadResponse = await uploadString(filePath, data, 'base64')
-            } else if (data) {
-                uploadResponse = await uploadBytes(filePath, data, options.metadata)
+                let uploadResponse
+                if (options.base64) {
+                    uploadResponse = await uploadString(filePath, data, 'base64')
+                } else if (data) {
+                    uploadResponse = await uploadBytes(filePath, data, options.metadata)
+                }
+                if (uploadResponse) {
+                    return await getDownloadURL(filePath)
+                }
+                console.log('Upload Response: ', uploadResponse)
+            } catch (e) {
+                console.log('Trying to set storage:', e)
             }
-            if (uploadResponse) {
-                return await getDownloadURL(filePath)
-            }
-            console.log('Upload Response: ', uploadResponse)
             return false
         },
         async deleteFile(path) {
