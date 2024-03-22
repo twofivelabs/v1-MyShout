@@ -64,7 +64,14 @@ const auth = getAuth(firebaseApp)
 const capAuth = FirebaseAuthentication
 const storage = getStorage(firebaseApp)
 const storageRef = ref(storage)
-const messaging = getMessaging(firebaseApp)
+let messaging
+
+try {
+    messaging = getMessaging(firebaseApp);
+} catch (err) {
+    console.error('Failed to initialize Firebase Messaging', err);
+}
+
 const analytics = getAnalytics(firebaseApp)
 const functions = getFunctions(firebaseApp)
 const app = firebaseApp
