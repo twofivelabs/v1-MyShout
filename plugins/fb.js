@@ -588,8 +588,9 @@ export default ({ app, store }, inject) => {
                     }
                 }
 
-                return await fire.setDoc(docRef, data, { merge }).then(() => {
-                    return true
+                return await fire.setDoc(docRef, data, { merge }).then((result) => {
+                    return result
+                    // return true
                 }).catch((e) => {
                     app.$system.log({ comp: 'Firebase', msg: `UPDATE: ${path}`, val: { error: e.message, data: data } })
                     return false
@@ -706,8 +707,8 @@ export default ({ app, store }, inject) => {
         // Use these for DIRECT ACCESS, it will collect from the store, and re-use these FB functions
         /**
          * Upload a file to fire storage
-         * @param path, url of the path to store it at
-         * @param data, file is an object
+         * @param path
+         * @param data
          * @param options
          * @returns {Promise<boolean|*>}
          */
