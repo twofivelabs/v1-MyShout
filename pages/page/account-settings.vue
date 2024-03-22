@@ -145,7 +145,7 @@ export default defineComponent({
   middleware: 'authenticated',
   setup () {
     const { state, dispatch, getters } = useStore()
-    const { $config, $helper } = useContext()
+    const { $config, $helper, $db } = useContext()
     const isLoggedIn = computed(() => getters['user/isLoggedIn'])
     const user = computed(() => state.user.data)
     const profile = computed(() => lodash.cloneDeep(state.user.profile))
@@ -154,12 +154,7 @@ export default defineComponent({
 
     // METHODS
     const userPinExist = async (pin) => {
-      const hasUsers = await dispatch('user/search', {
-        field: 'securityPin',
-        operator: '==',
-        term: pin,
-        limit: 1
-      })
+      const hasUsers = await $db.simpleSearch('Users', 'securityPin', pin)
       return hasUsers.length > 0
     }
     const deleteAccount = async () => {
