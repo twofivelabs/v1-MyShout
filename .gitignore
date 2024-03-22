@@ -10,3 +10,4 @@ node_modules
 /.eslintcache
 .DS_Store
 static/sw.js
+.eslintcache

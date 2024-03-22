@@ -53,8 +53,8 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { $system, $notify, i18n } = useContext()
-    const { dispatch, state } = useStore()
+    const { $system, $notify, $db, i18n } = useContext()
+    const { state } = useStore()
     const loggedInUser = computed(() => state.user.data)
     const loggedInProfile = computed(() => state.user.profile)
     const loading = ref(false)
@@ -69,9 +69,9 @@ export default defineComponent({
       loading.value = true
       try {
         // Add A Checkin
-        await dispatch('user/checkins/add', {
+        await $db.save(`Users/${props.user.id}/CheckIns`, {
           userId: props.user.id,
-          requestedBy: loggedInUser.value.uid
+          requestedBy: loggedInUser.value.uid  
         }).then((res) => {
           if (res !== false) {
             dialog.value = false
@@ -80,8 +80,7 @@ export default defineComponent({
           }
         })
         // Add A Notification
-        await dispatch('user/notifications/add', {
-          // userId: props.user.id,
+        await $db.save(`Users/${props.user.id}/Notifications`, {
           uid: props.user.id,
           title: 'Check-In',
           body: `You have been requested to check-in by @${loggedInProfile.value.username}. Contact them by phone or text message.`,
