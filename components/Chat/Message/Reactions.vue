@@ -77,7 +77,6 @@ import Vue from 'vue'
           sad: '😢' ,
           angry: '😡'
       }
-
       const emojis = ref([
         { name: 'smile', value: '😀' },
         { name: 'laugh', value: '😂' },
@@ -85,6 +84,13 @@ import Vue from 'vue'
         { name: 'sad', value: '😢' },
         { name: 'angry', value: '😡' }
       ])
+      const defaultReactions = {
+        smile: 0,
+        laugh: 0,
+        love: 0,
+        sad: 0,
+        angry: 0
+      }
 
       const triggerEmojiMenu = () => {
         if (props.thread) return;
@@ -102,26 +108,34 @@ import Vue from 'vue'
         const userReactionToMessagePath = `Chats/${props.chat.id}/Messages/${props.message.id}/Reactions/${userId.value}`
         const messagePath = `Chats/${props.chat.id}/Messages/${props.message.id}`
 
+        // If there was no reactions map on the object add it
+        if (!props.message.reactions) {
+          //eslint-disable-next-line vue/no-mutating-props
+          props.message.reactions = defaultReactions
+        }
+
         // Check Reaction of message
+        const userMessageReaction = await $db.get(userReactionToMessagePath)
         try {
-          const userMessageReaction = await $db.get(userReactionToMessagePath)
           previousReactionEmoji = userMessageReaction.reaction
           if (userMessageReaction && (userMessageReaction.reaction === newReactionEmoji)) {
             // Do nothing, because it's already marked as the same reaction
             console.log('SAME REACTION')
             return
           }
-
           // New Reaction
           if (userMessageReaction) {
-
             // Remove previous reaction on UI
             const previousReactionCount = props.message.reactions[previousReactionEmoji] - 1
             Vue.set(props.message.reactions, previousReactionEmoji, previousReactionCount)
             // This is for adjusting the DB query later
             adjustedReactions[previousReactionEmoji] = $db.fire().increment(-1)
           }
+        } catch (e) {
+          console.log('STICKY: REACTION Error > userMessageReaction: ', e)
+        }
 
+        try {
           // Update reaction on UI
           if (props.message.reactions[newReactionEmoji] === 0) {
             Vue.set(props.message.reactions, newReactionEmoji, 1)
@@ -202,7 +216,7 @@ import Vue from 'vue'
 
           // await messageRef.collection("Reactions").doc(userId.value).set({reaction: emoji.name, created_at: new Date()})
         } catch (e) {
-          console.log('STICKY: REACTION Error: ', e)
+          console.log('STICKY: REACTION Error 2: ', e)
         }
       }
 
