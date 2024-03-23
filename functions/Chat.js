@@ -101,69 +101,6 @@ exports.ChatMessageOnCreate = functions.firestore
   });
 
 // firebase deploy --only functions:Chat
-// firebase deploy --only functions:Chat-ChatMessageOnWrite
-exports.ChatMessageOnWrite = functions.firestore
-  .document("Chats/{ChatId}/Messages/{MessageId}")
-  .onWrite(async (change, context) => {
-    const { ChatId } = context.params;
-
-    const before = change.before.exists ? change.before.data() : null;
-    const after = change.after.exists ? change.after.data() : null;
-
-    if (!before && after) return;
-
-    try {
-      // Handle case where the 'seen' array is updated
-      if (before && after && after.seen.length > before.seen.length) {
-        // Identify new users who have seen the message
-        const newSeenUsers = after.seen.filter(userId => !before.seen.includes(userId));
-
-        // Perform operations for each new seen user
-        await Promise.all(newSeenUsers.map(async userId => {
-          // Retrieve user document reference
-          const userRef = db.doc(`Users/${userId}`);
-          // Retrieve user document snapshot
-          const userSnap = await userRef.get();
-          // Extract user data
-          const userData = userSnap.data();
-
-          // Decrement "notifications.unseen" count if greater than 0
-          await userRef.update({
-            "notifications.message": admin.firestore.FieldValue.increment(
-              userData.notifications.message > 0 ? -1 : 0
-            )
-          });
-
-          // Construct unseen count key
-          const unseenCountKey = `unseen.${userId}`;
-          // Retrieve chat document reference
-          const chatDocRef = db.doc(`Chats/${ChatId}`);
-          // Retrieve chat document snapshot
-          const chatSnap = await chatDocRef.get();
-          // Extract chat data
-          const chatData = chatSnap.data();
-
-          // Decrement unseen count for chat document if greater than 0
-          if (chatData.unseen && chatData.unseen[userId] > 0) {
-            await chatDocRef.update({
-              [unseenCountKey]: admin.firestore.FieldValue.increment(-1)
-            });
-          }
-        }));
-
-        return null;
-      }
-
-      // Return null if no action is required
-      return null;
-    } catch (error) {
-      console.error("Error in ChatMessageOnWrite function:", error);
-      // Handle the error appropriately, such as logging or returning a response
-      return null;
-    }
-  });
-
-// firebase deploy --only functions:Chat
 // firebase deploy --only functions:Chat-ChatOnWrite
 exports.ChatOnWrite = functions.firestore
   .document("Chats/{ChatId}")
@@ -241,9 +178,40 @@ exports.ChatViewMessage = functions
   .https.onCall(async (body, context) => {
     if (!context.auth) return; 
 
-    console.log(`User ${context.auth.uid} Has Viewed Message`, body);
+    try {
+      console.log(`User ${context.auth.uid} Has Viewed Message ${body.messageId} in Chat ${body.chatId}`);
 
-    return true;
+      const chatRef = db.collection("Chats").doc(body.chatId)
+      const messageRef = chatRef.collection("Messages").doc(body.messageId)
+      const userRef = db.collection("Users").doc(context.auth.uid)
+
+      //Add User to Seen array in message document
+      await messageRef.update({
+        seen: admin.firestore.FieldValue.arrayUnion(context.auth.uid)
+      })
+
+      //Get total count of unseen messages in chat
+      const allMessagesSnapshot = await chatRef.collection("Messages").get();
+      const allMessagesCount = allMessagesSnapshot.size;
+
+      const allSeenMessagesSnapshot = await chatRef.collection("Messages").where('seen', 'array-contains', context.auth.uid).get();
+      const allSeenMessagesCount = allSeenMessagesSnapshot.size;
+
+      const unseenCount = allMessagesCount - allSeenMessagesCount;
+
+      const fieldPath = new admin.firestore.FieldPath('unseen', context.auth.uid);
+      await chatRef.update(fieldPath, unseenCount)
+
+      const userDoc = await userRef.get()
+      await userRef.update({
+        'notifications.message' : userDoc.data()?.notifications.message > 0 ? admin.firestore.FieldValue.increment(-1) : 0
+      })
+
+      return true;
+    } catch (e) {
+      console.log("Error: ChatViewMessage", e)
+      return false
+    }
   })     
 
 // https://us-central1-my-shout-staging.cloudfunctions.net/Chat-fetchUrlMetadata

@@ -60,7 +60,7 @@ export default defineComponent({
   directives: { Intersect },
   setup() {
     const { $db, $capacitor,
-      $helper, $encryption
+      $helper, $encryption, $services
     } = useContext();
     const { state } = useStore();
     const route = useRoute();
@@ -223,17 +223,13 @@ export default defineComponent({
 
     const onMessageInterest = async (message) => {
       try {
+        
           if (!message?.seen?.includes(user.value.data.uid)) {
-            $db.save(`Chats/${chatId.value}/Messages/${message.id}`, {
+            await $services.viewMessage({chatId: chatId.value, messageId: message.id})
+
+            /*$db.save(`Chats/${chatId.value}/Messages/${message.id}`, {
               seen: $db.fire().arrayUnion(user.value.data.uid)
-            })
-            /* await dispatch('chats/messages/updateField', {
-              chatId: chatId.value,
-              id: message.id,
-              data: {
-                seen: $db.fire().arrayUnion(user.value.data.uid)
-              }
-            }); */
+            })*/
           }
       } catch (error) {
         console.error('STICKY: ERROR UPDATING MESSAGE INTEREST', error);
