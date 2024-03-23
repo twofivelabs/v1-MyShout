@@ -183,6 +183,7 @@ exports.ChatViewMessage = functions
 
       const chatRef = db.collection("Chats").doc(body.chatId)
       const messageRef = chatRef.collection("Messages").doc(body.messageId)
+      const userRef = db.collection("Users").doc(context.auth.uid)
 
       //Add User to Seen array in message document
       await messageRef.update({
@@ -192,20 +193,18 @@ exports.ChatViewMessage = functions
       //Get total count of unseen messages in chat
       const allMessagesSnapshot = await chatRef.collection("Messages").get();
       const allMessagesCount = allMessagesSnapshot.size;
-      console.log(`All Messages`, allMessagesCount)
 
       const allSeenMessagesSnapshot = await chatRef.collection("Messages").where('seen', 'array-contains', context.auth.uid).get();
       const allSeenMessagesCount = allSeenMessagesSnapshot.size;
-      console.log(`All Unseen Messages`, allSeenMessagesCount)
 
       const unseenCount = allMessagesCount - allSeenMessagesCount;
-      console.log("Unseen", unseenCount || 'error counting');
 
-      //Update chat document with how many messages the user hasn't seen
-      await chatRef.update({
-        unseen: {
-          [context.auth.uid]: unseenCount || 0
-        }
+      const fieldPath = new admin.firestore.FieldPath('unseen', context.auth.uid);
+      await chatRef.update(fieldPath, unseenCount)
+
+      const userDoc = await userRef.get()
+      await userRef.update({
+        'notifications.message' : userDoc.data()?.notifications.message > 0 ? admin.firestore.FieldValue.increment(-1) : 0
       })
 
       return true;

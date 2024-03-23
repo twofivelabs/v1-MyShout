@@ -57,9 +57,9 @@ exports.AddUserRole = functions.auth.user().onCreate((authUser) => {
               shareLocationWithFriends: true,
             },
             notifications: {
-              messages: 0,
-              alerts: 0,
-              requests: 0
+              message: 0,
+              alert: 0,
+              request: 0
             },
             gps: {
               lat: null,
