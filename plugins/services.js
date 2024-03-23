@@ -181,26 +181,7 @@ export default ({
       //const subscribeUser = app.$fire.functions.httpsCallable('MailerLite-subscribeUser')
       return await subscribeUser(data)
     },
-    /*async sendStripeTransfers (userId, orderId) {
-      const responseFunc = app.$fire.functions.httpsCallable('StripeWebhooks-sendStripeTransfers')
-      return await responseFunc({
-        userId: userId,
-        orderId: orderId
-      })
-    },
-    async stripeCreatePaymentIntent (data) {
-      const responseFunc = app.$fire.functions.httpsCallable('StripeWebhooks-stripeCreatePaymentIntent')
-      return await responseFunc(data)
-    },
-    async stripeCreateCustomer (customer) {
-      const responseFunc = app.$fire.functions.httpsCallable('StripeWebhooks-createCustomer')
-      return await responseFunc(customer)
-    },
-    async stripeCreateCustomerEphemeralKeys (customerId) {
-      const responseFunc = app.$fire.functions.httpsCallable('StripeWebhooks-createCustomerEphemeralKeys')
-      return await responseFunc(customerId)
-    },
-*/
+
     updateUserMeta (data) {
       if (data) {
         const meta = {
@@ -217,6 +198,12 @@ export default ({
         // console.log('UPDATE USER META LOCATION', meta)
         store.dispatch('user/updateField', meta)
       }
-    }
+    },
+
+    async viewMessage (data={}) {
+      const responseFunc = app.$db.fire().httpsCallable(app.$db.fire().functions, 'Chat-ChatViewMessage')
+      console.log("Sending Data To ChatviewMessage", data)
+      return await responseFunc(data)
+    },
   })
 }
