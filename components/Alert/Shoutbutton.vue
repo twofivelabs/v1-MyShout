@@ -176,10 +176,8 @@ export default defineComponent({
 
         // Upload audio file
         if (audio) {
-          console.log('STICKY: ADD SHOUT TO', `/USERS/${user.value.uid}/shouts/${Date.now()}.wav`)
-          audioUrl.value = await $db.upload({
-            path: `/USERS/${user.value.uid}/shouts/${Date.now()}.wav`,
-            data: audio.recordDataBase64,
+          const filePath = `/USERS/${user.value.uid}/shouts/${Date.now()}.wav`
+          audioUrl.value = await $db.upload(filePath, audio.recordDataBase64, {
             base64: true
           })
 
