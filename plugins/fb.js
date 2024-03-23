@@ -587,9 +587,9 @@ export default ({ app, store }, inject) => {
                     }
                 }
 
-                return await fire.setDoc(docRef, data, { merge }).then((result) => {
-                    return result
+                return await fire.setDoc(docRef, data, { merge }).then(() => {
                     // return true
+                    return data
                 }).catch((e) => {
                     app.$system.log({ comp: 'Firebase', msg: `UPDATE: ${path}`, val: { error: e.message, data: data } })
                     return false
@@ -905,41 +905,50 @@ export default ({ app, store }, inject) => {
             if (!data) return false
 
             let response = null
-            let { newPath, /* storeToUse, storeToUseAll, pathId,  */slug } = parse_path(path, data)
+            let { newPath,  /* storeToUse, storeToUseAll, pathId,  */ } = parse_path(path, data)
             // const dataPosition = (data.position ? data.position : 'push')
             //console.log(dataPosition, { newPath, storeToUse, storeToUseAll, pathId, slug })
-
+// console.log('$SAVE', newPath)
             // Don't want this to be saved to db
             delete data.position
             delete data.path
             delete data.joined
             delete data.timeAgo
 
-            // EXISTING DOC
-            if ('id' in data || 'slug' in data) {
-                console.info(`%c💾 SAVE > existing doc: ${newPath} ${data}`, consoleGreenStyles)
-                data.slug = slug
-                data.id = data.slug
-                data.updated_at = new Date()
-                if (!data.created_at) {
-                    data.created_at = new Date()
-                } else {
-                    delete data.created_at
-                }
-                response = await this._update(newPath, null, data, true)
+            const pathSplit = newPath.split('/')
+            const documentId = pathSplit[pathSplit.length - 1]
+            let addDataWith = null
+
+            // DOCUMENT -> Update Doc
+            if ( (pathSplit.length % 2) === 0 ) {
+                // console.log('UPDATE DOC')
+                addDataWith = 'update'
             }
-            // NEW DOC
-            else if (!data.created_at && (data.id || data.slug) ) {
-                console.info(`%c💾 SAVE > new doc: ${newPath} ${data}`, consoleGreenStyles)
+            // COLLECTION -> New Doc
+            else {
+                // console.log('NEW DOC')
+                addDataWith = 'new'
+            }
+            // DOCUMENT -> Update Doc -> Safety Net
+            if ('id' in data || 'slug' in data) {
+                // console.log('UPDATE DOC')
+                addDataWith = 'update'
+            }
+
+            if (addDataWith === 'update') {
+                console.info(`%c💾 SAVE > Update Doc: ${newPath} ${data}`, consoleGreenStyles)
+                data.id = documentId || null
+                data.updated_at = new Date()
+                delete data.created_at // Don't want to update this field
+
+                response = await this._update(newPath, null, data, true)
+
+            } else {
+                console.info(`%c💾 SAVE > New Doc: ${newPath} ${data}`, consoleGreenStyles)
                 data.id = data.id || data.slug || null
                 data.created_at = new Date()
-                response = await this._update(newPath, null, data)
-            }
-            // NEW DOC SAFETY
-            else {
-                console.info(`%c💾 SAVE > new doc last: ${newPath} ${data}`, consoleGreenStyles)
-                data.created_at = new Date()
-                response = await this._update(newPath, null, data)
+                //response = await this._update(newPath, null, data)
+                response = await this._add(newPath, null, data)
             }
 
             return response || false

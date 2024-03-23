@@ -57,7 +57,7 @@ export default defineComponent({
 
     const getReadStatusIcon = (chat, message) => {
       const totalParticipantsExcludingSender = chat.participants.length - 1;
-      const seenCountExcludingSender = message.seen.filter(uid => uid !== message.owner).length;
+      const seenCountExcludingSender = message.seen.filter(uid => uid !== message.owner)?.length;
 
       if (seenCountExcludingSender  === 0) {
         return 'mdi-eye-off'; // icon when no one has read

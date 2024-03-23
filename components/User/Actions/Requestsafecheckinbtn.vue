@@ -71,15 +71,18 @@ export default defineComponent({
         // Add A Checkin
         await $db.save(`Users/${props.user.id}/CheckIns`, {
           userId: props.user.id,
-          requestedBy: loggedInUser.value.uid  
+          requestedBy: loggedInUser.value.uid
         }).then((res) => {
           if (res !== false) {
             dialog.value = false
-            checkAddId.value = res.id
+            checkAddId.value = res.id || null
             $notify.show({ text: i18n.t('notify.success'), color: 'green' })
           }
         })
+
+
         // Add A Notification
+        // TODO: include body to be translated
         await $db.save(`Users/${props.user.id}/Notifications`, {
           uid: props.user.id,
           title: 'Check-In',
@@ -88,7 +91,7 @@ export default defineComponent({
           type: 'checkIn',
           seen: false,
           archived: false,
-          created_at: new Date(),
+          // created_at: new Date(),
           meta: {
             checkInId: checkAddId.value,
             requestedBy: loggedInUser.value.uid
