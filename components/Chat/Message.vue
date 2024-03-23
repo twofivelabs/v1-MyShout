@@ -249,11 +249,6 @@ import { Touch } from 'vuetify/lib/directives'
 
 import moment from 'moment'
 
-/*
-import firebase from 'firebase';
-import 'firebase/functions';
-*/
-
 export default defineComponent({
   name: 'ChatMessage',
   props: {
@@ -367,8 +362,9 @@ export default defineComponent({
 
     const getReadStatusIcon = (chat, message) => {
       try {
-        const totalParticipantsExcludingSender = chat.participants.length - 1;
-        const seenCountExcludingSender = message?.seen.filter(userId => userId !== message.owner).length;
+        if (!chat?.participants && !message?.seen) return 'mdi-eye-off';
+        const totalParticipantsExcludingSender = chat.participants?.length - 1;
+        const seenCountExcludingSender = message?.seen.filter(userId => userId !== message.owner)?.length;
         if (seenCountExcludingSender  === 0) {
           return 'mdi-eye-off'; // icon when no one has read
         } else if (seenCountExcludingSender < totalParticipantsExcludingSender) {

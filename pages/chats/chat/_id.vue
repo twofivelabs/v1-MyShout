@@ -223,7 +223,7 @@ export default defineComponent({
 
     const onMessageInterest = async (message) => {
       try {
-        
+
           if (!message?.seen?.includes(user.value.data.uid)) {
             await $services.viewMessage({chatId: chatId.value, messageId: message.id})
 
@@ -239,6 +239,7 @@ export default defineComponent({
     const handleReply = message => isReply.value = message;
 
     watch (state.listeners, (_, listener) => {
+      // TODO: Noticed that the Chats/*** was getting an extra listener when switching to a user profile
       if (listener[`Chats/${chatId.value}`]) {
         chat.value = state.listeners[`Chats/${chatId.value}`]
         if (chat.value && chat.value?.participants) loadParticipants()
@@ -267,11 +268,18 @@ export default defineComponent({
     })
     watch(route, (to, from) => {
       chatId.value = to.params.id;
-      if (to.params.id && !from || (to.params.id !== from.params.id)) loadChat();
+      if (to.params.id && !from || (to.params.id !== from.params.id)) {
+        //console.log('WATCHING >> Load Chat')
+        loadChat();
+
+      }
     }, { immediate: true });
 
     watch(() => messages.value, (newMessages, oldMessages) => {
-      if (newMessages && oldMessages && newMessages !== oldMessages) return scrollToUnseenMessage();
+      if (newMessages && oldMessages && newMessages !== oldMessages) {
+        //console.log('WATCHING >> scroll messages')
+        return scrollToUnseenMessage();
+      }
     }, { deep: true });
 
     onMounted(() => {

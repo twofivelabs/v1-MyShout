@@ -142,18 +142,18 @@ export default ({ app, store }, inject) => {
             if (data.id || data.slug || data.name) {
                 const additionalPath = (app.$helper.slugify(data.id, '-', false) || app.$helper.slugify(data.slug || data.name))
                 slug = additionalPath
-                if (!path.includes(additionalPath)) {
+                if (!path?.includes(additionalPath)) {
                     //path = path + '/' + additionalPath
                 }
             }
         }
-        if (path && path.includes('/')) {
+        if (path && path?.includes('/')) {
             let pathParts = path.split('/')
 
-            pathId = pathParts[pathParts.length - 1]
+            pathId = pathParts[pathParts?.length - 1]
             slug = pathId
-            storeToUseAll = pathParts[pathParts.length - 1].toLowerCase()
-            storeToUseOne = pathParts[pathParts.length - 2].toLowerCase()
+            storeToUseAll = pathParts[pathParts?.length - 1].toLowerCase()
+            storeToUseOne = pathParts[pathParts?.length - 2].toLowerCase()
             storeToUse = store.state[storeToUseOne] ? storeToUseOne : storeToUseAll
 
             // Auto capitalize the elements in the string
@@ -183,8 +183,10 @@ export default ({ app, store }, inject) => {
     function invalidPath(path) {
         let invalid = false
         if (!path) invalid = true
-        if (path.slice(-1) === '/') invalid = true
-        if (path.includes('//')) invalid = true
+        else if (path?.includes('undefined')) invalid = true
+        else if (path?.slice(-1) === '/') invalid = true
+        else if (path?.includes('//')) invalid = true
+
         if (invalid) console.log('Path is invalid: ', path)
         return invalid
     }
@@ -267,7 +269,7 @@ export default ({ app, store }, inject) => {
          * @returns {Promise<boolean>}
          */
         async simpleSearch (col, field, value) {
-            if (!value || value.length < 3) {
+            if (!value || value?.length < 3) {
                 console.log('Search with a minimum of 2 characters')
                 return false
             }
@@ -486,10 +488,10 @@ export default ({ app, store }, inject) => {
                 // SET PAGINATION LEVEL
                 if (paginate) {
                     if (!paginationMarkers[`${what}-top`]) {
-                        paginationMarkers[`${what}-top`] = docs.docs[docs.docs.length - 1]
+                        paginationMarkers[`${what}-top`] = docs.docs[docs.docs?.length - 1]
                     }
                     // paginationMarkers[`${what}-last`] = docs.docs[docs.docs.length - 1]
-                    paginationMarkers[`${what}-lastVisible`] = docs.docs[docs.docs.length - 1]
+                    paginationMarkers[`${what}-lastVisible`] = docs.docs[docs.docs?.length - 1]
                     paginationMarkers[`${what}-first`] = docs.docs[0]
                     // console.log('FIRST', paginationMarkers[`${what}-first`])
                 }
@@ -760,18 +762,8 @@ export default ({ app, store }, inject) => {
             if (invalidPath(path)) return false
 
             // PARSE THE PATH GIVEN
-            let {
-                newPath,
-                //storeToUseAll,
-                //storeToUseOne
-            } = parse_path(path)
+            let { newPath } = parse_path(path)
             // const mergedData = Object.assign({path:newPath}, {...data})
-            /*
-            console.table({
-                'NewPath': newPath,
-                'Store To Use All': storeToUseAll,
-                'Store To Use One': storeToUseOne
-            }) */
 
             if ( (newPath.split('/').length % 2) === 0 ) {
                 const getOneRes = await this._get_one(newPath, null, true)
@@ -806,13 +798,15 @@ export default ({ app, store }, inject) => {
         // PATCH JOBS FOR MYSHOUT
         async listen(path, { where = [], limit = 25, position = 'push', orderBy = null, orderDirection =null }) {
             if (invalidPath(path)) false
+            let { newPath } = parse_path(path)
 
             try {
-                const pathSplit = path.split('/')
+                // const pathSplit = path.split('/')
+
                 const queryConstraints = []
                 let collectionDoc
 
-                if ( (pathSplit.length % 2) === 0 ) {
+                if ( (newPath.split('/').length % 2) === 0 ) {
                     collectionDoc = fire.doc(fire.fs, path)
                 } else {
                     collectionDoc = fire.collection(fire.fs, path)
@@ -838,11 +832,21 @@ export default ({ app, store }, inject) => {
                         console.info(`%c👂Change: ${path}`, consoleYellowStyles)
 
                         // DOCUMENT
-                        if ( (pathSplit.length % 2) === 0 ) {
+                        // if ( (pathSplit?.length % 2) === 0 ) {
+                        if ( (newPath.split('/').length % 2) === 0 ) {
                             if (snapshot.empty) return({})
 
                             const data = { id: snapshot.id, ...snapshot.data() }
-                            Vue.set(store.state.listeners, path, data)
+                            //store.state.listeners[path] = data
+                            //console.log('TRYING TO SET WITH VUE')
+                            //console.log(store.state.listeners, path, data)
+                            //Vue.set(store.state.listeners, path, data)
+                            // TODO: Noticed that the Chats/*** was getting an extra listener when switching to a user profile
+                            try {
+                                Vue.set(store.state.listeners, path, data)
+                            } catch {
+                                store.state.listeners[path] = data
+                            }
                             // store.state.listeners[path] = data
                             return (data)
                         }
@@ -906,9 +910,6 @@ export default ({ app, store }, inject) => {
 
             let response = null
             let { newPath,  /* storeToUse, storeToUseAll, pathId,  */ } = parse_path(path, data)
-            // const dataPosition = (data.position ? data.position : 'push')
-            //console.log(dataPosition, { newPath, storeToUse, storeToUseAll, pathId, slug })
-// console.log('$SAVE', newPath)
             // Don't want this to be saved to db
             delete data.position
             delete data.path
@@ -920,7 +921,7 @@ export default ({ app, store }, inject) => {
             let addDataWith = null
 
             // DOCUMENT -> Update Doc
-            if ( (pathSplit.length % 2) === 0 ) {
+            if ( (newPath.split('/').length % 2) === 0 ) {
                 // console.log('UPDATE DOC')
                 addDataWith = 'update'
             }
