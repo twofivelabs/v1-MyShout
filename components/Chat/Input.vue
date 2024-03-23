@@ -242,14 +242,13 @@
           const fileConverted = await convertFileUrlToBase64(filePath)
           if (!fileConverted) return
 
-          const url = await $db.upload({
-            path: `/CHATS/${props.chat.id}/${new Date().getTime()}.mp4`,
-            data: fileConverted,
+          const fileDestination = `/CHATS/${props.chat.id}/${new Date().getTime()}.mp4`
+          const url = await $db.upload(fileDestination, fileConverted, {
             base64: true,
             metaData: {
               contentType: 'video/mp4'
             }
-          });
+          })
           console.log('[camera] videoUrl:', url);
           return url;
         } catch (error) {

@@ -183,14 +183,13 @@ export default defineComponent({
         try {
           const sampleBase64 = await CameraPreview.captureSample(cameraSampleOptions);
           if (sampleBase64) {
-            const sampleUrl = await $db.upload({
-              path: `/CHATS/${chatId.value}/${new Date().getTime()}.jpg`,
-              data: sampleBase64?.value,
+            const filePath = `/CHATS/${chatId.value}/${new Date().getTime()}.jpg`
+            const sampleUrl = await $db.upload(filePath, sampleBase64?.value, {
               base64: true,
               metaData: {
                 contentType: 'image/jpeg'
               }
-            });
+            })
             if (sampleUrl) emit('videoThumbnailUrl', sampleUrl)
             console.log('[camera], SAMPLE URL:', sampleUrl, JSON.stringify(sampleUrl));
           }

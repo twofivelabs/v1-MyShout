@@ -53,9 +53,8 @@ export default defineComponent({
       try {
         const photoBase64 = await $capacitor.cameraTakePicture(false)
 
-        const photoUrl = await $db.upload({
-          path: `/CHATS/${props.chat.id}/${ new Date().getTime() }.jpg`,
-          data: photoBase64,
+        const filePath = `/CHATS/${props.chat.id}/${ new Date().getTime() }.jpg`
+        const photoUrl = await $db.upload(filePath, photoBase64, {
           base64: true,
           metaData: {
             contentType: 'image/jpeg'

@@ -9,7 +9,7 @@
       small
       fab
   >
-    <input type="file" accept="*" ref="fileInput" style="display: none;" @change="handleUpload" /> 
+    <input type="file" accept="*" ref="fileInput" style="display: none;" @change="handleUpload" />
     <v-icon>
       mdi-file
     </v-icon>
@@ -66,28 +66,23 @@ export default defineComponent({
     // Helper Function: fileExtension
     const fileExtension = (mimeType) => {
       const typeParts = mimeType.split('/');
-      return typeParts[1]; 
+      return typeParts[1];
     };
 
     const handleUpload = async (event) => {
       console.log("KYLE: handleUpload", event)
       isUploading.value = true; // Show loading state
       try {
-        const file = event.target.files[0]; 
+        const file = event.target.files[0];
         console.log("KYLE: File", file)
 
         if (!file) return; // No file selected
-
 
         const fileData = await readFileAsDataURL(file);
         console.log("KYLE: FileData", fileData)
 
         const path = `/CHATS/${props.chat.id}/${ new Date().getTime() }.${fileExtension(file.type)}`;
-
-        const uploadResult = await $db.upload({ 
-          path, 
-          data: fileData, 
-        });
+        const uploadResult = await $db.upload(path, fileData)
 
         if (uploadResult) {
           uploadComplete.value = true
@@ -97,7 +92,7 @@ export default defineComponent({
       } catch (error) {
         console.log("KYLE: Error Uploading File", error)
       } finally {
-        isUploading.value = false; 
+        isUploading.value = false;
         fileInput.value.value = null; // Reset file input
       }
     };

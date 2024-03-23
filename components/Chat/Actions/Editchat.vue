@@ -61,8 +61,8 @@ export default defineComponent({
     const loading = ref(false)
     const dialog = ref(false)
     const form = ref({
-      title: '',
-      description: ''
+      title: props.chat.title,
+      description: props.chat.description
     })
 
     // METHODS
@@ -72,13 +72,13 @@ export default defineComponent({
         $db.save(`Chats/${props.chat.id}`, {
           title: form.value.title,
           description: form.value.description
-        }).then((res) => {
+        }).then(() => {
           //eslint-disable-next-line vue/no-mutating-props
           props.chat.title = form.value.title,
-              //eslint-disable-next-line vue/no-mutating-props
+          //eslint-disable-next-line vue/no-mutating-props
           props.chat.description = form.value.description
 
-          if (res) return dialog.value = false
+          return dialog.value = false
         })
 
         /* const res = await dispatch('chats/updateField', {
