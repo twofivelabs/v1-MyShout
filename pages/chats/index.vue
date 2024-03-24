@@ -75,7 +75,7 @@ export default defineComponent({
   middleware: 'authenticated',
   setup() {
     const { state } = useStore()
-    const { $db, $capacitor } = useContext()
+    const { $db, $capacitor, $helper } = useContext()
     const user = computed(() => state.user)
 
     // DEFINE
@@ -104,7 +104,8 @@ export default defineComponent({
       if (listener['Chats']) {
 
         listener['Chats'].forEach(async (chat) => {
-          chat.message.sent_by_name = null
+          // chat['message']['sent_by_name'] = null
+          // Vue.set(chat.message, 'sent_by_name', null)
           if (chat?.message?.sent_by) {
             let u
             // This will help just eliminate an extra call to firebase
@@ -115,6 +116,8 @@ export default defineComponent({
               u = currentLoadedUsers[chat.message.sent_by]
             }
             chat.message.sent_by_name = u?.username ?? u.first_name
+          } else {
+            $helper.setObjByPath(chat, 'message.sent_by_name', null)
           }
 
           if (chat._changeType === "added" || chat._changeType === "modified") {

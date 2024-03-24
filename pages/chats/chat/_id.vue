@@ -46,7 +46,7 @@ import {
   useStore,
   computed,
   watch,
-  onMounted, onUnmounted
+  onMounted, onUnmounted, watchEffect
 } from '@nuxtjs/composition-api';
 
 import { Intersect } from 'vuetify/lib/directives';
@@ -92,6 +92,7 @@ export default defineComponent({
 
         chatListener.value = await $db.listen(`Chats/${chatId.value}`, {where: null}).then(() => {
           loadMessages()
+          watchListeners()
         })
 
       } catch (e) {
@@ -245,34 +246,50 @@ export default defineComponent({
 
     const handleReply = message => isReply.value = message;
 
-    watch (state.listeners, (_, listener) => {
-      // TODO: Noticed that the Chats/*** was getting an extra listener when switching to a user profile
-      if (listener[`Chats/${chatId.value}`]) {
-        chat.value = state.listeners[`Chats/${chatId.value}`]
-        if (chat.value && chat.value?.participants) loadParticipants()
+    const watchListeners = () => {
+      watch (state.listeners, (_, listener) => {
+        // TODO: Noticed that the Chats/*** was getting an extra listener when switching to a user profile
+        if (listener[`Chats/${chatId.value}`]) {
+          chat.value = state.listeners[`Chats/${chatId.value}`]
+          if (chat.value && chat.value?.participants) loadParticipants()
+        }
+      })
+
+
+    }
+
+    watchEffect(() => {
+      if (state.listeners) {
+        console.log('LISTENERS', state.listeners)
       }
+      if (state.listeners[`Chats/${chatId.value}/Messages`]) {
+        console.log('MESSAGES')
+        state.listeners[`Chats/${chatId.value}/Messages`].forEach(async (message) => {
+              message.ownerData = participants.value[message.owner]
+              if (message?.message) message.message = $encryption.decrypt(message.message)
+              if (message?.urls?.length > 0) message.message = $helper.linkifyText(message.message)
 
-      // MESSAGES
-      if (listener[`Chats/${chatId.value}/Messages`]) {
-        listener[`Chats/${chatId.value}/Messages`].forEach(async (message) => {
-          message.ownerData = participants.value[message.owner]
-          if (message?.message) message.message = $encryption.decrypt(message.message)
-          if (message?.urls?.length > 0) message.message = $helper.linkifyText(message.message)
+              // Parse Date Issues
+              if (message?.created_at && (typeof message.created_at === 'string' || message.created_at instanceof String)) {
+                message.created_at = Date.parse(message.created_at)
+              }
 
-          // Parse Date Issues
-          if (message?.created_at && (typeof message.created_at === 'string' || message.created_at instanceof String)) {
-            message.created_at = Date.parse(message.created_at)
-          }
+              if (message._changeType === "added" || message._changeType === "modified") {
+                console.log('Message.id', message.id)
+                Vue.set(chatMessages.value, message.id, message)
+                try {
+                  document.getElementById(`bottomOfChat`).scrollIntoView({ behavior: "smooth" })
+                } catch { /**/ }
+              } else {
+                Vue.delete(chatMessages.value, message.id)
+              }
 
-          if (message._changeType === "added" || message._changeType === "modified") {
-            Vue.set(chatMessages.value, message.id, message)
-          } else {
-            Vue.delete(chatMessages.value, message.id)
-          }
-
-        })
+            })
       }
     })
+
+
+
     watch(route, (to, from) => {
       chatId.value = to.params.id;
       if (to.params.id && !from || (to.params.id !== from.params.id)) {

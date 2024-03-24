@@ -78,7 +78,6 @@ export default defineComponent({
           owner: user.value.uid,
           participants: newChatFriends.value
         }).then(async (room) => {
-          console.log("ROOM", room)
           if (room !== false) {
             newChatFriends.value = []
             //await router.push(`/chats/chat/${room.id}`)
