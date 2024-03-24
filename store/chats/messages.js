@@ -126,7 +126,7 @@ export const actions = {
         }, dataConverter)
     },
     async add (_ , { message, chatId }) {
-        const response = await this.$db.add(`Chats/${chatId}/${dbRootPath}/`, dataConverter, message)
+        const response = await this.$db.save(`Chats/${chatId}/${dbRootPath}`, dataConverter, message)
         if (response) {
             // await commit('PUSH_TO_ALL', data)
             // await commit('PUSH_TO_LOADED', data)

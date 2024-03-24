@@ -3,10 +3,10 @@
       {{ typingMessage }}
     </div>
   </template>
-  
+
   <script>
-  import { computed, defineComponent } from '@nuxtjs/composition-api';
-  
+  import { computed, defineComponent, useStore } from '@nuxtjs/composition-api';
+
   export default defineComponent({
     name: 'ChatTyping',
     props: {
@@ -19,20 +19,23 @@
         default: () => ({}),
       },
     },
-    setup(props, { root }) {
-      const user = computed(() => root.$store.state.user);
-      
+    setup(props) {
+      const { state } = useStore()
+      //eslint-disable-next-line no-unused-vars
+      const user = computed(() => state.user);
+
       const typingMessage = computed(() => {
         if (!props.chat.typing || props.chat.typing.length === 0) {
           return '';
         }
-  
+
         const otherTypingUsers = props.chat.typing.filter(userId => userId !== user.value.data.uid);
-  
+        //const otherTypingUsers = props.chat.typing;
+
         const userNames = otherTypingUsers
           .map(userId => props.participants[userId]?.username || null)
           .filter(Boolean);
-  
+
         switch (userNames.length) {
           case 0:
             return '';
@@ -42,14 +45,14 @@
             return `${userNames.join(', ')} are typing...`;
         }
       });
-  
+
       return {
         typingMessage,
       };
     },
   });
   </script>
-  
+
   <style>
   .typing-indicator {
     padding: 10px;
@@ -58,4 +61,3 @@
     font-size: 11px;
   }
   </style>
-  

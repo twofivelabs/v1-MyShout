@@ -270,7 +270,9 @@
         });
       };
 
-      watch(newMessage, (newValue) => updateTyping(!!newValue), { immediate: true });
+      watch(newMessage, (newValue) => {
+        updateTyping(!!newValue)
+      }, { immediate: true });
       watch(route, (to) => {
         // Watch URL Params for VIDEO
         if (to.query?.videoUrl) {

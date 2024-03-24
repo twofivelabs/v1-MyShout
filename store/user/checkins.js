@@ -118,7 +118,7 @@ export const actions = {
   async add ({ commit }, data) {
     const uid = data.userId
     if (uid) {
-      const response = await this.$db.add(`Users/${uid}/${dbRootPath}`, dataConverter, data)
+      const response = await this.$db.save(`Users/${uid}/${dbRootPath}`, dataConverter, data)
       if (response) {
         await commit('SET_ALL', response)
       }

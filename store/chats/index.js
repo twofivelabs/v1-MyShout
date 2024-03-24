@@ -164,7 +164,7 @@ export const actions = {
     }, dataConverter)
   },
   async add ({ commit }, data) {
-    const response = await this.$db.add(`${dbRootPath}`, dataConverter, data)
+    const response = await this.$db.save(`${dbRootPath}`, dataConverter, data)
     if (response) {
       await commit('PUSH_TO_ALL', data)
       await commit('PUSH_TO_LOADED', data)

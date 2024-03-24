@@ -122,7 +122,7 @@ export const actions = {
     const uid = rootState.user.data.uid
 
     if (uid) {
-      const response = await this.$db.add(`Users/${uid}/${dbRootPath}`, dataConverter, data)
+      const response = await this.$db.save(`Users/${uid}/${dbRootPath}`, dataConverter, data)
       if (response) {
         await commit('PUSH_TO_ALL', response)
       }

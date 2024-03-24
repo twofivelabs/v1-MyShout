@@ -72,6 +72,7 @@ export default defineComponent({
     const chat = ref(null);
     const admins = ref({});
     const participants = ref({});
+    const participantsLoaded = ref(false)
     const messagesLoading = ref(true);
     const messages = ref([]);
     const chatMessages = ref({});
@@ -109,9 +110,13 @@ export default defineComponent({
 
     const loadParticipants = async () => {
       try {
+        // This should be better
+        // TODO: it's looping all participants on each time you type (isTyping)
+        if (participantsLoaded.value) return
+
         const participantProfiles = await Promise.all(
           chat.value?.participants?.map(participantUid => {
-              return $db.get(`Users/${participantUid}`)
+                return $db.get(`Users/${participantUid}`)
           })
         )
         participantProfiles?.forEach(profile => {
@@ -121,6 +126,8 @@ export default defineComponent({
         })
       } catch (e) {
         console.error("Error Loading Participants", e);
+      } finally {
+        participantsLoaded.value = true
       }
 
       try {

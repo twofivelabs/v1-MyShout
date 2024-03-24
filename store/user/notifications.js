@@ -127,7 +127,7 @@ export const actions = {
       if(!data.imageUrl) {
           data.imageUrl = 'https://firebasestorage.googleapis.com/v0/b/my-shout-app.appspot.com/o/ADMIN%2FMyShout%20200X200.png?alt=media&token=2e8bf86d-c111-47e2-b320-9e6724c1d017'
       }
-      const response = await this.$db.add(`Users/${uid}/${dbRootPath}`, dataConverter, data)
+      const response = await this.$db.save(`Users/${uid}/${dbRootPath}`, dataConverter, data)
       if (response) {
         // Causing to show the notification in my own notifications
         // await commit('SET_ALL', response)

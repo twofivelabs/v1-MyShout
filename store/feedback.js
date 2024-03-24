@@ -170,7 +170,7 @@ export const actions = {
     commit,
     dispatch
   }, data) {
-    const response = await this.$db.add(`${dbRootPath}`, dataConverter, data)
+    const response = await this.$db.save(`${dbRootPath}`, dataConverter, data)
     if (response && response.id) {
       await dispatch('products/incrementLikes', {
         productId: data.product.id,
