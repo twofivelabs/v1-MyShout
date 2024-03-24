@@ -32,7 +32,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const { $system } = useContext()
+    const { $system, $db } = useContext()
     const { state, dispatch } = useStore()
     const loading = ref(false)
     const dialog = ref(false)
@@ -44,11 +44,8 @@ export default defineComponent({
 
     // METHODS
     const hasExistingChat = async () => {
-      return await dispatch('chats/search', {
-        field: 'owner',
-        operator: '==',
-        term: loggedInUser.value.uid,
-      }).then((rooms) => {
+      const rooms = await $db.simpleSearch('Chats', 'owner', loggedInUser.value.uid)
+      if (rooms.length > 0) {
         // All the users chats
         if(rooms) {
           let roomFound = false
@@ -63,7 +60,7 @@ export default defineComponent({
           })
           return roomFound
         }
-      })
+      }
     }
     const startChat = async () => {
       loading.value = true

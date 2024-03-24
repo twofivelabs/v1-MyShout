@@ -424,6 +424,8 @@ export default ({ app, store }, inject) => {
             collectionDoc = fire.collection(fire.fs, what)
 
             // WHERE STATEMENT
+            // Patch: 2024/03/24 - Issue with passing the where argument
+            if (where?.where) where = where.where
             if (Array.isArray(where) && where.length >= 1) {
                 // multi level where statements
                 if (Array.isArray(where[0])) {
