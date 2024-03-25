@@ -124,7 +124,6 @@
                     </div>
                   </v-bottom-sheet>
                 </div>
-
               </div>
 
               <div class="caption text-right">

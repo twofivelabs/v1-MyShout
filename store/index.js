@@ -8,6 +8,7 @@ export const state = () => reactive({
   appLoading: true,
   authUser: null,
   listeners: reactive({}),
+  loaded: reactive({}),
   onboarding: {
       phoneNumber: null
   },

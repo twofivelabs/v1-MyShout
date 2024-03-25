@@ -185,8 +185,6 @@
           }); */
 
           if (res && props.reply) {
-            console.log('STICKY: Array Union: ', res.id, JSON.stringify(res.id))
-
             $db.save(`Chats/${props.chat.id}/Messages/${props.reply.id}`, {
               replies: $db.fire().arrayUnion(res.id)
             }).catch((e) => {

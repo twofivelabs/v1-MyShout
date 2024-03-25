@@ -58,6 +58,7 @@ import firebaseApp from './../firebaseConfig'
 import {filter} from 'lodash'
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication'
 import Vue from "vue"
+import { reactive } from '@nuxtjs/composition-api'
 
 const fs = getFirestore(firebaseApp)
 const auth = getAuth(firebaseApp)
@@ -767,11 +768,18 @@ export default ({ app, store }, inject) => {
             let { newPath } = parse_path(path)
             // const mergedData = Object.assign({path:newPath}, {...data})
 
+            if (app.$ttlStorage.get(newPath)) {
+                console.log('Cached >>> ', newPath)
+                return app.$ttlStorage.get(newPath)
+            }
+
             if ( (newPath.split('/').length % 2) === 0 ) {
                 const getOneRes = await this._get_one(newPath, null, true)
+                if (getOneRes) app.$ttlStorage.set(newPath, getOneRes, 240000)
                 return (getOneRes) ? getOneRes : false
             } else {
                 const getAllRes = await this._get_all(newPath, data, null)
+                if (getAllRes) app.$ttlStorage.set(newPath, getAllRes, 240000)
                 return (getAllRes) ? getAllRes : false
             }
         },
@@ -803,8 +811,6 @@ export default ({ app, store }, inject) => {
             let { newPath } = parse_path(path)
 
             try {
-                // const pathSplit = path.split('/')
-
                 const queryConstraints = []
                 let collectionDoc
 
@@ -827,29 +833,21 @@ export default ({ app, store }, inject) => {
                 console.info(`%c👂Listening: ${path} WHERE: ${JSON.stringify(where)}, ORDER: ${JSON.stringify(orderBy)}, LIMIT: ${limit}, POS: ${position}`, consoleYellowStyles)
 
                 const q = fire.query( collectionDoc, ...queryConstraints )
-                /* fire.onSnapshot( q, (snapshot) => {
-                    console.log('snapshot 1', snapshot)
-                }) */
+
                 const snapshotListener = fire.onSnapshot( q, (snapshot) => {
                         console.info(`%c👂Change: ${path}`, consoleYellowStyles)
 
                         // DOCUMENT
-                        // if ( (pathSplit?.length % 2) === 0 ) {
                         if ( (newPath.split('/').length % 2) === 0 ) {
                             if (snapshot.empty) return({})
 
-                            const data = { id: snapshot.id, ...snapshot.data() }
-                            //store.state.listeners[path] = data
-                            //console.log('TRYING TO SET WITH VUE')
-                            //console.log(store.state.listeners, path, data)
-                            //Vue.set(store.state.listeners, path, data)
+                            const data = { ...snapshot.data(), id: snapshot.id }
                             // TODO: Noticed that the Chats/*** was getting an extra listener when switching to a user profile
                             try {
                                 Vue.set(store.state.listeners, path, data)
                             } catch {
-                                store.state.listeners[path] = data
+                                store.state.listeners[path] = reactive(data)
                             }
-                            // store.state.listeners[path] = data
                             return (data)
                         }
 
@@ -859,10 +857,11 @@ export default ({ app, store }, inject) => {
 
                             const responseData = []
                             snapshot.docChanges().forEach(async (change) => {
-                                const data = { id: change.doc.id, ...change.doc.data() }
+                                const data = { ...change.doc.data(), id: change.doc.id }
 
                                 try {
-                                    data.created_at = data.created_at.toDate().toDateString()
+                                    //data.created_at = data.created_at.toDate().toDateString()
+                                    data.created_at = new Date(data.created_at.seconds*1000)
                                 } catch { /**/ }
 
                                 if (change.type === 'added') {

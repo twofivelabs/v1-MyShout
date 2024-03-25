@@ -28,6 +28,11 @@
         {{ participants.size > 1 ? $t('chat.leave_group') : $t('chat.leave_chat') }}
       </v-list-item-title>
     </v-list-item>
+    <v-list-item key="chat-id">
+      <v-list-item-title class="grey--text caption mt-10">
+        ID: {{ chat.id }}
+      </v-list-item-title>
+    </v-list-item>
   </v-list-item-group>
 </template>
 

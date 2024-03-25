@@ -60,7 +60,7 @@ export default defineComponent({
   directives: { Intersect },
   setup() {
     const { $db, $capacitor,
-      $helper, $encryption, $services
+      $helper, $encryption, $services,
     } = useContext();
     const { state } = useStore();
     const route = useRoute();
@@ -92,7 +92,7 @@ export default defineComponent({
 
         chatListener.value = await $db.listen(`Chats/${chatId.value}`, {where: null}).then(() => {
           loadMessages()
-          watchListeners()
+          loadParticipants()
         })
 
       } catch (e) {
@@ -110,34 +110,50 @@ export default defineComponent({
     };
 
     const loadParticipants = async () => {
+      console.log('chat.value?.participants', chat.value?.participants)
       try {
-        // This should be better
         // TODO: it's looping all participants on each time you type (isTyping)
-        if (participantsLoaded.value) return
+        // I did place a 'Temp fix', inside the fb.js as a 'cached' response
+        $db.get(`Chats/${chatId.value}`).then((c) => {
+          if (c?.participants) {
+            c.participants.forEach(async (pId) => {
+              participants.value[pId] = await $db.get(`Users/${pId}`)
+            })
+          }
+          if (c?.admins) {
+            c.admins.forEach(async (aId) => {
+              admins.value[aId] = await $db.get(`Users/${aId}`)
+            })
+          }
+        })
 
-        const participantProfiles = await Promise.all(
+
+        // Having an issue with chat.value loading in sequence
+        /* const participantProfiles = await Promise.all(
           chat.value?.participants?.map(participantUid => {
                 return $db.get(`Users/${participantUid}`)
           })
         )
+
         participantProfiles?.forEach(profile => {
+          console.log('PROFILE,', profile)
           if (profile) {
             participants.value[profile.id] = profile;
           }
-        })
+        }) */
       } catch (e) {
-        console.error("Error Loading Participants", e);
+        console.error("Error Loading Participants + Admins", e);
       } finally {
         participantsLoaded.value = true
       }
 
-      try {
-        chat.value.admins?.forEach(adminUid => {
+     /*  try {
+        chat.value?.admins?.forEach(adminUid => {
           if (participants.value[adminUid]) admins.value[adminUid] = participants.value[adminUid];
         });
       } catch (e) {
         console.error("Error Loading Admins", e);
-      }
+      } */
     };
 
     const loadMessages = async () => {
@@ -246,49 +262,32 @@ export default defineComponent({
 
     const handleReply = message => isReply.value = message;
 
-    const watchListeners = () => {
-      watch (state.listeners, (_, listener) => {
-        // TODO: Noticed that the Chats/*** was getting an extra listener when switching to a user profile
-        if (listener[`Chats/${chatId.value}`]) {
-          chat.value = state.listeners[`Chats/${chatId.value}`]
-          if (chat.value && chat.value?.participants) loadParticipants()
-        }
-      })
-
-
-    }
-
     watchEffect(() => {
-      if (state.listeners) {
-        console.log('LISTENERS', state.listeners)
+      if (state.listeners[`Chats/${chatId.value}`]) {
+        chat.value = state.listeners[`Chats/${chatId.value}`]
       }
+
       if (state.listeners[`Chats/${chatId.value}/Messages`]) {
-        console.log('MESSAGES')
         state.listeners[`Chats/${chatId.value}/Messages`].forEach(async (message) => {
-              message.ownerData = participants.value[message.owner]
-              if (message?.message) message.message = $encryption.decrypt(message.message)
-              if (message?.urls?.length > 0) message.message = $helper.linkifyText(message.message)
+          message.ownerData = participants.value[message.owner]
+          if (message?.message) message.message = $encryption.decrypt(message.message)
+          if (message?.urls?.length > 0) message.message = $helper.linkifyText(message.message)
 
-              // Parse Date Issues
-              if (message?.created_at && (typeof message.created_at === 'string' || message.created_at instanceof String)) {
-                message.created_at = Date.parse(message.created_at)
-              }
+          if (message._changeType === "added" || message._changeType === "modified") {
+            Vue.set(chatMessages.value, message.id, message)
+            setTimeout(() => {
+              try {
+                document.getElementById(`bottomOfChat`).scrollIntoView({ behavior: "smooth" })
+              } catch { /**/ }
+            }, 250)
 
-              if (message._changeType === "added" || message._changeType === "modified") {
-                console.log('Message.id', message.id)
-                Vue.set(chatMessages.value, message.id, message)
-                try {
-                  document.getElementById(`bottomOfChat`).scrollIntoView({ behavior: "smooth" })
-                } catch { /**/ }
-              } else {
-                Vue.delete(chatMessages.value, message.id)
-              }
-
-            })
+          } else {
+            Vue.delete(chatMessages.value, message.id)
+          }
+        })
       }
+
     })
-
-
 
     watch(route, (to, from) => {
       chatId.value = to.params.id;
