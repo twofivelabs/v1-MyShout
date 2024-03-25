@@ -298,7 +298,7 @@ export default defineComponent({
       i18n,
       $db
     } = useContext()
-    const { state, dispatch } = useStore()
+    const { state } = useStore()
     const router = useRouter()
     const user = computed(() => state.user.profile)
     const userData = computed(() => state.user.data)
