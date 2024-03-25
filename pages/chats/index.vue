@@ -19,7 +19,6 @@
 
         <v-list two-line class="pb-9" v-if="userChats && Object.keys(userChats).length > 0">
           <template v-for="(chat, index) in userChats">
-
             <v-list-item v-if="chat" :key="index">
               <NuxtLink :to="`/chats/chat/${chat.id}`">
                 <v-badge v-if="chat.unseen && chat.unseen[user.data.uid] > 0"
@@ -48,7 +47,7 @@
             </v-list-item>
           </template>
         </v-list>
-        <div v-else>
+        <div v-else class="mt-10">
           <ElementH4 align="center" :text="$t('chats.no_chats')"/>
         </div>
       </v-col>
