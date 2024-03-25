@@ -519,6 +519,7 @@ const config = {
         console.log('ENTRY', config.entry) // { app: [ "path/to/server.js" ] } (currently undefined)
       }
     }, */
+    postcss: null,
     vendor: ['lodash', 'axios'],
     plugins: [
       new webpack.ProvidePlugin({

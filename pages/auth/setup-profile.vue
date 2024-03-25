@@ -345,7 +345,7 @@ export default defineComponent({
           $notify.show({ text: i18n.t('notify.username_in_use'), color: 'red' })
 
         } else {
-          await dispatch('user/updateField', {
+          await $db.save(`Users/${userData.value.uid}`, {
             username: username,
             onboarded: user.value.email ? 2 : 1
           }).then(() => {
@@ -371,7 +371,7 @@ export default defineComponent({
         if(await emailExists(email)) {
           $notify.show({ text: i18n.t('onboarding.error_email_in_use'), color: 'red' })
         } else {
-          await dispatch('user/updateField', {
+          await $db.save(`Users/${userData.value.uid}`, {
             email: email,
             onboarded: 1
           }).then(() => {
@@ -411,11 +411,11 @@ export default defineComponent({
       loading.value = false
     }
     const setProfilePhoto = async () => {
-      await dispatch('user/updateField', {
-          onboarded: 4
-        })
+      await $db.save(`Users/${userData.value.uid}`, {
+        onboarded: 4
+      })
 
-        step.value = 5
+      step.value = 5
     }
     const setLocationPermissions = async () => {
       loading.value = true
@@ -423,7 +423,7 @@ export default defineComponent({
       setTimeout(async () => {
         $capacitor.gpsInit()
 
-        await dispatch('user/updateField', {
+        await $db.save(`Users/${userData.value.uid}`, {
           permissions: {
             location: true
           },
@@ -441,7 +441,7 @@ export default defineComponent({
         // PUSH NOTIFICATION PERMISSIONS
         await $capacitor.pushNotificationsRequestAndRegisterPermissions().then(async () => {
           await $capacitor.pushNotificationsListeners()
-          await dispatch('user/updateField', {
+          await $db.save(`Users/${userData.value.uid}`, {
             permissions: {
               notifications: true
             },
@@ -459,7 +459,7 @@ export default defineComponent({
     }
     const setHowDidYouHear = async () => {
       if (form.hear) {
-        await dispatch('user/updateField', {
+        await $db.save(`Users/${userData.value.uid}`, {
           how_did_you_hear: form.hear,
           onboarded: 7
         })
@@ -469,8 +469,7 @@ export default defineComponent({
     }
     const completeProfile = async () => {
       const device = await $capacitor.device()
-
-      await dispatch('user/updateField', {
+      await $db.save(`Users/${userData.value.uid}`, {
         onboarded: 8,
         device: {
           model: device.model,
