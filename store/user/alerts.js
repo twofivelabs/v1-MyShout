@@ -143,7 +143,7 @@ export const actions = {
     uid = uid || rootState.user.data.uid
     if (uid) {
         const where = {}
-        const response = await this.$db.get_all(`Users/${uid}/${dbRootPath}`, where, dataConverter, {
+        const response = await this.$db.get(`Users/${uid}/${dbRootPath}`, where, dataConverter, {
             by: 'created_at',
             direction: 'desc'
         })
@@ -191,7 +191,7 @@ export const actions = {
   },
   async remove ({ rootState }, doc) {
     const uid = rootState.user.data.uid
-    return await this.$db.delete_doc(`Users/${uid}/${dbRootPath}/${doc}`)
+    return await this.$db.delete(`Users/${uid}/${dbRootPath}/${doc}`)
   },
   async group (_, {
       where = {},

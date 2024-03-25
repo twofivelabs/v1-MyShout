@@ -127,14 +127,14 @@ export const actions = {
     }
   },
   async getAll ({ commit }, where = {}) {
-    const all = await this.$db.get_all(`${dbRootPath}`, where, dataConverter)
+    const all = await this.$db.get(`${dbRootPath}`, where, dataConverter)
     if (all) {
       await commit('SET_ALL', all)
     }
     return all
   },
   async remove ({ commit }, doc) {
-    const response = await this.$db.delete_doc(`${dbRootPath}/${doc}`)
+    const response = await this.$db.delete(`${dbRootPath}/${doc}`)
     if (response) {
       await commit('REMOVE_ONE', doc)
     }

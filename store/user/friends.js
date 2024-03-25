@@ -216,8 +216,8 @@ export const actions = {
   },
   async remove ({ rootState }, doc) {
     const uid = rootState.user.data.uid
-    return await this.$db.delete_doc(`Users/${uid}/${dbRootPath}/${doc}`).then(async () => {
-        await this.$db.delete_doc(`Users/${doc}/${dbRootPath}/${uid}`)
+    return await this.$db.delete(`Users/${uid}/${dbRootPath}/${doc}`).then(async () => {
+        await this.$db.delete(`Users/${doc}/${dbRootPath}/${uid}`)
     }).then(() => {
         return true
     }).catch(() => {

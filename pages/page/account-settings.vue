@@ -138,7 +138,6 @@ import {
   watchEffect
 } from '@nuxtjs/composition-api'
 
-import lodash from 'lodash'
 
 export default defineComponent({
   name: 'UserAccountSettingspage',
@@ -148,7 +147,7 @@ export default defineComponent({
     const { $config, $helper, $db } = useContext()
     const isLoggedIn = computed(() => getters['user/isLoggedIn'])
     const user = computed(() => state.user.data)
-    const profile = computed(() => lodash.cloneDeep(state.user.profile))
+    const profile = computed(() => state.user.profile)
     const loading = ref(false)
     const dialog = ref(false)
 
@@ -180,7 +179,9 @@ export default defineComponent({
     // WATCH
     watchEffect(async () => {
       // Generate NEW PIN if none-exists
-      if (profile.value && profile.value.id && !profile.value.securityPin) {
+      console.log('securityPin', profile.value.username, profile.value.securityPin)
+      if (profile.value?.id && !profile.value.securityPin) {
+        console.log('*** Creating new security pin')
         let pinExists = true
         do {
           const pin = $helper.generateStringPin()

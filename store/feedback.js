@@ -210,7 +210,7 @@ export const actions = {
       direction: 'desc'
     }
   }) {
-    const all = await this.$db.get_all(`${dbRootPath}`, where, dataConverter, order, limit)
+    const all = await this.$db.get(`${dbRootPath}`, where, dataConverter, order, limit)
     if (all) {
       if (where.value) {
         await commit('SET_PRODUCT_ALL', {
@@ -224,7 +224,7 @@ export const actions = {
     return all
   },
   async remove ({ commit }, doc) {
-    const response = await this.$db.delete_doc(`${dbRootPath}/${doc}`)
+    const response = await this.$db.delete(`${dbRootPath}/${doc}`)
     if (response) {
       await commit('REMOVE_ONE', doc)
     }

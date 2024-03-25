@@ -156,14 +156,14 @@ export const actions = {
         limit = 20,
         order = {}
     }) {
-        const all = await this.$db.get_all(`${dbRootPath}`, where, dataConverter, order, limit)
+        const all = await this.$db.get(`${dbRootPath}`, where, dataConverter, order, limit)
         if (all) {
             await commit('SET_ALL', all)
         }
         return all
     },
     async remove ({ commit }, data) {
-        const response = await this.$db.delete_doc(`Chats/${data.chatId}/${dbRootPath}/${data.id}`)
+        const response = await this.$db.delete(`Chats/${data.chatId}/${dbRootPath}/${data.id}`)
         if (response) {
             await commit('REMOVE_ONE', data)
         }

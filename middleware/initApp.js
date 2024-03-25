@@ -47,7 +47,6 @@ export default async function ({ store, app, redirect, route } ) {
             return null
         }
     }
-
     async function getTokenResult(a, forceRefresh) {
         let tokenResult
         try {
@@ -61,7 +60,6 @@ export default async function ({ store, app, redirect, route } ) {
         }
         return tokenResult
     }
-
     async function initStateChange(authUser, a=null) {
         hasInitAppLocal = true
         console.info(`%c🔐AUTH STATE CHANGED `, consoleUserStyles)
@@ -102,6 +100,13 @@ export default async function ({ store, app, redirect, route } ) {
         if (claims?.user_id) {
             // Send off that we have a user
             await store.dispatch('user/onAuthStateChanged', { authUser, claims: claims })
+
+            while (store.state.user.authStateLoaded === false) {
+                console.info(`🔐authStateLoaded? ${store.state.user.authStateLoaded}`)
+                await new Promise(resolve => setTimeout(resolve, 250))
+            }
+
+            //console.log('PROFILE', store.state.user.profile.securityPin)
 
             store.state.isAppInit = true
             store.state.appLoading = false

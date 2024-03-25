@@ -156,7 +156,7 @@ export const actions = {
   async getAll ({ commit, rootState }, where = {}) {
     const uid = rootState.user.data.uid
     if (uid) {
-      const response = await this.$db.get_all(`Users/${uid}/${dbRootPath}`, where, dataConverter, {
+      const response = await this.$db.get(`Users/${uid}/${dbRootPath}`, where, dataConverter, {
         by: 'created_at',
         direction: 'desc'
       }, 40)
@@ -193,12 +193,11 @@ export const actions = {
 
         watch (rootState.listeners, (_, listener) => {
             if (listener[`Users/${uid}/${dbRootPath}`]) {
-
                 listener[`Users/${uid}/${dbRootPath}`].forEach(async (notification) => {
-                    try {
+                    /* try {
                         notification.seconds = notification?.created_at?.seconds || null //TODO This OR statement needs to be refined. Quick patch for now.
                         notification.created_at = notification.created_at.toDate().toDateString()
-                    } catch { /**/ }
+                    } catch { /!**!/ } */
 
                     if (notification?.seen === false) {
                         commit('user/SET_HAS_NOTIFICATIONS', true, {root: true})
@@ -230,6 +229,6 @@ export const actions = {
     const uid = rootState.user.data.uid
     const docId = doc?.id || doc
     commit('REMOVE', doc)
-    return await this.$db.delete_doc(`Users/${uid}/${dbRootPath}/${docId}`)
+    return await this.$db.delete(`Users/${uid}/${dbRootPath}/${docId}`)
   }
 }

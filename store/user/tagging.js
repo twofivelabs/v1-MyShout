@@ -89,7 +89,7 @@ export const actions = {
   async getAll ({ commit, rootState }, uid = null) {
     uid = uid || rootState.user.data.uid
     if (uid) {
-      const response = await this.$db.get_all(`Users/${uid}/${dbRootPath}`)
+      const response = await this.$db.get(`Users/${uid}/${dbRootPath}`)
       if (response) {
         await commit('SET_ALL', response)
       }
@@ -98,6 +98,6 @@ export const actions = {
   },
   async remove ({ rootState }, doc) {
     const uid = rootState.user.data.uid
-    return await this.$db.delete_doc(`Users/${uid}/${dbRootPath}/${doc}`)
+    return await this.$db.delete(`Users/${uid}/${dbRootPath}/${doc}`)
   }
 }

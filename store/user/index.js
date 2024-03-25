@@ -284,24 +284,12 @@ export const mutations = {
   },
   SET_USER_PROFILE_INIT: async (state, userProfile) => {
     const combineUserProfile = Object.assign(state.profile, userProfile)
-
-    /*if (!lodash.has(state.profile, 'has.messages')) {
-        console.log('STICKY: USER > no hasMessages')
-        lodash.set(state.profile, 'has.messages', false)
-        Vue.set(state.profile, 'has.messages', false)
-    }
-    if (!lodash.has(state.profile, 'has.notifications')) {
-        lodash.set(state.profile, 'has.notifications', false)
-        Vue.set(state.profile, 'has.notifications', false)
-    }*/
-
     Vue.set(state, 'profile', combineUserProfile)
 
     if (userProfile?.first_name) {
-      Vue.set(state.profile, 'initial', userProfile.first_name.charAt(0).toUpperCase())
+      Vue.set(state.profile, 'initial', createInitial(userProfile))
     }
   },
-
   ON_AUTH_STATE_CHANGED_MUTATION: (state, { authUser, claims }) => {
       if (!authUser) return
 
@@ -437,18 +425,23 @@ export const actions = {
     }
     return response
   },
-  async listen({ commit, dispatch, rootState }, id) {
+  async listen({ commit, dispatch, rootState, state }, id) {
       try {
         if(id) {
+            state.authStateLoaded = false
             const userListener = await this.$db.listen(`Users/${id}`, {where:null})
 
+            // Making adjustment to watcher
             watch (rootState.listeners, async (_, listener) => {
                 if (listener[`Users/${id}`]) {
                     await commit('SET_USER_PROFILE_INIT', {...listener[`Users/${id}`]})
+
+                    setTimeout(async () => {
+                        await dispatch("checkUserData")
+                        console.log('🔐Auth state should be loaded now')
+                        state.authStateLoaded = true
+                    }, 1000)
                 }
-                setTimeout(async () => {
-                    await dispatch("checkUserData")
-                }, 1000)
             })
 
             return userListener
@@ -466,7 +459,7 @@ export const actions = {
   async getAll ({ commit, rootState }, { where = {}, limit = 20, order = {}, uid = null }) {
     uid = uid || rootState.user.data.uid
     if (uid) {
-        let response = await this.$db.get_all(`${dbRootPath}`, where, dataConverter, order, limit)
+        let response = await this.$db.get(`${dbRootPath}`, where, dataConverter, order, limit)
         if (response) {
             commit('SET_ALL', response)
         }
@@ -546,14 +539,7 @@ export const actions = {
   async setUserProfile ({ dispatch }, authUserUid) {
     if (authUserUid) {
         await dispatch('listen', authUserUid)
-
-        await dispatch('user/notifications/listen', {
-          where: [{
-            field: 'archived',
-            op: '==',
-            value: false
-          }]
-        }, { root:true })
+        await dispatch('notifications/listen', { root:true })
     }
   },
   async noUserCleanUp ({ commit }) {

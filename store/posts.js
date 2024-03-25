@@ -184,7 +184,7 @@ export const actions = {
     return all
   },
   async remove ({ commit }, doc) {
-    const response = await this.$db.delete_doc(`${dbRootPath}/${doc}`)
+    const response = await this.$db.delete(`${dbRootPath}/${doc}`)
     if (response) {
       await commit('REMOVE_ONE', doc)
     }

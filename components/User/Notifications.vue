@@ -84,7 +84,7 @@
                 </span>
               </div>
               <div class="caption grey--text mt-2">
-                {{ notification.created_at }}
+                {{ moment(notification.created_at).fromNow() }}
               </div>
     </v-col>
     <v-col class="text-right" cols="3">
@@ -121,6 +121,7 @@ import {
   ref,
 } from '@nuxtjs/composition-api'
 import {Intersect} from 'vuetify/lib/directives'
+import moment from 'moment'
 
 export default defineComponent({
   name: 'UserNotifications',
@@ -306,6 +307,7 @@ export default defineComponent({
       loading,
       user,
       profile,
+      moment,
       deleteAllNotifications,
       goTo,
       emergencyBodyNotification,
