@@ -1,6 +1,6 @@
 import lodash from 'lodash'
 import Vue from 'vue'
-import { reactive, watch } from '@nuxtjs/composition-api'
+import { reactive, watchEffect } from '@nuxtjs/composition-api'
 import { geohashForLocation } from 'geofire-common'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
 import {Badge} from '@capawesome/capacitor-badge'
@@ -432,9 +432,9 @@ export const actions = {
             const userListener = await this.$db.listen(`Users/${id}`, {where:null})
 
             // Making adjustment to watcher
-            watch (rootState.listeners, async (_, listener) => {
-                if (listener[`Users/${id}`]) {
-                    await commit('SET_USER_PROFILE_INIT', {...listener[`Users/${id}`]})
+            watchEffect(async () => {
+                if (rootState.listeners[`Users/${id}`]) {
+                    await commit('SET_USER_PROFILE_INIT', {...rootState.listeners[`Users/${id}`]})
 
                     setTimeout(async () => {
                         await dispatch("checkUserData")

@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { reactive, watch } from '@nuxtjs/composition-api'
+import { reactive, watchEffect } from '@nuxtjs/composition-api'
 import FirestoreHelpers from '~/classes/FirestoreHelpers'
 
 const dbRootPath = 'Notifications'
@@ -191,9 +191,9 @@ export const actions = {
             where: ['archived', '==', false]
         })
 
-        watch (rootState.listeners, (_, listener) => {
-            if (listener[`Users/${uid}/${dbRootPath}`]) {
-                listener[`Users/${uid}/${dbRootPath}`].forEach(async (notification) => {
+        watchEffect(async () => {
+            if (rootState.listeners[`Users/${uid}/${dbRootPath}`]) {
+                rootState.listeners[`Users/${uid}/${dbRootPath}`].forEach(async (notification) => {
                     /* try {
                         notification.seconds = notification?.created_at?.seconds || null //TODO This OR statement needs to be refined. Quick patch for now.
                         notification.created_at = notification.created_at.toDate().toDateString()
@@ -216,9 +216,10 @@ export const actions = {
                     }
                 })
 
-                if (listener[`Users/${uid}/${dbRootPath}`].length > 0) hasInitNotifications = true
+                if (rootState.listeners[`Users/${uid}/${dbRootPath}`].length > 0) hasInitNotifications = true
             }
         })
+
 
     } catch (e) {
         console.log('notifications error.', e)

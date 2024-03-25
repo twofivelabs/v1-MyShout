@@ -17,7 +17,9 @@
         <span class="caption" v-else-if="alert.gps.lat">{{ alert.gps.lat }}, {{ alert.gps.lng }}</span>
       </v-list-item-content>
       <v-list-item-action class="mr-3">
-        <span class="caption">{{ $helper.fromNow(alert.created_at) }}</span>
+        <span class="caption">
+          {{ moment(alert.created_at).fromNow() }}
+        </span>
       </v-list-item-action>
     </v-list-item>
     <v-bottom-sheet v-model="showBottomSheet" :scrollable="true" max-width="700">
@@ -36,7 +38,7 @@
           <div class="text-center my-3">
             <span v-if="alert.created_at" class="caption">
               <v-icon>mdi-calendar</v-icon>
-              {{ $helper.fromNow(alert.created_at) }}
+              {{ moment(alert.created_at).fromNow() }}
             </span>
             <span v-if="alert.gps.lat" class="caption">
               <v-icon>mdi-map</v-icon>
@@ -64,6 +66,7 @@ import {
   ref, useContext,
 } from '@nuxtjs/composition-api'
 import { Touch } from 'vuetify/lib/directives'
+import moment from 'moment'
 
 
 export default defineComponent({
@@ -103,6 +106,7 @@ export default defineComponent({
     }
 
     return {
+      moment,
       loading,
       showBottomSheet,
       swipe,

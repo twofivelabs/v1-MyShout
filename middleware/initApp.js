@@ -106,7 +106,7 @@ export default async function ({ store, app, redirect, route } ) {
                 await new Promise(resolve => setTimeout(resolve, 250))
             }
 
-            //console.log('PROFILE', store.state.user.profile.securityPin)
+            // console.log('PROFILE', store.state.user.profile.securityPin)
 
             store.state.isAppInit = true
             store.state.appLoading = false
