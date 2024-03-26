@@ -18,7 +18,7 @@
       </v-list-item-content>
       <v-list-item-action class="mr-3">
         <span class="caption">
-          {{ moment(alert.created_at).fromNow() }}
+          {{ $helper.fromNow(alert.created_at) }}
         </span>
       </v-list-item-action>
     </v-list-item>
@@ -38,7 +38,7 @@
           <div class="text-center my-3">
             <span v-if="alert.created_at" class="caption">
               <v-icon>mdi-calendar</v-icon>
-              {{ moment(alert.created_at).fromNow() }}
+              {{ $helper.fromNow(alert.created_at) }}
             </span>
             <span v-if="alert.gps.lat" class="caption">
               <v-icon>mdi-map</v-icon>

@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="formEl" @submit.prevent="validate">
+  <v-form ref="formEl" @submit.prevent="validate" class="text-center">
     <v-text-field
         v-model="form.email"
         :rules="rules.email"
@@ -25,17 +25,15 @@
         counter
     />
 
-    <div class="text-center">
-      <v-btn
-        :loading="loading"
-        class="text-center"
-        color="primary"
-        elevation="0"
-        type="submit"
-      >
-        {{ $t('btn.login') }}
-      </v-btn>
-    </div>
+    <v-btn
+      :loading="loading"
+      class="text-center"
+      color="primary"
+      elevation="0"
+      type="submit"
+    >
+      {{ $t('btn.login') }}
+    </v-btn>
 
     <div class="text-center py-5">
       <FormsForgotpasswordbtn class="mx-auto" />
@@ -73,6 +71,8 @@ export default defineComponent({
 
     // METHODS
     const validate = async () => {
+      loading.value = true
+
       valid.value = await formEl.value.validate()
       if (!form.value.email || !form.value.password) {
         valid.value = false
@@ -82,18 +82,27 @@ export default defineComponent({
       } else {
         $notify.show({ text: i18n.t('notify.error_try_again'), color: 'error' })
       }
+
+      loading.value = false
     }
     const submitLogin = async () => {
         loading.value = true
 
-        await $db.fire().capAuth.signInWithEmailAndPassword({
+        // Capacitor Auth
+        /* await $db.fire().capAuth.signInWithEmailAndPassword({
           email: form.value.email.trim().toLowerCase(),
           password: form.value.password
-        }).then(() => {
-          loading.value = false
+        }).then(() => { */
 
-          $db.fire().logEvent($db.fire().analytics, 'login')
+        // Firebase Auth
+        await $db.fire().signInWithEmailAndPassword(
+            $db.fire().auth,
+            form.value.email.trim().toLowerCase(),
+            form.value.password
+        ).then(() => {
+          loading.value = false
           $notify.show({ text: i18n.t('notify.success'), color: 'green' })
+          // $db.fire().logEvent($db.fire().analytics, 'login')
 
           router.push('/')
 

@@ -4,34 +4,34 @@
         v-model="form.email"
         :rules="rules.email"
         :label="$t('form.email')"
-        required
         prepend-inner-icon="mdi-email"
-        outlined
         background-color="#f8f9fa"
         class="py-0 my-0"
+        required
+        outlined
     />
 
     <v-text-field
         v-model="form.password"
         :rules="rules.password"
-        autocomplete="off"
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         @click:append="showPassword = !showPassword"
         :type="showPassword ? 'text' : 'password'"
         :label="$t('form.password')"
-        required
         prepend-inner-icon="mdi-lock"
-        counter
-        outlined
         background-color="#f8f9fa"
+        autocomplete="off"
+        required
+        outlined
+        counter
     />
 
     <v-btn
       :disabled="!valid"
       :loading="loading"
+      class="text-center"
       color="primary"
       elevation="0"
-      class="text-center"
       type="submit"
     >
       {{ $t('btn.sign_up') }}
@@ -99,11 +99,20 @@ export default defineComponent({
       loading.value = false
     }
     const register = async () => {
-
-      await $db.fire().capAuth.createUserWithEmailAndPassword({
+      loading.value = true
+      // Capacitor Auth
+      /* await $db.fire().capAuth.createUserWithEmailAndPassword({
         email: form.value.email.trim().toLowerCase(),
         password: form.value.password
-      }).then(() => {
+      }).then(() => { */
+
+      // Firebase Auth
+      await $db.fire().createUserWithEmailAndPassword(
+          $db.fire().auth,
+          form.value.email.trim().toLowerCase(),
+          form.value.password
+      ).then(() => {
+        loading.value = false
         $notify.show({ text: i18n.t('notify.success'), color: 'green' })
         // $db.fire().logEvent($db.fire().analytics, 'sign_up')
 

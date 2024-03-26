@@ -8,11 +8,36 @@ export default ({
 }, inject) => {
   inject('helper', {
      fromNow(date) {
-         try {
-             return moment(date.toDate()).fromNow()
-         } catch {
-             return date
+         let ifError = false
+         let dateToReturn
+         if (!date) return null
+
+         if (date?.seconds) {
+             try {
+                 dateToReturn = moment(new Date(date.seconds * 1000)).fromNow()
+             } catch (e) {
+                 console.log('new Date(seconds) Error', e)
+                 ifError = true
+             }
+         } else {
+             try {
+                 dateToReturn = moment(date.toDate()).fromNow()
+             } catch (e) {
+                 console.log('date.toDate() Error', e)
+                 ifError = true
+             }
+             try {
+                 dateToReturn = moment(date).fromNow()
+             } catch (e) {
+                 console.log('moment(date) Error:', e)
+                 ifError = true
+             }
          }
+
+         if (dateToReturn === 'Invalid date') return date
+         if (ifError) return date
+
+         return dateToReturn
      },
      downloadFile(path, filename) {
          // Create a new link
