@@ -179,7 +179,7 @@ export default defineComponent({
     // WATCH
     watchEffect(async () => {
       // Generate NEW PIN if none-exists
-      console.log('securityPin', profile.value.username, profile.value.securityPin)
+      // console.log('securityPin', profile.value.username, profile.value.securityPin)
       if (profile.value?.id && !profile.value.securityPin) {
         console.log('*** Creating new security pin')
         let pinExists = true

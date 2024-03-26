@@ -88,7 +88,7 @@ export default defineComponent({
         }).then((res) => {
           if (res !== false) {
             friendshipAccess.value = res
-            if(friendshipAccess.value.isEmergency) {
+            if(friendshipAccess.value?.isEmergency) {
               canViewAlerts.value = true
             }
             if(publicUser.value.permissions.shareLocationWithFriends) {

@@ -756,7 +756,7 @@ export default ({ app, store }, inject) => {
 
             return await this._count(newPath, where)
         },
-        async get(path, data= null) {
+        async get(path, data= null, ttl=15000) {
             if (invalidPath(path)) return false
 
             // PARSE THE PATH GIVEN
@@ -764,17 +764,17 @@ export default ({ app, store }, inject) => {
             // const mergedData = Object.assign({path:newPath}, {...data})
 
             if (app.$ttlStorage.get(newPath)) {
-                console.log('Cached >>> ', newPath)
+                console.log('💲Cached > ', newPath)
                 return app.$ttlStorage.get(newPath)
             }
 
             if ( (newPath.split('/').length % 2) === 0 ) {
                 const getOneRes = await this._get_one(newPath, null, true)
-                if (getOneRes) app.$ttlStorage.set(newPath, getOneRes, 240000)
+                if (getOneRes) app.$ttlStorage.set(newPath, getOneRes, ttl)
                 return (getOneRes) ? getOneRes : false
             } else {
                 const getAllRes = await this._get_all(newPath, data, null)
-                if (getAllRes) app.$ttlStorage.set(newPath, getAllRes, 240000)
+                if (getAllRes) app.$ttlStorage.set(newPath, getAllRes, ttl)
                 return (getAllRes) ? getAllRes : false
             }
         },
