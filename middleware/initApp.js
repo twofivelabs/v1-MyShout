@@ -6,22 +6,20 @@ const a = getAuth(firebaseApp)
 const consoleInitStyles = [
     'color: green',
     'background: #000',
-    'font-weight:600;',
+    'font-weight:600',
     'box-shadow: 2px 2px black',
-    'border-radius: 5px;',
+    'border-radius: 5px',
     'padding: 2px 5px',
     'border: 1px solid green'
 ].join(';')
 const consoleUserStyles = [
     'color: white',
     'background: #E7B75FFF',
-    'font-weight:600;',
+    'font-weight:600',
     'box-shadow: 2px 2px black',
-    'border-radius: 5px;',
+    'border-radius: 5px',
     'padding: 2px 5px',
 ].join(';')
-
-
 
 export default async function ({ store, app, redirect, route } ) {
     if (store.state.isAppInit) {
@@ -47,20 +45,8 @@ export default async function ({ store, app, redirect, route } ) {
             return null
         }
     }
-    async function getTokenResult(a, forceRefresh) {
-        let tokenResult
-        try {
-            tokenResult = await a.currentUser.getIdTokenResult(forceRefresh)
-        } catch { /* */ }
 
-        if (!tokenResult) {
-            try {
-                tokenResult = await app.$db.fire().capAuth.getIdToken({forceRefresh: forceRefresh})
-            } catch { /* */ }
-        }
-        return tokenResult
-    }
-    async function initStateChange(authUser, a=null) {
+    async function initStateChange(authUser) {
         hasInitAppLocal = true
         console.info(`%c🔐AUTH STATE CHANGED `, consoleUserStyles)
 
@@ -80,7 +66,7 @@ export default async function ({ store, app, redirect, route } ) {
 
         // We are going to try and get the user auth claims before loading
         // This will help with security and ensure we have an accurate user
-        let tokenResult = await getTokenResult(a, false)
+        let tokenResult = await app.$db.getTokenResult(false)
         let claims = parseJwt(tokenResult)
 
         if (claims && claims?.isActive && (typeof(claims?.isActive) !== "undefined")) {
@@ -89,7 +75,7 @@ export default async function ({ store, app, redirect, route } ) {
             for (let i = 0; i < 15; i++) {
                 if (!claims?.isActive) {
                     await app.$helper.sleep(500, 'Waiting for user claims')
-                    tokenResult = await getTokenResult(a, true)
+                    tokenResult = await app.$db.getTokenResult(true)
                     claims = parseJwt(tokenResult)
                 } else {
                     break;
@@ -105,7 +91,7 @@ export default async function ({ store, app, redirect, route } ) {
             while (store.state.user.authStateLoaded === false) {
                 await app.$helper.sleep(250, `🔐authStateLoaded? ${store.state.user.authStateLoaded}`)
 
-                if (attempts === 40) {
+                if (attempts === 20) {
                     console.log('Lets hope the auth loaded?')
                     store.state.user.authStateLoaded = true
                     break

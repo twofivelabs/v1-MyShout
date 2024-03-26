@@ -90,27 +90,27 @@ const consoleFbStyles = [
     'color: #ff6719',
     'background: transparent',
     'border: 1px solid #ff6719',
-    'font-weight:600;',
+    'font-weight:600',
     'box-shadow: 2px 2px black',
-    'border-radius: 5px;',
+    'border-radius: 5px',
     'padding: 2px 5px',
 ].join(';')
 const consoleGreenStyles = [
     'color: #0bbe4d',
     'background: transparent',
     'border: 1px solid #0bbe4d',
-    'font-weight:600;',
+    'font-weight:600',
     'box-shadow: 2px 2px black',
-    'border-radius: 5px;',
+    'border-radius: 5px',
     'padding: 2px 5px',
 ].join(';')
 const consoleYellowStyles = [
     'color: #ffdd00',
     'background: transparent',
     'border: 1px solid #ffdd00',
-    'font-weight:600;',
+    'font-weight:600',
     'box-shadow: 2px 2px black',
-    'border-radius: 5px;',
+    'border-radius: 5px',
     'padding: 2px 5px',
 ].join(';')
 
@@ -209,6 +209,25 @@ export default ({ app, store }, inject) => {
                 auth = getAuth()
             }
             return auth
+        },
+        async getTokenResult(forceRefresh=false) {
+            let tokenResult
+            // Traditional Firebase Auth
+            try {
+                tokenResult = await getAuth(firebaseApp).currentUser.getIdTokenResult(forceRefresh)
+            } catch(e) {
+                console.log('fb.js, FB > unable to get token', )
+            }
+
+            // Capacitor Firebase Auth
+            if (!tokenResult) {
+                try {
+                    tokenResult = await  capAuth.getIdToken({forceRefresh: forceRefresh})
+                } catch(e) {
+                    console.log('fb.js, CAP FB > unable to get token', )
+                }
+            }
+            return tokenResult
         },
         parsePath (path) {
             return parse_path(path)

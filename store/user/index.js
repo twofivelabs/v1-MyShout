@@ -429,7 +429,7 @@ export const actions = {
   async listen({ commit, dispatch, rootState, state }, id) {
       try {
         if(id) {
-            state.authStateLoaded = false
+            // state.authStateLoaded = false
             const userListener = await this.$db.listen(`Users/${id}`, {where:null})
 
             // Making adjustment to watcher
@@ -443,14 +443,18 @@ export const actions = {
                         state.authStateLoaded = true
                     }, 1000)
                 } else {
-                    console.log('Could not find users listener: ', id)
+                    console.log('STICKY: User / Listener / Could not find users listener: ', id)
                 }
             })
-
             return userListener
+
+        } else {
+            console.log('STICKY: User / Listener / No userId to listen to')
+            console.log('LISTENERS:', rootState.listeners)
         }
       } catch(e) {
-          console.log('Error listening to user:', e)
+          console.log('STICKY: User / Listener / Error listening to user:', e)
+          console.log('LISTENERS:', rootState.listeners)
       }
   },
   async checkUserData ({ state }) {

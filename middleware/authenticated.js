@@ -1,8 +1,4 @@
 export default async function ({ app, store, redirect }) {
-
-    // console.log('AUTH STATE LOADED: ', await store.getters['users/authStateLoaded'])
-    // console.log('store.state.user', store.state.user)
-
     function checkUserStatus () {
       if ((store.state.user.data.role && store.state.user.data.role.isActive) && !store.state.user.data.role.isActive) {
         return redirect('/status')

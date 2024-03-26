@@ -3,9 +3,9 @@
     'color: #fac023',
     'background: transparent',
     'border: 1px solid #fac023',
-    'font-weight:600;',
+    'font-weight:600',
     'box-shadow: 2px 2px black',
-    'border-radius: 5px;',
+    'border-radius: 5px',
     'padding: 2px 5px',
 ].join(';')*/
 

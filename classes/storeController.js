@@ -7,25 +7,25 @@ import {cloneDeep} from 'lodash'
 const consoleInfoStyles = [
     'color: white',
     'background: #266bab',
-    'font-weight:600;',
+    'font-weight:600',
     'box-shadow: 2px 2px black',
-    'border-radius: 5px;',
+    'border-radius: 5px',
     'padding: 2px 5px',
 ].join(';')
 const consoleListeningStyles = [
     'color: white',
     'background: #0bbe4d',
-    'font-weight:600;',
+    'font-weight:600',
     'box-shadow: 2px 2px black',
-    'border-radius: 5px;',
+    'border-radius: 5px',
     'padding: 2px 5px',
 ].join(';')
 const consoleJoinStyles = [
     'color: white',
     'background: #74369d',
-    'font-weight:600;',
+    'font-weight:600',
     'box-shadow: 2px 2px black',
-    'border-radius: 5px;',
+    'border-radius: 5px',
     'padding: 2px 5px',
 ].join(';')
 

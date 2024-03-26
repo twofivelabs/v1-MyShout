@@ -380,10 +380,10 @@ inject('capacitor', {
 
                 if (permission.receive === 'granted') {
                     await PushNotifications.register();
-                    console.log("STICKY: REGISTERED")
+                    console.log("STICKY: Push Notifications > REGISTERED")
 
                     await this.pushNotificationsListeners()
-                    console.log('STICKY: NOTIFICATIONS > Mobile > True')
+                    console.log('STICKY: Push Notifications > Mobile > True')
 
                     return true
                 } else {

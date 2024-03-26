@@ -148,7 +148,7 @@
               v-if="user.permissions.location"
               class="mt-7"
               color="green"
-              size="120"
+              size="90"
               v-anime="{
                 translateY: [100, 0],
                 duration: 1200
@@ -197,7 +197,7 @@
               v-if="user.permissions.notifications"
               class="mt-7"
               color="green"
-              size="120"
+              size="90"
               v-anime="{
                 translateY: [100, 0],
                 duration: 600
@@ -449,15 +449,13 @@ export default defineComponent({
           })
         })
 
-        // MICROPHONE PERMISSIONS
-        await $capacitor.microphonePermissions()
-
         loading.value = false
         step.value = 7
 
-      },1500)
+      },1000)
     }
     const setHowDidYouHear = async () => {
+      loading.value = true
       if (form.hear) {
         await $db.save(`Users/${userData.value.uid}`, {
           how_did_you_hear: form.hear,
@@ -465,6 +463,12 @@ export default defineComponent({
         })
       }
 
+      // MICROPHONE PERMISSIONS
+      setTimeout(async () => {
+        await $capacitor.microphonePermissions()
+      }, 1000)
+
+      loading.value = false
       return step.value = 8
     }
     const completeProfile = async () => {
@@ -728,7 +732,6 @@ export default defineComponent({
         {name: 'Zimbabwe', code: 'ZW'}
       ]
     })
-
 
     // PAGE META
     useMeta({
