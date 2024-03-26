@@ -565,15 +565,15 @@ export const actions = {
    */
   async signOut ({ commit, rootState }) {
       try {
-          await this.$db.fire().signOut(this.$db.fire().auth).then(() => {
-              this.$db.fire().capAuth.signOut()
+          commit('RESET_STORE')
+          this.$storage.setUniversal('uid', null)
+          rootState.appLoading = true
+          rootState.isAppInit = false
 
-              commit('RESET_STORE')
-              this.$storage.setUniversal('uid', null)
-              rootState.appLoading = true
-              rootState.isAppInit = false
-              this.$router.push('/auth/')
-          })
+          await this.$db.fire().signOut(this.$db.fire().auth)
+          await this.$db.fire().capAuth.signOut()
+
+          await this.$router.push('/auth/')
 
       } catch (e) {
           this.$system.log({ comp: 'store/user', msg: 'signOut', val: e })

@@ -106,7 +106,11 @@ export default async function ({ store, app, redirect, route } ) {
                 console.info(`🔐authStateLoaded? ${store.state.user.authStateLoaded}`)
                 await new Promise(resolve => setTimeout(resolve, 250))
 
-                if (attempts === 40) break
+                if (attempts === 40) {
+                    console.log('Lets hope the auth loaded?')
+                    store.state.user.authStateLoaded = true
+                    break
+                }
                 attempts++
             }
 
