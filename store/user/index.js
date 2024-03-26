@@ -442,6 +442,8 @@ export const actions = {
                         console.log('🔐Auth state should be loaded now')
                         state.authStateLoaded = true
                     }, 1000)
+                } else {
+                    console.log('Could not find users listener: ', id)
                 }
             })
 
@@ -529,14 +531,22 @@ export const actions = {
     try {
       await this.$storage.setUniversal('uid', authUser.uid)
     } catch (e) {
-      this.$system.log({ comp: 'store/user', msg: 'onAuthStateChanged > getIdToken', val: e })
+      console.log('onAuthStateChanged > getIdToken:', e)
     }
 
+    // Set some local storage
     await this.$storage.setUniversal('uid', authUser.uid)
     await this.$storage.setUniversal('claims', claims)
-    await commit('ON_AUTH_STATE_CHANGED_MUTATION', { authUser, claims })
-    await dispatch('setUserProfile', authUser.uid)
 
+    // Mutation of user when state is ready
+    // Basically just sets the profile
+    await commit('ON_AUTH_STATE_CHANGED_MUTATION', { authUser, claims })
+
+    // Start listeners
+    await dispatch('listen', authUser.uid)
+    await dispatch('notifications/listen', { root:true })
+
+    // User is ready
     console.info(`👤User: ${authUser.uid}`)
   },
   async setUserProfile ({ dispatch }, authUserUid) {
