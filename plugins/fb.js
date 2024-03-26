@@ -210,6 +210,8 @@ export default ({ app, store }, inject) => {
             }
             return auth
         },
+        // TODO: I know there is an error here in the log, not sure if it causes anything
+        // I commented out the capAuth and removed the error, but didn't stop the freezing
         async getTokenResult(forceRefresh=false) {
             let tokenResult
             // Traditional Firebase Auth
