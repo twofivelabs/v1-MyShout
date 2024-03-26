@@ -567,7 +567,7 @@ export const actions = {
       try {
           commit('RESET_STORE')
           this.$storage.setUniversal('uid', null)
-          rootState.appLoading = true
+          // rootState.appLoading = true
           rootState.isAppInit = false
 
           await this.$db.fire().signOut(this.$db.fire().auth)
