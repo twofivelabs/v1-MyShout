@@ -105,7 +105,7 @@ export default defineComponent({
         password: form.value.password
       }).then(() => {
         $notify.show({ text: i18n.t('notify.success'), color: 'green' })
-        $db.fire().logEvent($db.fire().analytics, 'sign_up')
+        // $db.fire().logEvent($db.fire().analytics, 'sign_up')
 
         router.push('/auth/setup-profile')
 

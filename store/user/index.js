@@ -451,9 +451,7 @@ export const actions = {
       }
   },
   async checkUserData ({ state }) {
-    if (window.location.pathname === '/auth' ||
-        window.location.pathname === '/auth/setup-profile') return;
-
+    if (window.location.pathname === '/auth') return;
     if (state.profile.onboarded===null || state.profile.onboarded===undefined || state.profile.onboarded < 8 ) return this.$router.push('/auth/setup-profile')
   },
   async getAll ({ commit, rootState }, { where = {}, limit = 20, order = {}, uid = null }) {

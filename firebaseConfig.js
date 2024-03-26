@@ -28,7 +28,7 @@ if (!apps.length) {
 
 const getFirebaseAuth = async () => {
     if (Capacitor.isNativePlatform()) {
-        return initializeAuth(apps[0], {
+        return initializeAuth(firebaseApp, {
             persistence: indexedDBLocalPersistence,
         });
     } else {

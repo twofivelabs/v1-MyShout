@@ -101,9 +101,11 @@ export default async function ({ store, app, redirect, route } ) {
             // Send off that we have a user
             await store.dispatch('user/onAuthStateChanged', { authUser, claims: claims })
 
-            while (store.state.user.authStateLoaded === false) {
+            let attempts = 0
+            while (store.state.user.authStateLoaded === false || attempts === 100) {
                 console.info(`🔐authStateLoaded? ${store.state.user.authStateLoaded}`)
                 await new Promise(resolve => setTimeout(resolve, 250))
+                attempts++
             }
 
             // console.log('PROFILE', store.state.user.profile.securityPin)
