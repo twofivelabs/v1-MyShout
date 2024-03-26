@@ -102,9 +102,11 @@ export default async function ({ store, app, redirect, route } ) {
             await store.dispatch('user/onAuthStateChanged', { authUser, claims: claims })
 
             let attempts = 0
-            while (store.state.user.authStateLoaded === false || attempts === 45) {
+            while (store.state.user.authStateLoaded === false) {
                 console.info(`🔐authStateLoaded? ${store.state.user.authStateLoaded}`)
                 await new Promise(resolve => setTimeout(resolve, 250))
+
+                if (attempts === 40) break
                 attempts++
             }
 
