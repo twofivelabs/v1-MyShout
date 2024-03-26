@@ -47,34 +47,32 @@ import {
     uploadString,
 } from 'firebase/storage'
 
+import firebaseApp from './../firebaseConfig'
 import { Capacitor  } from '@capacitor/core'
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication'
 import {getMessaging, getToken, onMessage} from 'firebase/messaging'
 import {onBackgroundMessage} from 'firebase/messaging/sw'
 import {getAnalytics, logEvent} from 'firebase/analytics'
 import {getFunctions, httpsCallable} from 'firebase/functions'
-
-import firebaseApp from './../firebaseConfig'
-
-import {filter} from 'lodash'
-import { FirebaseAuthentication } from '@capacitor-firebase/authentication'
 import Vue from "vue"
+import {filter} from 'lodash'
 import { reactive } from '@nuxtjs/composition-api'
 
 const fs = getFirestore(firebaseApp)
 const auth = getAuth(firebaseApp)
 const capAuth = FirebaseAuthentication
 const storage = getStorage(firebaseApp)
+const analytics = getAnalytics(firebaseApp)
+const functions = getFunctions(firebaseApp)
+const app = firebaseApp
 let messaging
-
 try {
     messaging = getMessaging(firebaseApp);
 } catch (err) {
     console.error('Failed to initialize Firebase Messaging', err);
 }
-
-const analytics = getAnalytics(firebaseApp)
-const functions = getFunctions(firebaseApp)
-const app = firebaseApp
+const listeners = []
+const paginationMarkers = {}
 
 const fire = {
     app,
@@ -87,9 +85,6 @@ const fire = {
     analytics, logEvent,
     functions, httpsCallable
 }
-
-const listeners = []
-const paginationMarkers = {}
 
 const consoleFbStyles = [
     'color: #ff6719',

@@ -71,7 +71,7 @@ export default defineComponent({
     watchEffect(async () => {
 
       // Wait to have userId first
-      if (user.value.data.uid) {
+      if (user.value.data.uid && state.store.user.hasOnboarded ) {
         // NOTIFICATION PERMISSIONS
         if (hasRequestedNotificationPermissions.value === false) {
           // console.log('STICKY: watchEffect > Request Push Notifications')
@@ -93,15 +93,11 @@ export default defineComponent({
 
     // MOUNTED
     onMounted(async () => {
-
-      //const load = await getters['user/authStateLoaded']
-      // console.log('mounted loaded: ', load)
-
       // Check user if they have profile pieces
       setTimeout(async() => {
 
         // Wait to have userId first
-        if (user.value.data.uid) {
+        if (user.value.data.uid && state.store.user.hasOnboarded) {
           $capacitor.gpsInit()
 
           Preferences.set({

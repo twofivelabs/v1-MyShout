@@ -130,5 +130,6 @@ export default async function ({ store, app, redirect, route } ) {
             return
         }
         if (!hasInitAppLocal) await initStateChange(authUser)
+        console.log('** CAP > hasInitAppLocal is not firing:', hasInitAppLocal)
     })
 }

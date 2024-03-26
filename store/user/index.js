@@ -137,6 +137,7 @@ export const state = () => reactive({
   one: new User({}).fields,
   loaded: {},
   authStateLoaded: false,
+  hasOnboarded: false
 })
 
 export const getters = {
@@ -452,7 +453,11 @@ export const actions = {
   },
   async checkUserData ({ state }) {
     if (window.location.pathname === '/auth') return;
-    if (state.profile.onboarded===null || state.profile.onboarded===undefined || state.profile.onboarded < 8 ) return this.$router.push('/auth/setup-profile')
+    if (state.profile.onboarded===null || state.profile.onboarded===undefined || state.profile.onboarded < 8 ) {
+        return this.$router.push('/auth/setup-profile')
+    } else {
+        state.hasOnboarded = true
+    }
   },
   async getAll ({ commit, rootState }, { where = {}, limit = 20, order = {}, uid = null }) {
     uid = uid || rootState.user.data.uid
