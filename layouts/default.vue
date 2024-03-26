@@ -32,7 +32,6 @@ export default defineComponent({
   setup () {
     const {
       state,
-      dispatch
     } = useStore()
 
     const {
@@ -45,23 +44,6 @@ export default defineComponent({
     const extraClassNames = ref(null)
 
     onBeforeMount(async () => {
-      try {
-        // If state is available load the UID
-        let uid = null
-        if (state.user.data) {
-          uid = await state.user.data.uid
-        } else if (state.storage.uid) {
-          uid = await state.storage.uid
-        }
-
-        // Signing up anonymously, will provide them with an ID with firebase
-        if (uid) {
-          await dispatch('user/setUserProfile', uid)
-        }
-      } catch {
-        // Error
-      }
-
       /**
        * Deep Linking for mobile
        * This should open the app if someone clicks a link, and they have the app installed

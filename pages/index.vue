@@ -49,29 +49,24 @@ export default defineComponent({
   name: 'HomePage',
   middleware: 'authenticated',
   setup () {
-    const {
-      state,
-    } = useStore()
-    const {
-      $config,
-      $capacitor,
-    } = useContext()
+    const { state } = useStore()
+    const { $config, $capacitor, } = useContext()
     const loading = ref(false)
     const user = computed(() => state.user)
-
-    // DEFINE CONTENT
     const location = computed(() => state.user.location)
     const hasRequestedNotificationPermissions = ref(false)
     const hasRequestedMicrophonePermissions = ref(false)
+
+    // METHODS
     const localNotificationRequestPermission = async () => {
       await LocalNotifications.requestPermissions()
     }
 
     // WATCH
     watchEffect(async () => {
-
       // Wait to have userId first
-      if (user.value.data.uid && state.store.user.hasOnboarded ) {
+      // Added this because it was trying to load permissions for these things too fast
+      if (user.value.data.uid && user.value.hasOnboarded ) {
         // NOTIFICATION PERMISSIONS
         if (hasRequestedNotificationPermissions.value === false) {
           // console.log('STICKY: watchEffect > Request Push Notifications')
@@ -97,7 +92,7 @@ export default defineComponent({
       setTimeout(async() => {
 
         // Wait to have userId first
-        if (user.value.data.uid && state.store.user.hasOnboarded) {
+        if (user.value.data.uid && user.value.hasOnboarded) {
           $capacitor.gpsInit()
 
           Preferences.set({

@@ -103,8 +103,7 @@ export default async function ({ store, app, redirect, route } ) {
 
             let attempts = 0
             while (store.state.user.authStateLoaded === false) {
-                console.info(`🔐authStateLoaded? ${store.state.user.authStateLoaded}`)
-                await new Promise(resolve => setTimeout(resolve, 250))
+                await app.$helper.sleep(250, `🔐authStateLoaded? ${store.state.user.authStateLoaded}`)
 
                 if (attempts === 40) {
                     console.log('Lets hope the auth loaded?')
